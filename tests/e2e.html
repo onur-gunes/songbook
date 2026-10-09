@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>ukb e2e</title>
+<title>songbook e2e</title>
 </head>
 <body>
 <iframe id="f" src="../index.html?nosw" style="width:1100px;height:900px;border:0"></iframe>
@@ -189,7 +189,7 @@ async function main() {
     ok('chooser closes on pick', doc().querySelector('#voicingChooser') === null, '');
     const cAfter = cTgt.querySelector('img').getAttribute('src');
     ok('chord item swaps voicing', cAfter !== cBefore, '');
-    ok('pick persisted', win().localStorage.getItem('ukb:pick:ukulele:C') !== null, win().localStorage.getItem('ukb:pick:ukulele:C'));
+    ok('pick persisted', win().localStorage.getItem('songbook:pick:ukulele:C') !== null, win().localStorage.getItem('songbook:pick:ukulele:C'));
     cTgt.click(); await wait(80);
     ok('stored voicing selected on reopen', Array.from(doc().querySelectorAll('#voicingChooser button.sel img')).some(i => i.getAttribute('src') === cAfter), '');
     win().location.hash = '#/krakow-ukulele/riptide';
@@ -199,7 +199,7 @@ async function main() {
     await wait(300);
     const cBack = Array.from(doc().querySelectorAll('#chordStrip .chord-item')).find(it => it.querySelector('.cname').textContent === 'C').querySelector('img').getAttribute('src');
     ok('voicing remembered across songs', cBack === cAfter, '');
-    win().localStorage.removeItem('ukb:pick:ukulele:C');
+    win().localStorage.removeItem('songbook:pick:ukulele:C');
     // rail chords stay put: stop/pause/muted never change (riff check on a known song later)
 
     // 7e. classic open-position voicings rank first
@@ -239,12 +239,12 @@ async function main() {
     $('notesBox').value = 'test note 123';
     $('notesSave').click(); await wait(50);
     ok('notes status shown', $('notesStatus').classList.contains('show'));
-    ok('notes in localStorage', (win().localStorage.getItem('ukb:note:krakow-ukulele\u0000riptide') || '') === 'test note 123');
+    ok('notes in localStorage', (win().localStorage.getItem('songbook:note:krakow-ukulele\u0000riptide') || '') === 'test note 123');
 
     // 11. favorite from song view
     $('favBtn').click(); await wait(50);
     ok('fav button on', $('favBtn').classList.contains('on'));
-    ok('fav in localStorage', (win().localStorage.getItem('ukb:favorites') || '').indexOf('riptide') > -1);
+    ok('fav in localStorage', (win().localStorage.getItem('songbook:favorites') || '').indexOf('riptide') > -1);
     $('favBtn').click(); await wait(50);
     ok('fav toggles off', !$('favBtn').classList.contains('on'));
 
@@ -265,8 +265,8 @@ async function main() {
     // 12b. manual adjust keeps auto-scroll running, re-anchored to the new position
     $('scrollBtn').click(); await wait(200);
     ok('playing before adjust', scrollLabel() === 'Pause auto-scroll', scrollLabel());
-    const st = win().ukbTest.scrollState;
-    const bounds = win().ukbTest.scrollBounds();
+    const st = win().songbookTest.scrollState;
+    const bounds = win().songbookTest.scrollBounds();
     const v0 = (bounds - st.from) / (st.durMs - st.elapsed);
     const yBefore = win().pageYOffset;
     win().scrollBy(0, 400);
@@ -300,7 +300,7 @@ async function main() {
     ok('speed clamps low', $('speedValue').textContent === '0.2×', $('speedValue').textContent);
     for (let i = 0; i < 40; i++) $('speedUp').click();
     ok('speed clamps high', $('speedValue').textContent === '3.0×', $('speedValue').textContent);
-    ok('speed persisted', win().localStorage.getItem('ukb:speed:krakow-ukulele\u0000riptide') === '3', win().localStorage.getItem('ukb:speed:krakow-ukulele\u0000riptide'));
+    ok('speed persisted', win().localStorage.getItem('songbook:speed:krakow-ukulele\u0000riptide') === '3', win().localStorage.getItem('songbook:speed:krakow-ukulele\u0000riptide'));
     for (let i = 0; i < 50 && parseFloat($('speedValue').textContent) > s0; i++) $('speedDown').click();
     for (let i = 0; i < 50 && parseFloat($('speedValue').textContent) < s0; i++) $('speedUp').click();
     ok('speed restored', parseFloat($('speedValue').textContent) === s0, $('speedValue').textContent);
@@ -332,7 +332,7 @@ async function main() {
     ok('size clamps low', $('sizeValue').textContent === '70%', $('sizeValue').textContent);
     for (let i = 0; i < 20; i++) $('sizeUp').click();
     ok('size clamps high', $('sizeValue').textContent === '150%', $('sizeValue').textContent);
-    ok('size persisted', win().localStorage.getItem('ukb:size:krakow-ukulele\u0000all-apologies') === '1.5', win().localStorage.getItem('ukb:size:krakow-ukulele\u0000all-apologies'));
+    ok('size persisted', win().localStorage.getItem('songbook:size:krakow-ukulele\u0000all-apologies') === '1.5', win().localStorage.getItem('songbook:size:krakow-ukulele\u0000all-apologies'));
     win().location.hash = '#/krakow-ukulele/riptide';
     await wait(250);
     ok('per-song size default for other song', $('sizeValue').textContent === '100%', $('sizeValue').textContent);
@@ -355,7 +355,7 @@ async function main() {
     $('sheet').dispatchEvent(pev('pointerup', 22, 150, 300));
     $('sheet').dispatchEvent(pev('pointermove', 22, 160, 300));
     ok('pinch ignores moves after release', $('sizeValue').textContent === '100%', $('sizeValue').textContent);
-    ok('pinch size persisted', win().localStorage.getItem('ukb:size:krakow-ukulele\u0000riptide') === '1', win().localStorage.getItem('ukb:size:krakow-ukulele\u0000riptide'));
+    ok('pinch size persisted', win().localStorage.getItem('songbook:size:krakow-ukulele\u0000riptide') === '1', win().localStorage.getItem('songbook:size:krakow-ukulele\u0000riptide'));
     $('sizeUp').click(); await wait(30);
     ok('stepper and pinch share the same state', $('sizeValue').textContent === '110%', $('sizeValue').textContent);
     $('sizeDown').click(); await wait(30);
@@ -373,7 +373,7 @@ async function main() {
     ok('chord size bigger', $('chordSizeValue').textContent === '110%', $('chordSizeValue').textContent);
     const cH1 = parseFloat(win().getComputedStyle(cImg0).height);
     ok('chart grew', cH1 > cH0, cH0 + ' -> ' + cH1);
-    ok('chord size persisted', win().localStorage.getItem('ukb:chordSize') === '1.1', win().localStorage.getItem('ukb:chordSize'));
+    ok('chord size persisted', win().localStorage.getItem('songbook:chordSize') === '1.1', win().localStorage.getItem('songbook:chordSize'));
     for (let i = 0; i < 20; i++) $('chordSizeDown').click();
     ok('chord size clamps low', $('chordSizeValue').textContent === '60%', $('chordSizeValue').textContent);
     for (let i = 0; i < 20; i++) $('chordSizeUp').click();
@@ -383,12 +383,12 @@ async function main() {
     $('chordPinBtn').click(); await wait(30);
     ok('strip unpins', stripEl.classList.contains('is-static') && win().getComputedStyle(stripEl).position === 'static', win().getComputedStyle(stripEl).position);
     ok('pin segment unpinned', $('chordPinBtn').textContent === '📍' && $('chordPinBtn').getAttribute('aria-pressed') === 'false' && $('chordPinBtn').title.indexOf('Not pinned') > -1, $('chordPinBtn').title);
-    ok('pin persisted off', win().localStorage.getItem('ukb:chordPin') === '0', win().localStorage.getItem('ukb:chordPin'));
+    ok('pin persisted off', win().localStorage.getItem('songbook:chordPin') === '0', win().localStorage.getItem('songbook:chordPin'));
     $('chordPinBtn').click(); await wait(30);
     ok('strip repins', !stripEl.classList.contains('is-static') && win().getComputedStyle(stripEl).position === 'sticky', '');
-    ok('pin persisted on', win().localStorage.getItem('ukb:chordPin') === '1', win().localStorage.getItem('ukb:chordPin'));
-    win().localStorage.removeItem('ukb:chordSize');
-    win().localStorage.removeItem('ukb:chordPin');
+    ok('pin persisted on', win().localStorage.getItem('songbook:chordPin') === '1', win().localStorage.getItem('songbook:chordPin'));
+    win().localStorage.removeItem('songbook:chordSize');
+    win().localStorage.removeItem('songbook:chordPin');
 
     // 13. keyboard: / focuses search in list view
     win().location.hash = '';
@@ -414,7 +414,7 @@ async function main() {
     $('themeToggle').click(); await wait(50);
     const themeAfter = doc().documentElement.getAttribute('data-theme');
     ok('theme toggles', themeBefore !== themeAfter, themeBefore + ' -> ' + themeAfter);
-    ok('theme persisted', win().localStorage.getItem('ukb:theme') === JSON.stringify(themeAfter).replace(/"/g, '').replace(/^"|"$/g, '') || win().localStorage.getItem('ukb:theme') !== null, win().localStorage.getItem('ukb:theme'));
+    ok('theme persisted', win().localStorage.getItem('songbook:theme') === JSON.stringify(themeAfter).replace(/"/g, '').replace(/^"|"$/g, '') || win().localStorage.getItem('songbook:theme') !== null, win().localStorage.getItem('songbook:theme'));
     $('themeToggle').click(); await wait(50);
 
     // 17. hash routing back to list
@@ -430,13 +430,13 @@ async function main() {
     ok('compact class applied', doc().querySelector('#songList').classList.contains('is-compact'));
     ok('compact toggle state', $('viewToggle').textContent === '▤' && $('viewToggle').getAttribute('aria-pressed') === 'true', $('viewToggle').textContent);
     ok('compact aria label', $('viewToggle').getAttribute('aria-label').indexOf('card view') > -1, $('viewToggle').getAttribute('aria-label'));
-    ok('compact persisted', win().localStorage.getItem('ukb:compact') === '1', win().localStorage.getItem('ukb:compact'));
+    ok('compact persisted', win().localStorage.getItem('songbook:compact') === '1', win().localStorage.getItem('songbook:compact'));
     ok('compact rows intact', rows().length === 198 && !!rows()[0].querySelector('.row-level') && !!rows()[0].querySelector('.row-title') && !!rows()[0].querySelector('.row-artist'), '');
     ok('compact keeps everything on one line', win().getComputedStyle(rows()[0].querySelector('.row-main')).display === 'flex', win().getComputedStyle(rows()[0].querySelector('.row-main')).display);
     ok('compact keeps row numbers', win().getComputedStyle(rows()[0].querySelector('.row-num')).display !== 'none' && rows()[0].querySelector('.row-num').textContent.length > 0, rows()[0].querySelector('.row-num').textContent);
     $('viewToggle').click(); await wait(50);
     ok('toggled back to cards', !doc().querySelector('#songList').classList.contains('is-compact') && $('viewToggle').textContent === '☰', '');
-    ok('compact off persisted', win().localStorage.getItem('ukb:compact') === '0', win().localStorage.getItem('ukb:compact'));
+    ok('compact off persisted', win().localStorage.getItem('songbook:compact') === '0', win().localStorage.getItem('songbook:compact'));
 
     // 18. recent click reopens song
     const recentBtn = doc().querySelector('#recentList button');
@@ -449,7 +449,7 @@ async function main() {
     ok('recent block before clear', !$('recentBlock').hidden && doc().querySelectorAll('#recentList li').length > 0, doc().querySelectorAll('#recentList li').length);
     $('recentClear').click(); await wait(50);
     ok('clear hides recent block', $('recentBlock').hidden && doc().querySelectorAll('#recentList li').length === 0, doc().querySelectorAll('#recentList li').length);
-    ok('clear persisted', win().localStorage.getItem('ukb:recent') === '[]', win().localStorage.getItem('ukb:recent'));
+    ok('clear persisted', win().localStorage.getItem('songbook:recent') === '[]', win().localStorage.getItem('songbook:recent'));
 
     // 19. rail/annotation tokens survive transpose
     win().location.hash = '#/krakow-ukulele/all-apologies';
@@ -467,11 +467,11 @@ async function main() {
     win().location.hash = '#/krakow-ukulele/riptide';
     await wait(250);
     ok('instrument toggle present', doc().querySelectorAll('.instrument-btn').length === 2, doc().querySelectorAll('.instrument-btn').length);
-    ok('default instrument ukulele', win().ukbTest.getInstrument() === 'ukulele', win().ukbTest.getInstrument());
+    ok('default instrument ukulele', win().songbookTest.getInstrument() === 'ukulele', win().songbookTest.getInstrument());
     const ukeSrc = doc().querySelector('#chordStrip img').getAttribute('src');
     doc().querySelector('.instrument-btn[data-instrument="guitar"]').click();
     await wait(150);
-    ok('instrument switched to guitar', win().ukbTest.getInstrument() === 'guitar', win().ukbTest.getInstrument());
+    ok('instrument switched to guitar', win().songbookTest.getInstrument() === 'guitar', win().songbookTest.getInstrument());
     ok('guitar button active', doc().querySelector('.instrument-btn[data-instrument="guitar"]').classList.contains('active'));
     const guitSrc = doc().querySelector('#chordStrip img').getAttribute('src');
     ok('diagrams re-rendered for guitar', guitSrc !== ukeSrc && guitSrc.indexOf('data:image/svg+xml') === 0, guitSrc.slice(0, 40));
@@ -482,14 +482,14 @@ async function main() {
     ok('guitar diagram scales in width too', gW1 > gW0 * 1.2, gW0.toFixed(1) + ' -> ' + gW1.toFixed(1));
     for (let i = 0; i < 5; i++) $('chordSizeDown').click();
     await wait(60);
-    const svgU = win().ukbTest.ChordKit.diagramSVG('ukulele', win().ukbTest.ChordKit.voicings('Am', 'ukulele')[0]);
-    const svgG = win().ukbTest.ChordKit.diagramSVG('guitar', win().ukbTest.ChordKit.voicings('Am', 'guitar')[0]);
+    const svgU = win().songbookTest.ChordKit.diagramSVG('ukulele', win().songbookTest.ChordKit.voicings('Am', 'ukulele')[0]);
+    const svgG = win().songbookTest.ChordKit.diagramSVG('guitar', win().songbookTest.ChordKit.voicings('Am', 'guitar')[0]);
     ok('ukulele engine draws 4 strings', (svgU.match(/class="st"/g) || []).length === 4, (svgU.match(/class="st"/g) || []).length);
     ok('guitar engine draws 6 strings', (svgG.match(/class="st"/g) || []).length === 6, (svgG.match(/class="st"/g) || []).length);
     doc().querySelector('.instrument-btn[data-instrument="ukulele"]').click();
     await wait(150);
-    ok('instrument back to ukulele', win().ukbTest.getInstrument() === 'ukulele');
-    ok('instrument persisted', win().localStorage.getItem('ukb:instrument') === '"ukulele"', win().localStorage.getItem('ukb:instrument'));
+    ok('instrument back to ukulele', win().songbookTest.getInstrument() === 'ukulele');
+    ok('instrument persisted', win().localStorage.getItem('songbook:instrument') === '"ukulele"', win().localStorage.getItem('songbook:instrument'));
 
     // 19c. songbook picker lists the bundled songbook; import controls exist
     ok('songbook select has bundled option',

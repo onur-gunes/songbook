@@ -15,7 +15,7 @@ import websocket
 
 def launch_chrome(port=9333, user_data_dir=None):
     import tempfile
-    user_data_dir = user_data_dir or tempfile.mkdtemp(prefix='ukb-cdp-')
+    user_data_dir = user_data_dir or tempfile.mkdtemp(prefix='songbook-cdp-')
     proc = subprocess.Popen([
         '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
         '--headless=new',

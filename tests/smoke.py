@@ -21,17 +21,17 @@ def main():
         cdp = CDP(target['webSocketDebuggerUrl'])
         cdp.enable()
         cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
-        cdp.wait_js('!!(window.ukbTest && ukbTest.getActive())', timeout=30)
+        cdp.wait_js('!!(window.songbookTest && songbookTest.getActive())', timeout=30)
 
         results = []
         def ok(name, cond, detail=''):
             results.append((name, bool(cond), detail))
 
-        n_songs = cdp.eval('ukbTest.getActive().songs.length')
+        n_songs = cdp.eval('songbookTest.getActive().songs.length')
         rows = cdp.eval("document.querySelectorAll('#songList .song-row').length")
         ok('active songbook songs=198', n_songs == 198, n_songs)
         ok('rendered rows=198', rows == 198, rows)
-        ok('default instrument ukulele', cdp.eval('ukbTest.getInstrument()') == 'ukulele')
+        ok('default instrument ukulele', cdp.eval('songbookTest.getInstrument()') == 'ukulele')
 
         # open a song
         cdp.eval("location.hash = '#/krakow-ukulele/riptide'")
@@ -43,20 +43,20 @@ def main():
             "Array.from(document.querySelectorAll('#chordStrip .cname')).map(e=>e.textContent).join(',')")
         ok('Riptide strip chords', names == 'Am,G,C,F', names)
         uke_svg = cdp.eval(
-            "ukbTest.ChordKit.diagramSVG('ukulele', ukbTest.ChordKit.voicings('Am','ukulele')[0])")
+            "songbookTest.ChordKit.diagramSVG('ukulele', songbookTest.ChordKit.voicings('Am','ukulele')[0])")
         ok('ukulele Am svg has 4 strings', uke_svg.count('class="st"') == 4, uke_svg.count('class="st"'))
 
         # switch instrument globally
-        cdp.eval("ukbTest.setInstrument('guitar')")
+        cdp.eval("songbookTest.setInstrument('guitar')")
         time.sleep(0.3)
-        ok('instrument now guitar', cdp.eval('ukbTest.getInstrument()') == 'guitar')
+        ok('instrument now guitar', cdp.eval('songbookTest.getInstrument()') == 'guitar')
         g_svg = cdp.eval(
-            "ukbTest.ChordKit.diagramSVG('guitar', ukbTest.ChordKit.voicings('Am','guitar')[0])")
+            "songbookTest.ChordKit.diagramSVG('guitar', songbookTest.ChordKit.voicings('Am','guitar')[0])")
         ok('guitar Am svg has 6 strings', g_svg.count('class="st"') == 6, g_svg.count('class="st"'))
         # diagrams re-rendered
         first_src = cdp.eval("document.querySelector('#chordStrip img').src.slice(0,40)")
         ok('strip diagram re-rendered', 'data:image/svg' in first_src, first_src)
-        cdp.eval("ukbTest.setInstrument('ukulele')")
+        cdp.eval("songbookTest.setInstrument('ukulele')")
 
         # back to list
         cdp.eval("location.hash = ''")

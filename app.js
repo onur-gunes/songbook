@@ -11,6 +11,7 @@
 
     var $ = function (id) { return document.getElementById(id); };
     var SEP = '\u0000';
+    var NS = 'songbook';        // storage namespace prefix
 
     function lsGet(key, fallback) {
         try {
@@ -31,7 +32,7 @@
 
     /* ---------------- theme ---------------- */
 
-    var THEME_KEY = 'ukb:theme';
+    var THEME_KEY = NS + ':theme';
 
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
@@ -71,7 +72,7 @@
     function idbOpen() {
         return new Promise(function (res, rej) {
             if (!window.indexedDB) { rej(new Error('no indexedDB')); return; }
-            var req = window.indexedDB.open('ukb', 1);
+            var req = window.indexedDB.open(NS, 1);
             req.onupgradeneeded = function () {
                 var db = req.result;
                 if (!db.objectStoreNames.contains('songbooks')) db.createObjectStore('songbooks', { keyPath: 'id' });
@@ -212,8 +213,8 @@
 
     /* ---------------- personal data ---------------- */
 
-    var FAV_KEY = 'ukb:favorites';
-    var RECENT_KEY = 'ukb:recent';
+    var FAV_KEY = NS + ':favorites';
+    var RECENT_KEY = NS + ':recent';
     var RECENT_MAX = 15;
 
     var favorites = new Set(lsGet(FAV_KEY, []));   // composite "sbId\0songId"
@@ -229,13 +230,13 @@
         lsSet(RECENT_KEY, recent);
     }
 
-    function noteKey(sbId, songId) { return 'ukb:note:' + sbId + SEP + songId; }
-    function speedKey(sbId, songId) { return 'ukb:speed:' + sbId + SEP + songId; }
-    function sizeKey(sbId, songId) { return 'ukb:size:' + sbId + SEP + songId; }
+    function noteKey(sbId, songId) { return NS + ':note:' + sbId + SEP + songId; }
+    function speedKey(sbId, songId) { return NS + ':speed:' + sbId + SEP + songId; }
+    function sizeKey(sbId, songId) { return NS + ':size:' + sbId + SEP + songId; }
 
     /* ---------------- instrument ---------------- */
 
-    var instrument = lsGet('ukb:instrument', null);
+    var instrument = lsGet(NS + ':instrument', null);
     if (instrument !== 'ukulele' && instrument !== 'guitar') instrument = null;
 
     function applyInstrumentUi() {
@@ -248,7 +249,7 @@
     function setInstrument(inst) {
         if (inst !== 'ukulele' && inst !== 'guitar') return;
         instrument = inst;
-        lsSet('ukb:instrument', instrument);
+        lsSet(NS + ':instrument', instrument);
         applyInstrumentUi();
         closeVoicingChooser();
         if (currentSong) renderChordStrip(currentSong);
@@ -352,7 +353,7 @@
 
     /* ---------------- chord strip (ChordKit) ---------------- */
 
-    function pickKey(chordName) { return 'ukb:pick:' + instrument + ':' + chordName; }
+    function pickKey(chordName) { return NS + ':pick:' + instrument + ':' + chordName; }
 
     function storedPick(chordName) {
         try {
@@ -500,7 +501,7 @@
         sort: 'title',
         compact: false
     };
-    try { state.compact = window.localStorage.getItem('ukb:compact') === '1'; } catch (e) { /* ignore */ }
+    try { state.compact = window.localStorage.getItem(NS + ':compact') === '1'; } catch (e) { /* ignore */ }
 
     function applyViewToggle() {
         var b = $('viewToggle');
@@ -688,7 +689,7 @@
 
         $('viewToggle').addEventListener('click', function () {
             state.compact = !state.compact;
-            try { window.localStorage.setItem('ukb:compact', state.compact ? '1' : '0'); } catch (e) { /* ignore */ }
+            try { window.localStorage.setItem(NS + ':compact', state.compact ? '1' : '0'); } catch (e) { /* ignore */ }
             renderList();
         });
 
@@ -837,7 +838,7 @@
         $('chordSizeUp').addEventListener('click', function () { setChordSize(chordSize + 0.1); });
         $('chordPinBtn').addEventListener('click', function () {
             chordPin = !chordPin;
-            try { window.localStorage.setItem('ukb:chordPin', chordPin ? '1' : '0'); } catch (e) { /* ignore */ }
+            try { window.localStorage.setItem(NS + ':chordPin', chordPin ? '1' : '0'); } catch (e) { /* ignore */ }
             applyChordSettings();
         });
         applyChordSettings();
@@ -870,10 +871,10 @@
     var chordSize = 1;
     var chordPin = true;
     try {
-        var _cs = parseFloat(window.localStorage.getItem('ukb:chordSize'));
+        var _cs = parseFloat(window.localStorage.getItem(NS + ':chordSize'));
         if (_cs >= 0.6 && _cs <= 1.5) chordSize = Math.round(_cs * 10) / 10;
     } catch (e) { /* ignore */ }
-    try { chordPin = window.localStorage.getItem('ukb:chordPin') !== '0'; } catch (e) { /* ignore */ }
+    try { chordPin = window.localStorage.getItem(NS + ':chordPin') !== '0'; } catch (e) { /* ignore */ }
 
     function applyChordSettings() {
         document.documentElement.style.setProperty('--chord-size', chordSize);
@@ -893,7 +894,7 @@
     function setChordSize(v) {
         chordSize = Math.min(1.5, Math.max(0.6, Math.round(v * 10) / 10));
         applyChordSettings();
-        try { window.localStorage.setItem('ukb:chordSize', String(chordSize)); } catch (e) { /* ignore */ }
+        try { window.localStorage.setItem(NS + ':chordSize', String(chordSize)); } catch (e) { /* ignore */ }
     }
 
     var pinch = { pts: {}, active: false, base: 0 };
@@ -1220,7 +1221,7 @@
     init();
 
     /* exposed for tests */
-    window.ukbTest = {
+    window.songbookTest = {
         ChordKit: ChordKit,
         transposeChordValue: transposeChordValue,
         transposeToken: transposeToken,

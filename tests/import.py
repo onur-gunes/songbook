@@ -62,7 +62,7 @@ def main():
         results.append((name, bool(cond), detail))
 
     def run_checks(cdp, phase):
-        ids = cdp.eval("ukbTest.allSongbooks().map(s=>s.id).join(',')")
+        ids = cdp.eval("songbookTest.allSongbooks().map(s=>s.id).join(',')")
         ok(phase + ': two songbooks', ids == 'krakow-ukulele,test-sb', ids)
         opts = cdp.eval(
             "Array.from(document.querySelectorAll('#songbookSelect option')).map(o=>o.value).join(',')")
@@ -73,26 +73,26 @@ def main():
         cdp = CDP(target['webSocketDebuggerUrl'])
         cdp.enable()
         cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
-        cdp.wait_js('!!(window.ukbTest && ukbTest.getActive())', timeout=30)
+        cdp.wait_js('!!(window.songbookTest && songbookTest.getActive())', timeout=30)
 
         # import
         cdp.eval(IMPORT_JS, await_promise=False)
-        cdp.wait_js("ukbTest.allSongbooks().length === 2", timeout=10)
+        cdp.wait_js("songbookTest.allSongbooks().length === 2", timeout=10)
         cdp.wait_js("location.hash === '#/test-sb'", timeout=10)
         run_checks(cdp, 'after import')
-        ok('after import: active is test-sb', cdp.eval('ukbTest.getActive().id') == 'test-sb')
+        ok('after import: active is test-sb', cdp.eval('songbookTest.getActive().id') == 'test-sb')
         rows = cdp.eval("document.querySelectorAll('#songList .song-row').length")
         ok('after import: 2 rows', rows == 2, rows)
 
         # brand logo follows the active songbook
         ok('imported songbook: logo hidden', cdp.eval("document.getElementById('logo').hidden === true"))
         cdp.eval("var s=document.getElementById('songbookSelect'); s.value='krakow-ukulele'; s.dispatchEvent(new Event('change'));")
-        cdp.wait_js("ukbTest.getActive().id === 'krakow-ukulele'", timeout=10)
+        cdp.wait_js("songbookTest.getActive().id === 'krakow-ukulele'", timeout=10)
         logo = cdp.eval("({hidden: document.getElementById('logo').hidden, src: document.getElementById('logo').getAttribute('src') || ''})")
         ok('krakow songbook: krakow logo shown',
            logo['hidden'] is False and 'ukulele-krakow-trans' in logo['src'], json.dumps(logo))
         cdp.eval("var s=document.getElementById('songbookSelect'); s.value='test-sb'; s.dispatchEvent(new Event('change'));")
-        cdp.wait_js("ukbTest.getActive().id === 'test-sb'", timeout=10)
+        cdp.wait_js("songbookTest.getActive().id === 'test-sb'", timeout=10)
         ok('switch back: logo hidden again', cdp.eval("document.getElementById('logo').hidden === true"))
 
         # open imported song and check sheet/chords render
@@ -107,22 +107,22 @@ def main():
 
         # persistence across reload
         cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw#/test-sb'})
-        cdp.wait_js('!!(window.ukbTest && ukbTest.allSongbooks().length === 2)', timeout=30)
+        cdp.wait_js('!!(window.songbookTest && songbookTest.allSongbooks().length === 2)', timeout=30)
         run_checks(cdp, 'after reload')
-        ok('after reload: active test-sb', cdp.eval('ukbTest.getActive().id') == 'test-sb')
+        ok('after reload: active test-sb', cdp.eval('songbookTest.getActive().id') == 'test-sb')
 
         # removal
         cdp.eval("window.confirm = function(){ return true; };")
         cdp.eval("document.getElementById('removeSongsBtn').click()", await_promise=False)
-        cdp.wait_js("ukbTest.allSongbooks().length === 1", timeout=10)
+        cdp.wait_js("songbookTest.allSongbooks().length === 1", timeout=10)
         ok('after remove: one songbook',
-           cdp.eval("ukbTest.allSongbooks().map(s=>s.id).join(',')") == 'krakow-ukulele')
+           cdp.eval("songbookTest.allSongbooks().map(s=>s.id).join(',')") == 'krakow-ukulele')
 
         # reload confirms removal persisted
         cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
-        cdp.wait_js('!!(window.ukbTest && ukbTest.getActive())', timeout=30)
+        cdp.wait_js('!!(window.songbookTest && songbookTest.getActive())', timeout=30)
         ok('after remove+reload: one songbook',
-           cdp.eval("ukbTest.allSongbooks().length") == 1)
+           cdp.eval("songbookTest.allSongbooks().length") == 1)
 
         n_fail = 0
         for name, passed, detail in results:
