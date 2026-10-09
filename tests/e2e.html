@@ -157,7 +157,7 @@ async function main() {
     ok('strip restores at 0', Array.from(doc().querySelectorAll('#chordStrip .cname')).map(c => c.textContent).join(',') === names0.join(','), '');
     $('trUp').click(); $('trUp').click(); $('trUp').click(); await wait(400);
     const names3 = Array.from(doc().querySelectorAll('#chordStrip .cname')).map(c => c.textContent);
-    ok('strip +3 names', names3.join(',') === 'Cm,A#,D#,G#', names3.join(','));
+    ok('strip +3 names', names3.join(',') === 'Cm,Bb,D#,G#', names3.join(','));
     ok('strip +3 no missing via enharmonic', doc().querySelectorAll('#chordStrip .missing').length === 0 && doc().querySelectorAll('#chordStrip img').length === 4, 'missing=' + doc().querySelectorAll('#chordStrip .missing').length + ' imgs=' + doc().querySelectorAll('#chordStrip img').length);
     $('trDown').click(); $('trDown').click(); $('trDown').click(); await wait(50);
     ok('strip back to 0 after +3', $('trValue').textContent === '0', '');
@@ -167,7 +167,7 @@ async function main() {
     await wait(300);
     $('trUp').click(); await wait(500);
     const namesR = Array.from(doc().querySelectorAll('#chordStrip .cname')).map(n => n.textContent);
-    ok('respect +1 names', namesR.join(',') === 'C#,C#sus4,G#,F7,F#,A#m,Fm,B', namesR.join(','));
+    ok('respect +1 names', namesR.join(',') === 'C#,C#sus4,G#,F7,F#,Bbm,Fm,B', namesR.join(','));
     ok('respect +1 no missing', doc().querySelectorAll('#chordStrip .missing').length === 0, 'missing=' + doc().querySelectorAll('#chordStrip .missing').length);
     const genImgs = Array.from(doc().querySelectorAll('#chordStrip img')).filter(i => (i.getAttribute('src') || '').indexOf('data:image/svg+xml') === 0);
     ok('generated svg diagrams used', genImgs.length >= 3, genImgs.length);
