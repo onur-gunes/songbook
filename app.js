@@ -388,13 +388,14 @@
         (song.chords || []).forEach(function (name) {
             var tname = transposeChartName(name, transpose);
             var label = displayChord(tname);
-            var item = el('div', 'chord-item');
+            var hard = ChordKit.chordDifficulty(tname) === 'hard';
+            var item = el('div', 'chord-item' + (hard ? ' hard' : ''));
             var list = voicingsFor(tname);
             if (list.length) {
                 var v = chosenVoicing(tname);
                 var img = new Image();
                 img.alt = label + ' chord diagram';
-                img.title = label + ' – click to choose voicing';
+                img.title = label + (hard ? ' (hard chord – easy alternative in the picker)' : ' – click to choose voicing');
                 img.loading = 'lazy';
                 img.src = ChordKit.dataUri(instrument, v);
                 item.setAttribute('role', 'button');
@@ -445,16 +446,20 @@
         head.appendChild(closeBtn);
         box.appendChild(head);
         var grid = el('div', 'chooser-grid');
-        shapes.slice(0, 60).forEach(function (f) {
+        var hard = ChordKit.chordDifficulty(chordName) === 'hard';
+        shapes.slice(0, 60).forEach(function (f, i) {
             var opt = el('button');
             opt.type = 'button';
-            opt.title = 'Fretting ' + f.map(function (v) { return v < 0 ? 'x' : (v === 0 ? 'o' : v); }).join(' ');
+            var easy = hard && i === 1;
+            var fretsTxt = f.map(function (v) { return v < 0 ? 'x' : (v === 0 ? 'o' : v); }).join(' ');
+            opt.title = 'Fretting ' + fretsTxt + (easy ? ' – easy alternative' : '');
+            if (easy) opt.classList.add('easy');
             if (f.join(',') === curKey) opt.classList.add('sel');
             var oi = new Image();
             oi.alt = '';
             oi.src = ChordKit.dataUri(instrument, f);
             opt.appendChild(oi);
-            opt.appendChild(el('span', 'choosing-frets', f.map(function (v) { return v < 0 ? 'x' : (v === 0 ? 'o' : v); }).join(' ')));
+            opt.appendChild(el('span', 'choosing-frets', fretsTxt));
             opt.addEventListener('click', function () {
                 savePick(chordName, f);
                 img.src = ChordKit.dataUri(instrument, f);

@@ -335,6 +335,48 @@
         return keyed.map(function (k) { return k.f; });
     }
 
+    // Chords whose standard open-position shape is a stretchy barre. The plain
+    // major/minor triads on these roots are the ones learners struggle with; a
+    // muted first-position alternative is meaningfully easier.
+    var HARD_MAJOR = { 1: 1, 4: 1, 6: 1, 8: 1, 10: 1, 11: 1 };   // C#, E, F#, G#, Bb, B
+    var HARD_MINOR = { 1: 1, 8: 1, 10: 1, 11: 1 };               // C#m, G#m, A#m, Bm
+
+    function chordDifficulty(name) {
+        var p = parse(name);
+        if (!p) return 'standard';
+        var hard = p.type.id === 'maj' ? HARD_MAJOR[p.rootPc] : (p.type.id === 'm' ? HARD_MINOR[p.rootPc] : null);
+        return hard ? 'hard' : 'standard';
+    }
+
+    // For hard chords, lift the best easier muted voicing into the second slot
+    // so it surfaces right after the standard instead of getting buried.
+    function boostEasy(inst, shapes, rootPc, type) {
+        if (inst.id !== 'ukulele' || shapes.length < 2) return shapes;
+        var hard = type.id === 'maj' ? HARD_MAJOR[rootPc] : (type.id === 'm' ? HARD_MINOR[rootPc] : null);
+        if (!hard) return shapes;
+        var std = shapes[0];
+        if (std.indexOf(-1) >= 0) return shapes;
+        var stdR = shapeRank(inst, std, rootPc);
+        var best = -1, bestM = -1, bestC = -1, bestS = -1;
+        for (var i = 1; i < shapes.length; i++) {
+            var f = shapes[i];
+            if (f.indexOf(-1) < 0) continue;
+            var r = shapeRank(inst, f, rootPc);
+            if (r.maxF > stdR.maxF) continue;
+            if (r.maxF === stdR.maxF && r.frettedCount >= stdR.frettedCount) continue;
+            if (best < 0 ||
+                r.maxF < bestM ||
+                (r.maxF === bestM && r.frettedCount < bestC) ||
+                (r.maxF === bestM && r.frettedCount === bestC && r.sounding > bestS)) {
+                best = i; bestM = r.maxF; bestC = r.frettedCount; bestS = r.sounding;
+            }
+        }
+        if (best < 2) return shapes;
+        var out = shapes.slice();
+        out.splice(1, 0, out.splice(best, 1)[0]);
+        return out;
+    }
+
     // All ranked voicings for a chord name on an instrument. Never empty for a
     // valid chord: falls back to relaxed (stretch) voicings if needed.
     function voicings(name, instrumentId) {
@@ -344,7 +386,8 @@
         var shapes = shapesFor(inst, parsed.rootPc, parsed.type, false);
         if (!shapes.length) shapes = shapesFor(inst, parsed.rootPc, parsed.type, true);
         if (!shapes.length) return [];
-        return sortShapes(inst, shapes, parsed.rootPc, parsed.type);
+        shapes = sortShapes(inst, shapes, parsed.rootPc, parsed.type);
+        return boostEasy(inst, shapes, parsed.rootPc, parsed.type);
     }
 
     function bestVoicing(name, instrumentId) {
@@ -455,6 +498,7 @@
         parse: parse,
         rootPcOf: rootPcOf,
         rootName: rootName,
+        chordDifficulty: chordDifficulty,
         voicings: voicings,
         bestVoicing: bestVoicing,
         diagramSVG: diagramSVG,

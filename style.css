@@ -797,6 +797,14 @@ main {
     color: var(--accent);
 }
 
+.chord-item.hard .cname::after {
+    content: '\25CF';
+    font-size: 0.42rem;
+    vertical-align: super;
+    margin-left: 2px;
+    opacity: 0.45;
+}
+
 .chord-item .missing {
     height: calc(78px * var(--chord-size, 1));
     display: flex;
@@ -894,6 +902,21 @@ main {
 .chooser-grid button.sel {
     border-color: var(--accent);
     box-shadow: 0 0 0 2px var(--accent);
+}
+
+.chooser-grid button.easy {
+    border-color: var(--accent);
+    outline: 1px dashed var(--accent);
+    outline-offset: 2px;
+}
+
+.chooser-grid button.easy .choosing-frets::after {
+    content: ' · easy';
+}
+
+.chooser-grid button.easy .choosing-frets {
+    color: var(--accent);
+    font-weight: 700;
 }
 
 .chooser-grid img {

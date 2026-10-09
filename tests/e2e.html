@@ -209,7 +209,11 @@ async function main() {
     eTarget.click(); await wait(80);
     const eRanks = Array.from(doc().querySelectorAll('#voicingChooser .choosing-frets')).map(x => x.textContent.replace(/\s+/g, '').replace(/o/g, '0'));
     ok('E default is classic open 1402', eRanks[0] === '1402', eRanks[0]);
-    ok('E second option is the 4442 barre', eRanks[1] === '4442', eRanks[1]);
+    ok('E second option boosted to easy 1x02', eRanks[1] === '1x02', eRanks[1]);
+    ok('easy option flagged', doc().querySelectorAll('#voicingChooser button.easy').length === 1, doc().querySelectorAll('#voicingChooser button.easy').length);
+    const hardNames = Array.from(doc().querySelectorAll('#chordStrip .chord-item.hard .cname')).map(c => c.textContent);
+    ok('E marked hard', hardNames.includes('E'), hardNames.join(','));
+    ok('Em not marked', !hardNames.includes('Em'), hardNames.join(','));
     doc().querySelector('.chooser-close').click(); await wait(50);
     win().location.hash = '#/krakow-ukulele/500-miles-i-m-gonna-be';
     await wait(300);
