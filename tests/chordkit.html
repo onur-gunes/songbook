@@ -39,7 +39,7 @@ try {
         (ChordKit.voicings(k, 'ukulele') || []).forEach(f => { if (f.some(v => v < 0)) ukeMuted = true; });
         (ChordKit.voicings(k, 'guitar') || []).forEach(f => { if (f.some(v => v < 0)) gtrMuted = true; });
     }
-    ok('no muted ukulele voicings', !ukeMuted);
+    ok('ukulele offers muted voicings', ukeMuted);
     ok('guitar uses muted strings', gtrMuted);
 
     // every chart chord resolves on both instruments

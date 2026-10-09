@@ -62,7 +62,7 @@
             strings: ['G', 'C', 'E', 'A'],
             tuning: [67, 60, 64, 69],
             maxFret: 12,
-            muted: false,
+            muted: true,
             playable: ukulelePlayable
         },
         guitar: {
@@ -301,7 +301,8 @@
     }
 
     function cmpUke(x, y) {
-        // ukulele explorer order: low position, few fretted strings, tight span
+        // ukulele explorer order: most strings ringing, low position, few fretted strings, tight span
+        if (x.sounding !== y.sounding) return x.sounding - y.sounding;
         if (x.maxF !== y.maxF) return x.maxF - y.maxF;
         if (x.frettedCount !== y.frettedCount) return x.frettedCount - y.frettedCount;
         if (x.span !== y.span) return x.span - y.span;
