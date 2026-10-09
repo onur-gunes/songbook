@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="Offline songbook - chord sheets and generated diagrams for ukulele and guitar">
+<meta name="theme-color" content="#1b1f27">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="images/icon.PNG" sizes="32x32">
+<link rel="apple-touch-icon" href="images/icon.PNG">
+<link rel="stylesheet" href="style.css">
+<title>Songbook</title>
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="#/" aria-label="Back to song list">
+            <img id="logo" src="images/ukulele-krakow-trans-light.png"
+                 data-light="images/ukulele-krakow-trans-light.png"
+                 data-dark="images/ukulele-krakow-trans-dark.png"
+                 alt="Songbook" width="40" height="40">
+            <span class="brand-name">Songbook</span>
+        </a>
+        <div class="topbar-right">
+            <div class="seg-group instrument-toggle" role="group" aria-label="Instrument">
+                <button class="instrument-btn active" data-instrument="ukulele" type="button" aria-pressed="true">Ukulele</button>
+                <button class="instrument-btn" data-instrument="guitar" type="button" aria-pressed="false">Guitar</button>
+            </div>
+            <button id="themeToggle" class="icon-btn" type="button" aria-label="Switch to dark mode">☀</button>
+        </div>
+    </div>
+</header>
+
+<main id="main">
+
+    <!-- ============ SONG LIST VIEW ============ -->
+    <section id="listView" hidden>
+
+        <div class="songbook-bar">
+            <label class="songbook-label" for="songbookSelect">Songbook</label>
+            <select id="songbookSelect" class="songbook-select" aria-label="Choose a songbook"></select>
+            <button id="importBtn" class="pill-btn" type="button">Import list…</button>
+            <button id="removeSongsBtn" class="link-btn" type="button" hidden>Remove</button>
+            <input id="importFile" type="file" accept=".json,application/json" hidden>
+        </div>
+
+        <div class="controls">
+            <div class="search-wrap">
+                <input id="search" type="search" autocomplete="off" spellcheck="false"
+                       placeholder="Search songs or artists..." aria-label="Search songs or artists">
+                <button id="searchClear" class="icon-btn search-clear" type="button" aria-label="Clear search" hidden>×</button>
+            </div>
+
+            <div class="list-rail">
+                <div class="filters" id="filters" role="group" aria-label="Filter by difficulty (combine levels)">
+                    <button class="filter-btn active" data-level="All" type="button">All</button>
+                    <button class="filter-btn" data-level="Easy" type="button">Easy</button>
+                    <button class="filter-btn" data-level="Medium" type="button">Medium</button>
+                    <button class="filter-btn" data-level="Hard" type="button">Hard</button>
+                    <button class="filter-btn" data-level="New" type="button">🔥 New</button>
+                    <button class="filter-btn" data-level="Favorites" type="button">★ Favorites</button>
+                </div>
+
+                <div class="list-rail-right">
+                    <div class="sort-group" role="group" aria-label="Sort songs by">
+                        <span class="sort-label">Sort</span>
+                        <div class="seg-group" role="group" aria-label="Sort order">
+                            <button class="sort-btn active" data-sort="title" type="button" aria-pressed="true">Title</button>
+                            <button class="sort-btn" data-sort="artist" type="button" aria-pressed="false">Artist</button>
+                        </div>
+                    </div>
+                    <button id="randomBtn" class="rail-btn" type="button" aria-label="Open a random song" title="Random song">🎲</button>
+                    <button id="viewToggle" class="rail-btn" type="button" aria-pressed="false"
+                            aria-label="Switch to compact one-line song list" title="Compact list">☰</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="recentBlock" class="recent-block" hidden>
+            <div class="section-head">
+                <h2 class="section-title">Recently played</h2>
+                <button id="recentClear" class="link-btn" type="button" aria-label="Clear recently played">Clear</button>
+            </div>
+            <ul id="recentList" class="recent-list"></ul>
+        </div>
+
+        <p id="resultCount" class="result-count"></p>
+        <ul id="songList" class="song-list"></ul>
+        <p id="emptyState" class="empty-state" hidden>No songs match.</p>
+    </section>
+
+    <!-- ============ SONG VIEW ============ -->
+    <section id="songView" hidden>
+
+        <nav class="song-nav">
+            <a class="back-link" href="#/" id="backLink">← All songs</a>
+            <div class="nav-arrows">
+                <button id="prevBtn" class="nav-btn" type="button" aria-label="Previous song">← Previous</button>
+                <button id="nextBtn" class="nav-btn" type="button" aria-label="Next song">Next →</button>
+            </div>
+        </nav>
+
+        <header class="song-header">
+            <span id="songNumber" class="song-number">#—</span>
+            <h1 id="songTitle" class="song-title">Song</h1>
+            <p id="songArtist" class="song-artist">Artist</p>
+            <div class="song-meta">
+                <span id="songLevel" class="level-badge">Easy</span>
+                <button id="favBtn" class="fav-btn" type="button" aria-label="Toggle favorite" aria-pressed="false">☆</button>
+            </div>
+        </header>
+
+        <div id="chordStrip" class="chord-strip" aria-label="Chord diagrams"></div>
+
+        <div class="song-tools" role="toolbar" aria-label="Song tools">
+            <div class="tool-group" role="group" aria-label="Transpose">
+                <span class="tool-label">Transpose</span>
+                <div class="stepper">
+                    <button id="trDown" class="step-btn" type="button" aria-label="Transpose down">−</button>
+                    <span id="trValue" class="step-value" aria-live="polite">0</span>
+                    <button id="trUp" class="step-btn" type="button" aria-label="Transpose up">+</button>
+                </div>
+            </div>
+            <div class="tool-group" role="group" aria-label="Text size">
+                <span class="tool-label">Aa</span>
+                <div class="stepper">
+                    <button id="sizeDown" class="step-btn" type="button" aria-label="Smaller text">−</button>
+                    <span id="sizeValue" class="step-value" aria-live="polite">100%</span>
+                    <button id="sizeUp" class="step-btn" type="button" aria-label="Bigger text">+</button>
+                </div>
+            </div>
+            <div class="tool-group" role="group" aria-label="Chord diagram size">
+                <span class="tool-label">Chords</span>
+                <div class="stepper">
+                    <button id="chordSizeDown" class="step-btn" type="button" aria-label="Smaller chord diagrams">−</button>
+                    <span id="chordSizeValue" class="step-value" aria-live="polite">100%</span>
+                    <button id="chordSizeUp" class="step-btn" type="button" aria-label="Bigger chord diagrams">+</button>
+                    <span class="step-divider" role="separator"></span>
+                    <button id="chordPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="sheet" class="sheet" tabindex="0" aria-label="Chord sheet"></div>
+
+        <section class="notes-block">
+            <h2 class="section-title">My notes</h2>
+            <textarea id="notesBox" rows="4" placeholder="Personal notes for this song..."></textarea>
+            <div class="notes-row">
+                <button id="notesSave" class="pill-btn" type="button">Save</button>
+                <span id="notesStatus" class="notes-status" aria-live="polite"></span>
+            </div>
+        </section>
+
+        <div class="qr-row">
+            <img src="images/qrcode.png" alt="QR code" width="72" height="72" loading="lazy">
+        </div>
+
+        <div id="scrollControl" class="scroll-control">
+            <button id="scrollBtn" class="scroll-ctrl-btn" type="button"
+                    aria-label="Start auto-scroll" title="Start auto-scroll (Space)">▶</button>
+            <button id="scrollReset" class="scroll-ctrl-btn" type="button"
+                    aria-label="Reset auto-scroll" title="Start over from the top">⟲</button>
+            <div class="scroll-speed" role="group" aria-label="Auto-scroll speed">
+                <button id="speedDown" class="speed-btn" type="button" aria-label="Slower">−</button>
+                <span id="speedValue" class="scroll-value" aria-live="polite">1.0×</span>
+                <button id="speedUp" class="speed-btn" type="button" aria-label="Faster">+</button>
+            </div>
+        </div>
+
+    </section>
+
+    <div id="bootMsg" class="boot-msg">Loading songbooks…</div>
+
+</main>
+
+<footer class="site-foot">
+    Personal offline songbook · ukulele + guitar
+</footer>
+
+<script src="chords.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

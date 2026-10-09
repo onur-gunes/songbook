@@ -1,0 +1,41 @@
+<!doctype html><meta charset="utf-8"><title>t</title>
+<iframe id="f" src="../index.html?nosw" style="width:1000px;height:700px"></iframe>
+<pre id="log">pending</pre>
+<script>
+/*CASES*/
+const f = document.getElementById('f');
+async function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
+async function until(fn, t=6000){ const t0=Date.now(); while(Date.now()-t0<t){ if(fn()) return true; await wait(30);} return false; }
+const norm = s => s.replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
+async function main(){
+  await new Promise(r=>f.addEventListener('load', r));
+  await until(()=>f.contentDocument.querySelectorAll('#songList .song-row').length===198);
+  const d = () => f.contentDocument, w = () => f.contentWindow;
+  const bad = [];
+  let done = 0, transposed = 0;
+  const sheetLines = () => Array.from(d().querySelectorAll('#sheet .line')).map(l=>norm(l.textContent));
+  for (const c of CASES) {
+    w().location.hash = '#/krakow-ukulele/' + c.id;
+    const ok = await until(()=>d().getElementById('songTitle').textContent === c.title && d().querySelectorAll('#sheet .line').length>0);
+    if (!ok) { bad.push(c.id+' :: did-not-render'); continue; }
+    const lines0 = sheetLines();
+    const gotFlat = lines0.filter(Boolean).join(' ');
+    const want = c.want.map(norm).filter(Boolean);
+    const missing = want.filter(l => l.length > 3 && gotFlat.indexOf(l) === -1);
+    if (missing.length) bad.push(c.id+' :: missing='+missing.length+' first='+JSON.stringify(missing[0].slice(0,80)));
+    done++;
+    if (done % 7 === 0) {
+      d().getElementById('trUp').click(); await wait(40);
+      if (d().getElementById('trValue').textContent!=='+1' || d().querySelectorAll('#sheet .line').length!==lines0.length)
+        bad.push(c.id+' :: transpose-rerender');
+      d().getElementById('trDown').click(); await wait(40);
+      if (sheetLines().join('\n')!==lines0.join('\n')) bad.push(c.id+' :: transpose-roundtrip');
+      transposed++;
+    }
+  }
+  document.title = bad.length===0 ? 'DONE '+done+'/'+CASES.length+' tx='+transposed : 'FAILS:'+bad.length;
+  document.getElementById('log').textContent = (bad.length? bad.join('\n') : 'ALL '+done+' SONGS FIDELITY OK, '+transposed+' transpose cycles OK') + '\nfirst/last: ' + (CASES[0]&&CASES[0].id) + ' / ' + (CASES[CASES.length-1]&&CASES[CASES.length-1].id);
+  window.__done = true;
+}
+main().catch(e=>{ document.title='CRASH'; document.getElementById('log').textContent = 'CRASH '+e.message; window.__done = true; });
+</script>

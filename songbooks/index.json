@@ -1,0 +1,11 @@
+{
+  "songbooks": [
+    {
+      "id": "krakow-ukulele",
+      "name": "Krakow Ukulele Songbook",
+      "description": "198 songs from Krakow Ukulele & Sing Tuesdays.",
+      "instrument": "ukulele",
+      "file": "krakow-ukulele.json"
+    }
+  ]
+}

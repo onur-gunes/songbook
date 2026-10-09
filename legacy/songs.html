@@ -1,0 +1,2790 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+
+<link rel="icon" href="/images/icon.PNG" sizes="32x32" />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+<title>Krakow Ukulele & Sing Tuesdays - Songbook</title>
+
+<style>
+.highlight { background-color: lemonchiffon; font-weight: bold; }
+.chord { font-weight: bold; color: red; }
+ul { list-style: none; padding-left: 0; }
+#options a { text-decoration: underline; }
+#songs a { text-decoration: none; }
+
+.montserrat-h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+}
+
+/* --- Redesigned Pill-Style Toggle & Action Buttons --- */
+.custom-btn {
+    margin-bottom: 8px;
+    border: none;
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+}
+
+.custom-btn:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* Base Filter Styles (Inactive State) */
+.btn-filter-easy {
+    background-color: #e8f5e9;
+    color: #198754;
+    border: 2px solid #198754;
+}
+.btn-filter-easy.active {
+    background: linear-gradient(135deg, #2ecc71, #198754);
+    color: #ffffff !important;
+    border-color: transparent;
+}
+
+.btn-filter-medium {
+    background-color: #fffde7;
+    color: #d97706;
+    border: 2px solid #ffc107;
+}
+.btn-filter-medium.active {
+    background: linear-gradient(135deg, #ffe082, #ffc107);
+    color: #212529 !important;
+    border-color: transparent;
+}
+
+.btn-filter-hard {
+    background-color: #ffebee;
+    color: #dc3545;
+    border: 2px solid #dc3545;
+}
+.btn-filter-hard.active {
+    background: linear-gradient(135deg, #ff7675, #dc3545);
+    color: #ffffff !important;
+    border-color: transparent;
+}
+
+.btn-filter-onlynew {
+    background-color: #e0f7fa;
+    color: #0891b2;
+    border: 2px solid #0dcaf0;
+}
+.btn-filter-onlynew.active {
+    background: linear-gradient(135deg, #67e8f9, #0dcaf0);
+    color: #0f172a !important;
+    border-color: transparent;
+}
+
+/* Sort Buttons */
+.btn-sort {
+    background-color: #f1f5f9;
+    color: #334155;
+    border: 2px solid #cbd5e1;
+}
+.btn-sort.active {
+    background: linear-gradient(135deg, #38bdf8, #2563eb);
+    color: #ffffff;
+    border-color: transparent;
+}
+
+.bold-text {
+    font-weight: bold;
+    font-style: normal; 
+}
+.italic-text {
+    font-style: italic;
+    font-weight: normal;
+}   
+.ultra-light {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 200;
+}
+
+.semi-bold {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+}
+.custom-text-h5 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.2rem;
+}
+
+.lucky-button {
+    margin-top: 4px;
+    border: none;
+    border-radius: 999px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #ffe45e, #a855f7);
+    background-size: 220% 220%;
+    color: #231f20;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    animation: luckyShift 7s ease-in-out infinite;
+    width: 100%;
+    transition: transform 0.2s ease;
+}
+
+.lucky-button:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+@keyframes luckyShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 2000;
+    border: 1px solid #ced4da;
+    border-radius: 999px;
+    background-color: #ffffff;
+    color: #212529;
+    padding: 6px 12px;
+    font-size: 0.875rem;
+}
+
+.theme-toggle:hover {
+    background-color: #f8f9fa;
+}
+
+body {
+    background-color: #ffffff;
+    color: #212529;
+    overflow-x: hidden;
+}
+
+body.dark-mode {
+    background-color: #121212;
+    color: #f1f1f1;
+}
+
+body.dark-mode a {
+    color: #ff9a9a;
+}
+
+body.dark-mode a:focus,
+body.dark-mode a:hover {
+    color: #ffffff;
+}
+
+body.dark-mode .custom-btn.btn-sort {
+    background-color: #1e293b;
+    color: #cbd5e1;
+    border-color: #475569;
+}
+
+body.dark-mode .theme-toggle {
+    background-color: #1f1f1f;
+    color: #f1f1f1;
+    border-color: #595959;
+}
+
+body.dark-mode .lucky-button {
+    background: linear-gradient(135deg, #ffd84d, #b084ff);
+    background-size: 220% 220%;
+    color: #111111;
+}
+
+</style>
+</head>
+
+<body><button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark mode">☼</button>
+
+<header class="container text-center">
+    <div class="m-2 mb-2 text-center">
+        <img id="siteLogo" src="images/ukulele-krakow-trans-light.png" data-light-logo="images/ukulele-krakow-trans-light.png" data-dark-logo="images/ukulele-krakow-trans-dark.png" class="img-fluid" alt="Krakow Ukulele" width="200">
+    </div>
+</header>
+
+<div class="container">
+<div class="row justify-content-center">
+    
+    <div id="list" class="col-lg-8 col-md-10 col-sm-12 my-3">
+
+        <h4 class="semi-bold mb-3">Songbook</h4>
+        <div class="row row-cols-2">
+            <div class="col-md-6">
+                <div>
+                    <h6 class="custom-text-h5 mb-2">Filter</h6>
+                    <form id="filter-form">
+                        <div class="d-flex flex-column">
+                            <button type="button" name="Easy" class="custom-btn btn-filter-easy filter-button active">Easy</button>
+                            <button type="button" name="Medium" class="custom-btn btn-filter-medium filter-button active">Medium</button>
+                            <button type="button" name="Hard" class="custom-btn btn-filter-hard filter-button active">Hard</button>
+                            <button type="button" name="New" class="custom-btn btn-filter-onlynew filter-button">🔥 New only</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-6 d-flex justify-content-end">
+                <div class="w-100">
+                    <h6 class="custom-text-h5 mb-2">Sort by</h6>
+                    <div class="d-flex flex-column">
+                        <button type="button" id="sortByTitle" class="custom-btn btn-sort active">Titles</button>
+                        <button type="button" id="sortByArtist" class="custom-btn btn-sort">Artists</button>
+                        <button type="button" id="luckyButton" class="lucky-button">I am feeling Lucky</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h6>Songs</h6>
+            <ul id="songs">
+                
+                    <li data-title="(I Can't Get No) Satisfaction" data-artist="The Rolling Stones" data-level="Easy">
+                        <a href="(I-Can't-Get-No)-Satisfaction.html" name="1">
+                        1 - (I Can't Get No) Satisfaction - 
+                        </a>
+                        <small>
+                            <em> The Rolling Stones - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="19-2000" data-artist="Gorillaz" data-level="Easy">
+                        <a href="19-2000.html" name="2">
+                        2 - 19-2000 - 
+                        </a>
+                        <small>
+                            <em> Gorillaz - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="500 Miles (I'm Gonna Be)" data-artist="The Proclaimers" data-level="Easy">
+                        <a href="500-Miles-(I'm-Gonna-Be).html" name="3">
+                        3 - 500 Miles (I'm Gonna Be) - 
+                        </a>
+                        <small>
+                            <em> The Proclaimers - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="A Little Respect" data-artist="Erasure" data-level="Medium">
+                        <a href="A-Little-Respect.html" name="4">
+                        4 - A Little Respect - 
+                        </a>
+                        <small>
+                            <em> Erasure - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Accidentally In Love" data-artist="Counting Crows" data-level="Medium">
+                        <a href="Accidentally-In-Love.html" name="5">
+                        5 - Accidentally In Love - 
+                        </a>
+                        <small>
+                            <em> Counting Crows - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="After Hours" data-artist="The Velvet Underground" data-level="Medium">
+                        <a href="After-Hours.html" name="6">
+                        6 - After Hours - 
+                        </a>
+                        <small>
+                            <em> The Velvet Underground - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Ain't No Sunshine" data-artist="Bill Withers" data-level="Easy">
+                        <a href="Ain't-No-Sunshine.html" name="7">
+                        7 - Ain't No Sunshine - 
+                        </a>
+                        <small>
+                            <em> Bill Withers - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="All About That Bass" data-artist="Meghan Trainor" data-level="Easy">
+                        <a href="All-About-That-Bass.html" name="8">
+                        8 - All About That Bass - 
+                        </a>
+                        <small>
+                            <em> Meghan Trainor - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="All Apologies" data-artist="Nirvana" data-level="Easy">
+                        <a href="All-Apologies.html" name="9">
+                        9 - All Apologies - 
+                        </a>
+                        <small>
+                            <em> Nirvana - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="All Star (Shrek)" data-artist="Smash Mouth" data-level="Hard">
+                        <a href="All-Star-(Shrek).html" name="10">
+                        10 - All Star (Shrek) - 
+                        </a>
+                        <small>
+                            <em> Smash Mouth - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="American Idiot" data-artist="Green Day" data-level="Medium">
+                        <a href="American-Idiot.html" name="11">
+                        11 - American Idiot - 
+                        </a>
+                        <small>
+                            <em> Green Day - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Another Brick In The Wall" data-artist="Pink Floyd" data-level="Easy">
+                        <a href="Another-Brick-In-The-Wall.html" name="12">
+                        12 - Another Brick In The Wall - 
+                        </a>
+                        <small>
+                            <em> Pink Floyd - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Another Love" data-artist="Tom Odell" data-level="Easy">
+                        <a href="Another-Love.html" name="13">
+                        13 - Another Love - 
+                        </a>
+                        <small>
+                            <em> Tom Odell - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Bad Moon Rising" data-artist="Creedence" data-level="Easy">
+                        <a href="Bad-Moon-Rising.html" name="14">
+                        14 - Bad Moon Rising - 
+                        </a>
+                        <small>
+                            <em> Creedence - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Bad Romance" data-artist="Lady Gaga" data-level="Easy">
+                        <a href="Bad-Romance.html" name="15">
+                        15 - Bad Romance - 
+                        </a>
+                        <small>
+                            <em> Lady Gaga - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Bang Bang" data-artist="Nancy Sinatra" data-level="Easy">
+                        <a href="Bang-Bang.html" name="16">
+                        16 - Bang Bang - 
+                        </a>
+                        <small>
+                            <em> Nancy Sinatra - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Basket Case" data-artist="Green Day" data-level="Medium">
+                        <a href="Basket-Case.html" name="17">
+                        17 - Basket Case - 
+                        </a>
+                        <small>
+                            <em> Green Day - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Beggin'" data-artist="Madcon" data-level="Easy">
+                        <a href="Beggin'.html" name="18">
+                        18 - Beggin' - 
+                        </a>
+                        <small>
+                            <em> Madcon - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Billie Jean" data-artist="Micheal Jackson" data-level="Easy">
+                        <a href="Billie-Jean.html" name="19">
+                        19 - Billie Jean - 
+                        </a>
+                        <small>
+                            <em> Micheal Jackson - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Bitter Sweet Symphony" data-artist="The Verve" data-level="Easy">
+                        <a href="Bitter-Sweet-Symphony.html" name="20">
+                        20 - Bitter Sweet Symphony - 
+                        </a>
+                        <small>
+                            <em> The Verve - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Black" data-artist="Pearl Jam" data-level="Medium">
+                        <a href="Black.html" name="21">
+                        21 - Black - 
+                        </a>
+                        <small>
+                            <em> Pearl Jam - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Blinding Lights" data-artist="The Weeknd" data-level="Medium">
+                        <a href="Blinding-Lights.html" name="22">
+                        22 - Blinding Lights - 
+                        </a>
+                        <small>
+                            <em> The Weeknd - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Blister in the Sun" data-artist="The Violent Femmes" data-level="Medium">
+                        <a href="🔥Blister-in-the-Sun.html" name="23">
+                        23 - 🔥Blister in the Sun - 
+                        </a>
+                        <small>
+                            <em> The Violent Femmes - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Blowing In The Wind" data-artist="Bob Dylan" data-level="Easy">
+                        <a href="Blowing-In-The-Wind.html" name="24">
+                        24 - Blowing In The Wind - 
+                        </a>
+                        <small>
+                            <em> Bob Dylan - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Bohemian Rhapsody" data-artist="Queen" data-level="Hard">
+                        <a href="Bohemian-Rhapsody.html" name="25">
+                        25 - Bohemian Rhapsody - 
+                        </a>
+                        <small>
+                            <em> Queen - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Boys Don't Cry" data-artist="The Cure" data-level="Medium">
+                        <a href="Boys-Don't-Cry.html" name="26">
+                        26 - Boys Don't Cry - 
+                        </a>
+                        <small>
+                            <em> The Cure - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Brown Eyed Girl" data-artist="Van Morrison" data-level="Easy">
+                        <a href="Brown-Eyed-Girl.html" name="27">
+                        27 - Brown Eyed Girl - 
+                        </a>
+                        <small>
+                            <em> Van Morrison - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Budapest" data-artist="George Ezra" data-level="Easy">
+                        <a href="Budapest.html" name="28">
+                        28 - Budapest - 
+                        </a>
+                        <small>
+                            <em> George Ezra - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="California Dreaming" data-artist="The Mamas and the Papas" data-level="Hard">
+                        <a href="California-Dreaming.html" name="29">
+                        29 - California Dreaming - 
+                        </a>
+                        <small>
+                            <em> The Mamas and the Papas - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Californication" data-artist="Red Hot Chili Peppers" data-level="Medium">
+                        <a href="Californication.html" name="30">
+                        30 - Californication - 
+                        </a>
+                        <small>
+                            <em> Red Hot Chili Peppers - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Can't Get You Out Of My Head" data-artist="Kylie Minogue" data-level="Medium">
+                        <a href="Can't-Get-You-Out-Of-My-Head.html" name="31">
+                        31 - Can't Get You Out Of My Head - 
+                        </a>
+                        <small>
+                            <em> Kylie Minogue - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Can't Help Falling In Love With You" data-artist="Elvis Presley" data-level="Medium">
+                        <a href="Can't-Help-Falling-In-Love-With-You.html" name="32">
+                        32 - Can't Help Falling In Love With You - 
+                        </a>
+                        <small>
+                            <em> Elvis Presley - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Can't Stop" data-artist="Red Hot Chili Peppers" data-level="Medium">
+                        <a href="Can't-Stop.html" name="33">
+                        33 - Can't Stop - 
+                        </a>
+                        <small>
+                            <em> Red Hot Chili Peppers - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Can't Take My Eyes Off You" data-artist="Frankie Vallie" data-level="Medium">
+                        <a href="Can't-Take-My-Eyes-Off-You.html" name="34">
+                        34 - Can't Take My Eyes Off You - 
+                        </a>
+                        <small>
+                            <em> Frankie Vallie - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Careless Whisper" data-artist="George Michael" data-level="Easy">
+                        <a href="Careless-Whisper.html" name="35">
+                        35 - Careless Whisper - 
+                        </a>
+                        <small>
+                            <em> George Michael - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Cecilia" data-artist="Simon & Garfunkel" data-level="Medium">
+                        <a href="Cecilia.html" name="36">
+                        36 - Cecilia - 
+                        </a>
+                        <small>
+                            <em> Simon & Garfunkel - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Chop Suey" data-artist="System of a Down" data-level="Hard">
+                        <a href="Chop-Suey.html" name="37">
+                        37 - Chop Suey - 
+                        </a>
+                        <small>
+                            <em> System of a Down - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Cold Heart" data-artist="Elton John, Dua Lipa" data-level="Easy">
+                        <a href="Cold-Heart.html" name="38">
+                        38 - Cold Heart - 
+                        </a>
+                        <small>
+                            <em> Elton John, Dua Lipa - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Colors Of The Wind" data-artist="Judy Kuhn" data-level="Medium">
+                        <a href="🔥Colors-Of-The-Wind.html" name="39">
+                        39 - 🔥Colors Of The Wind - 
+                        </a>
+                        <small>
+                            <em> Judy Kuhn - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Crazy" data-artist="Gnarls Barkley" data-level="Medium">
+                        <a href="Crazy.html" name="40">
+                        40 - Crazy - 
+                        </a>
+                        <small>
+                            <em> Gnarls Barkley - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Crazy Little Thing Called Love" data-artist="The Queen" data-level="Hard">
+                        <a href="Crazy-Little-Thing-Called-Love.html" name="41">
+                        41 - Crazy Little Thing Called Love - 
+                        </a>
+                        <small>
+                            <em> The Queen - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Creep" data-artist="Radiohead" data-level="Easy">
+                        <a href="Creep.html" name="42">
+                        42 - Creep - 
+                        </a>
+                        <small>
+                            <em> Radiohead - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Dancing Queen" data-artist="Abba" data-level="Medium">
+                        <a href="Dancing-Queen.html" name="43">
+                        43 - Dancing Queen - 
+                        </a>
+                        <small>
+                            <em> Abba - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Do I Wanna Know" data-artist="Arctic Monkeys" data-level="Medium">
+                        <a href="Do-I-Wanna-Know.html" name="44">
+                        44 - Do I Wanna Know - 
+                        </a>
+                        <small>
+                            <em> Arctic Monkeys - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Dog Days Are Over" data-artist="Florence + The Machine" data-level="Medium">
+                        <a href="🔥Dog-Days-Are-Over.html" name="45">
+                        45 - 🔥Dog Days Are Over - 
+                        </a>
+                        <small>
+                            <em> Florence + The Machine - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Don't Let Me Be Misunderstood" data-artist="Animals/Krakow Street Band" data-level="Medium">
+                        <a href="Don't-Let-Me-Be-Misunderstood.html" name="46">
+                        46 - Don't Let Me Be Misunderstood - 
+                        </a>
+                        <small>
+                            <em> Animals/Krakow Street Band - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Don't Let Me Down" data-artist="The Beatles" data-level="Easy">
+                        <a href="Don't-Let-Me-Down.html" name="47">
+                        47 - Don't Let Me Down - 
+                        </a>
+                        <small>
+                            <em> The Beatles - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Don't Look Back In Anger" data-artist="Oasis" data-level="Hard">
+                        <a href="Don't-Look-Back-In-Anger.html" name="48">
+                        48 - Don't Look Back In Anger - 
+                        </a>
+                        <small>
+                            <em> Oasis - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Don't Stop Me Now" data-artist="Queen" data-level="Hard">
+                        <a href="Don't-Stop-Me-Now.html" name="49">
+                        49 - Don't Stop Me Now - 
+                        </a>
+                        <small>
+                            <em> Queen - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Don't Worry Be Happy" data-artist="Bobby McFerrin" data-level="Easy">
+                        <a href="Don't-Worry-Be-Happy.html" name="50">
+                        50 - Don't Worry Be Happy - 
+                        </a>
+                        <small>
+                            <em> Bobby McFerrin - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Dream A Little Dream Of Me" data-artist="The Mamas & The Papas" data-level="Hard">
+                        <a href="Dream-A-Little-Dream-Of-Me.html" name="51">
+                        51 - Dream A Little Dream Of Me - 
+                        </a>
+                        <small>
+                            <em> The Mamas & The Papas - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Englishman In New York" data-artist="Sting" data-level="Easy">
+                        <a href="Englishman-In-New-York.html" name="52">
+                        52 - Englishman In New York - 
+                        </a>
+                        <small>
+                            <em> Sting - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Enjoy The Silence" data-artist="Depeche Mode" data-level="Medium">
+                        <a href="Enjoy-The-Silence.html" name="53">
+                        53 - Enjoy The Silence - 
+                        </a>
+                        <small>
+                            <em> Depeche Mode - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Every Breath You Take" data-artist="The Police" data-level="Medium">
+                        <a href="Every-Breath-You-Take.html" name="54">
+                        54 - Every Breath You Take - 
+                        </a>
+                        <small>
+                            <em> The Police - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Everywhere" data-artist="Fleetwood Mac" data-level="Easy">
+                        <a href="Everywhere.html" name="55">
+                        55 - Everywhere - 
+                        </a>
+                        <small>
+                            <em> Fleetwood Mac - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Eye Of The Tiger" data-artist="Survivor" data-level="Medium">
+                        <a href="Eye-Of-The-Tiger.html" name="56">
+                        56 - Eye Of The Tiger - 
+                        </a>
+                        <small>
+                            <em> Survivor - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Flowers" data-artist="Miley Cyrus" data-level="Easy">
+                        <a href="Flowers.html" name="57">
+                        57 - Flowers - 
+                        </a>
+                        <small>
+                            <em> Miley Cyrus - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Fluorescent Adolescent" data-artist="Arctic Monkeys" data-level="Medium">
+                        <a href="Fluorescent-Adolescent.html" name="58">
+                        58 - Fluorescent Adolescent - 
+                        </a>
+                        <small>
+                            <em> Arctic Monkeys - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Fly Away" data-artist="Lenny Kravitz" data-level="Easy">
+                        <a href="Fly-Away.html" name="59">
+                        59 - Fly Away - 
+                        </a>
+                        <small>
+                            <em> Lenny Kravitz - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Fly Me To The Moon" data-artist="Frank Sinatra" data-level="Medium">
+                        <a href="Fly-Me-To-The-Moon.html" name="60">
+                        60 - Fly Me To The Moon - 
+                        </a>
+                        <small>
+                            <em> Frank Sinatra - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Friday I'm In Love" data-artist="The Cure" data-level="Medium">
+                        <a href="Friday-I'm-In-Love.html" name="61">
+                        61 - Friday I'm In Love - 
+                        </a>
+                        <small>
+                            <em> The Cure - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Get Lucky" data-artist="Daft Punk" data-level="Easy">
+                        <a href="Get-Lucky.html" name="62">
+                        62 - Get Lucky - 
+                        </a>
+                        <small>
+                            <em> Daft Punk - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Go Your Own Way" data-artist="Fleetwood Mac" data-level="Medium">
+                        <a href="🔥Go-Your-Own-Way.html" name="63">
+                        63 - 🔥Go Your Own Way - 
+                        </a>
+                        <small>
+                            <em> Fleetwood Mac - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Hallelujah" data-artist="Leonard Cohen" data-level="Medium">
+                        <a href="Hallelujah.html" name="64">
+                        64 - Hallelujah - 
+                        </a>
+                        <small>
+                            <em> Leonard Cohen - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Happy" data-artist="Pharrell Williams" data-level="Medium">
+                        <a href="Happy.html" name="65">
+                        65 - Happy - 
+                        </a>
+                        <small>
+                            <em> Pharrell Williams - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🎂Happy Birthday" data-artist="Patty & Mildred Hill (Traditional tune)" data-level="Easy">
+                        <a href="🎂Happy-Birthday.html" name="66">
+                        66 - 🎂Happy Birthday - 
+                        </a>
+                        <small>
+                            <em> Patty & Mildred Hill (Traditional tune) - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Happy Together" data-artist="The Turtles" data-level="Medium">
+                        <a href="Happy-Together.html" name="67">
+                        67 - Happy Together - 
+                        </a>
+                        <small>
+                            <em> The Turtles - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Have You Ever Seen The Rain" data-artist="Creedence" data-level="Medium">
+                        <a href="Have-You-Ever-Seen-The-Rain.html" name="68">
+                        68 - Have You Ever Seen The Rain - 
+                        </a>
+                        <small>
+                            <em> Creedence - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Here Comes The Sun" data-artist="The Beatles" data-level="Hard">
+                        <a href="Here-Comes-The-Sun.html" name="69">
+                        69 - Here Comes The Sun - 
+                        </a>
+                        <small>
+                            <em> The Beatles - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Hey Jude" data-artist="The Beatles" data-level="Medium">
+                        <a href="Hey-Jude.html" name="70">
+                        70 - Hey Jude - 
+                        </a>
+                        <small>
+                            <em> The Beatles - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Hey There Delilah" data-artist="Plain White T's" data-level="Medium">
+                        <a href="Hey-There-Delilah.html" name="71">
+                        71 - Hey There Delilah - 
+                        </a>
+                        <small>
+                            <em> Plain White T's - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Hey Ya" data-artist="OutKast" data-level="Medium">
+                        <a href="Hey-Ya.html" name="72">
+                        72 - Hey Ya - 
+                        </a>
+                        <small>
+                            <em> OutKast - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Highway To Hell" data-artist="AC/DC" data-level="Medium">
+                        <a href="Highway-To-Hell.html" name="73">
+                        73 - Highway To Hell - 
+                        </a>
+                        <small>
+                            <em> AC/DC - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Hit Me Baby One More Time" data-artist="Britney Spears" data-level="Medium">
+                        <a href="Hit-Me-Baby-One-More-Time.html" name="74">
+                        74 - Hit Me Baby One More Time - 
+                        </a>
+                        <small>
+                            <em> Britney Spears - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Hit The Road Jack" data-artist="Ray Charles" data-level="Hard">
+                        <a href="Hit-The-Road-Jack.html" name="75">
+                        75 - Hit The Road Jack - 
+                        </a>
+                        <small>
+                            <em> Ray Charles - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Ho Hey" data-artist="The Lumineers" data-level="Easy">
+                        <a href="Ho-Hey.html" name="76">
+                        76 - Ho Hey - 
+                        </a>
+                        <small>
+                            <em> The Lumineers - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Home" data-artist="Edward Sharpe and the Magnetic Zeros" data-level="Medium">
+                        <a href="🔥Home.html" name="77">
+                        77 - 🔥Home - 
+                        </a>
+                        <small>
+                            <em> Edward Sharpe and the Magnetic Zeros - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Hotel California" data-artist="Eagles" data-level="Medium">
+                        <a href="Hotel-California.html" name="78">
+                        78 - Hotel California - 
+                        </a>
+                        <small>
+                            <em> Eagles - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="House Of Gold" data-artist="Twenty One Pilots" data-level="Medium">
+                        <a href="House-Of-Gold.html" name="79">
+                        79 - House Of Gold - 
+                        </a>
+                        <small>
+                            <em> Twenty One Pilots - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="House Of The Rising Sun" data-artist="The Animals" data-level="Medium">
+                        <a href="House-Of-The-Rising-Sun.html" name="80">
+                        80 - House Of The Rising Sun - 
+                        </a>
+                        <small>
+                            <em> The Animals - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="How You Remind Me" data-artist="Nickelback" data-level="Easy">
+                        <a href="How-You-Remind-Me.html" name="81">
+                        81 - How You Remind Me - 
+                        </a>
+                        <small>
+                            <em> Nickelback - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="I Heard It Through The Grapevine" data-artist="Marvin Gaye" data-level="Easy">
+                        <a href="I-Heard-It-Through-The-Grapevine.html" name="82">
+                        82 - I Heard It Through The Grapevine - 
+                        </a>
+                        <small>
+                            <em> Marvin Gaye - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥I Knew You Were Trouble" data-artist="Taylor Swift" data-level="Medium">
+                        <a href="🔥I-Knew-You-Were-Trouble.html" name="83">
+                        83 - 🔥I Knew You Were Trouble - 
+                        </a>
+                        <small>
+                            <em> Taylor Swift - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="I Still Haven't Found What I'm Looking For" data-artist="U2" data-level="Easy">
+                        <a href="I-Still-Haven't-Found-What-I'm-Looking-For.html" name="84">
+                        84 - I Still Haven't Found What I'm Looking For - 
+                        </a>
+                        <small>
+                            <em> U2 - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="I Wanna Be Like You (The Monkey Song)" data-artist="The Jungle Book" data-level="Medium">
+                        <a href="I-Wanna-Be-Like-You-(The-Monkey-Song).html" name="85">
+                        85 - I Wanna Be Like You (The Monkey Song) - 
+                        </a>
+                        <small>
+                            <em> The Jungle Book - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="I Want It That Way" data-artist="Backstreet Boys" data-level="Hard">
+                        <a href="I-Want-It-That-Way.html" name="86">
+                        86 - I Want It That Way - 
+                        </a>
+                        <small>
+                            <em> Backstreet Boys - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="I Want To Break Free" data-artist="Queen" data-level="Easy">
+                        <a href="I-Want-To-Break-Free.html" name="87">
+                        87 - I Want To Break Free - 
+                        </a>
+                        <small>
+                            <em> Queen - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="I Was Made For Lovin' You" data-artist="Kiss" data-level="Medium">
+                        <a href="I-Was-Made-For-Lovin'-You.html" name="88">
+                        88 - I Was Made For Lovin' You - 
+                        </a>
+                        <small>
+                            <em> Kiss - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="I Will Survive" data-artist="Gloria Gaynor" data-level="Medium">
+                        <a href="I-Will-Survive.html" name="89">
+                        89 - I Will Survive - 
+                        </a>
+                        <small>
+                            <em> Gloria Gaynor - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="I'll Be There For You (Friends Theme)" data-artist="The Rembrandts" data-level="Medium">
+                        <a href="I'll-Be-There-For-You-(Friends-Theme).html" name="90">
+                        90 - I'll Be There For You (Friends Theme) - 
+                        </a>
+                        <small>
+                            <em> The Rembrandts - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="I'm A Believer (From Shrek)" data-artist="The Monkees" data-level="Medium">
+                        <a href="I'm-A-Believer-(From-Shrek).html" name="91">
+                        91 - I'm A Believer (From Shrek) - 
+                        </a>
+                        <small>
+                            <em> The Monkees - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="I'm Still Standing" data-artist="Elton John" data-level="Medium">
+                        <a href="I'm-Still-Standing.html" name="92">
+                        92 - I'm Still Standing - 
+                        </a>
+                        <small>
+                            <em> Elton John - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="I'm Yours" data-artist="Jason Mraz" data-level="Easy">
+                        <a href="I'm-Yours.html" name="93">
+                        93 - I'm Yours - 
+                        </a>
+                        <small>
+                            <em> Jason Mraz - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Imagine" data-artist="John Lennon" data-level="Medium">
+                        <a href="Imagine.html" name="94">
+                        94 - Imagine - 
+                        </a>
+                        <small>
+                            <em> John Lennon - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="In The Summertime" data-artist="Mungo Jerry" data-level="Easy">
+                        <a href="In-The-Summertime.html" name="95">
+                        95 - In The Summertime - 
+                        </a>
+                        <small>
+                            <em> Mungo Jerry - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="It's My Life" data-artist="Bon Jovi" data-level="Medium">
+                        <a href="It's-My-Life.html" name="96">
+                        96 - It's My Life - 
+                        </a>
+                        <small>
+                            <em> Bon Jovi - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="It's Raining Men" data-artist="The Weather Girls" data-level="Medium">
+                        <a href="It's-Raining-Men.html" name="97">
+                        97 - It's Raining Men - 
+                        </a>
+                        <small>
+                            <em> The Weather Girls - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Jammin'" data-artist="Bob Marley" data-level="Medium">
+                        <a href="Jammin'.html" name="98">
+                        98 - Jammin' - 
+                        </a>
+                        <small>
+                            <em> Bob Marley - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Jolene" data-artist="Dolly Parton" data-level="Medium">
+                        <a href="Jolene.html" name="99">
+                        99 - Jolene - 
+                        </a>
+                        <small>
+                            <em> Dolly Parton - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Just Like Heaven" data-artist="The Cure" data-level="Easy">
+                        <a href="🔥Just-Like-Heaven.html" name="100">
+                        100 - 🔥Just Like Heaven - 
+                        </a>
+                        <small>
+                            <em> The Cure - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Karma Police" data-artist="Radiohead" data-level="Medium">
+                        <a href="Karma-Police.html" name="101">
+                        101 - Karma Police - 
+                        </a>
+                        <small>
+                            <em> Radiohead - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Kids" data-artist="MGMT" data-level="Easy">
+                        <a href="Kids.html" name="102">
+                        102 - Kids - 
+                        </a>
+                        <small>
+                            <em> MGMT - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Killing Me Softly" data-artist="Roberta Flack" data-level="Medium">
+                        <a href="Killing-Me-Softly.html" name="103">
+                        103 - Killing Me Softly - 
+                        </a>
+                        <small>
+                            <em> Roberta Flack - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Knocking On Heaven's Door" data-artist="Bob Dylan" data-level="Easy">
+                        <a href="Knocking-On-Heaven's-Door.html" name="104">
+                        104 - Knocking On Heaven's Door - 
+                        </a>
+                        <small>
+                            <em> Bob Dylan - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="La Bamba" data-artist="Ritchie Valens" data-level="Easy">
+                        <a href="La-Bamba.html" name="105">
+                        105 - La Bamba - 
+                        </a>
+                        <small>
+                            <em> Ritchie Valens - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="La Vie En Rose" data-artist="Louis Armstrong" data-level="Medium">
+                        <a href="La-Vie-En-Rose.html" name="106">
+                        106 - La Vie En Rose - 
+                        </a>
+                        <small>
+                            <em> Louis Armstrong - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Lake Of Fire" data-artist="Meat Puppets" data-level="Hard">
+                        <a href="🔥Lake-Of-Fire.html" name="107">
+                        107 - 🔥Lake Of Fire - 
+                        </a>
+                        <small>
+                            <em> Meat Puppets - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Lazy Song, The" data-artist="Bruno Mars" data-level="Easy">
+                        <a href="Lazy-Song,-The.html" name="108">
+                        108 - Lazy Song, The - 
+                        </a>
+                        <small>
+                            <em> Bruno Mars - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Lemon Tree" data-artist="Fools Garden" data-level="Medium">
+                        <a href="Lemon-Tree.html" name="109">
+                        109 - Lemon Tree - 
+                        </a>
+                        <small>
+                            <em> Fools Garden - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Let Her Go" data-artist="Passenger" data-level="Medium">
+                        <a href="Let-Her-Go.html" name="110">
+                        110 - Let Her Go - 
+                        </a>
+                        <small>
+                            <em> Passenger - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Let It Be" data-artist="The Beatles" data-level="Medium">
+                        <a href="Let-It-Be.html" name="111">
+                        111 - Let It Be - 
+                        </a>
+                        <small>
+                            <em> The Beatles - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Light My Fire" data-artist="The Doors" data-level="Medium">
+                        <a href="Light-My-Fire.html" name="112">
+                        112 - Light My Fire - 
+                        </a>
+                        <small>
+                            <em> The Doors - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Lion Sleeps Tonight, The" data-artist="The Tokens" data-level="Easy">
+                        <a href="Lion-Sleeps-Tonight,-The.html" name="113">
+                        113 - Lion Sleeps Tonight, The - 
+                        </a>
+                        <small>
+                            <em> The Tokens - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Little Lion Man" data-artist="Mumford and Sons" data-level="Easy">
+                        <a href="Little-Lion-Man.html" name="114">
+                        114 - Little Lion Man - 
+                        </a>
+                        <small>
+                            <em> Mumford and Sons - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Little Talks" data-artist="Of Monsters and Men" data-level="Easy">
+                        <a href="🔥Little-Talks.html" name="115">
+                        115 - 🔥Little Talks - 
+                        </a>
+                        <small>
+                            <em> Of Monsters and Men - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Loneliest" data-artist="Maneskin" data-level="Medium">
+                        <a href="Loneliest.html" name="116">
+                        116 - Loneliest - 
+                        </a>
+                        <small>
+                            <em> Maneskin - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Losing My Religion" data-artist="R.E.M." data-level="Medium">
+                        <a href="Losing-My-Religion.html" name="117">
+                        117 - Losing My Religion - 
+                        </a>
+                        <small>
+                            <em> R.E.M. - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Lost On You" data-artist="LP" data-level="Easy">
+                        <a href="Lost-On-You.html" name="118">
+                        118 - Lost On You - 
+                        </a>
+                        <small>
+                            <em> LP - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Love Of My Life" data-artist="Queen" data-level="Medium">
+                        <a href="Love-Of-My-Life.html" name="119">
+                        119 - Love Of My Life - 
+                        </a>
+                        <small>
+                            <em> Queen - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Lovesong" data-artist="The Cure" data-level="Easy">
+                        <a href="Lovesong.html" name="120">
+                        120 - Lovesong - 
+                        </a>
+                        <small>
+                            <em> The Cure - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Lucy In The Sky With Diamonds" data-artist="The Beatles" data-level="Hard">
+                        <a href="Lucy-In-The-Sky-With-Diamonds.html" name="121">
+                        121 - Lucy In The Sky With Diamonds - 
+                        </a>
+                        <small>
+                            <em> The Beatles - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Mad World" data-artist="Gary Jules" data-level="Easy">
+                        <a href="Mad-World.html" name="122">
+                        122 - Mad World - 
+                        </a>
+                        <small>
+                            <em> Gary Jules - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Mamma Mia" data-artist="ABBA" data-level="Hard">
+                        <a href="Mamma-Mia.html" name="123">
+                        123 - Mamma Mia - 
+                        </a>
+                        <small>
+                            <em> ABBA - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Maria" data-artist="Blondie" data-level="Easy">
+                        <a href="Maria.html" name="124">
+                        124 - Maria - 
+                        </a>
+                        <small>
+                            <em> Blondie - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Maybe Tomorrow" data-artist="Stereophonics" data-level="Easy">
+                        <a href="Maybe-Tomorrow.html" name="125">
+                        125 - Maybe Tomorrow - 
+                        </a>
+                        <small>
+                            <em> Stereophonics - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Mr Brightside" data-artist="The Killers" data-level="Easy">
+                        <a href="Mr-Brightside.html" name="126">
+                        126 - Mr Brightside - 
+                        </a>
+                        <small>
+                            <em> The Killers - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Mr Sandman" data-artist="The Chordettes" data-level="Hard">
+                        <a href="🔥Mr-Sandman.html" name="127">
+                        127 - 🔥Mr Sandman - 
+                        </a>
+                        <small>
+                            <em> The Chordettes - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="My Girl" data-artist="The Temptations" data-level="Medium">
+                        <a href="My-Girl.html" name="128">
+                        128 - My Girl - 
+                        </a>
+                        <small>
+                            <em> The Temptations - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="My Heart Will Go On (Titanic)" data-artist="Celine Dion" data-level="Easy">
+                        <a href="My-Heart-Will-Go-On-(Titanic).html" name="129">
+                        129 - My Heart Will Go On (Titanic) - 
+                        </a>
+                        <small>
+                            <em> Celine Dion - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Never Gonna Give You Up" data-artist="Rick Astley" data-level="Easy">
+                        <a href="🔥Never-Gonna-Give-You-Up.html" name="130">
+                        130 - 🔥Never Gonna Give You Up - 
+                        </a>
+                        <small>
+                            <em> Rick Astley - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Number 1 Party Anthem" data-artist="Arctic Monkeys" data-level="Medium">
+                        <a href="Number-1-Party-Anthem.html" name="131">
+                        131 - Number 1 Party Anthem - 
+                        </a>
+                        <small>
+                            <em> Arctic Monkeys - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="One Love" data-artist="Bob Marley" data-level="Easy">
+                        <a href="One-Love.html" name="132">
+                        132 - One Love - 
+                        </a>
+                        <small>
+                            <em> Bob Marley - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Otherside" data-artist="Red Hot Chili Peppers" data-level="Easy">
+                        <a href="Otherside.html" name="133">
+                        133 - Otherside - 
+                        </a>
+                        <small>
+                            <em> Red Hot Chili Peppers - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="People Are Strange" data-artist="The Doors" data-level="Easy">
+                        <a href="People-Are-Strange.html" name="134">
+                        134 - People Are Strange - 
+                        </a>
+                        <small>
+                            <em> The Doors - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Postcards From Italy" data-artist="Beirut" data-level="Medium">
+                        <a href="Postcards-From-Italy.html" name="135">
+                        135 - Postcards From Italy - 
+                        </a>
+                        <small>
+                            <em> Beirut - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Psycho Killer" data-artist="Talking Heads" data-level="Hard">
+                        <a href="Psycho-Killer.html" name="136">
+                        136 - Psycho Killer - 
+                        </a>
+                        <small>
+                            <em> Talking Heads - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Pumped Up Kicks" data-artist="Foster The People" data-level="Easy">
+                        <a href="Pumped-Up-Kicks.html" name="137">
+                        137 - Pumped Up Kicks - 
+                        </a>
+                        <small>
+                            <em> Foster The People - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Raindrops Keep Fallin' On My Head" data-artist="B J Thomas" data-level="Hard">
+                        <a href="Raindrops-Keep-Fallin'-On-My-Head.html" name="138">
+                        138 - Raindrops Keep Fallin' On My Head - 
+                        </a>
+                        <small>
+                            <em> B J Thomas - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Relax, Take It Easy" data-artist="Mika" data-level="Easy">
+                        <a href="🔥Relax,-Take-It-Easy.html" name="139">
+                        139 - 🔥Relax, Take It Easy - 
+                        </a>
+                        <small>
+                            <em> Mika - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Ring Of Fire" data-artist="Johnny Cash" data-level="Easy">
+                        <a href="Ring-Of-Fire.html" name="140">
+                        140 - Ring Of Fire - 
+                        </a>
+                        <small>
+                            <em> Johnny Cash - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Riptide" data-artist="Vance Joy" data-level="Easy">
+                        <a href="Riptide.html" name="141">
+                        141 - Riptide - 
+                        </a>
+                        <small>
+                            <em> Vance Joy - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Rolling In The Deep" data-artist="Adelle" data-level="Easy">
+                        <a href="Rolling-In-The-Deep.html" name="142">
+                        142 - Rolling In The Deep - 
+                        </a>
+                        <small>
+                            <em> Adelle - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Roxanne" data-artist="The Police" data-level="Easy">
+                        <a href="Roxanne.html" name="143">
+                        143 - Roxanne - 
+                        </a>
+                        <small>
+                            <em> The Police - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Sailing" data-artist="Rod Stewart" data-level="Medium">
+                        <a href="Sailing.html" name="144">
+                        144 - Sailing - 
+                        </a>
+                        <small>
+                            <em> Rod Stewart - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Save My Soul" data-artist="Krakow Street Band" data-level="Easy">
+                        <a href="Save-My-Soul.html" name="145">
+                        145 - Save My Soul - 
+                        </a>
+                        <small>
+                            <em> Krakow Street Band - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Shake It Off" data-artist="Taylor Swift" data-level="Easy">
+                        <a href="Shake-It-Off.html" name="146">
+                        146 - Shake It Off - 
+                        </a>
+                        <small>
+                            <em> Taylor Swift - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Shallow" data-artist="Misc Soundtrack" data-level="Medium">
+                        <a href="Shallow.html" name="147">
+                        147 - Shallow - 
+                        </a>
+                        <small>
+                            <em> Misc Soundtrack - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥She Loves You" data-artist="The Beatles" data-level="Medium">
+                        <a href="🔥She-Loves-You.html" name="148">
+                        148 - 🔥She Loves You - 
+                        </a>
+                        <small>
+                            <em> The Beatles - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Shiny Happy People" data-artist="REM" data-level="Medium">
+                        <a href="Shiny-Happy-People.html" name="149">
+                        149 - Shiny Happy People - 
+                        </a>
+                        <small>
+                            <em> REM - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Snow (Hey Oh)" data-artist="Red Hot Chili Peppers" data-level="Medium">
+                        <a href="Snow-(Hey-Oh).html" name="150">
+                        150 - Snow (Hey Oh) - 
+                        </a>
+                        <small>
+                            <em> Red Hot Chili Peppers - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Somebody To Love" data-artist="Jefferson Airplane" data-level="Medium">
+                        <a href="Somebody-To-Love.html" name="151">
+                        151 - Somebody To Love - 
+                        </a>
+                        <small>
+                            <em> Jefferson Airplane - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Somebody Told Me" data-artist="The Killers" data-level="Medium">
+                        <a href="🔥Somebody-Told-Me.html" name="152">
+                        152 - 🔥Somebody Told Me - 
+                        </a>
+                        <small>
+                            <em> The Killers - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Somewhere Over The Rainbow" data-artist="Arlen and Harburg" data-level="Medium">
+                        <a href="Somewhere-Over-The-Rainbow.html" name="153">
+                        153 - Somewhere Over The Rainbow - 
+                        </a>
+                        <small>
+                            <em> Arlen and Harburg - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Sounds Of Silence" data-artist="Paul Simon" data-level="Medium">
+                        <a href="Sounds-Of-Silence.html" name="154">
+                        154 - Sounds Of Silence - 
+                        </a>
+                        <small>
+                            <em> Paul Simon - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Space Oddity" data-artist="David Bowie" data-level="Hard">
+                        <a href="Space-Oddity.html" name="155">
+                        155 - Space Oddity - 
+                        </a>
+                        <small>
+                            <em> David Bowie - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Stand By Me" data-artist="Ben E King" data-level="Easy">
+                        <a href="Stand-By-Me.html" name="156">
+                        156 - Stand By Me - 
+                        </a>
+                        <small>
+                            <em> Ben E King - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Stay With Me" data-artist="Sam Smith" data-level="Easy">
+                        <a href="Stay-With-Me.html" name="157">
+                        157 - Stay With Me - 
+                        </a>
+                        <small>
+                            <em> Sam Smith - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Summer Nights" data-artist="John Travolta & Olivia Newton-John" data-level="Hard">
+                        <a href="Summer-Nights.html" name="158">
+                        158 - Summer Nights - 
+                        </a>
+                        <small>
+                            <em> John Travolta & Olivia Newton-John - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Sunshine Reggae" data-artist="Laid Back" data-level="Easy">
+                        <a href="Sunshine-Reggae.html" name="159">
+                        159 - Sunshine Reggae - 
+                        </a>
+                        <small>
+                            <em> Laid Back - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Sweater Weather" data-artist="The Neighbourhood" data-level="Hard">
+                        <a href="🔥Sweater-Weather.html" name="160">
+                        160 - 🔥Sweater Weather - 
+                        </a>
+                        <small>
+                            <em> The Neighbourhood - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Sweet Caroline" data-artist="Neil Diamond" data-level="Medium">
+                        <a href="Sweet-Caroline.html" name="161">
+                        161 - Sweet Caroline - 
+                        </a>
+                        <small>
+                            <em> Neil Diamond - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Sweet Child Of Mine" data-artist="Guns & Roses" data-level="Medium">
+                        <a href="Sweet-Child-Of-Mine.html" name="162">
+                        162 - Sweet Child Of Mine - 
+                        </a>
+                        <small>
+                            <em> Guns & Roses - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Sweet Dreams" data-artist="Eurythmics" data-level="Easy">
+                        <a href="Sweet-Dreams.html" name="163">
+                        163 - Sweet Dreams - 
+                        </a>
+                        <small>
+                            <em> Eurythmics - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Take Me Home Country Roads" data-artist="John Denver" data-level="Medium">
+                        <a href="Take-Me-Home-Country-Roads.html" name="164">
+                        164 - Take Me Home Country Roads - 
+                        </a>
+                        <small>
+                            <em> John Denver - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Take Me Out" data-artist="Franz Ferdinand" data-level="Medium">
+                        <a href="Take-Me-Out.html" name="165">
+                        165 - Take Me Out - 
+                        </a>
+                        <small>
+                            <em> Franz Ferdinand - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Take On Me" data-artist="Aha" data-level="Medium">
+                        <a href="Take-On-Me.html" name="166">
+                        166 - Take On Me - 
+                        </a>
+                        <small>
+                            <em> Aha - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Teenage Dirtbag" data-artist="Wheatus" data-level="Medium">
+                        <a href="🔥Teenage-Dirtbag.html" name="167">
+                        167 - 🔥Teenage Dirtbag - 
+                        </a>
+                        <small>
+                            <em> Wheatus - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Tender" data-artist="Blur" data-level="Medium">
+                        <a href="Tender.html" name="168">
+                        168 - Tender - 
+                        </a>
+                        <small>
+                            <em> Blur - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="The Final Countdown" data-artist="Europe" data-level="Medium">
+                        <a href="The-Final-Countdown.html" name="169">
+                        169 - The Final Countdown - 
+                        </a>
+                        <small>
+                            <em> Europe - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="The Judge" data-artist="Twenty One Pilots" data-level="Medium">
+                        <a href="The-Judge.html" name="170">
+                        170 - The Judge - 
+                        </a>
+                        <small>
+                            <em> Twenty One Pilots - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="The Man Who Sold The World" data-artist="David Bowie" data-level="Medium">
+                        <a href="The-Man-Who-Sold-The-World.html" name="171">
+                        171 - The Man Who Sold The World - 
+                        </a>
+                        <small>
+                            <em> David Bowie - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="The Scientist" data-artist="Coldplay" data-level="Easy">
+                        <a href="The-Scientist.html" name="172">
+                        172 - The Scientist - 
+                        </a>
+                        <small>
+                            <em> Coldplay - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="There Is A Light That Never Goes Out" data-artist="The Smiths" data-level="Hard">
+                        <a href="There-Is-A-Light-That-Never-Goes-Out.html" name="173">
+                        173 - There Is A Light That Never Goes Out - 
+                        </a>
+                        <small>
+                            <em> The Smiths - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="These Boots Are Made For Walking" data-artist="Nancy Sinatra" data-level="Easy">
+                        <a href="These-Boots-Are-Made-For-Walking.html" name="174">
+                        174 - These Boots Are Made For Walking - 
+                        </a>
+                        <small>
+                            <em> Nancy Sinatra - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Thinking Out Loud" data-artist="Ed Sheeran" data-level="Hard">
+                        <a href="Thinking-Out-Loud.html" name="175">
+                        175 - Thinking Out Loud - 
+                        </a>
+                        <small>
+                            <em> Ed Sheeran - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="This Charming Man" data-artist="The Smiths" data-level="Medium">
+                        <a href="This-Charming-Man.html" name="176">
+                        176 - This Charming Man - 
+                        </a>
+                        <small>
+                            <em> The Smiths - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Three Little Birds" data-artist="Bob Marley and the Wailers" data-level="Easy">
+                        <a href="Three-Little-Birds.html" name="177">
+                        177 - Three Little Birds - 
+                        </a>
+                        <small>
+                            <em> Bob Marley and the Wailers - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Times Like These" data-artist="Foo Fighters" data-level="Easy">
+                        <a href="Times-Like-These.html" name="178">
+                        178 - Times Like These - 
+                        </a>
+                        <small>
+                            <em> Foo Fighters - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥Titanium" data-artist="David Guetta & Sia" data-level="Easy">
+                        <a href="🔥Titanium.html" name="179">
+                        179 - 🔥Titanium - 
+                        </a>
+                        <small>
+                            <em> David Guetta & Sia - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Toxic" data-artist="Britney Spears" data-level="Easy">
+                        <a href="Toxic.html" name="180">
+                        180 - Toxic - 
+                        </a>
+                        <small>
+                            <em> Britney Spears - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Toxicity" data-artist="System Of A Down" data-level="Medium">
+                        <a href="Toxicity.html" name="181">
+                        181 - Toxicity - 
+                        </a>
+                        <small>
+                            <em> System Of A Down - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Twist And Shout" data-artist="The Beatles" data-level="Easy">
+                        <a href="Twist-And-Shout.html" name="182">
+                        182 - Twist And Shout - 
+                        </a>
+                        <small>
+                            <em> The Beatles - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Under Pressure" data-artist="Queen & David Bowie" data-level="Hard">
+                        <a href="Under-Pressure.html" name="183">
+                        183 - Under Pressure - 
+                        </a>
+                        <small>
+                            <em> Queen & David Bowie - </em> 
+                        </small>
+                        <span class="text-danger" >
+                            <small><b>Hard</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Use Somebody" data-artist="Kings Of Leon" data-level="Easy">
+                        <a href="Use-Somebody.html" name="184">
+                        184 - Use Somebody - 
+                        </a>
+                        <small>
+                            <em> Kings Of Leon - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Valerie" data-artist="Amy Winehouse" data-level="Easy">
+                        <a href="Valerie.html" name="185">
+                        185 - Valerie - 
+                        </a>
+                        <small>
+                            <em> Amy Winehouse - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Wake Me Up" data-artist="Avicii" data-level="Easy">
+                        <a href="Wake-Me-Up.html" name="186">
+                        186 - Wake Me Up - 
+                        </a>
+                        <small>
+                            <em> Avicii - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="🔥What Is Love (Baby Don't Hurt Me)" data-artist="Haddaway" data-level="Easy">
+                        <a href="🔥What-Is-Love-(Baby-Don't-Hurt-Me).html" name="187">
+                        187 - 🔥What Is Love (Baby Don't Hurt Me) - 
+                        </a>
+                        <small>
+                            <em> Haddaway - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="What's Up" data-artist="4 Non Blondes" data-level="Easy">
+                        <a href="What's-Up.html" name="188">
+                        188 - What's Up - 
+                        </a>
+                        <small>
+                            <em> 4 Non Blondes - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Where Is My Mind" data-artist="Pixies" data-level="Medium">
+                        <a href="Where-Is-My-Mind.html" name="189">
+                        189 - Where Is My Mind - 
+                        </a>
+                        <small>
+                            <em> Pixies - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Why Don't You Get A Job" data-artist="The Offspring" data-level="Easy">
+                        <a href="Why-Don't-You-Get-A-Job.html" name="190">
+                        190 - Why Don't You Get A Job - 
+                        </a>
+                        <small>
+                            <em> The Offspring - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Wicked Game" data-artist="Chris Isaak" data-level="Easy">
+                        <a href="Wicked-Game.html" name="191">
+                        191 - Wicked Game - 
+                        </a>
+                        <small>
+                            <em> Chris Isaak - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Wish You Were Here" data-artist="Pink Floyd" data-level="Medium">
+                        <a href="Wish-You-Were-Here.html" name="192">
+                        192 - Wish You Were Here - 
+                        </a>
+                        <small>
+                            <em> Pink Floyd - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Wonderwall" data-artist="Oasis" data-level="Medium">
+                        <a href="Wonderwall.html" name="193">
+                        193 - Wonderwall - 
+                        </a>
+                        <small>
+                            <em> Oasis - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Yellow" data-artist="Coldplay" data-level="Easy">
+                        <a href="Yellow.html" name="194">
+                        194 - Yellow - 
+                        </a>
+                        <small>
+                            <em> Coldplay - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="You Are My Sunshine" data-artist="Johnny Cash" data-level="Easy">
+                        <a href="You-Are-My-Sunshine.html" name="195">
+                        195 - You Are My Sunshine - 
+                        </a>
+                        <small>
+                            <em> Johnny Cash - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="You Know I'm No Good" data-artist="Amy Winehouse" data-level="Medium">
+                        <a href="You-Know-I'm-No-Good.html" name="196">
+                        196 - You Know I'm No Good - 
+                        </a>
+                        <small>
+                            <em> Amy Winehouse - </em> 
+                        </small>
+                        <span class="text-warning" >
+                            <small><b>Medium</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="You Will Never Know" data-artist="Imany" data-level="Easy">
+                        <a href="You-Will-Never-Know.html" name="197">
+                        197 - You Will Never Know - 
+                        </a>
+                        <small>
+                            <em> Imany - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+                    <li data-title="Zombie" data-artist="The Cranberries" data-level="Easy">
+                        <a href="Zombie.html" name="198">
+                        198 - Zombie - 
+                        </a>
+                        <small>
+                            <em> The Cranberries - </em> 
+                        </small>
+                        <span class="text-success" >
+                            <small><b>Easy</b></small>
+                        </span>
+                    </li>
+                
+            </ul>
+        </div>
+       
+    </div>
+
+    <hr/>
+            
+    <div class="m-2 my-4 text-center">
+        <img src="/images/qrcode.png" class="img-fluid" alt="QR Code" width="200">
+    </div>
+
+</div>
+</div>
+
+<script>
+    // Theme Switcher (No storage)
+    (function() {
+        const toggleButton = document.getElementById('themeToggle');
+        const logo = document.getElementById('siteLogo');
+
+        function applyTheme(isDark) {
+            document.body.classList.toggle('dark-mode', isDark);
+            toggleButton.textContent = isDark ? '☾' : '☼';
+            toggleButton.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+            if (logo) {
+                logo.src = isDark ? logo.dataset.darkLogo : logo.dataset.lightLogo;
+            }
+        }
+
+        toggleButton.addEventListener('click', function() {
+            applyTheme(!document.body.classList.contains('dark-mode'));
+        });
+    })();
+    // Shared Filtering Logic
+    function filterSongs() {
+        const songsList = document.getElementById('songs');
+        if (!songsList) return;
+
+        const activeButtons = document.querySelectorAll('.filter-button.active');
+        const activeNames = Array.from(activeButtons).map(b => b.name);
+        const allSongs = songsList.querySelectorAll('li');
+
+        allSongs.forEach(song => {
+            // Get level from data attribute or fallback to DOM text
+            let level = song.getAttribute('data-level');
+            if (!level) {
+                const bTag = song.querySelector('span small b');
+                level = bTag ? bTag.textContent.trim() : '';
+            }
+
+            let shouldDisplay = activeNames.includes(level);
+
+            // Handle "New" Filter
+            if (activeNames.includes('New')) {
+                const titleText = song.querySelector('a')?.textContent || '';
+                if (shouldDisplay) {
+                    shouldDisplay = titleText.includes('🔥');
+                }
+            }
+
+            song.style.display = shouldDisplay ? 'block' : 'none';
+        });
+    }
+
+    function setupFilterButtons() {
+        const filterButtons = document.querySelectorAll('.filter-button');
+
+        filterSongs();
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                button.classList.toggle('active');
+                filterSongs();
+            });
+        });
+    }
+
+    function setupSortingButtons() {
+        const songsList = document.getElementById('songs');
+        const sortByTitleButton = document.getElementById('sortByTitle');
+        const sortByArtistButton = document.getElementById('sortByArtist');
+
+        if (!songsList || !sortByTitleButton || !sortByArtistButton) return;
+
+        sortByTitleButton.addEventListener('click', () => {
+            sortListBy('title');
+            sortByArtistButton.classList.remove('active');
+            sortByTitleButton.classList.add('active');
+            filterSongs();
+        });
+
+        sortByArtistButton.addEventListener('click', () => {
+            sortListBy('artist');
+            sortByTitleButton.classList.remove('active');
+            sortByArtistButton.classList.add('active');
+            filterSongs();
+        });
+
+        function sortListBy(type) {
+            const items = Array.from(songsList.children);
+
+            items.sort((a, b) => {
+                let valA = '';
+                let valB = '';
+
+                if (type === 'title') {
+                    valA = a.getAttribute('data-title') || a.querySelector('a')?.textContent || '';
+                    valB = b.getAttribute('data-title') || b.querySelector('a')?.textContent || '';
+                } else if (type === 'artist') {
+                    valA = a.getAttribute('data-artist') || a.querySelector('em')?.textContent || '';
+                    valB = b.getAttribute('data-artist') || b.querySelector('em')?.textContent || '';
+                }
+
+                // Clean prefixes for sorting
+                valA = valA.replace(/^[🔥🎂\s\-\:]+/, '').replace(/^The\s+/i, '').trim();
+                valB = valB.replace(/^[🔥🎂\s\-\:]+/, '').replace(/^The\s+/i, '').trim();
+
+                return valA.localeCompare(valB, 'en', { sensitivity: 'base' });
+            });
+
+            // Re-append sorted elements
+            const fragment = document.createDocumentFragment();
+            items.forEach(item => fragment.appendChild(item));
+            songsList.appendChild(fragment);
+        }
+    }
+
+    function setupLuckyButton() {
+        const luckyButton = document.getElementById('luckyButton');
+        const songsList = document.getElementById('songs');
+
+        if (!luckyButton || !songsList) return;
+
+        luckyButton.addEventListener('click', () => {
+            const visibleSongs = Array.from(songsList.querySelectorAll('li')).filter(song => song.style.display !== 'none');
+
+            if (visibleSongs.length === 0) {
+                alert('No songs match the current filter.');
+                return;
+            }
+
+            const randomIndex = Math.floor(Math.random() * visibleSongs.length);
+            const selectedSong = visibleSongs[randomIndex].querySelector('a');
+
+            if (selectedSong && selectedSong.getAttribute('href')) {
+                window.location.href = selectedSong.getAttribute('href');
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupFilterButtons();
+        setupSortingButtons();
+        setupLuckyButton();
+    });
+</script>
+</body>
+</html>

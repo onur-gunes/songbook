@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ukb e2e</title>
+</head>
+<body>
+<iframe id="f" src="../index.html?nosw" style="width:1100px;height:900px;border:0"></iframe>
+<pre id="log"></pre>
+<script>
+const log = [];
+function ok(name, cond, detail) {
+    log.push((cond ? 'PASS ' : 'FAIL ') + name + (detail !== undefined ? ' | ' + detail : ''));
+}
+const frame = document.getElementById('f');
+const win = () => frame.contentWindow;
+const doc = () => frame.contentDocument;
+const $ = id => doc().getElementById(id);
+const scrollLabel = () => $('scrollBtn').getAttribute('aria-label');
+const rows = () => doc().querySelectorAll('#songList .song-row');
+const titles = () => Array.from(rows()).map(r => r.querySelector('.row-title').textContent);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+async function until(fn, timeout = 8000) {
+    const t0 = Date.now();
+    while (Date.now() - t0 < timeout) {
+        try { if (fn()) return true; } catch (e) { /* keep polling */ }
+        await wait(50);
+    }
+    return false;
+}
+
+async function main() {
+    await new Promise(r => frame.addEventListener('load', r));
+    const ready = await until(() => rows().length === 198);
+    if (!ready) { ok('app booted (198 rows)', false, 'rows=' + rows().length); throw new Error('app did not boot'); }
+
+    const errors = [];
+    win().addEventListener('error', e => errors.push(String(e.message)));
+
+    // 1. list renders
+    ok('198 rows', rows().length === 198, rows().length);
+    ok('resultCount', $('resultCount').textContent === '198 songs', $('resultCount').textContent);
+    ok('first row alphabetical by title', titles()[0] === "(I Can't Get No) Satisfaction", titles()[0]);
+    ok('row has level badge', !!rows()[0].querySelector('.row-level'));
+
+    // 2. search
+    $('search').value = 'ript';
+    $('search').dispatchEvent(new (win().Event)('input'));
+    await wait(50);
+    ok('search ript -> 1 row', rows().length === 1, rows().length);
+    ok('search ript -> Riptide', titles()[0] === 'Riptide', titles()[0]);
+
+    $('search').value = 'vance';
+    $('search').dispatchEvent(new (win().Event)('input'));
+    await wait(50);
+    ok('search vance (artist) -> 1 row', rows().length === 1, rows().length);
+
+    $('search').value = 'rolling';
+    $('search').dispatchEvent(new (win().Event)('input'));
+    await wait(50);
+    ok('search rolling -> 2 rows', rows().length === 2, rows().length);
+
+    $('search').value = 'zzzzz';
+    $('search').dispatchEvent(new (win().Event)('input'));
+    await wait(50);
+    ok('no match -> empty state', !$('emptyState').hidden && rows().length === 0);
+    $('searchClear').click();
+    await wait(50);
+    ok('clear search -> 198 rows', rows().length === 198, rows().length);
+
+    // 3. filters (levels are multi-select OR toggles)
+    const click = lv => doc().querySelector('.filter-btn[data-level="' + lv + '"]').click();
+    click('Easy'); await wait(50);
+    ok('filter Easy -> 84', rows().length === 84, rows().length);
+    click('Medium'); await wait(50);
+    ok('filter Easy+Medium -> 175', rows().length === 175, rows().length);
+    ok('multi-select active states',
+        doc().querySelector('[data-level="Easy"]').getAttribute('aria-pressed') === 'true' &&
+        doc().querySelector('[data-level="Medium"]').getAttribute('aria-pressed') === 'true' &&
+        doc().querySelector('[data-level="All"]').getAttribute('aria-pressed') === 'false');
+    click('Medium'); await wait(50);
+    ok('deselect Medium -> 84', rows().length === 84, rows().length);
+    click('Hard'); await wait(50);
+    ok('filter Easy+Hard -> 107', rows().length === 107, rows().length);
+    click('All'); await wait(50);
+    ok('All clears levels -> 198', rows().length === 198, rows().length);
+
+    click('New'); await wait(50);
+    ok('toggle New -> 18', rows().length === 18, rows().length);
+    click('New'); await wait(50);
+    ok('untoggle New -> 198', rows().length === 198, rows().length);
+
+    // 4. favorites flow
+    const star = doc().querySelector('#songList .song-row .star-btn');
+    star.click(); await wait(50);
+    ok('star adds fav', star.classList.contains('on'));
+    click('Favorites'); await wait(50);
+    ok('Favorites filter -> 1', rows().length === 1, rows().length);
+    click('Favorites'); await wait(50);
+    ok('Favorites off -> 198', rows().length === 198, rows().length);
+
+    // 5. sort buttons (default: Title, alphabetical like the original site)
+    ok('title sort active by default', doc().querySelector('[data-sort="title"]').getAttribute('aria-pressed') === 'true');
+    const t = titles();
+    ok('title sort strips emoji', !t[0].startsWith('🔥') && !t[0].startsWith('🎂'), t[0]);
+    ok('title sort not starting with The', !/^the /i.test(t[0]), t[0]);
+    const stripped = t.map(x => x.replace(/^[🔥🎂\s]+/, '').replace(/^The\s+/i, ''));
+    const sortedCopy = stripped.slice().sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+    ok('title sort ordering', JSON.stringify(stripped) === JSON.stringify(sortedCopy), stripped.slice(0, 3).join(' / '));
+    ok('19-2000 intact', t.some(x => x === '19-2000'), t.filter(x => x.startsWith('19')).join(','));
+
+    doc().querySelector('[data-sort="artist"]').click();
+    await wait(50);
+    const arts = Array.from(rows()).map(r => r.querySelector('.row-artist').textContent);
+    const artsSorted = arts.slice().sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+    ok('artist sort ordering', JSON.stringify(arts) === JSON.stringify(artsSorted), arts[0] + ' .. ' + arts[arts.length - 1]);
+    ok('artist sort button active',
+        doc().querySelector('[data-sort="artist"]').getAttribute('aria-pressed') === 'true' &&
+        doc().querySelector('[data-sort="title"]').getAttribute('aria-pressed') === 'false');
+
+    doc().querySelector('[data-sort="title"]').click();
+    await wait(50);
+    ok('back to title sort', titles()[0] === t[0], titles()[0]);
+
+    // 6. open song via hash
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(200);
+    ok('song view shown', $('songView').hidden === false && $('listView').hidden === true);
+    ok('song title', $('songTitle').textContent === 'Riptide', $('songTitle').textContent);
+    ok('song number', $('songNumber').textContent === '#166' || $('songNumber').textContent.startsWith('#'), $('songNumber').textContent);
+    ok('sheet has lines', doc().querySelectorAll('#sheet .line').length > 10, doc().querySelectorAll('#sheet .line').length);
+    ok('chord strip has items', doc().querySelectorAll('#chordStrip .chord-item').length > 0, doc().querySelectorAll('#chordStrip .chord-item').length);
+    const firstChordSrc = doc().querySelector('#chordStrip img') ? doc().querySelector('#chordStrip img').getAttribute('src') : null;
+    ok('first chord img src', firstChordSrc === null || firstChordSrc.indexOf('data:image') === 0, firstChordSrc && firstChordSrc.slice(0, 40));
+
+    // 7. transpose
+    const firstChord = () => { const s = doc().querySelector('#sheet .seg-chord'); return s ? s.textContent : null; };
+    const before = firstChord();
+    $('trUp').click(); await wait(30);
+    ok('transpose +1 label', $('trValue').textContent === '+1', $('trValue').textContent);
+    ok('transpose changes chord', firstChord() !== before, before + ' -> ' + firstChord());
+    const up1 = firstChord();
+    $('trUp').click(); await wait(30);
+    ok('transpose +2', $('trValue').textContent === '+2' && firstChord() !== up1, firstChord());
+    for (let i = 0; i < 2; i++) { $('trDown').click(); await wait(20); }
+    ok('transpose back to 0', $('trValue').textContent === '0' && firstChord() === before, firstChord());
+    // 7b. chord strip diagrams + names follow transpose
+    const names0 = Array.from(doc().querySelectorAll('#chordStrip .cname')).map(c => c.textContent);
+    const srcs0 = Array.from(doc().querySelectorAll('#chordStrip img')).map(i => i.getAttribute('src'));
+    ok('strip shows original chords', names0.join(',') === 'Am,G,C,F', names0.join(','));
+    $('trUp').click(); $('trUp').click(); await wait(50);
+    const names2 = Array.from(doc().querySelectorAll('#chordStrip .cname')).map(c => c.textContent);
+    const srcs2 = Array.from(doc().querySelectorAll('#chordStrip img')).map(i => i.getAttribute('src'));
+    ok('strip transposes names', names2.join(',') === 'Bm,A,D,G', names2.join(','));
+    ok('strip transposes diagrams', srcs2.length === 4 && srcs2.every((s, i) => s !== srcs0[i]), srcs2.join(',').slice(0, 60));
+    $('trDown').click(); $('trDown').click(); await wait(50);
+    ok('strip restores at 0', Array.from(doc().querySelectorAll('#chordStrip .cname')).map(c => c.textContent).join(',') === names0.join(','), '');
+    $('trUp').click(); $('trUp').click(); $('trUp').click(); await wait(400);
+    const names3 = Array.from(doc().querySelectorAll('#chordStrip .cname')).map(c => c.textContent);
+    ok('strip +3 names', names3.join(',') === 'Cm,A#,D#,G#', names3.join(','));
+    ok('strip +3 no missing via enharmonic', doc().querySelectorAll('#chordStrip .missing').length === 0 && doc().querySelectorAll('#chordStrip img').length === 4, 'missing=' + doc().querySelectorAll('#chordStrip .missing').length + ' imgs=' + doc().querySelectorAll('#chordStrip img').length);
+    $('trDown').click(); $('trDown').click(); $('trDown').click(); await wait(50);
+    ok('strip back to 0 after +3', $('trValue').textContent === '0', '');
+
+    // 7c. generated diagrams cover transposed chords with no native gif (a little respect +1)
+    win().location.hash = '#/krakow-ukulele/a-little-respect';
+    await wait(300);
+    $('trUp').click(); await wait(500);
+    const namesR = Array.from(doc().querySelectorAll('#chordStrip .cname')).map(n => n.textContent);
+    ok('respect +1 names', namesR.join(',') === 'C#,C#sus4,G#,F7,F#,A#m,Fm,B', namesR.join(','));
+    ok('respect +1 no missing', doc().querySelectorAll('#chordStrip .missing').length === 0, 'missing=' + doc().querySelectorAll('#chordStrip .missing').length);
+    const genImgs = Array.from(doc().querySelectorAll('#chordStrip img')).filter(i => (i.getAttribute('src') || '').indexOf('data:image/svg+xml') === 0);
+    ok('generated svg diagrams used', genImgs.length >= 3, genImgs.length);
+    ok('generated charts valid', genImgs.length >= 3 && genImgs.every(i => i.complete && i.naturalWidth > 0), genImgs.map(i => i.naturalWidth).join(','));
+    $('trDown').click(); await wait(50);
+    ok('respect back to 0', $('trValue').textContent === '0' && Array.from(doc().querySelectorAll('#chordStrip .cname')).map(n => n.textContent).join(',') === 'C,Csus4,G,E7,F,Am,Em,Bb', '');
+
+    // 7d. every chart is a generated svg + click opens a voicing chooser
+    const sdAll = Array.from(doc().querySelectorAll('#chordStrip img'));
+    ok('all strip charts generated svg', sdAll.length === 8 && sdAll.every(i => (i.getAttribute('src') || '').indexOf('data:image/svg+xml') === 0), sdAll.length);
+    const cTgt = Array.from(doc().querySelectorAll('#chordStrip .chord-item')).find(it => it.querySelector('.cname').textContent === 'C');
+    const cBefore = cTgt.querySelector('img').getAttribute('src');
+    cTgt.click(); await wait(80);
+    ok('chooser opens on chord click', doc().querySelector('#voicingChooser') !== null, '');
+    const cOpts = Array.from(doc().querySelectorAll('#voicingChooser .chooser-grid button'));
+    ok('chooser lists multiple voicings', cOpts.length > 2, cOpts.length);
+    ok('current voicing marked selected', doc().querySelectorAll('#voicingChooser button.sel').length === 1, '');
+    cOpts[1].click(); await wait(80);
+    ok('chooser closes on pick', doc().querySelector('#voicingChooser') === null, '');
+    const cAfter = cTgt.querySelector('img').getAttribute('src');
+    ok('chord item swaps voicing', cAfter !== cBefore, '');
+    ok('pick persisted', win().localStorage.getItem('ukb:pick:ukulele:C') !== null, win().localStorage.getItem('ukb:pick:ukulele:C'));
+    cTgt.click(); await wait(80);
+    ok('stored voicing selected on reopen', Array.from(doc().querySelectorAll('#voicingChooser button.sel img')).some(i => i.getAttribute('src') === cAfter), '');
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(250);
+    ok('chooser not leaked to other song', doc().querySelector('#voicingChooser') === null && Array.from(doc().querySelectorAll('#chordStrip .cname')).map(n => n.textContent).join(',') === 'Am,G,C,F', '');
+    win().location.hash = '#/krakow-ukulele/a-little-respect';
+    await wait(300);
+    const cBack = Array.from(doc().querySelectorAll('#chordStrip .chord-item')).find(it => it.querySelector('.cname').textContent === 'C').querySelector('img').getAttribute('src');
+    ok('voicing remembered across songs', cBack === cAfter, '');
+    win().localStorage.removeItem('ukb:pick:ukulele:C');
+    // rail chords stay put: stop/pause/muted never change (riff check on a known song later)
+
+    // 7e. classic open-position voicings rank first
+    win().location.hash = '#/krakow-ukulele/black';
+    await wait(300);
+    let eTarget = Array.from(doc().querySelectorAll('#chordStrip .chord-item')).find(it => it.querySelector('.cname').textContent === 'E');
+    eTarget.click(); await wait(80);
+    const eRanks = Array.from(doc().querySelectorAll('#voicingChooser .choosing-frets')).map(x => x.textContent.replace(/\s+/g, '').replace(/o/g, '0'));
+    ok('E default is classic open 1402', eRanks[0] === '1402', eRanks[0]);
+    ok('E second option is the 4442 barre', eRanks[1] === '4442', eRanks[1]);
+    doc().querySelector('.chooser-close').click(); await wait(50);
+    win().location.hash = '#/krakow-ukulele/500-miles-i-m-gonna-be';
+    await wait(300);
+    let emTarget = Array.from(doc().querySelectorAll('#chordStrip .chord-item')).find(it => it.querySelector('.cname').textContent === 'Em');
+    emTarget.click(); await wait(80);
+    const emRanks = Array.from(doc().querySelectorAll('#voicingChooser .choosing-frets')).map(x => x.textContent.replace(/\s+/g, '').replace(/o/g, '0'));
+    ok('Em default is classic open 0432', emRanks[0] === '0432', emRanks[0]);
+    doc().querySelector('.chooser-close').click(); await wait(50);
+
+    // 8. NC song -> missing diagram fallback
+    win().location.hash = '#/krakow-ukulele/home';
+    await wait(400);
+    const missing = doc().querySelectorAll('#chordStrip .missing');
+    ok('NC missing fallback renders', missing.length >= 1 || Array.from(doc().querySelectorAll('#chordStrip .cname')).some(c => c.textContent === 'NC'), 'missing=' + missing.length);
+
+    // 9. prev/next respect sort/filter (default: title order)
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(200);
+    const numNow = $('songNumber').textContent;
+    $('nextBtn').click(); await wait(200);
+    const numNext = $('songNumber').textContent;
+    ok('next goes forward', numNext !== numNow, numNow + ' -> ' + numNext);
+    $('prevBtn').click(); await wait(200);
+    ok('prev returns', $('songNumber').textContent === numNow);
+
+    // 10. notes persist
+    $('notesBox').value = 'test note 123';
+    $('notesSave').click(); await wait(50);
+    ok('notes status shown', $('notesStatus').classList.contains('show'));
+    ok('notes in localStorage', (win().localStorage.getItem('ukb:note:krakow-ukulele\u0000riptide') || '') === 'test note 123');
+
+    // 11. favorite from song view
+    $('favBtn').click(); await wait(50);
+    ok('fav button on', $('favBtn').classList.contains('on'));
+    ok('fav in localStorage', (win().localStorage.getItem('ukb:favorites') || '').indexOf('riptide') > -1);
+    $('favBtn').click(); await wait(50);
+    ok('fav toggles off', !$('favBtn').classList.contains('on'));
+
+    // 12. auto-scroll starts/pauses without throwing
+    ok('floating scroll button visible in song view', $('scrollBtn').getClientRects().length > 0);
+    win().scrollTo(0, 0);
+    await wait(80);
+    $('scrollBtn').click(); await wait(300);
+    ok('no jump on start', win().pageYOffset < 30, 'y=' + win().pageYOffset);
+    ok('scroll playing label', scrollLabel() === 'Pause auto-scroll', scrollLabel());
+    ok('playing state styled', $('scrollBtn').classList.contains('playing'));
+    const y1 = win().pageYOffset;
+    $('scrollBtn').click(); await wait(100);
+    ok('scroll pauses', scrollLabel() === 'Resume auto-scroll', scrollLabel());
+    $('scrollReset').click(); await wait(50);
+    ok('scroll resets', scrollLabel() === 'Start auto-scroll', scrollLabel());
+
+    // 12b. manual adjust keeps auto-scroll running, re-anchored to the new position
+    $('scrollBtn').click(); await wait(200);
+    ok('playing before adjust', scrollLabel() === 'Pause auto-scroll', scrollLabel());
+    const st = win().ukbTest.scrollState;
+    const bounds = win().ukbTest.scrollBounds();
+    const v0 = (bounds - st.from) / (st.durMs - st.elapsed);
+    const yBefore = win().pageYOffset;
+    win().scrollBy(0, 400);
+    ok('manual scroll moved page', win().pageYOffset >= yBefore + 300, yBefore + ' -> ' + win().pageYOffset);
+    // headless virtual-time never dispatches scroll events; deliver one as a browser would
+    win().dispatchEvent(new (win().Event)('scroll'));
+    await wait(50);
+    ok('keeps scrolling after manual adjust', scrollLabel() === 'Pause auto-scroll', scrollLabel());
+    ok('re-anchored to adjusted position', Math.abs(st.from - win().pageYOffset) < 4, 'from=' + st.from + ' y=' + win().pageYOffset);
+    const v1 = (bounds - st.from) / (st.durMs - st.elapsed);
+    ok('scroll speed preserved', Math.abs(v1 - v0) / v0 < 0.05, v0.toFixed(3) + ' -> ' + v1.toFixed(3));
+    win().scrollBy(0, -150);
+    win().dispatchEvent(new (win().Event)('scroll'));
+    await wait(50);
+    ok('upward adjust keeps playing', scrollLabel() === 'Pause auto-scroll', scrollLabel());
+    ok('re-anchored upward', Math.abs(st.from - win().pageYOffset) < 4, 'from=' + st.from + ' y=' + win().pageYOffset);
+    $('scrollBtn').click(); await wait(50);
+    ok('pause after adjust', scrollLabel() === 'Resume auto-scroll', scrollLabel());
+    $('scrollBtn').click(); await wait(50);
+    ok('resume after adjust', scrollLabel() === 'Pause auto-scroll', scrollLabel());
+    $('scrollReset').click(); await wait(50);
+
+    // 12c. speed stepper: fine-grained control with clamps
+    const s0 = parseFloat($('speedValue').textContent);
+    ok('speed initial parses', !isNaN(s0), $('speedValue').textContent);
+    $('speedUp').click();
+    ok('speed +0.1', parseFloat($('speedValue').textContent) === +(s0 + 0.1).toFixed(1), $('speedValue').textContent);
+    $('speedDown').click(); $('speedDown').click();
+    ok('speed -0.1 twice', parseFloat($('speedValue').textContent) === +(s0 - 0.1).toFixed(1), $('speedValue').textContent);
+    for (let i = 0; i < 30; i++) $('speedDown').click();
+    ok('speed clamps low', $('speedValue').textContent === '0.2×', $('speedValue').textContent);
+    for (let i = 0; i < 40; i++) $('speedUp').click();
+    ok('speed clamps high', $('speedValue').textContent === '3.0×', $('speedValue').textContent);
+    ok('speed persisted', win().localStorage.getItem('ukb:speed:krakow-ukulele\u0000riptide') === '3', win().localStorage.getItem('ukb:speed:krakow-ukulele\u0000riptide'));
+    for (let i = 0; i < 50 && parseFloat($('speedValue').textContent) > s0; i++) $('speedDown').click();
+    for (let i = 0; i < 50 && parseFloat($('speedValue').textContent) < s0; i++) $('speedUp').click();
+    ok('speed restored', parseFloat($('speedValue').textContent) === s0, $('speedValue').textContent);
+
+    // 12d. per-song speed is remembered individually (default 1.0× when unset)
+    const savedRiptide = parseFloat($('speedValue').textContent);
+    win().location.hash = '#/krakow-ukulele/all-apologies';
+    await wait(250);
+    ok('per-song default speed 1.0', $('speedValue').textContent === '1.0×', $('speedValue').textContent);
+    $('speedUp').click(); $('speedUp').click();
+    ok('song b speed changed', $('speedValue').textContent === '1.2×', $('speedValue').textContent);
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(250);
+    ok('song a speed remembered', parseFloat($('speedValue').textContent) === savedRiptide, $('speedValue').textContent + ' vs ' + savedRiptide);
+    win().location.hash = '#/krakow-ukulele/all-apologies';
+    await wait(250);
+    ok('song b speed remembered', $('speedValue').textContent === '1.2×', $('speedValue').textContent);
+
+    // 12e. per-song text size (default 100%)
+    const baseSize = parseFloat(win().getComputedStyle($('sheet')).fontSize);
+    ok('size default 100%', $('sizeValue').textContent === '100%', $('sizeValue').textContent);
+    $('sizeDown').click(); await wait(50);
+    ok('size smaller', $('sizeValue').textContent === '90%', $('sizeValue').textContent);
+    ok('size applied smaller', parseFloat(win().getComputedStyle($('sheet')).fontSize) < baseSize, parseFloat(win().getComputedStyle($('sheet')).fontSize));
+    $('sizeUp').click(); $('sizeUp').click();
+    ok('size bigger', $('sizeValue').textContent === '110%', $('sizeValue').textContent);
+    ok('size applied bigger', parseFloat(win().getComputedStyle($('sheet')).fontSize) > baseSize, parseFloat(win().getComputedStyle($('sheet')).fontSize));
+    for (let i = 0; i < 20; i++) $('sizeDown').click();
+    ok('size clamps low', $('sizeValue').textContent === '70%', $('sizeValue').textContent);
+    for (let i = 0; i < 20; i++) $('sizeUp').click();
+    ok('size clamps high', $('sizeValue').textContent === '150%', $('sizeValue').textContent);
+    ok('size persisted', win().localStorage.getItem('ukb:size:krakow-ukulele\u0000all-apologies') === '1.5', win().localStorage.getItem('ukb:size:krakow-ukulele\u0000all-apologies'));
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(250);
+    ok('per-song size default for other song', $('sizeValue').textContent === '100%', $('sizeValue').textContent);
+    win().location.hash = '#/krakow-ukulele/all-apologies';
+    await wait(250);
+    ok('per-song size remembered', $('sizeValue').textContent === '150%', $('sizeValue').textContent);
+
+    // 12f. pinch over the sheet adjusts text size, per song
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(250);
+    ok('pinch starting size 100', $('sizeValue').textContent === '100%', $('sizeValue').textContent);
+    const pev = (type, id, x, y) => new (win().PointerEvent)(type, { pointerId: id, pointerType: 'touch', bubbles: true, cancelable: true, clientX: x, clientY: y });
+    $('sheet').dispatchEvent(pev('pointerdown', 21, 100, 300));
+    $('sheet').dispatchEvent(pev('pointerdown', 22, 300, 300));
+    $('sheet').dispatchEvent(pev('pointermove', 22, 360, 300));
+    ok('pinch out grows text', $('sizeValue').textContent === '110%', $('sizeValue').textContent);
+    $('sheet').dispatchEvent(pev('pointermove', 22, 150, 300));
+    ok('pinch in shrinks text', $('sizeValue').textContent === '100%', $('sizeValue').textContent);
+    $('sheet').dispatchEvent(pev('pointerup', 21, 100, 300));
+    $('sheet').dispatchEvent(pev('pointerup', 22, 150, 300));
+    $('sheet').dispatchEvent(pev('pointermove', 22, 160, 300));
+    ok('pinch ignores moves after release', $('sizeValue').textContent === '100%', $('sizeValue').textContent);
+    ok('pinch size persisted', win().localStorage.getItem('ukb:size:krakow-ukulele\u0000riptide') === '1', win().localStorage.getItem('ukb:size:krakow-ukulele\u0000riptide'));
+    $('sizeUp').click(); await wait(30);
+    ok('stepper and pinch share the same state', $('sizeValue').textContent === '110%', $('sizeValue').textContent);
+    $('sizeDown').click(); await wait(30);
+    win().location.hash = '#/krakow-ukulele/all-apologies';
+    await wait(250);
+    ok('pinch change isolated per song', $('sizeValue').textContent === '150%', $('sizeValue').textContent);
+
+    // 12g. chord diagram size stepper + sticky strip toggle
+    const stripEl = doc().querySelector('#chordStrip');
+    const cImg0 = doc().querySelector('#chordStrip img');
+    const cH0 = parseFloat(win().getComputedStyle(cImg0).height);
+    ok('strip pinned by default', win().getComputedStyle(stripEl).position === 'sticky' && $('chordPinBtn').getAttribute('aria-pressed') === 'true' && $('chordPinBtn').textContent === '📌', win().getComputedStyle(stripEl).position);
+    ok('chord size default', $('chordSizeValue').textContent === '100%', $('chordSizeValue').textContent);
+    $('chordSizeUp').click(); await wait(30);
+    ok('chord size bigger', $('chordSizeValue').textContent === '110%', $('chordSizeValue').textContent);
+    const cH1 = parseFloat(win().getComputedStyle(cImg0).height);
+    ok('chart grew', cH1 > cH0, cH0 + ' -> ' + cH1);
+    ok('chord size persisted', win().localStorage.getItem('ukb:chordSize') === '1.1', win().localStorage.getItem('ukb:chordSize'));
+    for (let i = 0; i < 20; i++) $('chordSizeDown').click();
+    ok('chord size clamps low', $('chordSizeValue').textContent === '60%', $('chordSizeValue').textContent);
+    for (let i = 0; i < 20; i++) $('chordSizeUp').click();
+    ok('chord size clamps high', $('chordSizeValue').textContent === '150%', $('chordSizeValue').textContent);
+    for (let i = 0; i < 5; i++) $('chordSizeDown').click();
+    ok('chord size reset 100', $('chordSizeValue').textContent === '100%', $('chordSizeValue').textContent);
+    $('chordPinBtn').click(); await wait(30);
+    ok('strip unpins', stripEl.classList.contains('is-static') && win().getComputedStyle(stripEl).position === 'static', win().getComputedStyle(stripEl).position);
+    ok('pin segment unpinned', $('chordPinBtn').textContent === '📍' && $('chordPinBtn').getAttribute('aria-pressed') === 'false' && $('chordPinBtn').title.indexOf('Not pinned') > -1, $('chordPinBtn').title);
+    ok('pin persisted off', win().localStorage.getItem('ukb:chordPin') === '0', win().localStorage.getItem('ukb:chordPin'));
+    $('chordPinBtn').click(); await wait(30);
+    ok('strip repins', !stripEl.classList.contains('is-static') && win().getComputedStyle(stripEl).position === 'sticky', '');
+    ok('pin persisted on', win().localStorage.getItem('ukb:chordPin') === '1', win().localStorage.getItem('ukb:chordPin'));
+    win().localStorage.removeItem('ukb:chordSize');
+    win().localStorage.removeItem('ukb:chordPin');
+
+    // 13. keyboard: / focuses search in list view
+    win().location.hash = '';
+    await wait(200);
+    doc().body.dispatchEvent(new (win().KeyboardEvent)('keydown', { key: '/', bubbles: true }));
+    await wait(50);
+    ok('slash focuses search', doc().activeElement === $('search'), doc().activeElement && doc().activeElement.id);
+    $('search').blur();
+
+    // 14. random from filtered list
+    click('Hard'); await wait(50);
+    $('randomBtn').click(); await wait(200);
+    const lvl = $('songLevel').textContent;
+    ok('random respects filter', $('songView').hidden === false && lvl === 'Hard', lvl);
+    click('All'); await wait(50);
+
+    // 15. recent list updates
+    ok('recent block visible', !$('recentBlock').hidden);
+    ok('recent has entries', doc().querySelectorAll('#recentList li').length >= 2, doc().querySelectorAll('#recentList li').length);
+
+    // 16. theme toggle persists
+    const themeBefore = doc().documentElement.getAttribute('data-theme');
+    $('themeToggle').click(); await wait(50);
+    const themeAfter = doc().documentElement.getAttribute('data-theme');
+    ok('theme toggles', themeBefore !== themeAfter, themeBefore + ' -> ' + themeAfter);
+    ok('theme persisted', win().localStorage.getItem('ukb:theme') === JSON.stringify(themeAfter).replace(/"/g, '').replace(/^"|"$/g, '') || win().localStorage.getItem('ukb:theme') !== null, win().localStorage.getItem('ukb:theme'));
+    $('themeToggle').click(); await wait(50);
+
+    // 17. hash routing back to list
+    doc().querySelector('.back-link').click();
+    await wait(200);
+    ok('back to list', $('listView').hidden === false && $('songView').hidden === true);
+    ok('scroll button hidden in list view', $('scrollBtn').getClientRects().length === 0);
+    ok('list still filtered All', rows().length === 198, rows().length);
+
+    // 17b. compact one-line list view (persisted)
+    ok('view toggle initial', $('viewToggle').textContent === '☰' && $('viewToggle').getAttribute('aria-pressed') === 'false', $('viewToggle').textContent);
+    $('viewToggle').click(); await wait(50);
+    ok('compact class applied', doc().querySelector('#songList').classList.contains('is-compact'));
+    ok('compact toggle state', $('viewToggle').textContent === '▤' && $('viewToggle').getAttribute('aria-pressed') === 'true', $('viewToggle').textContent);
+    ok('compact aria label', $('viewToggle').getAttribute('aria-label').indexOf('card view') > -1, $('viewToggle').getAttribute('aria-label'));
+    ok('compact persisted', win().localStorage.getItem('ukb:compact') === '1', win().localStorage.getItem('ukb:compact'));
+    ok('compact rows intact', rows().length === 198 && !!rows()[0].querySelector('.row-level') && !!rows()[0].querySelector('.row-title') && !!rows()[0].querySelector('.row-artist'), '');
+    ok('compact keeps everything on one line', win().getComputedStyle(rows()[0].querySelector('.row-main')).display === 'flex', win().getComputedStyle(rows()[0].querySelector('.row-main')).display);
+    ok('compact keeps row numbers', win().getComputedStyle(rows()[0].querySelector('.row-num')).display !== 'none' && rows()[0].querySelector('.row-num').textContent.length > 0, rows()[0].querySelector('.row-num').textContent);
+    $('viewToggle').click(); await wait(50);
+    ok('toggled back to cards', !doc().querySelector('#songList').classList.contains('is-compact') && $('viewToggle').textContent === '☰', '');
+    ok('compact off persisted', win().localStorage.getItem('ukb:compact') === '0', win().localStorage.getItem('ukb:compact'));
+
+    // 18. recent click reopens song
+    const recentBtn = doc().querySelector('#recentList button');
+    recentBtn.click(); await wait(200);
+    ok('recent click opens song', $('songView').hidden === false && $('songTitle').textContent.length > 0, $('songTitle').textContent);
+
+    // 18b. clear recently played
+    win().location.hash = '';
+    await wait(200);
+    ok('recent block before clear', !$('recentBlock').hidden && doc().querySelectorAll('#recentList li').length > 0, doc().querySelectorAll('#recentList li').length);
+    $('recentClear').click(); await wait(50);
+    ok('clear hides recent block', $('recentBlock').hidden && doc().querySelectorAll('#recentList li').length === 0, doc().querySelectorAll('#recentList li').length);
+    ok('clear persisted', win().localStorage.getItem('ukb:recent') === '[]', win().localStorage.getItem('ukb:recent'));
+
+    // 19. rail/annotation tokens survive transpose
+    win().location.hash = '#/krakow-ukulele/all-apologies';
+    await wait(300);
+    $('trUp').click(); await wait(50);
+    const sheetText = $('sheet').textContent;
+    ok('muted annotations survive transpose', sheetText.indexOf('(riff)') > -1, '');
+    const preLines = Array.from(doc().querySelectorAll('.sheet .line.is-pre'));
+    ok('riff blocks present', preLines.length > 0, preLines.length);
+    ok('riff never wraps', preLines.every(l => win().getComputedStyle(l).whiteSpace === 'pre'), win().getComputedStyle(preLines[0]).whiteSpace);
+    ok('riff scrolls horizontally', preLines.every(l => win().getComputedStyle(l).overflowX === 'auto'), win().getComputedStyle(preLines[0]).overflowX);
+    ok('transpose did not throw', errors.length === 0, errors.join('; '));
+
+    // 19b. global instrument toggle re-renders diagrams for guitar
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(250);
+    ok('instrument toggle present', doc().querySelectorAll('.instrument-btn').length === 2, doc().querySelectorAll('.instrument-btn').length);
+    ok('default instrument ukulele', win().ukbTest.getInstrument() === 'ukulele', win().ukbTest.getInstrument());
+    const ukeSrc = doc().querySelector('#chordStrip img').getAttribute('src');
+    doc().querySelector('.instrument-btn[data-instrument="guitar"]').click();
+    await wait(150);
+    ok('instrument switched to guitar', win().ukbTest.getInstrument() === 'guitar', win().ukbTest.getInstrument());
+    ok('guitar button active', doc().querySelector('.instrument-btn[data-instrument="guitar"]').classList.contains('active'));
+    const guitSrc = doc().querySelector('#chordStrip img').getAttribute('src');
+    ok('diagrams re-rendered for guitar', guitSrc !== ukeSrc && guitSrc.indexOf('data:image/svg+xml') === 0, guitSrc.slice(0, 40));
+    const svgU = win().ukbTest.ChordKit.diagramSVG('ukulele', win().ukbTest.ChordKit.voicings('Am', 'ukulele')[0]);
+    const svgG = win().ukbTest.ChordKit.diagramSVG('guitar', win().ukbTest.ChordKit.voicings('Am', 'guitar')[0]);
+    ok('ukulele engine draws 4 strings', (svgU.match(/class="st"/g) || []).length === 4, (svgU.match(/class="st"/g) || []).length);
+    ok('guitar engine draws 6 strings', (svgG.match(/class="st"/g) || []).length === 6, (svgG.match(/class="st"/g) || []).length);
+    doc().querySelector('.instrument-btn[data-instrument="ukulele"]').click();
+    await wait(150);
+    ok('instrument back to ukulele', win().ukbTest.getInstrument() === 'ukulele');
+    ok('instrument persisted', win().localStorage.getItem('ukb:instrument') === '"ukulele"', win().localStorage.getItem('ukb:instrument'));
+
+    // 19c. songbook picker lists the bundled songbook; import controls exist
+    ok('songbook select has bundled option',
+        doc().querySelectorAll('#songbookSelect option').length === 1 &&
+        doc().querySelector('#songbookSelect option').value === 'krakow-ukulele',
+        doc().querySelector('#songbookSelect option') && doc().querySelector('#songbookSelect option').value);
+    ok('import button present', !!$('importBtn'));
+
+    // 20. no console/page errors overall
+    ok('no page errors', errors.length === 0, errors.join('; '));
+
+    // done
+    const fails = log.filter(l => l.startsWith('FAIL'));
+    log.push('ERRORS: ' + (errors.join('; ') || 'none'));
+    document.title = 'DONE ' + (log.length - fails.length - 1) + '/' + (log.length - 1);
+    emit();
+    window.__done = true;
+}
+
+const logEl = document.getElementById('log');
+function emit() {
+    logEl.textContent = log.join('\n') + (window.__err ? '\n\nCRASH: ' + window.__err : '');
+}
+
+main().catch(e => {
+    window.__err = e.message + ' @ ' + (e.stack || '').split('\n')[1];
+    document.title = 'CRASH';
+    emit();
+    window.__done = true;
+});
+</script>
+</body>
+</html>

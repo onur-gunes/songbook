@@ -1,0 +1,74 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>chordkit unit</title>
+<pre id="log"></pre>
+<script src="../chords.js"></script>
+<script>
+const KEYS = ["A","A7","A7sus4","Am","Am7","Am9","Asus4","B","B7","Bb","Bbm","Bbm6","Bbmaj7","Bm","Bm7","C","C+","C7","Cdim","Cm","Cmaj7","Csharpdim","Csharpm","Csus4","D","D7","Dm","Dm7","Dsus2","E","E7","Eb","Em","Em7","F","FC","Fm","Fmaj7","Fsharp","Fsharpm","Fsus2","G","G7","Gb","Gm","Gm7","Gmaj7","Gsharp","Gsus2","Gsus4","NC"];
+const log = [];
+function ok(name, cond, detail) { log.push((cond ? 'PASS ' : 'FAIL ') + name + (detail !== undefined ? ' | ' + detail : '')); }
+const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+try {
+    ok('ChordKit exposed', typeof ChordKit === 'object' && ChordKit.version);
+    ok('instruments', ChordKit.INSTRUMENTS.ukulele.tuning.length === 4 && ChordKit.INSTRUMENTS.guitar.tuning.length === 6);
+
+    // parsing
+    ok("parse FC -> F/C", ChordKit.parse('FC') && ChordKit.parse('FC').rootPc === 5 && ChordKit.parse('FC').bass === 0, JSON.stringify(ChordKit.parse('FC') && { r: ChordKit.parse('FC').rootPc, b: ChordKit.parse('FC').bass }));
+    ok("parse C+ -> aug", ChordKit.parse('C+') && ChordKit.parse('C+').type.id === 'aug');
+    ok('parse NC -> null', ChordKit.parse('NC') === null);
+    ok('parse Csharp -> C#', ChordKit.parse('Csharp') && ChordKit.parse('Csharp').rootPc === 1, ChordKit.parse('Csharp') && ChordKit.parse('Csharp').rootPc);
+
+    // canonical open voicings rank first (ukulele)
+    ok('C uke = 0003', eq(ChordKit.bestVoicing('C', 'ukulele'), [0, 0, 0, 3]));
+    ok('Am uke = 2000', eq(ChordKit.bestVoicing('Am', 'ukulele'), [2, 0, 0, 0]));
+    ok('G uke = 0232', eq(ChordKit.bestVoicing('G', 'ukulele'), [0, 2, 3, 2]));
+    ok('E uke = 1402', eq(ChordKit.bestVoicing('E', 'ukulele'), [1, 4, 0, 2]));
+    ok('Em uke = 0432', eq(ChordKit.bestVoicing('Em', 'ukulele'), [0, 4, 3, 2]));
+    ok('E uke 2nd = 4442', eq(ChordKit.voicings('E', 'ukulele')[1], [4, 4, 4, 2]), JSON.stringify(ChordKit.voicings('E', 'ukulele')[1]));
+
+    // guitar open-position voicings rank first
+    ok('C guitar = -1 3 2 0 1 0', eq(ChordKit.bestVoicing('C', 'guitar'), [-1, 3, 2, 0, 1, 0]));
+    ok('Am guitar = -1 0 2 2 1 0', eq(ChordKit.bestVoicing('Am', 'guitar'), [-1, 0, 2, 2, 1, 0]));
+    ok('G guitar = 3 2 0 0 0 3', eq(ChordKit.bestVoicing('G', 'guitar'), [3, 2, 0, 0, 0, 3]));
+
+    // ukulele never mutes; guitar may
+    let ukeMuted = false, gtrMuted = false;
+    for (const k of KEYS) {
+        if (k === 'NC') continue;
+        (ChordKit.voicings(k, 'ukulele') || []).forEach(f => { if (f.some(v => v < 0)) ukeMuted = true; });
+        (ChordKit.voicings(k, 'guitar') || []).forEach(f => { if (f.some(v => v < 0)) gtrMuted = true; });
+    }
+    ok('no muted ukulele voicings', !ukeMuted);
+    ok('guitar uses muted strings', gtrMuted);
+
+    // every chart chord resolves on both instruments
+    let missU = 0, missG = 0, badLen = 0;
+    for (const k of KEYS) {
+        if (k === 'NC') continue;
+        const u = ChordKit.voicings(k, 'ukulele');
+        const g = ChordKit.voicings(k, 'guitar');
+        if (!u.length) { missU++; log.push('  no ukulele voicing: ' + k); }
+        if (!g.length) { missG++; log.push('  no guitar voicing: ' + k); }
+        u.forEach(f => { if (f.length !== 4) badLen++; });
+        g.forEach(f => { if (f.length !== 6) badLen++; });
+    }
+    ok('all chart chords resolve on ukulele', missU === 0, missU);
+    ok('all chart chords resolve on guitar', missG === 0, missG);
+    ok('all voicings correct length', badLen === 0, badLen);
+
+    // SVG rendering
+    const su = ChordKit.diagramSVG('ukulele', ChordKit.bestVoicing('Am', 'ukulele'));
+    const sg = ChordKit.diagramSVG('guitar', ChordKit.bestVoicing('Am', 'guitar'));
+    ok('ukulele svg has 4 strings', (su.match(/class="st"/g) || []).length === 4, (su.match(/class="st"/g) || []).length);
+    ok('guitar svg has 6 strings', (sg.match(/class="st"/g) || []).length === 6, (sg.match(/class="st"/g) || []).length);
+    ok('dataUri is an svg data uri', ChordKit.dataUri('ukulele', [0, 0, 0, 3]).indexOf('data:image/svg+xml') === 0);
+} catch (e) {
+    log.push('CRASH ' + e.message);
+}
+
+const fails = log.filter(l => l.startsWith('FAIL') || l.startsWith('CRASH'));
+document.title = fails.length ? 'FAILS:' + fails.length : 'DONE ' + log.length + '/' + log.length;
+document.getElementById('log').textContent = log.join('\n');
+window.__done = true;
+</script>

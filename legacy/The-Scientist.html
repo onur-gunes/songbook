@@ -1,0 +1,423 @@
+
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+	<link rel="icon" href="/images/icon.PNG" sizes="32x32" />
+    <title>The Scientist - Krakow Ukulele Tuesdays</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style>
+        .highlight {background-color: lemonchiffon; font-weight: bold;} 
+        .chord { font-weight: bold; color:red}
+        #tab { font-size: 90%; font-family: Verdana, Tahoma, sans-serif; position: relative; z-index: 1; }
+        #tab .alert, #tab .mark { position: relative; z-index: 1; }
+		#floatingButton { z-index: 1100; }
+		.auto-scroll-control {
+			position: fixed;
+			right: 20px;
+			bottom: 20px;
+			z-index: 1100;
+		}
+		.auto-scroll-btn {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 48px;
+			height: 48px;
+			padding: 0;
+			border: 1px solid #d1d5db;
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.95);
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+			color: #1f2937;
+			line-height: 1;
+			cursor: pointer;
+			transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+		}
+		.auto-scroll-btn:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+		}
+		.auto-scroll-btn:active {
+			transform: translateY(0);
+		}
+		.auto-scroll-icon {
+			font-size: 1.05rem;
+			font-weight: 700;
+		}
+        #options a {text-decoration: underline;}
+
+		/* Updated background color here to keep text covered */
+        .chord-diagrams {
+            background-color: #ffffff;
+        }
+        .sticky { 
+            position: fixed; 
+            top: 0; 
+            margin-top: 0 !important; 
+            left: 0; 
+            padding: 0px 0px; 
+            width: 100%; 
+            border-bottom: 1px solid #cfd8dc; 
+            z-index: 1050;
+            background-color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            /* overflow-x: auto;
+            white-space: nowrap; */
+        }
+		.toggle-button {
+			background-color: #eee;
+			border: 0px solid ;
+			padding: 0px 0px;
+			margin-right: 5px;
+			cursor: pointer;
+		}
+		.div_box {
+			padding: 10px;
+		}
+		.checkbox:checked + #infoBox {
+			display: block;
+		}
+		
+		@font-face {
+			font-family: 'Montserrat';
+			src:  url('fonts/Montserrat-Regular.ttf') format('truetype');
+			font-weight: normal;
+			font-style: normal;
+		}
+
+		@font-face {
+			font-family: 'Montserrat';
+			src:  url('fonts/Montserrat-UltraLight.ttf') format('truetype');
+			font-weight: 200;
+			font-style: normal;
+		}
+		@font-face {
+			font-family: 'Montserrat';
+			src: url('fonts/Montserrat-SemiBold.ttf') format('truetype');
+			font-weight: 600;
+			font-style: normal;
+		}
+		.custom-text-h3 {
+			font-family: 'Montserrat', sans-serif;
+			font-size: 2rem
+		}
+		.custom-text-h4 {
+			font-family: 'Montserrat', sans-serif;
+			font-style: italics;
+			font-size: 1.5rem
+		}
+		.custom-text-h5 {
+			font-family: 'Montserrat', sans-serif;
+			font-size: 1.2rem
+		}
+		.ultra-light {
+			font-family: 'Montserrat', sans-serif;
+			font-weight: 200;
+		}
+		.ultra-light2 {
+			font-family: 'Montserrat', sans-serif;
+			font-weight: 200;
+			font-size: 1.1rem
+		}
+
+		.semi-bold {
+			font-family: 'Montserrat', sans-serif;
+			font-weight: 600;
+		}
+		.moj-element {
+			background-image: linear-gradient(to bottom, rgba(189, 32, 40, 0.4), rgba(189, 32, 40, 0.2));
+		}
+		.my-watermark {
+			background-image: url('../images/back_30.png');
+			background-position: right; /* lub background-position: 100%; */
+			background-size: contain;
+			background-repeat: no-repeat;
+			pointer-events: none; 
+		}
+
+		.theme-toggle {
+			position: absolute;
+			top: 12px;
+			right: 12px;
+			z-index: 2000;
+			border: 1px solid #ced4da;
+			border-radius: 999px;
+			background-color: #ffffff;
+			color: #212529;
+			padding: 6px 12px;
+			font-size: 0.875rem;
+		}
+
+		.theme-toggle:hover {
+			background-color: #f8f9fa;
+		}
+
+		body {
+			background-color: #ffffff;
+			color: #212529;
+		}
+
+		body.dark-mode {
+			background-color: #121212;
+			color: #f1f1f1;
+		}
+
+		body.dark-mode a {
+			color: #ff9a9a;
+		}
+
+		body.dark-mode a:hover,
+		body.dark-mode a:focus {
+			color: #ffffff;
+		}
+
+		body.dark-mode .shadow,
+		body.dark-mode .theme-toggle,
+		body.dark-mode .btn-light,
+		body.dark-mode .chord-diagrams,
+		body.dark-mode .sticky {
+			background-color: #1f1f1f !important;
+			color: #f1f1f1;
+			border-color: #595959;
+		}
+		
+		/* Specifically forces the chord container to match the body color */
+        body.dark-mode #chordsContainer,
+        body.dark-mode .sticky {
+            background-color: #121212 !important;
+            color: #f1f1f1;
+            border-color: #333333;
+        }
+		body.dark-mode .chord-diagrams img,
+		body.dark-mode img[src^="chords/"],
+		body.dark-mode img[src^="../chords/"] {
+			filter: invert(1) hue-rotate(180deg) contrast(0.95) !important;
+		}
+
+		body.dark-mode .auto-scroll-btn {
+			background: rgba(31, 31, 31, 0.95);
+			color: #f3f4f6;
+			border-color: #595959;
+		}
+
+
+    </style>
+
+</head>
+<body data-duration = 4.0>
+<!-- nie ma headera - czy tak wogle wolno? -->
+<button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark mode">☼</button>
+
+<div class="container">
+    <div class="row justify-content-center">      
+		<div class="col-lg-8 col-md-10 col-sm-12 my-3">
+			<div class="shadow p-3 mb-5 bg-body rounded my-watermark">
+				<h3 class="song-title semi-bold">
+					#172 - The Scientist
+				</h3>
+				<h5 class="song-artist ultra-light ">
+					Coldplay
+				</h5>
+			
+				<h5 class= ultra-light >
+					Level: 
+					<span class="badge rounded-pill badge-success text-white">Easy</span>					
+				</h5>				
+			
+			</div>
+			
+				<div class="mt-3">							
+					
+				</div>
+			
+			
+				<div id="chordsContainer" class="mt-4 chord-diagrams" style="overflow-x: auto;">
+					
+						<img src="chords/Dm.gif" alt="Dm" title="Dm" />
+					
+						<img src="chords/Bb.gif" alt="Bb" title="Bb" />
+					
+						<img src="chords/F.gif" alt="F" title="F" />
+					
+						<img src="chords/Fsus2.gif" alt="Fsus2" title="Fsus2" />
+					
+						<img src="chords/C.gif" alt="C" title="C" />
+					
+				
+				</div>
+				<!--<div class="div_box" id="devInfo" style="font-size: xx-small; position: fixed; right: 5px; top: 10px;">
+				  Dev info? <input type="checkbox" class="checkbox">
+				</div>
+				<div id="infoBox" style="position: fixed; right: 20px; top: 35px; border: 1px solid black; padding: 10px; display: none;">
+				  <p id="heightInfo" style="font-size: xx-small;"></p>
+				  <p id="scrollTimeStepInfo" style="font-size: xx-small;"></p>
+				  <p id="songDuration" style="font-size: xx-small;"></p>
+				</div>-->
+				<div id="floatingButton" class="auto-scroll-control">
+					<button id="myButton" onclick="toggleButton()" type="button" class="auto-scroll-btn" aria-label="Start auto-scroll" aria-pressed="false">
+						<span id="buttonIcon" class="auto-scroll-icon">▶</span>
+					</button>
+				</div>
+
+			
+			<div id="tab">
+				 <br>Intro:<br><span class="chord">[Dm]</span>... <span class="chord">[Bb]</span>... <span class="chord">[F]</span>... <span class="chord">[Fsus2]</span>....<br><br><span class="chord">[Dm]</span> Come up to <span class="chord">[Bb]</span> meet you, tell you I'm <span class="chord">[F]</span> sorry<br>You don't know how <span class="chord">[Fsus2]</span> lovely you are<br><span class="chord">[Dm]</span> I had to <span class="chord">[Bb]</span> find you, tell you I <span class="chord">[F]</span> need you,<br>Tell you I set you <span class="chord">[Fsus2]</span> apart<br><br><span class="chord">[Dm]</span> Tell me your <span class="chord">[Bb]</span> secrets and nurse me your <span class="chord">[F]</span> questions,<br>Oh lets go <span class="chord">[Fsus2]</span> back to the start<br><span class="chord">[Dm]</span> Running in cir-<span class="chord">[Bb]</span>cles, comin' in <span class="chord">[F]</span> tails<br>Heads on a <span class="chord">[Fsus2]</span> science apart<br><br><span class="chord">[Bb]</span> Nobody said it was easy,<br><span class="chord">[F]</span> Oh it's such a <span class="chord">[Fsus2]</span> shame for us to part.<br><span class="chord">[Bb]</span> Nobody said it was easy,  <br><span class="chord">[F]</span> No one ever <span class="chord">[Fsus2]</span> said it would be this hard.<br><span class="chord">[C]</span>... <strong><span class="chord">[stop]</span></strong> Oh take me back to the <span class="chord">[F]</span> start<br><span class="chord">[Bb]</span>... <span class="chord">[F]</span>... <span class="chord">[Fsus2]</span>...<br><br><span class="chord">[Dm]</span> I was just <span class="chord">[Bb]</span> guessin' at numbers and fi-<span class="chord">[F]</span>gures,<br>Pulling the <span class="chord">[Fsus2]</span> puzzles apart<br><span class="chord">[Dm]</span> Questions of sci-<span class="chord">[Bb]</span>ence, science and pro-<span class="chord">[F]</span>gress<br>Don't speak as <span class="chord">[Fsus2]</span> loud as my heart<br><br><span class="chord">[Dm]</span> And tell me you <span class="chord">[Bb]</span> love me, come back and <span class="chord">[F]</span> haunt me<br>Oh and I <span class="chord">[Fsus2]</span> rush to the start<br><span class="chord">[Dm]</span> Runnin' in cir-<span class="chord">[Bb]</span>cles, Chasin' <span class="chord">[F]</span> tails<br>Comin' back as <span class="chord">[Fsus2]</span> we are<br><br><span class="chord">[Bb]</span> Nobody said it was easy<br><span class="chord">[F]</span> Oh it's such a <span class="chord">[Fsus2]</span> shame for us to part<br><span class="chord">[Bb]</span> Nobody said it was easy<br><span class="chord">[F]</span> No one ever <span class="chord">[Fsus2]</span> said it would be so hard<br><span class="chord">[C]</span>... <strong><span class="chord">[stop]</span></strong> I'm going back to <span class="chord">[F]</span> the start.<br> <br><span class="chord">[Bb]</span>... <span class="chord">[F]</span>... <span class="chord">[Fsus2]</span>...<br><span class="chord">[Dm]</span>... <span class="chord">[Bb]</span>... <span class="chord">[F]</span>... <span class="chord">[Fsus2]</span>...<br><br><span class="chord">[Dm]</span> Ohh <span class="chord">[Bb]</span> uuuuhhhhh <span class="chord">[F]</span> <span class="chord">[Fsus2]</span><br><span class="chord">[Dm]</span> Ohh <span class="chord">[Bb]</span> uuuuhhhhh <span class="chord">[F]</span> <span class="chord">[Fsus2]</span><br><span class="chord">[Dm]</span> Ohh <span class="chord">[Bb]</span> uuuuhhhhh <span class="chord">[F]</span> <span class="chord">[Fsus2]</span><br><span class="chord">[Dm]</span> Ohh <span class="chord">[Bb]</span> uuuuhhhhh <span class="chord">[F/]</span> 
+			</div>
+			<hr/>
+			<div id="options" class="mt-4">
+				<a href="songs.html"><strong>← Back</strong></a>
+				 
+			</div>
+
+			
+					
+			<div class="m-2 my-4 text-center">
+				<img src="/images/qrcode.png" class="img-fluid" alt="QR Code" width="100">
+			</div>
+
+		</div>
+
+    </div>
+</div>
+
+<script>
+(function() {
+	var key = 'ilo-theme';
+	var toggleButton = document.getElementById('themeToggle');
+
+	function applyTheme(theme) {
+		var isDark = theme === 'dark';
+		document.body.classList.toggle('dark-mode', isDark);
+		toggleButton.textContent = isDark ? '☾' : '☼';
+		toggleButton.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+		localStorage.setItem(key, isDark ? 'dark' : 'light');
+	}
+
+	var savedTheme = localStorage.getItem(key);
+	applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+
+	toggleButton.addEventListener('click', function() {
+		applyTheme(document.body.classList.contains('dark-mode') ? 'light' : 'dark');
+	});
+})();
+
+window.onload = function initFloatingChords() {
+
+    const chordsContainer = document.getElementById("chordsContainer") || document.getElementsByClassName("mt-4")[0];
+
+    // prevent lyrics being visible from behind the chords
+    // chordsContainer.style.backgroundColor = "white"
+
+    const chordsContainerTop = chordsContainer.offsetTop
+    const chordsContainerHeight = chordsContainer.clientHeight
+
+    const chords = Array.prototype.slice.call(chordsContainer.getElementsByTagName("img"))
+    const maxChordSize = chords[0].clientWidth
+    const minChordSize = 40
+
+    const tab = document.getElementById("tab")
+
+    window.onscroll = function() {
+        onScrollListener()
+    };
+
+    function onScrollListener() {
+        var ratio = (window.pageYOffset - chordsContainerTop) / (chordsContainerTop + chordsContainerHeight)
+        ratio = Math.min(1.0, ratio)
+
+        var size = (1.0 - ratio) * maxChordSize
+        // minChordSize < size < maxChordSize
+        size = Math.min(maxChordSize, Math.max(minChordSize, size));
+        chords.forEach(chords => chords.style.width = size + "px")
+
+        if (window.pageYOffset > chordsContainerTop) {
+            chordsContainer.classList.add("sticky");
+            //include margin to prevent tab jumping up
+            tab.style.marginTop = chordsContainerHeight + "px"
+        } else {
+            chordsContainer.classList.remove("sticky");
+            tab.style.marginTop = "0px"
+        }
+    }
+}
+</script>
+
+<script>
+var scrollInterval;
+var songDuration = parseFloat(document.body.dataset.duration);
+var scrollDuration = songDuration * 60 * 1000; // x min w milisekundach - w tym czasie stronama zostac przewinięta
+//var body = document.body,
+//    html = document.documentElement;
+//var height = Math.max( Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight ) - window.innerHeight, 1);
+var height = document.getElementById('tab').clientHeight; //wysokość boxu div tab
+var scrollTimeStep =  scrollDuration / height; // czas co jaki ma być wywołana funkcja przewijania
+
+function updateAutoScrollButton(isRunning) {
+	var button = document.getElementById('myButton');
+	var icon = document.getElementById('buttonIcon');
+
+	if (!button || !icon) {
+		return;
+	}
+
+	icon.textContent = isRunning ? '■' : '▷';
+	// icon.textContent = isRunning ? '⏸' : '▶';  // Pause vs. Play
+	button.setAttribute('aria-pressed', isRunning ? 'true' : 'false');
+	button.setAttribute('aria-label', isRunning ? 'Stop auto-scroll' : 'Start auto-scroll');
+}
+
+function toggleButton() {
+	if (scrollInterval) { //jeśli scrollInterval był ustawiony w trakcie wywołania funkcji to zatrzymaj autoscroll
+    clearInterval(scrollInterval); // Zatrzymuje autoscrollowanie
+    scrollInterval = null;
+		updateAutoScrollButton(false);
+  } else { //w przeciwnym wypadku ustaw scroll interval i przewijaj chyba ze dotrzesz do końca strony
+		updateAutoScrollButton(true);
+    scrollInterval = setInterval(function() {
+      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+        // Jeśli strona została przewinięta do końca, zatrzymaj autoscroll po 4 sekundach
+        setTimeout(function() {
+          clearInterval(scrollInterval);
+          scrollInterval = null;
+					updateAutoScrollButton(false);
+        }, 4000);
+      } else {
+        window.scrollBy({top: 1, behavior: "instant"}); // Uruchamia autoscrollowanie
+      }
+		height = document.getElementById('tab').clientHeight; //tylko dla infoboxa
+		scrollTimeStep =  scrollDuration / height; 
+		var checkBox = document.querySelector('.checkbox');
+		var devInfo = document.getElementById('infoBox');
+		if (checkBox && devInfo) {
+			devInfo.style.display = checkBox.checked ? 'block' : 'none';
+			// Aktualizuj wartości w infoBox
+			document.getElementById('heightInfo').textContent = 'Height: ' + height;
+			document.getElementById('scrollTimeStepInfo').textContent = 'Scroll Time Step: ' + scrollTimeStep.toFixed(1);
+			document.getElementById('songDuration').textContent = 'songDuration: ' + songDuration;
+		}
+    }, scrollTimeStep);
+  }
+}
+updateAutoScrollButton(false);
+// Zatrzymaj autoscroll, gdy strona jest opuszczana
+window.addEventListener('beforeunload', function() {
+  if (scrollInterval) {
+    clearInterval(scrollInterval);
+  }
+});
+</script>
+<script>
+  function toggleDiv() {
+    var checkBox = document.querySelector('.checkbox');
+    var infoBox = document.getElementById('infoBox');
+    infoBox.style.display = checkBox.checked ? 'block' : 'none';
+  }
+</script>
+</body>
+</html>
