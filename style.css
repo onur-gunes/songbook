@@ -768,7 +768,6 @@ main {
 .chord-item img {
     height: calc(78px * var(--chord-size, 1));
     width: auto;
-    max-width: 90px;
     object-fit: contain;
     border-radius: 6px;
 }

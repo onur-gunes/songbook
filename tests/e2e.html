@@ -475,6 +475,13 @@ async function main() {
     ok('guitar button active', doc().querySelector('.instrument-btn[data-instrument="guitar"]').classList.contains('active'));
     const guitSrc = doc().querySelector('#chordStrip img').getAttribute('src');
     ok('diagrams re-rendered for guitar', guitSrc !== ukeSrc && guitSrc.indexOf('data:image/svg+xml') === 0, guitSrc.slice(0, 40));
+    const gW0 = doc().querySelector('#chordStrip img').getBoundingClientRect().width;
+    for (let i = 0; i < 5; i++) $('chordSizeUp').click();
+    await wait(60);
+    const gW1 = doc().querySelector('#chordStrip img').getBoundingClientRect().width;
+    ok('guitar diagram scales in width too', gW1 > gW0 * 1.2, gW0.toFixed(1) + ' -> ' + gW1.toFixed(1));
+    for (let i = 0; i < 5; i++) $('chordSizeDown').click();
+    await wait(60);
     const svgU = win().ukbTest.ChordKit.diagramSVG('ukulele', win().ukbTest.ChordKit.voicings('Am', 'ukulele')[0]);
     const svgG = win().ukbTest.ChordKit.diagramSVG('guitar', win().ukbTest.ChordKit.voicings('Am', 'guitar')[0]);
     ok('ukulele engine draws 4 strings', (svgU.match(/class="st"/g) || []).length === 4, (svgU.match(/class="st"/g) || []).length);
