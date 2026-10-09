@@ -21,193 +21,574 @@
    ],
    "sheet": [
     [
-     ["x", "Zwrotka 1"]
+     [
+      "x",
+      "Zwrotka 1"
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", "Zamienię każdy oddech w "],
-     ["c", "[Am]"],
-     ["x", "niespokojny "],
-     ["c", "[G]"],
-     ["x", "wiatr"]
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Zamienię każdy oddech w "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "niespokojny "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "wiatr"
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", "By zabrał mnie z powrotem - tam, "],
-     ["c", "[Am]"],
-     ["x", "gdzie masz "],
-     ["c", "[G]"],
-     ["x", "swój świat"]
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "By zabrał mnie z powrotem - tam, "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "gdzie masz "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "swój świat"
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", "Poskładam wszystkie szepty w "],
-     ["c", "[Am]"],
-     ["x", "jeden "],
-     ["c", "[G]"],
-     ["x", "ciepły krzyk"]
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Poskładam wszystkie szepty w "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "jeden "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "ciepły krzyk"
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", "Żeby znalazł Cię aż tam, "],
-     ["c", "[Am]"],
-     ["x", "gdzie pochowa-"],
-     ["c", "[G]"],
-     ["x", "łaś sny"]
-    ],
-    [],
-    [
-     ["x", "Refren"]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "Już teraz wiem, że dni są "],
-     ["c", "[G]"],
-     ["x", "tylko po to"]
-    ],
-    [
-     ["c", "[C]"],
-     ["x", "By do Ciebie wracać "],
-     ["c", "[Am]"],
-     ["x", "każdą nocą złotą"]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "Nie znam słów, co mają "],
-     ["c", "[G]"],
-     ["x", "jakiś większy sens"]
-    ],
-    [
-     ["c", "[C]"],
-     ["x", "Jeśli tylko jedno - "],
-     ["c", "[Am]"],
-     ["x", "jedno tylko wiem"]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "Być tam, zawsze tam, "],
-     ["c", "[G]"],
-     ["x", "gdzie "],
-     ["c", "[C]"],
-     ["x", "Ty"]
-    ],
-    [],
-    [
-     ["x", "Zwrotka 2"]
-    ],
-    [
-     ["c", "[C]"],
-     ["x", "Nie pytaj mnie o jutro - "],
-     ["c", "[Am]"],
-     ["x", "to za "],
-     ["c", "[G]"],
-     ["x", "tysiąc lat"]
-    ],
-    [
-     ["c", "[C]"],
-     ["x", "Płyniemy białą łódką w "],
-     ["c", "[Am]"],
-     ["x", "niezbada-"],
-     ["c", "[G]"],
-     ["x", "ny czas"]
-    ],
-    [
-     ["c", "[C]"],
-     ["x", "Poskładam nasze szepty w "],
-     ["c", "[Am]"],
-     ["x", "jeden "],
-     ["c", "[G]"],
-     ["x", "ciepły krzyk"]
-    ],
-    [
-     ["c", "[C]"],
-     ["x", "By już nie uciekły "],
-     ["c", "[Am]"],
-     ["x", "nam, by "],
-     ["c", "[G]"],
-     ["x", "wysuszyły łzy"]
-    ],
-    [],
-    [
-     ["x", "Refren"]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "Już teraz wiem, że dni są "],
-     ["c", "[G]"],
-     ["x", "tylko po to"]
-    ],
-    [
-     ["c", "[C]"],
-     ["x", "By do Ciebie wracać "],
-     ["c", "[Am]"],
-     ["x", "każdą nocą złotą"]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "Nie znam słów, co mają "],
-     ["c", "[G]"],
-     ["x", "jakiś większy sens"]
-    ],
-    [
-     ["c", "[C]"],
-     ["x", "Jeśli tylko jedno - "],
-     ["c", "[Am]"],
-     ["x", "jedno tylko wiem"]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "Być tam, zawsze tam, "],
-     ["c", "[G]"],
-     ["x", "gdzie "],
-     ["c", "[C]"],
-     ["x", "Ty"]
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Żeby znalazł Cię aż tam, "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "gdzie pochowa-"
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "łaś sny"
+     ]
     ],
     [],
     [
-     ["x", "Końcówka"]
+     [
+      "x",
+      "Refren"
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", "Budzić się i chodzić, "],
-     ["c", "[Am]"],
-     ["x", "spać we własnym niebie"]
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Już teraz wiem, że dni są "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "tylko po to"
+     ]
     ],
     [
-     ["c", "[F]"],
-     ["x", "Być tam, zawsze tam, "],
-     ["c", "[G]"],
-     ["x", "gdzie "],
-     ["c", "[C]"],
-     ["x", "Ty"]
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "By do Ciebie wracać "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "każdą nocą złotą"
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", "Żegnać się co świt i "],
-     ["c", "[Am]"],
-     ["x", "wracać znów do Ciebie"]
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Nie znam słów, co mają "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "jakiś większy sens"
+     ]
     ],
     [
-     ["c", "[F]"],
-     ["x", "Być tam, zawsze tam, "],
-     ["c", "[G]"],
-     ["x", "gdzie "],
-     ["c", "[C]"],
-     ["x", "Ty"]
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Jeśli tylko jedno - "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "jedno tylko wiem"
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", "Budzić się i chodzić, "],
-     ["c", "[Am]"],
-     ["x", "spać we własnym niebie"]
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Być tam, zawsze tam, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "gdzie "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Ty"
+     ]
+    ],
+    [],
+    [
+     [
+      "x",
+      "Zwrotka 2"
+     ]
     ],
     [
-     ["c", "[F]"],
-     ["x", "Być tam, zawsze tam, "],
-     ["c", "[G]"],
-     ["x", "gdzie "],
-     ["c", "[C]"],
-     ["x", "Ty"]
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Nie pytaj mnie o jutro - "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "to za "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "tysiąc lat"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Płyniemy białą łódką w "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "niezbada-"
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "ny czas"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Poskładam nasze szepty w "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "jeden "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "ciepły krzyk"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "By już nie uciekły "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "nam, by "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "wysuszyły łzy"
+     ]
+    ],
+    [],
+    [
+     [
+      "x",
+      "Refren"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Już teraz wiem, że dni są "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "tylko po to"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "By do Ciebie wracać "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "każdą nocą złotą"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Nie znam słów, co mają "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "jakiś większy sens"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Jeśli tylko jedno - "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "jedno tylko wiem"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Być tam, zawsze tam, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "gdzie "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Ty"
+     ]
+    ],
+    [],
+    [
+     [
+      "x",
+      "Końcówka"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Budzić się i chodzić, "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "spać we własnym niebie"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Być tam, zawsze tam, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "gdzie "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Ty"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Żegnać się co świt i "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "wracać znów do Ciebie"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Być tam, zawsze tam, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "gdzie "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Ty"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Budzić się i chodzić, "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "spać we własnym niebie"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Być tam, zawsze tam, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "gdzie "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Ty"
+     ]
     ]
    ]
   },
@@ -220,298 +601,841 @@
    "new": false,
    "dur": 4.2,
    "chords": [
-    "C",
-    "Am",
-    "Em",
-    "D",
     "F",
-    "G"
+    "Dm",
+    "Am",
+    "G",
+    "Bb",
+    "C"
    ],
    "sheet": [
     [
-     ["x", "Wstęp"]
+     [
+      "x",
+      "Wstęp"
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", " "],
-     ["c", "[Am]"],
-     ["x", " "],
-     ["c", "[Em]"],
-     ["x", " "],
-     ["c", "[D]"]
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", " "],
-     ["c", "[Am]"],
-     ["x", " "],
-     ["c", "[Em]"],
-     ["x", " "],
-     ["c", "[D]"]
-    ],
-    [],
-    [
-     ["x", "Refren"]
-    ],
-    [
-     ["c", "[C]"],
-     ["x", "I nawet kiedy będę "],
-     ["c", "[Am]"],
-     ["x", "sam,"]
-    ],
-    [
-     ["c", "[Em]"],
-     ["x", "Nie zmienię się, to nie "],
-     ["c", "[D]"],
-     ["x", "mój świat."]
-    ],
-    [
-     ["c", "[C]"],
-     ["x", "Przede mną droga, którą "],
-     ["c", "[Am]"],
-     ["x", "znam,"]
-    ],
-    [
-     ["c", "[Em]"],
-     ["x", "Którą ja wybrałem "],
-     ["c", "[D]"],
-     ["x", "sam."]
-    ],
-    [],
-    [
-     ["x", "Zwrotka 1"]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "Tak, zawsze ge"],
-     ["c", "[C]"],
-     ["x", "nialny"]
-    ],
-    [
-     ["c", "[Am]"],
-     ["x", "Idealny muszę "],
-     ["c", "[G]"],
-     ["x", "być"]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "I muszę chcieć, super "],
-     ["c", "[C]"],
-     ["x", "luz i już"]
-    ],
-    [
-     ["c", "[Am]"],
-     ["x", "Setki bzdur i już, to nie "],
-     ["c", "[G]"],
-     ["x", "ja"]
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ]
     ],
     [],
     [
-     ["x", "Refren"]
+     [
+      "x",
+      "Refren"
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", "I nawet kiedy będę "],
-     ["c", "[Am]"],
-     ["x", "sam,"]
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "I nawet kiedy będę "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "sam,"
+     ]
     ],
     [
-     ["c", "[Em]"],
-     ["x", "Nie zmienię się, to nie "],
-     ["c", "[D]"],
-     ["x", "mój świat."]
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Nie zmienię się, to nie "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "mój świat."
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", "Przede mną droga, którą "],
-     ["c", "[Am]"],
-     ["x", "znam,"]
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Przede mną droga, którą "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "znam,"
+     ]
     ],
     [
-     ["c", "[Em]"],
-     ["x", "Którą ja wybrałem "],
-     ["c", "[D]"],
-     ["x", "sam."]
-    ],
-    [],
-    [
-     ["x", "Zwrotka 2"]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "Wiesz, lubię wie"],
-     ["c", "[C]"],
-     ["x", "czory,"]
-    ],
-    [
-     ["c", "[Am]"],
-     ["x", "Lubię się schować na jakiś "],
-     ["c", "[G]"],
-     ["x", "czas."]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "I jakoś tak, niena"],
-     ["c", "[C]"],
-     ["x", "turalnie,"]
-    ],
-    [
-     ["c", "[Am]"],
-     ["x", "Trochę przesadnie, po"],
-     ["c", "[G]"],
-     ["x", "być sam."]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "Wejść na drzewo i patrzeć w "],
-     ["c", "[C]"],
-     ["x", "niebo,"]
-    ],
-    [
-     ["c", "[Am]"],
-     ["x", "Tak zwyczajnie, tylko "],
-     ["c", "[G]"],
-     ["x", "że,"]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "Tutaj też wiem ko"],
-     ["c", "[C]"],
-     ["x", "lejny raz,"]
-    ],
-    [
-     ["c", "[Am]"],
-     ["x", "Nie mam szans być kim "],
-     ["c", "[G]"],
-     ["x", "chcę."]
-    ],
-    [],
-    [
-     ["x", "Solo (C Am Em D)"]
-    ],
-    [
-     ["c", "[C]"],
-     ["x", " "],
-     ["c", "[Am]"],
-     ["x", " "],
-     ["c", "[Em]"],
-     ["x", " "],
-     ["c", "[D]"]
-    ],
-    [
-     ["c", "[C]"],
-     ["x", " "],
-     ["c", "[Am]"],
-     ["x", " "],
-     ["c", "[Em]"],
-     ["x", " "],
-     ["c", "[D]"]
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Którą ja wybrałem "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "sam."
+     ]
     ],
     [],
     [
-     ["x", "Zwrotka 3"]
+     [
+      "x",
+      "Zwrotka 1"
+     ]
     ],
     [
-     ["c", "[F]"],
-     ["x", "Noc, a nocą, gdy "],
-     ["c", "[C]"],
-     ["x", "nie śpię,"]
+     [
+      "c",
+      "[Bb]"
+     ],
+     [
+      "x",
+      "Tak, zawsze ge"
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "nialny"
+     ]
     ],
     [
-     ["c", "[Am]"],
-     ["x", "Wychodzę, choć nie chcę spojrzeć "],
-     ["c", "[G]"],
-     ["x", "na,"]
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "Idealny muszę "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "być"
+     ]
     ],
     [
-     ["c", "[F]"],
-     ["x", "Chemiczny świat, pachnący sza"],
-     ["c", "[C]"],
-     ["x", "rością,"]
+     [
+      "c",
+      "[Bb]"
+     ],
+     [
+      "x",
+      "I muszę chcieć, super "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "luz i już"
+     ]
     ],
     [
-     ["c", "[Am]"],
-     ["x", "Z papieru miłością, gdzie ty i "],
-     ["c", "[G]"],
-     ["x", "ja,"]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "I jeszcze ktoś, nie wiem "],
-     ["c", "[C]"],
-     ["x", "kto,"]
-    ],
-    [
-     ["c", "[Am]"],
-     ["x", "Chciałby tak przez kilka "],
-     ["c", "[G]"],
-     ["x", "lat,"]
-    ],
-    [
-     ["c", "[F]"],
-     ["x", "Zbyt zachłannie i trochę prze"],
-     ["c", "[C]"],
-     ["x", "sadnie,"]
-    ],
-    [
-     ["c", "[Am]"],
-     ["x", "Pobyć chwilę sam, chyba go "],
-     ["c", "[G]"],
-     ["x", "znam."]
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Setki bzdur i już, to nie "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "ja"
+     ]
     ],
     [],
     [
-     ["x", "Refren"]
+     [
+      "x",
+      "Refren"
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", "I nawet kiedy będę "],
-     ["c", "[Am]"],
-     ["x", "sam,"]
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "I nawet kiedy będę "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "sam,"
+     ]
     ],
     [
-     ["c", "[Em]"],
-     ["x", "Nie zmienię się, to nie "],
-     ["c", "[D]"],
-     ["x", "mój świat."]
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Nie zmienię się, to nie "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "mój świat."
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", "Przede mną droga, którą "],
-     ["c", "[Am]"],
-     ["x", "znam,"]
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Przede mną droga, którą "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "znam,"
+     ]
     ],
     [
-     ["c", "[Em]"],
-     ["x", "Którą ja wybrałem "],
-     ["c", "[D]"],
-     ["x", "sam."]
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Którą ja wybrałem "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "sam."
+     ]
     ],
     [],
     [
-     ["c", "[C]"],
-     ["x", "I nawet kiedy będę "],
-     ["c", "[Am]"],
-     ["x", "sam,"]
+     [
+      "x",
+      "Zwrotka 2"
+     ]
     ],
     [
-     ["c", "[Em]"],
-     ["x", "Nie zmienię się, to nie "],
-     ["c", "[D]"],
-     ["x", "mój świat."]
+     [
+      "c",
+      "[Bb]"
+     ],
+     [
+      "x",
+      "Wiesz, lubię wie"
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "czory,"
+     ]
     ],
     [
-     ["c", "[C]"],
-     ["x", "Przede mną droga, którą "],
-     ["c", "[Am]"],
-     ["x", "znam,"]
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "Lubię się schować na jakiś "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "czas."
+     ]
     ],
     [
-     ["c", "[Em]"],
-     ["x", "Którą ja wybrałem "],
-     ["c", "[D]"],
-     ["x", "sam. "],
-     ["c", "[C]"]
+     [
+      "c",
+      "[Bb]"
+     ],
+     [
+      "x",
+      "I jakoś tak, niena"
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "turalnie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "Trochę przesadnie, po"
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "być sam."
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Bb]"
+     ],
+     [
+      "x",
+      "Wejść na drzewo i patrzeć w "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "niebo,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "Tak zwyczajnie, tylko "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "że,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Bb]"
+     ],
+     [
+      "x",
+      "Tutaj też wiem ko"
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "lejny raz,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Nie mam szans być kim "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "chcę."
+     ]
+    ],
+    [],
+    [
+     [
+      "x",
+      "Solo (F Dm Am G)"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ]
+    ],
+    [],
+    [
+     [
+      "x",
+      "Zwrotka 3"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Bb]"
+     ],
+     [
+      "x",
+      "Noc, a nocą, gdy "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "nie śpię,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "Wychodzę, choć nie chcę spojrzeć "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "na,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Bb]"
+     ],
+     [
+      "x",
+      "Chemiczny świat, pachnący sza"
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "rością,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "Z papieru miłością, gdzie ty i "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "ja,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Bb]"
+     ],
+     [
+      "x",
+      "I jeszcze ktoś, nie wiem "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "kto,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "Chciałby tak przez kilka "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "lat,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Bb]"
+     ],
+     [
+      "x",
+      "Zbyt zachłannie i trochę prze"
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "sadnie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Pobyć chwilę sam, chyba go "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "znam."
+     ]
+    ],
+    [],
+    [
+     [
+      "x",
+      "Refren"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "I nawet kiedy będę "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "sam,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Nie zmienię się, to nie "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "mój świat."
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Przede mną droga, którą "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "znam,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Którą ja wybrałem "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "sam."
+     ]
+    ],
+    [],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "I nawet kiedy będę "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "sam,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Nie zmienię się, to nie "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "mój świat."
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Przede mną droga, którą "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "znam,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Którą ja wybrałem "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "sam. "
+     ],
+     [
+      "c",
+      "[F]"
+     ]
     ]
    ]
   }
