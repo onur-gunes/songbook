@@ -63,10 +63,10 @@ def main():
 
     def run_checks(cdp, phase):
         ids = cdp.eval("songbookTest.allSongbooks().map(s=>s.id).join(',')")
-        ok(phase + ': two songbooks', ids == 'krakow-ukulele,test-sb', ids)
+        ok(phase + ': imported appended to bundled', ids == 'krakow-ukulele,polska-gurom,test-sb', ids)
         opts = cdp.eval(
             "Array.from(document.querySelectorAll('#songbookSelect option')).map(o=>o.value).join(',')")
-        ok(phase + ': picker has imported', opts == 'krakow-ukulele,test-sb', opts)
+        ok(phase + ': picker has imported', opts == 'krakow-ukulele,polska-gurom,test-sb', opts)
 
     try:
         target = new_tab(PORT, BASE + '/index.html?nosw')
@@ -77,7 +77,7 @@ def main():
 
         # import
         cdp.eval(IMPORT_JS, await_promise=False)
-        cdp.wait_js("songbookTest.allSongbooks().length === 2", timeout=10)
+        cdp.wait_js("songbookTest.allSongbooks().length === 3", timeout=10)
         cdp.wait_js("location.hash === '#/test-sb'", timeout=10)
         run_checks(cdp, 'after import')
         ok('after import: active is test-sb', cdp.eval('songbookTest.getActive().id') == 'test-sb')
@@ -107,22 +107,22 @@ def main():
 
         # persistence across reload
         cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw#/test-sb'})
-        cdp.wait_js('!!(window.songbookTest && songbookTest.allSongbooks().length === 2)', timeout=30)
+        cdp.wait_js('!!(window.songbookTest && songbookTest.allSongbooks().length === 3)', timeout=30)
         run_checks(cdp, 'after reload')
         ok('after reload: active test-sb', cdp.eval('songbookTest.getActive().id') == 'test-sb')
 
         # removal
         cdp.eval("window.confirm = function(){ return true; };")
         cdp.eval("document.getElementById('removeSongsBtn').click()", await_promise=False)
-        cdp.wait_js("songbookTest.allSongbooks().length === 1", timeout=10)
-        ok('after remove: one songbook',
-           cdp.eval("songbookTest.allSongbooks().map(s=>s.id).join(',')") == 'krakow-ukulele')
+        cdp.wait_js("songbookTest.allSongbooks().length === 2", timeout=10)
+        ok('after remove: import gone, bundled kept',
+           cdp.eval("songbookTest.allSongbooks().map(s=>s.id).join(',')") == 'krakow-ukulele,polska-gurom')
 
         # reload confirms removal persisted
         cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
         cdp.wait_js('!!(window.songbookTest && songbookTest.getActive())', timeout=30)
-        ok('after remove+reload: one songbook',
-           cdp.eval("songbookTest.allSongbooks().length") == 1)
+        ok('after remove+reload: import does not return',
+           cdp.eval("songbookTest.allSongbooks().length") == 2)
 
         n_fail = 0
         for name, passed, detail in results:

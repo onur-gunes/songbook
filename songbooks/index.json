@@ -6,6 +6,13 @@
       "description": "198 songs from Krakow Ukulele & Sing Tuesdays.",
       "instrument": "ukulele",
       "file": "krakow-ukulele.json"
+    },
+    {
+      "id": "polska-gurom",
+      "name": "POLSKA GUROM",
+      "description": "Polskie klasyki do wspólnego grania.",
+      "instrument": "ukulele",
+      "file": "polska-gurom.json"
     }
   ]
 }

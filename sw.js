@@ -1,7 +1,7 @@
 /* Songbook service worker — app-shell cache + stale-while-revalidate. */
 'use strict';
 
-var VERSION = 'v4';
+var VERSION = 'v5';
 var SHELL = 'songbook-shell-' + VERSION;
 var RUNTIME = 'songbook-runtime-' + VERSION;
 
@@ -18,7 +18,8 @@ var CORE = [
     'images/icon-512.png',
     'images/icon.PNG',
     'images/ukulele-krakow-trans-light.png',
-    'images/ukulele-krakow-trans-dark.png'
+    'images/ukulele-krakow-trans-dark.png',
+    'images/polska-gurom.svg'
 ];
 
 self.addEventListener('install', function (e) {

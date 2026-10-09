@@ -491,11 +491,10 @@ async function main() {
     ok('instrument back to ukulele', win().songbookTest.getInstrument() === 'ukulele');
     ok('instrument persisted', win().localStorage.getItem('songbook:instrument') === '"ukulele"', win().localStorage.getItem('songbook:instrument'));
 
-    // 19c. songbook picker lists the bundled songbook; import controls exist
-    ok('songbook select has bundled option',
-        doc().querySelectorAll('#songbookSelect option').length === 1 &&
-        doc().querySelector('#songbookSelect option').value === 'krakow-ukulele',
-        doc().querySelector('#songbookSelect option') && doc().querySelector('#songbookSelect option').value);
+    // 19c. songbook picker lists the bundled songbooks; import controls exist
+    ok('songbook select lists both bundled lists',
+        [].map.call(doc().querySelectorAll('#songbookSelect option'), o => o.value).join(',') === 'krakow-ukulele,polska-gurom',
+        [].map.call(doc().querySelectorAll('#songbookSelect option'), o => o.value).join(','));
     ok('import button present', !!$('importBtn'));
 
     // 20. no console/page errors overall
