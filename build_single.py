@@ -56,6 +56,20 @@ chords = read('chords.js')
 app = read('app.js')
 songbooks = load_songbooks()
 
+# songbook logos live inside the JSON; inline them as data URIs so the bundle stays self-contained
+def inline_logo(val):
+    if isinstance(val, str) and val.startswith('images/'):
+        p = os.path.join(D, val)
+        if not os.path.exists(p):
+            raise SystemExit('missing image: ' + val)
+        return data_uri(p)
+    return val
+
+for sb in songbooks:
+    for key in ('logo', 'logoDark'):
+        if key in sb:
+            sb[key] = inline_logo(sb[key])
+
 # 1) inline CSS
 if '<link rel="stylesheet" href="style.css">' not in html:
     raise SystemExit('style.css <link> tag not found')
@@ -99,6 +113,8 @@ if bad:
 for chunk, name in [(chords, 'chords.js'), (app, 'app.js'), (songbooks_js, 'songbooks')]:
     if '</script' in chunk.lower():
         raise SystemExit('inline content %s contains a closing script tag sequence' % name)
+if 'images/' in songbooks_js:
+    raise SystemExit('songbooks JSON still references an image path')
 if '</style' in css.lower():
     raise SystemExit('inline style.css contains a closing style tag sequence')
 

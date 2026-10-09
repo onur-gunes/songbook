@@ -1142,8 +1142,6 @@ main {
 @media (max-width: 640px) {
     body { font-size: 15px; }
 
-    .brand-name { display: none; }
-
     .instrument-btn { padding: 0 10px; font-size: 0.78rem; }
 
     main { padding: 16px 12px 40px; }

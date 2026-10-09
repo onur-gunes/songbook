@@ -1,7 +1,7 @@
 /* Songbook service worker — app-shell cache + stale-while-revalidate. */
 'use strict';
 
-var VERSION = 'v2';
+var VERSION = 'v3';
 var SHELL = 'ukb-shell-' + VERSION;
 var RUNTIME = 'ukb-runtime-' + VERSION;
 

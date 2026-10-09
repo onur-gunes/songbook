@@ -3,6 +3,8 @@
  "name": "Krakow Ukulele Songbook",
  "description": "Personal offline songbook - Krakow Ukulele & Sing Tuesdays.",
  "instrument": "ukulele",
+ "logo": "images/ukulele-krakow-trans-light.png",
+ "logoDark": "images/ukulele-krakow-trans-dark.png",
  "songs": [
   {
    "id": "i-can-t-get-no-satisfaction",

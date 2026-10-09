@@ -84,6 +84,17 @@ def main():
         rows = cdp.eval("document.querySelectorAll('#songList .song-row').length")
         ok('after import: 2 rows', rows == 2, rows)
 
+        # brand logo follows the active songbook
+        ok('imported songbook: logo hidden', cdp.eval("document.getElementById('logo').hidden === true"))
+        cdp.eval("var s=document.getElementById('songbookSelect'); s.value='krakow-ukulele'; s.dispatchEvent(new Event('change'));")
+        cdp.wait_js("ukbTest.getActive().id === 'krakow-ukulele'", timeout=10)
+        logo = cdp.eval("({hidden: document.getElementById('logo').hidden, src: document.getElementById('logo').getAttribute('src') || ''})")
+        ok('krakow songbook: krakow logo shown',
+           logo['hidden'] is False and 'ukulele-krakow-trans' in logo['src'], json.dumps(logo))
+        cdp.eval("var s=document.getElementById('songbookSelect'); s.value='test-sb'; s.dispatchEvent(new Event('change'));")
+        cdp.wait_js("ukbTest.getActive().id === 'test-sb'", timeout=10)
+        ok('switch back: logo hidden again', cdp.eval("document.getElementById('logo').hidden === true"))
+
         # open imported song and check sheet/chords render
         cdp.eval("location.hash = '#/test-sb/t1'")
         cdp.wait_js("document.getElementById('songView').hidden === false", timeout=10)

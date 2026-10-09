@@ -38,9 +38,25 @@
         var btn = $('themeToggle');
         btn.textContent = theme === 'dark' ? '☾' : '☀';
         btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-        var logo = $('logo');
-        if (logo) logo.src = logo.getAttribute(theme === 'dark' ? 'data-dark' : 'data-light');
+        applyBrand();
         lsSet(THEME_KEY, theme);
+    }
+
+    /* Brand logo comes from the active songbook; hide it when the songbook has none. */
+    function applyBrand() {
+        var logo = $('logo');
+        if (!logo) return;
+        var light = (active && active.logo) || '';
+        var dark = (active && (active.logoDark || active.logo)) || '';
+        var dark_on = document.documentElement.getAttribute('data-theme') === 'dark';
+        var src = dark_on ? dark : light;
+        if (src) {
+            logo.src = src;
+            logo.hidden = false;
+        } else {
+            logo.hidden = true;
+            logo.removeAttribute('src');
+        }
     }
     function initTheme() {
         var saved = lsGet(THEME_KEY, null);
@@ -133,6 +149,8 @@
             name: name,
             description: String(raw.description || ''),
             instrument: (raw.instrument === 'guitar' || raw.instrument === 'ukulele') ? raw.instrument : 'ukulele',
+            logo: String(raw.logo || ''),
+            logoDark: String(raw.logoDark || ''),
             songs: raw.songs.map(normalizeSong)
         };
     }
@@ -174,6 +192,7 @@
         if (sel && sb) sel.value = sb.id;
         var rm = $('removeSongsBtn');
         if (rm) rm.hidden = !(sb && sb.imported);
+        applyBrand();
     }
 
     function buildSongbookSelect() {

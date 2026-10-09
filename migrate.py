@@ -13,6 +13,8 @@ SRC = os.path.join(D, 'legacy')
 SONGBOOK_ID = 'krakow-ukulele'
 SONGBOOK_NAME = 'Krakow Ukulele Songbook'
 SONGBOOK_DESC = 'Personal offline songbook - Krakow Ukulele & Sing Tuesdays.'
+SONGBOOK_LOGO_LIGHT = 'images/ukulele-krakow-trans-light.png'
+SONGBOOK_LOGO_DARK = 'images/ukulele-krakow-trans-dark.png'
 
 # ---------- helpers ----------
 
@@ -293,6 +295,8 @@ def main():
         'name': SONGBOOK_NAME,
         'description': SONGBOOK_DESC,
         'instrument': 'ukulele',
+        'logo': SONGBOOK_LOGO_LIGHT,
+        'logoDark': SONGBOOK_LOGO_DARK,
         'songs': songs,
     }
     out = json.dumps(songbook, ensure_ascii=False, indent=1) + '\n'
@@ -324,7 +328,7 @@ def main():
     refc = set()
     for s in songs:
         refc.update(s['chords'])
-    chord_files = {f[:-4] for f in os.listdir(os.path.join(D, 'chords')) if f.endswith('.gif')}
+    chord_files = {f[:-4] for f in os.listdir(os.path.join(D, 'legacy', 'chords-gifs')) if f.endswith('.gif')}
     missing_imgs = sorted(refc - chord_files)
     unused_imgs = sorted(chord_files - refc)
     lines.append('referenced chords: %d | image files: %d' % (len(refc), len(chord_files)))
