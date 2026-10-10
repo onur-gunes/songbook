@@ -1801,7 +1801,7 @@ main {
         var yDot = function (f) { return top + (f - lo) * fg - fg / 2; };
         var xStr = function (i) { return strX(i, gap, padX); };
         var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">';
-        var strTop = hasMark ? top - 15 : yWire(lo);
+        var strTop = yWire(lo);
         for (var i = 0; i < num; i++) {
             s += '<line class="st" x1="' + xStr(i) + '" y1="' + strTop + '" x2="' + xStr(i) + '" y2="' + yWire(hi) + '"/>';
         }
