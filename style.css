@@ -1088,14 +1088,6 @@ main {
 
 .notes-status.show { opacity: 1; }
 
-.qr-row {
-    margin-top: 26px;
-    display: flex;
-    justify-content: center;
-}
-
-.qr-row img { opacity: 0.75; }
-
 .site-foot {
     text-align: center;
     color: var(--muted);
