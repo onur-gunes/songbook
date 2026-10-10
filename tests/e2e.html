@@ -469,7 +469,23 @@ async function main() {
     doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
     win().localStorage.removeItem('songbook:chordMode');
 
-    // 13. keyboard: / focuses search in list view
+    // 12j. above mode: lyrics stay continuous (no chord gaps) and chords sit over the syllable
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(300);
+    doc().querySelector('.chord-mode-btn[data-chord-mode="above"]').click(); await wait(30);
+    const fullUnit = Array.from(doc().querySelectorAll('.sheet .ln-unit'))
+        .find(u => u.querySelector('.ln-lyric').textContent === 'I was scared of dentists and the dark,');
+    ok('above lyrics are continuous (single-spaced)', !!fullUnit, '');
+    if (fullUnit) {
+        const cs = Array.from(fullUnit.querySelectorAll('.ln-chords .seg-chord'))
+            .map(c => c.textContent + '@' + Math.round(parseFloat(c.style.left)));
+        ok('above chords sit over their syllable', cs[0] === 'Am@0' && cs[1] === 'G@16' && cs[2] === 'C@33',
+            cs.join(' '));
+    } else {
+        ok('above chords sit over their syllable', false, 'no full verse unit');
+    }
+    doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
+    win().localStorage.removeItem('songbook:chordMode');
     win().location.hash = '';
     await wait(200);
     doc().body.dispatchEvent(new (win().KeyboardEvent)('keydown', { key: '/', bubbles: true }));
