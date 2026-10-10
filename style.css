@@ -1050,20 +1050,36 @@ main {
 }
 
 /* Chords rendered above the lyrics, classic chord-sheet style */
-.sheet.chords-above .line {
-    line-height: 2.25;
+.sheet.chords-above .line.line-stacked {
+    margin: 0.15em 0 0.3em;
 }
 
 .sheet.chords-above .line.is-pre {
     line-height: 1.5;
 }
 
-.sheet.chords-above .seg-chord {
+.sheet.chords-above .ln-chords {
     position: relative;
-    top: -1.05em;
-    font-size: 0.95em;
-    vertical-align: baseline;
-    padding-right: 2ch;
+    height: 1.3em;
+}
+
+.sheet.chords-above .ln-chords .seg-chord {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+    white-space: pre;
+}
+
+.sheet.chords-above .ln-lyric {
+    white-space: pre;
+    min-height: 1.5em;
+    line-height: 1.5;
+}
+
+.sheet.chords-above .line:not(.line-stacked) .seg-chord + .seg-chord {
+    margin-left: 1ch;
 }
 
 .sheet .seg-muted { color: var(--muted); }

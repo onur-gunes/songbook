@@ -412,15 +412,32 @@ async function main() {
         '');
     ok('above mode persisted', win().localStorage.getItem('songbook:chordMode') === 'above',
         win().localStorage.getItem('songbook:chordMode'));
-    const aboveStyle = win().getComputedStyle(doc().querySelector('.sheet.chords-above .seg-chord'));
-    ok('above chords float above the lyrics', aboveStyle.position === 'relative' && parseFloat(aboveStyle.top) < 0,
-        aboveStyle.position + ' / ' + aboveStyle.top);
-    ok('above chords keep width (no collapse)',
-        doc().querySelectorAll('.sheet .line .seg-chord').length > 0 &&
-        Array.from(doc().querySelectorAll('.sheet .line')).filter(l => l.querySelectorAll('.seg-chord').length >= 2)
-            .every(l => { const xs = Array.from(l.querySelectorAll('.seg-chord')).map(c => c.getBoundingClientRect().left);
-                          return xs.every((x, i) => i === 0 || x > xs[i - 1]); }),
-        '');
+    const stacked = Array.from(doc().querySelectorAll('.sheet .line-stacked'));
+    ok('above uses stacked chord overlay on lyric lines', stacked.length > 0, stacked.length);
+    const units = () => Array.from(doc().querySelectorAll('.sheet .ln-unit'));
+    ok('lyrics are continuous (chords separated from text)', units().length > 0 &&
+        units().every(u => u.querySelectorAll('.ln-chords .seg-chord').length === u.querySelectorAll('.ln-chords *').length &&
+            !/\[/.test(u.querySelector('.ln-lyric').textContent)) &&
+        units().some(u => /\s/.test(u.querySelector('.ln-lyric').textContent)), '');
+    const unitsWithChords = units().filter(u => u.querySelectorAll('.ln-chords .seg-chord').length > 0);
+    ok('above chords sit above their lyric', unitsWithChords.length > 0 &&
+        unitsWithChords.every(u => Array.from(u.querySelectorAll('.ln-chords .seg-chord'))
+            .some(c => c.getBoundingClientRect().top < u.querySelector('.ln-lyric').getBoundingClientRect().top)), '');
+    // horizontal alignment: monospace sheet, so chord left (Nch) == N lyric columns
+    const msp = doc().createElement('span');
+    msp.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;';
+    msp.textContent = '00000000000000000000';
+    $('sheet').appendChild(msp);
+    const charW = msp.getBoundingClientRect().width / 20;
+    $('sheet').removeChild(msp);
+    const aligned = unitsWithChords.length > 0 && unitsWithChords.every(u => {
+        const base = u.querySelector('.ln-lyric').getBoundingClientRect().left;
+        return Array.from(u.querySelectorAll('.ln-chords .seg-chord')).every(c => {
+            const n = parseFloat(c.style.left);
+            return Math.abs(c.getBoundingClientRect().left - (base + n * charW)) < 1;
+        });
+    });
+    ok('above chords align with their lyric column', aligned, charW.toFixed(3));
     $('trUp').click(); await wait(30);
     const transposedAbove = chordSpans();
     ok('above transposes without brackets', transposedAbove.length > 0 && transposedAbove.every(t => !/^\[/.test(t)) &&
@@ -433,20 +450,22 @@ async function main() {
         win().localStorage.getItem('songbook:chordMode'));
     win().localStorage.removeItem('songbook:chordMode');
 
-    // 12i. chord-only instrumental lines (no lyrics) must not collapse in above mode
+    // 12i. chord-only instrumental lines (no lyrics) spread like inline in above mode
     win().location.hash = '#/krakow-ukulele/american-idiot';
     await wait(300);
     doc().querySelector('.chord-mode-btn[data-chord-mode="above"]').click(); await wait(30);
+    ok('american-idiot stacked lyric lines present', doc().querySelectorAll('.sheet .line-stacked').length > 0, '');
     const instLine = Array.from(doc().querySelectorAll('.sheet .line'))
-        .find(l => l.querySelectorAll('.seg-chord').length >= 2);
-    const instS = Array.from(instLine.querySelectorAll('.seg-chord'));
+        .find(l => !l.classList.contains('line-stacked') &&
+            Array.from(l.children).filter(c => c.classList.contains('seg-chord')).length >= 2);
+    const instS = Array.from(instLine.children).filter(c => c.classList.contains('seg-chord'));
     const instXs = instS.map(c => c.getBoundingClientRect().left);
     ok('instrumental chords spread across the line', instXs.length >= 2 &&
         instXs.every((x, i) => i === 0 || x > instXs[i - 1]), JSON.stringify(instXs));
     ok('instrumental chord labels unbracketed', instS.every(c => !/^\[/.test(c.textContent)),
         instS.map(c => c.textContent).join('|'));
-    ok('instrumental chords float above the line', instS.every(c =>
-        c.getBoundingClientRect().top < instLine.getBoundingClientRect().top), '');
+    ok('instrumental chords render inline', instS.every(c =>
+        win().getComputedStyle(c).position === 'static'), '');
     doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
     win().localStorage.removeItem('songbook:chordMode');
 

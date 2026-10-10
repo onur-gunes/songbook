@@ -313,6 +313,7 @@
     var transpose = 0;
 
     function renderSheet(song) {
+        if (chordMode === 'above') { renderSheetAbove(song); return; }
         var wrap = $('sheet');
         wrap.textContent = '';
         var frag = document.createDocumentFragment();
@@ -328,7 +329,6 @@
                 var kind = seg[0], val = seg[1];
                 if (kind === 'c') {
                     var cv = transposeChordValue(val, transpose);
-                    if (chordMode === 'above') cv = cv.replace(/^\[([\s\S]*)\]$/, '$1');
                     lineDiv.appendChild(el('span', 'seg-chord', cv));
                 } else if (kind === 'm') {
                     lineDiv.appendChild(el('span', 'seg-muted', val));
@@ -343,6 +343,148 @@
                 } else {
                     lineDiv.appendChild(document.createTextNode(val));
                 }
+            });
+            frag.appendChild(lineDiv);
+        });
+        wrap.appendChild(frag);
+    }
+
+    /* ---- classic chord-sheet rendering (chords above the lyrics) ---- */
+
+    function chordLabel(val) {
+        var cv = transposeChordValue(val, transpose);
+        var m = cv.match(/^\[([\s\S]*)\]$/);
+        return m ? m[1] : cv;
+    }
+
+    function plainText(seg) {
+        var val = seg[1];
+        if (seg[0] === 'y') return val.replace(/<[^>]*>/g, '');
+        return val;
+    }
+
+    function measureCharWidthPx() {
+        var sheet = $('sheet');
+        var tmp = document.createElement('span');
+        tmp.style.position = 'absolute';
+        tmp.style.visibility = 'hidden';
+        tmp.style.whiteSpace = 'pre';
+        tmp.textContent = '00000000000000000000';
+        sheet.appendChild(tmp);
+        var w = tmp.offsetWidth / 20;
+        sheet.removeChild(tmp);
+        return w || 0;
+    }
+
+    function colsPerLine() {
+        var w = measureCharWidthPx();
+        if (!w) return 40;
+        return Math.max(8, Math.floor($('sheet').clientWidth / w));
+    }
+
+    function splitLyric(text, perLine) {
+        var out = [], i = 0, n = text.length;
+        if (n <= perLine) {
+            if (n) out.push([0, n]);
+            return out;
+        }
+        while (i < n) {
+            var rest = text.slice(i);
+            if (rest.length <= perLine) { out.push([i, n]); break; }
+            var win = rest.slice(0, perLine);
+            var sp = win.lastIndexOf(' ');
+            if (sp > 0) { out.push([i, i + sp]); i += sp + 1; }
+            else { out.push([i, i + perLine]); i += perLine; }
+        }
+        return out;
+    }
+
+    function buildAboveLine(line, perLine) {
+        var hasWord = false, L = '', parts = [];
+        line.forEach(function (seg) {
+            if (seg[0] === 'c') return;
+            var t = plainText(seg);
+            parts.push({ kind: seg[0], text: t, start: L.length });
+            L += t;
+            if (/\S/.test(t)) hasWord = true;
+        });
+
+        var chords = [], X = 0, prevEnd = 0, lastChord = false;
+        line.forEach(function (seg) {
+            if (seg[0] === 'c') {
+                var label = chordLabel(seg[1]);
+                var col = lastChord ? Math.max(X, prevEnd) : X;
+                chords.push({ col: col, label: label });
+                prevEnd = col + label.length;
+                lastChord = true;
+            } else {
+                X += plainText(seg).length;
+                lastChord = false;
+            }
+        });
+
+        var div = el('div', 'line line-stacked');
+        var ranges = splitLyric(L, perLine);
+        if (!ranges.length) ranges = [[0, L.length]];
+        ranges.forEach(function (r) {
+            var unit = el('div', 'ln-unit');
+            var chor = el('div', 'ln-chords');
+            chords.forEach(function (c) {
+                if (c.col >= r[0] && c.col < r[1]) {
+                    var sp = el('span', 'seg-chord', c.label);
+                    sp.style.left = (c.col - r[0]) + 'ch';
+                    chor.appendChild(sp);
+                }
+            });
+            unit.appendChild(chor);
+            var ly = el('div', 'ln-lyric');
+            parts.forEach(function (p) {
+                var cs = Math.max(p.start, r[0]), ce = Math.min(p.start + p.text.length, r[1]);
+                if (cs >= ce) return;
+                var txt = p.text.slice(cs - p.start, ce - p.start);
+                if (!txt) return;
+                var node;
+                if (p.kind === 'm') node = el('span', 'seg-muted', txt);
+                else if (p.kind === 'b') node = el('span', 'seg-bold', txt);
+                else if (p.kind === 'i') node = el('span', 'seg-italic', txt);
+                else if (p.kind === 'y') node = el('span', 'seg-note', txt);
+                else node = document.createTextNode(txt);
+                ly.appendChild(node);
+            });
+            unit.appendChild(ly);
+            div.appendChild(unit);
+        });
+        return div;
+    }
+
+    function renderSheetAbove(song) {
+        var wrap = $('sheet');
+        wrap.textContent = '';
+        var frag = document.createDocumentFragment();
+        var perLine = colsPerLine();
+        (song.sheet || []).forEach(function (line) {
+            var lineDiv = el('div', 'line');
+            var isPre = line.length === 1 && line[0][0] === 'p';
+            if (isPre) {
+                lineDiv.classList.add('is-pre');
+                lineDiv.textContent = line[0][1];
+                frag.appendChild(lineDiv);
+                return;
+            }
+            var hasChord = line.some(function (s) { return s[0] === 'c'; });
+            var hasWord = line.some(function (s) { return s[0] !== 'c' && /\S/.test(plainText(s)); });
+            if (hasChord && hasWord) {
+                frag.appendChild(buildAboveLine(line, perLine));
+                return;
+            }
+            line.forEach(function (seg) {
+                var kind = seg[0], val = seg[1];
+                if (kind === 'c') { lineDiv.appendChild(el('span', 'seg-chord', chordLabel(val))); }
+                else if (kind === 'm') { lineDiv.appendChild(el('span', 'seg-muted', val)); }
+                else if (kind === 'b') { lineDiv.appendChild(el('span', 'seg-bold', val)); }
+                else if (kind === 'i') { lineDiv.appendChild(el('span', 'seg-italic', val)); }
+                else if (kind === 'y') { var note = el('span', 'seg-note'); note.innerHTML = val; lineDiv.appendChild(note); }
+                else { lineDiv.appendChild(document.createTextNode(val)); }
             });
             frag.appendChild(lineDiv);
         });
@@ -870,6 +1012,13 @@
             if (!scrollState.playing || scrollState.lastY === null) return;
             if (Math.abs(window.pageYOffset - scrollState.lastY) > 2) reanchorKeepSpeed();
         }, { passive: true });
+
+        var sheetResizeT = null;
+        window.addEventListener('resize', function () {
+            if (chordMode !== 'above' || !currentSong) return;
+            clearTimeout(sheetResizeT);
+            sheetResizeT = setTimeout(function () { renderSheet(currentSong); }, 150);
+        }, { passive: true });
     }
 
     function saveNotes() {
@@ -999,6 +1148,7 @@
         if (v === textSize) { applyTextSize(); return; }
         textSize = v;
         applyTextSize();
+        if (chordMode === 'above' && currentSong) renderSheet(currentSong);
         if (active && currentSong) {
             try { window.localStorage.setItem(sizeKey(active.id, currentSong.id), String(textSize)); } catch (e) { /* ignore */ }
         }
