@@ -486,6 +486,23 @@ async function main() {
     }
     doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
     win().localStorage.removeItem('songbook:chordMode');
+
+    // 12k. above mode: consecutive chords (instrumental bridge) are space-separated
+    win().location.hash = '#/krakow-ukulele/lost-on-you';
+    await wait(300);
+    doc().querySelector('.chord-mode-btn[data-chord-mode="above"]').click(); await wait(30);
+    const bridgeUnit = Array.from(doc().querySelectorAll('.sheet .line-stacked'))
+        .find(l => Array.from(l.querySelectorAll('.ln-chords .seg-chord'))
+            .map(c => c.textContent).join(',') === 'Am,D,Em,C');
+    ok('lost-on-you bridge chords present', !!bridgeUnit, '');
+    if (bridgeUnit) {
+        const cs = Array.from(bridgeUnit.querySelectorAll('.ln-chords .seg-chord'))
+            .map(c => c.textContent + '@' + Math.round(parseFloat(c.style.left)));
+        ok('consecutive chords are space-separated (not AmDEmC)',
+            cs.join(' ') === 'Am@0 D@3 Em@5 C@8', cs.join(' '));
+    }
+    doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
+    win().localStorage.removeItem('songbook:chordMode');
     win().location.hash = '';
     await wait(200);
     doc().body.dispatchEvent(new (win().KeyboardEvent)('keydown', { key: '/', bubbles: true }));

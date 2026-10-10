@@ -2331,7 +2331,7 @@ main {
         line.forEach(function (seg) {
             if (seg[0] === 'c') {
                 var label = chordLabel(seg[1]);
-                var col = prevWasChord ? Math.max(L.length, prevEnd) : L.length;
+                var col = prevWasChord ? Math.max(L.length, prevEnd + 1) : L.length;
                 chords.push({ col: col, label: label });
                 prevEnd = col + label.length;
                 prevWasChord = true;
