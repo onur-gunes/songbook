@@ -1051,7 +1051,7 @@ main {
 
 /* Chords rendered above the lyrics, classic chord-sheet style */
 .sheet.chords-above .line {
-    line-height: 2.2;
+    line-height: 2.25;
 }
 
 .sheet.chords-above .line.is-pre {
@@ -1059,14 +1059,11 @@ main {
 }
 
 .sheet.chords-above .seg-chord {
-    display: inline-block;
-    width: 0;
-    overflow: visible;
-    white-space: nowrap;
     position: relative;
-    top: -1.2em;
-    font-size: 0.8em;
+    top: -1.05em;
+    font-size: 0.95em;
     vertical-align: baseline;
+    padding-right: 2ch;
 }
 
 .sheet .seg-muted { color: var(--muted); }

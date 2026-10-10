@@ -413,8 +413,14 @@ async function main() {
     ok('above mode persisted', win().localStorage.getItem('songbook:chordMode') === 'above',
         win().localStorage.getItem('songbook:chordMode'));
     const aboveStyle = win().getComputedStyle(doc().querySelector('.sheet.chords-above .seg-chord'));
-    ok('above chords float above the lyrics', aboveStyle.display === 'inline-block' && parseFloat(aboveStyle.top) < 0,
-        aboveStyle.display + ' / ' + aboveStyle.top);
+    ok('above chords float above the lyrics', aboveStyle.position === 'relative' && parseFloat(aboveStyle.top) < 0,
+        aboveStyle.position + ' / ' + aboveStyle.top);
+    ok('above chords keep width (no collapse)',
+        doc().querySelectorAll('.sheet .line .seg-chord').length > 0 &&
+        Array.from(doc().querySelectorAll('.sheet .line')).filter(l => l.querySelectorAll('.seg-chord').length >= 2)
+            .every(l => { const xs = Array.from(l.querySelectorAll('.seg-chord')).map(c => c.getBoundingClientRect().left);
+                          return xs.every((x, i) => i === 0 || x > xs[i - 1]); }),
+        '');
     $('trUp').click(); await wait(30);
     const transposedAbove = chordSpans();
     ok('above transposes without brackets', transposedAbove.length > 0 && transposedAbove.every(t => !/^\[/.test(t)) &&
@@ -425,6 +431,23 @@ async function main() {
         chordSpans().every(t => /^\[/.test(t)), chordSpans().slice(0, 3).join(' '));
     ok('mode persisted back', win().localStorage.getItem('songbook:chordMode') === 'inline',
         win().localStorage.getItem('songbook:chordMode'));
+    win().localStorage.removeItem('songbook:chordMode');
+
+    // 12i. chord-only instrumental lines (no lyrics) must not collapse in above mode
+    win().location.hash = '#/krakow-ukulele/american-idiot';
+    await wait(300);
+    doc().querySelector('.chord-mode-btn[data-chord-mode="above"]').click(); await wait(30);
+    const instLine = Array.from(doc().querySelectorAll('.sheet .line'))
+        .find(l => l.querySelectorAll('.seg-chord').length >= 2);
+    const instS = Array.from(instLine.querySelectorAll('.seg-chord'));
+    const instXs = instS.map(c => c.getBoundingClientRect().left);
+    ok('instrumental chords spread across the line', instXs.length >= 2 &&
+        instXs.every((x, i) => i === 0 || x > instXs[i - 1]), JSON.stringify(instXs));
+    ok('instrumental chord labels unbracketed', instS.every(c => !/^\[/.test(c.textContent)),
+        instS.map(c => c.textContent).join('|'));
+    ok('instrumental chords float above the line', instS.every(c =>
+        c.getBoundingClientRect().top < instLine.getBoundingClientRect().top), '');
+    doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
     win().localStorage.removeItem('songbook:chordMode');
 
     // 13. keyboard: / focuses search in list view
