@@ -328,7 +328,7 @@
             line.forEach(function (seg) {
                 var kind = seg[0], val = seg[1];
                 if (kind === 'c') {
-                    var cv = stripBeats(transposeChordValue(val, transpose));
+                    var cv = transposeChordValue(val, transpose);
                     lineDiv.appendChild(el('span', 'seg-chord', cv));
                 } else if (kind === 'm') {
                     lineDiv.appendChild(el('span', 'seg-muted', val));
@@ -351,48 +351,10 @@
 
     /* ---- classic chord-sheet rendering (chords above the lyrics) ---- */
 
-    // A chord token may carry a beat count, e.g. "[Am:4]" = hold Am for 4 beats.
-    var MAX_BEATS = 16;
-
-    // Drops the beat suffix but keeps the brackets, for inline display.
-    function stripBeats(val) {
-        return val.replace(/:\s*\d+/g, '');
-    }
-
-    // Transposed chord display name plus its beat count, brackets removed.
-    function chordParts(val) {
+    function chordLabel(val) {
         var cv = transposeChordValue(val, transpose);
         var m = cv.match(/^\[([\s\S]*)\]$/);
-        var inner = (m ? m[1] : cv).trim();
-        var beats = 0;
-        inner = inner.replace(/\s*:\s*(\d+)/g, function (_, n) {
-            beats = Math.max(beats, parseInt(n, 10) || 0);
-            return '';
-        }).trim();
-        return { label: inner, beats: beats };
-    }
-
-    function beatsText(n) {
-        n = Math.min(n, MAX_BEATS);
-        var s = '';
-        for (var i = 0; i < n; i++) s += '\u25cf';
-        return s;
-    }
-
-    function beatsShown(p) { return beatsOn && p.beats >= 1; }
-
-    function chordWidth(val) {
-        var p = chordParts(val);
-        return p.label.length + (beatsShown(p) ? 1 + Math.min(p.beats, MAX_BEATS) : 0);
-    }
-
-    // A chord <span>, with beat dots appended when beats are enabled.
-    function chordSpan(val) {
-        var p = chordParts(val);
-        var span = el('span', 'seg-chord');
-        span.appendChild(document.createTextNode(p.label));
-        if (beatsShown(p)) span.appendChild(el('span', 'seg-beats', ' ' + beatsText(p.beats)));
-        return span;
+        return m ? m[1] : cv;
     }
 
     function plainText(seg) {
@@ -441,9 +403,10 @@
         var hasWord = false, L = '', parts = [], chords = [], prevEnd = 0, prevWasChord = false;
         line.forEach(function (seg) {
             if (seg[0] === 'c') {
+                var label = chordLabel(seg[1]);
                 var col = prevWasChord ? Math.max(L.length, prevEnd) : L.length;
-                chords.push({ col: col, val: seg[1] });
-                prevEnd = col + chordWidth(seg[1]);
+                chords.push({ col: col, label: label });
+                prevEnd = col + label.length;
                 prevWasChord = true;
                 return;
             }
@@ -466,7 +429,7 @@
             var chor = el('div', 'ln-chords');
             chords.forEach(function (c) {
                 if (c.col >= r[0] && c.col < r[1]) {
-                    var sp = chordSpan(c.val);
+                    var sp = el('span', 'seg-chord', c.label);
                     sp.style.left = (c.col - r[0]) + 'ch';
                     chor.appendChild(sp);
                 }
@@ -514,7 +477,7 @@
             }
             line.forEach(function (seg) {
                 var kind = seg[0], val = seg[1];
-                if (kind === 'c') { lineDiv.appendChild(chordSpan(val)); }
+                if (kind === 'c') { lineDiv.appendChild(el('span', 'seg-chord', chordLabel(val))); }
                 else if (kind === 'm') { lineDiv.appendChild(el('span', 'seg-muted', val)); }
                 else if (kind === 'b') { lineDiv.appendChild(el('span', 'seg-bold', val)); }
                 else if (kind === 'i') { lineDiv.appendChild(el('span', 'seg-italic', val)); }
@@ -1036,12 +999,8 @@
         Array.prototype.forEach.call(document.querySelectorAll('.chord-mode-btn'), function (b) {
             b.addEventListener('click', function () { setChordMode(b.dataset.chordMode); });
         });
-        Array.prototype.forEach.call(document.querySelectorAll('.beats-btn'), function (b) {
-            b.addEventListener('click', function () { setBeats(b.dataset.beats === 'on'); });
-        });
         applyChordSettings();
         applyChordMode();
-        applyBeats();
         $('sheet').addEventListener('pointerdown', sheetPointerDown);
         $('sheet').addEventListener('pointermove', sheetPointerMove);
         $('sheet').addEventListener('pointerup', sheetPointerEnd);
@@ -1078,7 +1037,6 @@
     var chordSize = 1;
     var chordPin = true;
     var chordMode = 'inline';
-    var beatsOn = false;
     try {
         var _cs = parseFloat(window.localStorage.getItem(NS + ':chordSize'));
         if (_cs >= 0.6 && _cs <= 1.5) chordSize = Math.round(_cs * 10) / 10;
@@ -1088,7 +1046,6 @@
         var _cm = window.localStorage.getItem(NS + ':chordMode');
         if (_cm === 'inline' || _cm === 'above') chordMode = _cm;
     } catch (e) { /* ignore */ }
-    try { beatsOn = window.localStorage.getItem(NS + ':beats') === '1'; } catch (e) { /* ignore */ }
 
     function applyChordSettings() {
         document.documentElement.style.setProperty('--chord-size', chordSize);
@@ -1127,22 +1084,6 @@
         try { window.localStorage.setItem(NS + ':chordMode', chordMode); } catch (e) { /* ignore */ }
         applyChordMode();
         if (currentSong) renderSheet(currentSong);
-    }
-
-    // Beat counts are an above-the-lyrics affordance only; the toggle just hides them.
-    function applyBeats() {
-        Array.prototype.forEach.call(document.querySelectorAll('.beats-btn'), function (b) {
-            var on = (b.dataset.beats === 'on') === beatsOn;
-            b.classList.toggle('active', on);
-            b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        });
-    }
-
-    function setBeats(on) {
-        beatsOn = !!on;
-        try { window.localStorage.setItem(NS + ':beats', beatsOn ? '1' : '0'); } catch (e) { /* ignore */ }
-        applyBeats();
-        if (currentSong && chordMode === 'above') renderSheet(currentSong);
     }
 
     var pinch = { pts: {}, active: false, base: 0 };
