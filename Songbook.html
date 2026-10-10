@@ -2994,7 +2994,9 @@ main {
             sb = bySb[decodeURIComponent(m[1])];
             if (m[2]) songId = decodeURIComponent(m[2]);
         }
-        if (!sb) sb = defaultSongbook();
+        // A bare "#/" means "back to the song list I'm browsing" — keep the
+        // current songbook instead of snapping to the default starter one.
+        if (!sb) sb = (active && bySb[active.id]) || defaultSongbook();
         if (!sb) return;
 
         setActive(sb);
