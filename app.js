@@ -519,15 +519,23 @@
         $('songList').classList.toggle('is-compact', state.compact);
     }
 
+    // Diacritic-insensitive fold: typing "pszczolka" finds "Pszczółka".
+    function fold(s) {
+        return String(s).toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\u0142/g, 'l');
+    }
+
     function filteredSongs() {
-        var q = state.q.trim().toLowerCase();
+        var q = fold(state.q.trim());
         var sbId = active ? active.id : '';
         var out = activeSongs().filter(function (s) {
             if (state.levels.size && !state.levels.has(s.level)) return false;
             if (state.isNew && !s.new) return false;
             if (state.favOnly && !isFav(sbId, s.id)) return false;
             if (q) {
-                var hay = (s.title + ' ' + s.artist).toLowerCase();
+                var hay = fold(s.title + ' ' + s.artist);
                 if (hay.indexOf(q) === -1) return false;
             }
             return true;
