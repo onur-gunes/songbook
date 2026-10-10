@@ -139,6 +139,9 @@
     function parse(name) {
         if (name == null) return null;
         var key = String(name).trim();
+        // A trailing ":N" marks how many beats the chord is held (e.g. "Am:4");
+        // it is display metadata, not part of the chord name.
+        key = key.replace(/\s*:\s*\d+\s*$/, '');
         if (!key || key === 'NC' || /^(stop|pause|riff|muted)$/i.test(key)) return null;
         var slash = splitSlash(key);
         var m = slash.head.match(/^([A-G])(sharp|flat|#|b)?(.*)$/);

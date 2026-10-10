@@ -62,6 +62,10 @@ or copy that one file to a phone. Everything is inlined; no network is used.
   transpose too).
 - Chord diagrams are generated on the fly by **chords.js** — one consistent SVG
   per chart, for both instruments, including chords never in the original artwork.
+- Chord placement: **In text** shows `[Am]` inline, **Above** shows the chord
+  over the lyric. In Above mode a **Beats** On/Off toggle draws how many beats
+  each chord is held, e.g. `Am ●●●●`, so you can follow a song you don't know.
+  Beat values are authored per chord in the source (see below).
 - Click a strip chord to open the **voicing chooser**: every playable voicing
   (lowest to highest fret) with a live preview; picks are remembered per chord.
 - Per-song text size Aa (70%–150%, live, stored per song; two-finger pinch works).
@@ -87,7 +91,7 @@ or copy that one file to a phone. Everything is inlined; no network is used.
       "new": false,
       "dur": 4,                // minutes, drives auto-scroll
       "chords": ["Am", "G"],
-      "sheet": [ [ ["c", "[Am]"], ["x", " lyric"], ... ], [] ]   // lines of [kind, text]
+      "sheet": [ [ ["c", "[Am:4]"], ["x", " lyric"], ... ], [] ]   // lines of [kind, text]
     }
   ]
 }
@@ -97,6 +101,12 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 `i` italic, `y` comment, `p` preformatted/tab. Personal data (favorites, notes,
 recent, theme, scroll speed, voicing picks) lives only in `localStorage`; the
 imported songbook JSON lives in `IndexedDB`.
+
+A chord token may carry a **beat count**: `[Am:4]` means hold Am for 4 beats.
+The beat suffix is stripped from the **In text** view and drawn as dots in the
+**Above** view when the Beats toggle is on. Beat counts are authored in
+`migrate.py` (`BEATS`, keyed by song id) so they survive regeneration; the value
+can be an int (every chord), or a dict like `{"G": 2, "D": 2, "Am": 4, "C": 4}`.
 
 ## Regenerate the bundled data
 

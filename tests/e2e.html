@@ -486,6 +486,35 @@ async function main() {
     }
     doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
     win().localStorage.removeItem('songbook:chordMode');
+
+    // 12k. beat counts: above-mode dots behind a toggle; inline stays clean
+    win().location.hash = '#/krakow-ukulele/knocking-on-heaven-s-door';
+    await wait(300);
+    const inlineBeats = chordSpans();
+    ok('inline hides beat counts', inlineBeats.every(t => !/:\d/.test(t)) && inlineBeats.indexOf('[G]') >= 0,
+        inlineBeats.slice(0, 4).join(' '));
+    doc().querySelector('.chord-mode-btn[data-chord-mode="above"]').click(); await wait(30);
+    ok('beats off by default', doc().querySelectorAll('.sheet .seg-beats').length === 0 &&
+        doc().querySelector('.beats-btn[data-beats="off"]').getAttribute('aria-pressed') === 'true', '');
+    doc().querySelector('.beats-btn[data-beats="on"]').click(); await wait(30);
+    const beatSpans = Array.from(doc().querySelectorAll('.sheet .seg-chord .seg-beats'))
+        .map(b => b.textContent.replace(/\s+/g, ''));
+    ok('beats on draws dots', beatSpans.length > 0 && beatSpans.every(t => /^\u25cf+$/.test(t)),
+        beatSpans.slice(0, 5).join(' '));
+    const chordsWithBeats = Array.from(doc().querySelectorAll('.sheet .seg-chord'))
+        .map(s => s.textContent.replace(/\s+/g, ' ').trim());
+    ok('beat counts match the chart (G2 D2 Am4 C4)',
+        chordsWithBeats.indexOf('G \u25cf\u25cf') >= 0 && chordsWithBeats.indexOf('D \u25cf\u25cf') >= 0 &&
+        chordsWithBeats.indexOf('Am \u25cf\u25cf\u25cf\u25cf') >= 0 && chordsWithBeats.indexOf('C \u25cf\u25cf\u25cf\u25cf') >= 0,
+        chordsWithBeats.slice(0, 6).join(' | '));
+    ok('beats persisted', win().localStorage.getItem('songbook:beats') === '1',
+        win().localStorage.getItem('songbook:beats'));
+    doc().querySelector('.beats-btn[data-beats="off"]').click(); await wait(30);
+    ok('beats off clears dots', doc().querySelectorAll('.sheet .seg-beats').length === 0, '');
+    doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
+    win().localStorage.removeItem('songbook:beats');
+    win().localStorage.removeItem('songbook:chordMode');
+
     win().location.hash = '';
     await wait(200);
     doc().body.dispatchEvent(new (win().KeyboardEvent)('keydown', { key: '/', bubbles: true }));

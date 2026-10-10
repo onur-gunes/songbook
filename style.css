@@ -1049,6 +1049,15 @@ main {
     font-weight: 700;
 }
 
+/* Beat dots appended to a chord, e.g. Am ●●●● (above-the-lyrics mode only) */
+.sheet .seg-beats {
+    color: var(--muted);
+    font-weight: 400;
+    font-size: 0.66em;
+    letter-spacing: 0.08em;
+    vertical-align: middle;
+}
+
 /* Chords rendered above the lyrics, classic chord-sheet style */
 .sheet.chords-above .line.line-stacked {
     margin: 0.15em 0 0.3em;
