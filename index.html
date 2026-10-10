@@ -127,8 +127,15 @@
                     <button id="sizeUp" class="step-btn" type="button" aria-label="Bigger text">+</button>
                 </div>
             </div>
-            <div class="tool-group" role="group" aria-label="Chord diagram size">
+            <div class="tool-group" role="group" aria-label="Chord placement">
                 <span class="tool-label">Chords</span>
+                <div class="seg-group chord-mode-group" role="group" aria-label="How chords are displayed">
+                    <button class="chord-mode-btn active" data-chord-mode="inline" type="button" aria-pressed="true">In text</button>
+                    <button class="chord-mode-btn" data-chord-mode="above" type="button" aria-pressed="false">Above</button>
+                </div>
+            </div>
+            <div class="tool-group" role="group" aria-label="Chord diagram size">
+                <span class="tool-label">Size</span>
                 <div class="stepper">
                     <button id="chordSizeDown" class="step-btn" type="button" aria-label="Smaller chord diagrams">−</button>
                     <span id="chordSizeValue" class="step-value" aria-live="polite">100%</span>

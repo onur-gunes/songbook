@@ -241,7 +241,7 @@ main {
     gap: 6px;
 }
 
-.filter-btn, .sort-btn {
+.filter-btn, .sort-btn, .chord-mode-btn {
     border: 1px solid transparent;
     background: transparent;
     color: var(--muted);
@@ -253,9 +253,9 @@ main {
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.filter-btn:hover, .sort-btn:hover { background: var(--surface); color: var(--text); }
+.filter-btn:hover, .sort-btn:hover, .chord-mode-btn:hover { background: var(--surface); color: var(--text); }
 
-.filter-btn.active, .sort-btn.active {
+.filter-btn.active, .sort-btn.active, .chord-mode-btn.active {
     background: var(--accent);
     color: #fff;
 }
@@ -290,16 +290,19 @@ main {
     background: var(--surface);
 }
 
-.seg-group .sort-btn {
+.seg-group .sort-btn,
+.seg-group .chord-mode-btn {
     border-radius: 0;
     padding: 0 14px;
     height: auto;
     line-height: 1;
 }
 
-.seg-group .sort-btn + .sort-btn { border-left: 1px solid var(--line); }
+.seg-group .sort-btn + .sort-btn,
+.seg-group .chord-mode-btn + .chord-mode-btn { border-left: 1px solid var(--line); }
 
-.seg-group .sort-btn.active { border-left-color: var(--accent); }
+.seg-group .sort-btn.active,
+.seg-group .chord-mode-btn.active { border-left-color: var(--accent); }
 
 .rail-btn {
     border: 1px solid var(--line);
@@ -1058,6 +1061,26 @@ main {
     font-weight: 700;
 }
 
+/* Chords rendered above the lyrics, classic chord-sheet style */
+.sheet.chords-above .line {
+    line-height: 2.2;
+}
+
+.sheet.chords-above .line.is-pre {
+    line-height: 1.5;
+}
+
+.sheet.chords-above .seg-chord {
+    display: inline-block;
+    width: 0;
+    overflow: visible;
+    white-space: nowrap;
+    position: relative;
+    top: -1.2em;
+    font-size: 0.8em;
+    vertical-align: baseline;
+}
+
 .sheet .seg-muted { color: var(--muted); }
 
 .sheet .seg-bold { font-weight: 700; }
@@ -1177,7 +1200,7 @@ main {
 
     .list-rail { gap: 8px 14px; padding: 8px 10px; }
 
-    .filter-btn, .sort-btn { padding: 7px 10px; font-size: 0.82rem; }
+    .filter-btn, .sort-btn, .chord-mode-btn { padding: 7px 10px; font-size: 0.82rem; }
 
     .song-link {
         grid-template-columns: 34px minmax(0, 1fr) auto;
@@ -1321,8 +1344,15 @@ main {
                     <button id="sizeUp" class="step-btn" type="button" aria-label="Bigger text">+</button>
                 </div>
             </div>
-            <div class="tool-group" role="group" aria-label="Chord diagram size">
+            <div class="tool-group" role="group" aria-label="Chord placement">
                 <span class="tool-label">Chords</span>
+                <div class="seg-group chord-mode-group" role="group" aria-label="How chords are displayed">
+                    <button class="chord-mode-btn active" data-chord-mode="inline" type="button" aria-pressed="true">In text</button>
+                    <button class="chord-mode-btn" data-chord-mode="above" type="button" aria-pressed="false">Above</button>
+                </div>
+            </div>
+            <div class="tool-group" role="group" aria-label="Chord diagram size">
+                <span class="tool-label">Size</span>
                 <div class="stepper">
                     <button id="chordSizeDown" class="step-btn" type="button" aria-label="Smaller chord diagrams">−</button>
                     <span id="chordSizeValue" class="step-value" aria-live="polite">100%</span>
@@ -2211,7 +2241,9 @@ main {
             line.forEach(function (seg) {
                 var kind = seg[0], val = seg[1];
                 if (kind === 'c') {
-                    lineDiv.appendChild(el('span', 'seg-chord', transposeChordValue(val, transpose)));
+                    var cv = transposeChordValue(val, transpose);
+                    if (chordMode === 'above') cv = cv.replace(/^\[([\s\S]*)\]$/, '$1');
+                    lineDiv.appendChild(el('span', 'seg-chord', cv));
                 } else if (kind === 'm') {
                     lineDiv.appendChild(el('span', 'seg-muted', val));
                 } else if (kind === 'b') {
@@ -2738,7 +2770,11 @@ main {
             try { window.localStorage.setItem(NS + ':chordPin', chordPin ? '1' : '0'); } catch (e) { /* ignore */ }
             applyChordSettings();
         });
+        Array.prototype.forEach.call(document.querySelectorAll('.chord-mode-btn'), function (b) {
+            b.addEventListener('click', function () { setChordMode(b.dataset.chordMode); });
+        });
         applyChordSettings();
+        applyChordMode();
         $('sheet').addEventListener('pointerdown', sheetPointerDown);
         $('sheet').addEventListener('pointermove', sheetPointerMove);
         $('sheet').addEventListener('pointerup', sheetPointerEnd);
@@ -2767,11 +2803,16 @@ main {
     var textSize = 1;
     var chordSize = 1;
     var chordPin = true;
+    var chordMode = 'inline';
     try {
         var _cs = parseFloat(window.localStorage.getItem(NS + ':chordSize'));
         if (_cs >= 0.6 && _cs <= 1.5) chordSize = Math.round(_cs * 10) / 10;
     } catch (e) { /* ignore */ }
     try { chordPin = window.localStorage.getItem(NS + ':chordPin') !== '0'; } catch (e) { /* ignore */ }
+    try {
+        var _cm = window.localStorage.getItem(NS + ':chordMode');
+        if (_cm === 'inline' || _cm === 'above') chordMode = _cm;
+    } catch (e) { /* ignore */ }
 
     function applyChordSettings() {
         document.documentElement.style.setProperty('--chord-size', chordSize);
@@ -2792,6 +2833,24 @@ main {
         chordSize = Math.min(1.5, Math.max(0.6, Math.round(v * 10) / 10));
         applyChordSettings();
         try { window.localStorage.setItem(NS + ':chordSize', String(chordSize)); } catch (e) { /* ignore */ }
+    }
+
+    function applyChordMode() {
+        $('sheet').classList.toggle('chords-above', chordMode === 'above');
+        Array.prototype.forEach.call(document.querySelectorAll('.chord-mode-btn'), function (b) {
+            var on = b.dataset.chordMode === chordMode;
+            b.classList.toggle('active', on);
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+    }
+
+    function setChordMode(mode) {
+        if (mode !== 'inline' && mode !== 'above') return;
+        if (mode === chordMode) return;
+        chordMode = mode;
+        try { window.localStorage.setItem(NS + ':chordMode', chordMode); } catch (e) { /* ignore */ }
+        applyChordMode();
+        if (currentSong) renderSheet(currentSong);
     }
 
     var pinch = { pts: {}, active: false, base: 0 };

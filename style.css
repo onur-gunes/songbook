@@ -229,7 +229,7 @@ main {
     gap: 6px;
 }
 
-.filter-btn, .sort-btn {
+.filter-btn, .sort-btn, .chord-mode-btn {
     border: 1px solid transparent;
     background: transparent;
     color: var(--muted);
@@ -241,9 +241,9 @@ main {
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.filter-btn:hover, .sort-btn:hover { background: var(--surface); color: var(--text); }
+.filter-btn:hover, .sort-btn:hover, .chord-mode-btn:hover { background: var(--surface); color: var(--text); }
 
-.filter-btn.active, .sort-btn.active {
+.filter-btn.active, .sort-btn.active, .chord-mode-btn.active {
     background: var(--accent);
     color: #fff;
 }
@@ -278,16 +278,19 @@ main {
     background: var(--surface);
 }
 
-.seg-group .sort-btn {
+.seg-group .sort-btn,
+.seg-group .chord-mode-btn {
     border-radius: 0;
     padding: 0 14px;
     height: auto;
     line-height: 1;
 }
 
-.seg-group .sort-btn + .sort-btn { border-left: 1px solid var(--line); }
+.seg-group .sort-btn + .sort-btn,
+.seg-group .chord-mode-btn + .chord-mode-btn { border-left: 1px solid var(--line); }
 
-.seg-group .sort-btn.active { border-left-color: var(--accent); }
+.seg-group .sort-btn.active,
+.seg-group .chord-mode-btn.active { border-left-color: var(--accent); }
 
 .rail-btn {
     border: 1px solid var(--line);
@@ -1046,6 +1049,26 @@ main {
     font-weight: 700;
 }
 
+/* Chords rendered above the lyrics, classic chord-sheet style */
+.sheet.chords-above .line {
+    line-height: 2.2;
+}
+
+.sheet.chords-above .line.is-pre {
+    line-height: 1.5;
+}
+
+.sheet.chords-above .seg-chord {
+    display: inline-block;
+    width: 0;
+    overflow: visible;
+    white-space: nowrap;
+    position: relative;
+    top: -1.2em;
+    font-size: 0.8em;
+    vertical-align: baseline;
+}
+
 .sheet .seg-muted { color: var(--muted); }
 
 .sheet .seg-bold { font-weight: 700; }
@@ -1165,7 +1188,7 @@ main {
 
     .list-rail { gap: 8px 14px; padding: 8px 10px; }
 
-    .filter-btn, .sort-btn { padding: 7px 10px; font-size: 0.82rem; }
+    .filter-btn, .sort-btn, .chord-mode-btn { padding: 7px 10px; font-size: 0.82rem; }
 
     .song-link {
         grid-template-columns: 34px minmax(0, 1fr) auto;

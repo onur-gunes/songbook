@@ -327,7 +327,9 @@
             line.forEach(function (seg) {
                 var kind = seg[0], val = seg[1];
                 if (kind === 'c') {
-                    lineDiv.appendChild(el('span', 'seg-chord', transposeChordValue(val, transpose)));
+                    var cv = transposeChordValue(val, transpose);
+                    if (chordMode === 'above') cv = cv.replace(/^\[([\s\S]*)\]$/, '$1');
+                    lineDiv.appendChild(el('span', 'seg-chord', cv));
                 } else if (kind === 'm') {
                     lineDiv.appendChild(el('span', 'seg-muted', val));
                 } else if (kind === 'b') {
@@ -854,7 +856,11 @@
             try { window.localStorage.setItem(NS + ':chordPin', chordPin ? '1' : '0'); } catch (e) { /* ignore */ }
             applyChordSettings();
         });
+        Array.prototype.forEach.call(document.querySelectorAll('.chord-mode-btn'), function (b) {
+            b.addEventListener('click', function () { setChordMode(b.dataset.chordMode); });
+        });
         applyChordSettings();
+        applyChordMode();
         $('sheet').addEventListener('pointerdown', sheetPointerDown);
         $('sheet').addEventListener('pointermove', sheetPointerMove);
         $('sheet').addEventListener('pointerup', sheetPointerEnd);
@@ -883,11 +889,16 @@
     var textSize = 1;
     var chordSize = 1;
     var chordPin = true;
+    var chordMode = 'inline';
     try {
         var _cs = parseFloat(window.localStorage.getItem(NS + ':chordSize'));
         if (_cs >= 0.6 && _cs <= 1.5) chordSize = Math.round(_cs * 10) / 10;
     } catch (e) { /* ignore */ }
     try { chordPin = window.localStorage.getItem(NS + ':chordPin') !== '0'; } catch (e) { /* ignore */ }
+    try {
+        var _cm = window.localStorage.getItem(NS + ':chordMode');
+        if (_cm === 'inline' || _cm === 'above') chordMode = _cm;
+    } catch (e) { /* ignore */ }
 
     function applyChordSettings() {
         document.documentElement.style.setProperty('--chord-size', chordSize);
@@ -908,6 +919,24 @@
         chordSize = Math.min(1.5, Math.max(0.6, Math.round(v * 10) / 10));
         applyChordSettings();
         try { window.localStorage.setItem(NS + ':chordSize', String(chordSize)); } catch (e) { /* ignore */ }
+    }
+
+    function applyChordMode() {
+        $('sheet').classList.toggle('chords-above', chordMode === 'above');
+        Array.prototype.forEach.call(document.querySelectorAll('.chord-mode-btn'), function (b) {
+            var on = b.dataset.chordMode === chordMode;
+            b.classList.toggle('active', on);
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+    }
+
+    function setChordMode(mode) {
+        if (mode !== 'inline' && mode !== 'above') return;
+        if (mode === chordMode) return;
+        chordMode = mode;
+        try { window.localStorage.setItem(NS + ':chordMode', chordMode); } catch (e) { /* ignore */ }
+        applyChordMode();
+        if (currentSong) renderSheet(currentSong);
     }
 
     var pinch = { pts: {}, active: false, base: 0 };

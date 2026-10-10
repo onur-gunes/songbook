@@ -394,6 +394,39 @@ async function main() {
     win().localStorage.removeItem('songbook:chordSize');
     win().localStorage.removeItem('songbook:chordPin');
 
+    // 12h. chord display mode: inline (default) vs classic above-the-lyrics
+    const chordSpans = () => Array.from(doc().querySelectorAll('.sheet .seg-chord')).map(s => s.textContent);
+    ok('chord mode default inline', !$('sheet').classList.contains('chords-above') &&
+        doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').getAttribute('aria-pressed') === 'true',
+        '');
+    const inlineText = chordSpans();
+    ok('inline chords keep brackets', inlineText.length > 0 && inlineText.every(t => /^\[/.test(t)),
+        inlineText.slice(0, 3).join(' '));
+    doc().querySelector('.chord-mode-btn[data-chord-mode="above"]').click(); await wait(30);
+    const aboveText = chordSpans();
+    ok('above mode drops brackets', aboveText.length > 0 && aboveText.every(t => !/^\[/.test(t)),
+        aboveText.slice(0, 3).join(' '));
+    ok('above mode applied & button state', $('sheet').classList.contains('chords-above') &&
+        doc().querySelector('.chord-mode-btn[data-chord-mode="above"]').getAttribute('aria-pressed') === 'true' &&
+        doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').getAttribute('aria-pressed') === 'false',
+        '');
+    ok('above mode persisted', win().localStorage.getItem('songbook:chordMode') === 'above',
+        win().localStorage.getItem('songbook:chordMode'));
+    const aboveStyle = win().getComputedStyle(doc().querySelector('.sheet.chords-above .seg-chord'));
+    ok('above chords float above the lyrics', aboveStyle.display === 'inline-block' && parseFloat(aboveStyle.top) < 0,
+        aboveStyle.display + ' / ' + aboveStyle.top);
+    $('trUp').click(); await wait(30);
+    const transposedAbove = chordSpans();
+    ok('above transposes without brackets', transposedAbove.length > 0 && transposedAbove.every(t => !/^\[/.test(t)) &&
+        transposedAbove.some((t, i) => t !== aboveText[i]), transposedAbove.slice(0, 3).join(' '));
+    $('trDown').click(); await wait(30);
+    doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
+    ok('inline restores brackets', !$('sheet').classList.contains('chords-above') &&
+        chordSpans().every(t => /^\[/.test(t)), chordSpans().slice(0, 3).join(' '));
+    ok('mode persisted back', win().localStorage.getItem('songbook:chordMode') === 'inline',
+        win().localStorage.getItem('songbook:chordMode'));
+    win().localStorage.removeItem('songbook:chordMode');
+
     // 13. keyboard: / focuses search in list view
     win().location.hash = '';
     await wait(200);
