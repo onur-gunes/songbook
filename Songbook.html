@@ -2433,6 +2433,18 @@ main {
         return x;
     }
 
+    function sheetEmPx() {
+        return parseFloat(getComputedStyle($('sheet')).fontSize) || 14.4;
+    }
+
+    // Width of a chord label as drawn (bold, same size as the sheet). Used to
+    // keep consecutive chords from overlapping when the lyric column is narrow.
+    function chordLabelWidth(label) {
+        var ctx = lyricsMeasureCtx();
+        ctx.font = sheetFontFor('b');
+        return ctx.measureText(label).width;
+    }
+
     function buildAboveLine(line, perLine) {
         var hasWord = false, L = '', parts = [], chords = [], prevEnd = 0, hadChord = false;
         line.forEach(function (seg) {
@@ -2462,12 +2474,20 @@ main {
             var unit = el('div', 'ln-unit');
             unit.setAttribute('data-start', r[0]);
             var chor = el('div', 'ln-chords');
+            var minGap = sheetEmPx() * 0.5;
+            var prevRight = null;
             chords.forEach(function (c) {
                 if (c.col >= r[0] && c.col < r[1]) {
+                    var left = lyricPrefixWidth(parts, r[0], c.col);
+                    // Keep a chord at its lyric column, but never let it run
+                    // into the one before it: proportional lyric gaps can be
+                    // narrower than the chord name itself.
+                    if (prevRight !== null && left < prevRight + minGap) left = prevRight + minGap;
                     var sp = el('span', 'seg-chord', c.label);
-                    sp.style.left = lyricPrefixWidth(parts, r[0], c.col) + 'px';
+                    sp.style.left = left + 'px';
                     sp.setAttribute('data-col', c.col);
                     chor.appendChild(sp);
+                    prevRight = left + chordLabelWidth(c.label);
                 }
             });
             unit.appendChild(chor);

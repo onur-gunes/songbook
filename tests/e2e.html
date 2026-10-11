@@ -434,10 +434,19 @@ async function main() {
         ctx.font = (cs.fontWeight || '400') + ' ' + (cs.fontStyle || 'normal') + ' ' + cs.fontSize + ' ' + cs.fontFamily;
         return ctx.measureText(text.slice(0, col - start)).width;
     };
-    const aligned = unitsWithChords.length > 0 && unitsWithChords.every(u =>
-        Array.from(u.querySelectorAll('.ln-chords .seg-chord')).every(c =>
-            Math.abs(parseFloat(c.style.left) - abovePrefixPx(u, c)) < 2));
-    ok('above chords align over their lyric', aligned, unitsWithChords.length);
+    // Chords sit at their lyric column, or further right if needed to avoid
+    // overlapping the chord before them (proportional lyric gaps can be narrow).
+    const aligned = unitsWithChords.length > 0 && unitsWithChords.every(u => {
+        let prevRight = -Infinity;
+        return Array.from(u.querySelectorAll('.ln-chords .seg-chord')).every(c => {
+            const left = parseFloat(c.style.left);
+            const okPrefix = left >= abovePrefixPx(u, c) - 1;
+            const okNoOverlap = left >= prevRight - 0.5;
+            prevRight = left + c.getBoundingClientRect().width;
+            return okPrefix && okNoOverlap;
+        });
+    });
+    ok('above chords align over their lyric without overlap', aligned, unitsWithChords.length);
     $('trUp').click(); await wait(30);
     const transposedAbove = chordSpans();
     ok('above transposes without brackets', transposedAbove.length > 0 && transposedAbove.every(t => !/^\[/.test(t)) &&
@@ -502,13 +511,41 @@ async function main() {
         const chordEls = Array.from(bridgeUnit.querySelectorAll('.ln-chords .seg-chord'));
         const px = chordEls.map(c => Math.round(parseFloat(c.style.left)));
         const exp = chordEls.map(c => Math.round(abovePrefixPx(bridgeUnit, c)));
+        let prevRight = -Infinity;
+        const noOverlap = chordEls.every(c => {
+            const left = parseFloat(c.style.left);
+            const ok = left >= prevRight - 0.5;
+            prevRight = left + c.getBoundingClientRect().width;
+            return ok;
+        });
         ok('bridge chords align over the lyric run',
             chordEls.map(c => c.textContent).join(',') === 'Am,D,Em,C' &&
-            px.every((v, i) => i === 0 || v > px[i - 1]) &&
-            exp.every((v, i) => Math.abs(v - px[i]) <= 1), px.join(' '));
+            px.every((v, i) => i === 0 || v > px[i - 1]) && noOverlap &&
+            exp.every((v, i) => px[i] >= v - 1), px.join(' ') + ' vs ' + exp.join(' '));
     }
     doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
     win().localStorage.removeItem('songbook:chordMode');
+
+    // 12l. above mode: dense instrumental lines (many chords with tiny lyric
+    // gaps) must not overlap after collision-avoidance placement.
+    win().location.hash = '#/polska-gurom/czerwone-korale';
+    await wait(300);
+    doc().querySelector('.chord-mode-btn[data-chord-mode="above"]').click(); await wait(30);
+    let denseOverlap = null;
+    doc().querySelectorAll('.sheet .ln-unit').forEach(u => {
+        const chords = Array.from(u.querySelectorAll('.ln-chords .seg-chord'))
+            .sort((a, b) => parseFloat(a.style.left) - parseFloat(b.style.left));
+        for (let i = 1; i < chords.length; i++) {
+            if (chords[i].getBoundingClientRect().left < chords[i - 1].getBoundingClientRect().right - 0.5) {
+                denseOverlap = chords[i - 1].textContent + '/' + chords[i].textContent;
+            }
+        }
+    });
+    ok('dense instrumental chords never overlap', denseOverlap === null, denseOverlap || '');
+    doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
+    win().localStorage.removeItem('songbook:chordMode');
+    win().location.hash = '#/krakow-ukulele';
+    await wait(200);
     win().location.hash = '';
     await wait(200);
     doc().body.dispatchEvent(new (win().KeyboardEvent)('keydown', { key: '/', bubbles: true }));
