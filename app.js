@@ -130,6 +130,7 @@
             artist: String(s.artist || ''),
             level: (s.level === 'Easy' || s.level === 'Medium' || s.level === 'Hard') ? s.level : 'Medium',
             new: !!s.new,
+            key: s.key ? String(s.key) : '',
             dur: typeof s.dur === 'number' ? s.dur : 4,
             chords: Array.isArray(s.chords) ? s.chords.map(String) : [],
             sheet: Array.isArray(s.sheet) ? s.sheet : (s.sheet ? s.sheet : [])
@@ -936,6 +937,17 @@
         var badge = $('songLevel');
         badge.textContent = song.level;
         badge.className = 'level-badge level-' + song.level;
+        var ok = $('origKey');
+        if (ok) {
+            var okv = $('origKeyValue');
+            if (song.key) {
+                ok.hidden = false;
+                okv.textContent = song.key;
+            } else {
+                ok.hidden = true;
+                okv.textContent = '';
+            }
+        }
         updateFavBtn();
 
         renderChordStrip(song);

@@ -42,6 +42,15 @@ def main():
         names = cdp.eval(
             "Array.from(document.querySelectorAll('#chordStrip .cname')).map(e=>e.textContent).join(',')")
         ok('Riptide strip chords', names == 'Am,G,C,F', names)
+        ok('Riptide original key shown',
+           cdp.eval("document.getElementById('origKey').hidden") is False
+           and cdp.eval("document.getElementById('origKeyValue').textContent") == 'C#',
+           cdp.eval("document.getElementById('origKeyValue').textContent"))
+        cdp.eval("location.hash = '#/polska-gurom/czerwone-korale'")
+        cdp.wait_js("document.getElementById('songTitle').textContent === 'Czerwone Korale'", timeout=10)
+        ok('no key -> section hidden', cdp.eval("document.getElementById('origKey').hidden") is True)
+        cdp.eval("location.hash = '#/krakow-ukulele/riptide'")
+        cdp.wait_js("document.getElementById('songTitle').textContent === 'Riptide'", timeout=10)
         uke_svg = cdp.eval(
             "songbookTest.ChordKit.diagramSVG('ukulele', songbookTest.ChordKit.voicings('Am','ukulele')[0])")
         ok('ukulele Am svg has 4 strings', uke_svg.count('class="st"') == 4, uke_svg.count('class="st"'))

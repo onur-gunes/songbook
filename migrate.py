@@ -18,6 +18,23 @@ SONGBOOK_LOGO_DARK = 'images/ukulele-krakow-trans-dark.png'
 
 # ---------- helpers ----------
 
+def load_original_keys():
+    """Curated original-recording keys: song id -> key string.
+
+    Source file songbooks/original-keys.json maps id -> {key, confidence, source}
+    (or a bare string). Hand-curated, since the recording key is not in legacy HTML.
+    """
+    path = os.path.join(D, 'songbooks', 'original-keys.json')
+    if not os.path.exists(path):
+        return {}
+    data = json.load(open(path, encoding='utf-8'))
+    out = {}
+    for k, v in data.items():
+        key = v.get('key') if isinstance(v, dict) else v
+        if key:
+            out[k] = key
+    return out
+
 def slugify(t):
     s = unicodedata.normalize('NFKD', t).encode('ascii', 'ignore').decode()
     s = re.sub(r'[^a-zA-Z0-9]+', '-', s).strip('-').lower()
@@ -249,6 +266,7 @@ def main():
     songs = []
     errors = []
     seen_ids = set()
+    original_keys = load_original_keys()
     files = sorted(f for f in os.listdir(SRC) if f.endswith('.html') and f != 'songs.html')
 
     for fn in files:
@@ -285,6 +303,8 @@ def main():
             'chords': r['chords'],
             'sheet': r['sheet'],
         }
+        if sid in original_keys:
+            song['key'] = original_keys[sid]
         if r['fb'] is not None:
             song['fb'] = r['fb']
         songs.append(song)
@@ -314,6 +334,10 @@ def main():
         lv[s['level']] = lv.get(s['level'], 0) + 1
     lines.append('levels: %s' % lv)
     lines.append('new songs: %d' % sum(1 for s in songs if s['new']))
+    keyed = [s['id'] for s in songs if s.get('key')]
+    lines.append('original keys: %d/%d' % (len(keyed), len(songs)))
+    missing_keys = [s['id'] for s in songs if not s.get('key')]
+    lines.append('missing original keys: %s' % (missing_keys[:10] or 'none'))
     nums = [s['n'] for s in songs]
     lines.append('numbers: %d..%d unique=%d' % (min(nums), max(nums), len(set(nums))))
     from collections import Counter

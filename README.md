@@ -32,6 +32,7 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 | `app.js` | Search, filters, sort, favorites, notes, transpose, auto-scroll, songbook switching, import, hash routing, service-worker registration |
 | `songbooks/index.json` | Manifest of bundled songbooks |
 | `songbooks/krakow-ukulele.json` | Bundled dataset (generated — don't hand-edit) |
+| `songbooks/original-keys.json` | Curated original-recording keys (id → key), merged in by `migrate.py` |
 | `manifest.webmanifest`, `sw.js` | PWA manifest + app-shell service worker |
 | `images/` | Logos (light/dark), favicon/PWA icons, QR code |
 | `legacy/` | The 198 original song pages (archived source) |
@@ -85,6 +86,7 @@ or copy that one file to a phone. Everything is inlined; no network is used.
       "artist": "...",
       "level": "Easy",         // Easy | Medium | Hard
       "new": false,
+      "key": "Am",             // original recording key (optional, shown in the song view)
       "dur": 4,                // minutes, drives auto-scroll
       "chords": ["Am", "G"],
       "sheet": [ [ ["c", "[Am]"], ["x", " lyric"], ... ], [] ]   // lines of [kind, text]
@@ -104,10 +106,10 @@ imported songbook JSON lives in `IndexedDB`.
 python3 migrate.py
 ```
 
-Reads `legacy/*.html`, writes `songbooks/krakow-ukulele.json`, and prints a
-validation report (198 songs, unique ids/numbers, levels 84/91/23, chord refs,
-no empty content, no broken unicode). Deterministic and byte-faithful to the
-original dataset.
+Reads `legacy/*.html`, merges original keys from `songbooks/original-keys.json`,
+writes `songbooks/krakow-ukulele.json`, and prints a validation report (198 songs,
+unique ids/numbers, levels 84/91/23, chord refs, no empty content, no broken
+unicode). Deterministic and byte-faithful to the original dataset.
 
 ## Builds
 
