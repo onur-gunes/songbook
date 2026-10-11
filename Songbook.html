@@ -2402,25 +2402,25 @@ main {
     }
 
     function buildAboveLine(line, perLine) {
-        var hasWord = false, L = '', parts = [], chords = [], prevEnd = 0, prevWasChord = false;
+        var hasWord = false, L = '', parts = [], chords = [], prevEnd = 0, hadChord = false;
         line.forEach(function (seg) {
             if (seg[0] === 'c') {
                 var label = chordLabel(seg[1]);
-                var col = prevWasChord ? Math.max(L.length, prevEnd + 1) : L.length;
+                var col = hadChord ? Math.max(L.length, prevEnd + 1) : L.length;
                 chords.push({ col: col, label: label });
                 prevEnd = col + label.length;
-                prevWasChord = true;
+                hadChord = true;
                 return;
             }
             var t = plainText(seg);
-            if (prevWasChord && /^\s/.test(t)) {
+            if (hadChord && /^\s/.test(t)) {
                 t = t.replace(/^\s+/, '');
                 if (L.length && !/\s$/.test(L)) t = ' ' + t;
             }
+            if (t.replace(/\s/g, '').length) hadChord = false;
             parts.push({ kind: seg[0], text: t, start: L.length });
             L += t;
             if (/\S/.test(t)) hasWord = true;
-            prevWasChord = false;
         });
 
         var div = el('div', 'line line-stacked');
