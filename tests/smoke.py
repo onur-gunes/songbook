@@ -85,7 +85,16 @@ def main():
         ok('guitar chuck mutes 6 strings', gtr_mutes == 6, gtr_mutes)
         cdp.eval("location.hash = '#/polska-gurom/czerwone-korale'")
         cdp.wait_js("document.getElementById('songTitle').textContent === 'Czerwone Korale'", timeout=10)
-        ok('no key -> section hidden', cdp.eval("document.getElementById('origKey').hidden") is True)
+        ok('polska-gurom key shown', cdp.eval("document.getElementById('origKey').hidden") is False
+           and cdp.eval("document.getElementById('origKeyValue').textContent") == 'Dm',
+           cdp.eval("document.getElementById('origKeyValue').textContent"))
+        ok('polska-gurom no capo', cdp.eval("document.getElementById('capoValue').textContent") == 'No capo',
+           cdp.eval("document.getElementById('capoValue').textContent"))
+        cdp.eval("location.hash = '#/polska-gurom/m-j-jest-ten-kawa-ek-pod-ogi'")
+        cdp.wait_js("document.getElementById('songTitle').textContent === 'M\u00f3j jest ten kawa\u0142ek pod\u0142ogi'", timeout=10)
+        ok('polska-gurom capo shown', cdp.eval("document.getElementById('capoPart').hidden") is False
+           and cdp.eval("document.getElementById('capoValue').textContent") == 'Capo 1',
+           cdp.eval("document.getElementById('capoValue').textContent"))
         cdp.eval("location.hash = '#/krakow-ukulele/riptide'")
         cdp.wait_js("document.getElementById('songTitle').textContent === 'Riptide'", timeout=10)
         uke_svg = cdp.eval(

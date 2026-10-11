@@ -1,0 +1,940 @@
+{
+ "heniek": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "m-j-jest-ten-kawa-ek-pod-ogi": {
+  "key": "Cm",
+  "sheetKey": "Bm",
+  "capo": 1,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "i-ciebie-te-bardzo": {
+  "key": "G",
+  "sheetKey": "G",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chart is G (site metadata inconsistent)"
+ },
+ "ostatnia-nadzieja": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "lubi-wraca-tam-gdzie-by-em": {
+  "key": "C",
+  "sheetKey": "C",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "pocz-tek": {
+  "key": "C",
+  "sheetKey": "C",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "zanim-p-jd": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "lipka": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "takie-tango": {
+  "key": "Dm",
+  "sheetKey": "Dm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "pi-a-tango": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "gdy-nie-ma-dzieci": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "nic-dwa-razy": {
+  "key": "G#",
+  "sheetKey": "G",
+  "capo": 1,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "testosteron": {
+  "key": "C",
+  "sheetKey": "C",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "nie-licz-godzin-i-lat": {
+  "key": "G",
+  "sheetKey": "G",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "arahja": {
+  "key": "Dm",
+  "sheetKey": "Dm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "kryzysowa-narzeczona": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "na-szczycie": {
+  "key": "C#m",
+  "sheetKey": "C#m",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "zawsze-z-toba-chcialbym-byc": {
+  "key": "C",
+  "sheetKey": "C",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "wehiku-czasu-to-by-by-cud-2003-remaster": {
+  "key": "A",
+  "sheetKey": "A",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "ba-ka": {
+  "key": "G",
+  "sheetKey": "G",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "dni-kt-rych-nie-znamy": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "raz-po-raz": {
+  "key": "B",
+  "sheetKey": "B",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "bal-wszystkich-wi-tych": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "s-ugi-za-szlugi": {
+  "key": "G",
+  "sheetKey": "G",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "ocali-od-zapomnienia": {
+  "key": "Cm",
+  "sheetKey": "Cm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "no-poka-na-co-ci-sta": {
+  "key": "C#",
+  "sheetKey": "C",
+  "capo": 1,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "swoje-szcz-cie-znam": {
+  "key": "E",
+  "sheetKey": "E",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "nikt-tak-pi-knie-nie-m-wi-e-si-boi-mi-o-ci": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "wi-nia": {
+  "key": "Dm",
+  "sheetKey": "Dm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "szum": {
+  "key": "D#m",
+  "sheetKey": "Dm",
+  "capo": 1,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "niebo-by-o-r-owe": {
+  "key": "C",
+  "sheetKey": "C",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "przez-twe-oczy-zielone": {
+  "key": "A#m",
+  "sheetKey": "Am",
+  "capo": 1,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "madison": {
+  "key": "A",
+  "sheetKey": "A",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "zacznij-od-bacha": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "bylam-roza": {
+  "key": "Bm",
+  "sheetKey": "Bm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "nie-p-acz-ewka": {
+  "key": "A",
+  "sheetKey": "A",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "ma-go-ka-szkoda-ez": {
+  "key": "Dm",
+  "sheetKey": "Dm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "chcemy-by-sob": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "szukaj-mnie": {
+  "key": "Bm",
+  "sheetKey": "Bm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "autobiografia": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "szparka-sekretarka": {
+  "key": "A",
+  "sheetKey": "A",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "jak-zapomnie": {
+  "key": "Bm",
+  "sheetKey": "Bm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota Tonacja"
+ },
+ "czerwone-korale": {
+  "key": "Dm",
+  "sheetKey": "Dm",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "cze-jak-si-masz": {
+  "key": "D",
+  "sheetKey": "D",
+  "capo": 0,
+  "confidence": "high",
+  "source": "chord inference"
+ },
+ "mury": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "high",
+  "source": "chord inference"
+ },
+ "za-ka-dym-razem": {
+  "key": "D",
+  "sheetKey": "D",
+  "capo": 0,
+  "confidence": "high",
+  "source": "chord inference"
+ },
+ "baranek": {
+  "key": "Dm",
+  "sheetKey": "Dm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "chord inference"
+ },
+ "d-aga": {
+  "key": "D",
+  "sheetKey": "D",
+  "capo": 0,
+  "confidence": "low",
+  "source": "chord inference"
+ },
+ "policeman": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "high",
+  "source": "chord inference"
+ },
+ "ko-na-bia-ym-rycerzu": {
+  "key": "Dm",
+  "sheetKey": "Dm",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "krakowski-spleen": {
+  "key": "Bm",
+  "sheetKey": "Bm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "chord inference"
+ },
+ "mamo-ja-nie-chc-za-m": {
+  "key": "Em",
+  "sheetKey": "C#m",
+  "capo": 3,
+  "confidence": "high",
+  "source": "chord inference"
+ },
+ "za-wielkim-morzem-ty": {
+  "key": "Fm",
+  "sheetKey": "Fm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "chord inference"
+ },
+ "w-moim-ogr-decku": {
+  "key": "Dm",
+  "sheetKey": "Dm",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "hej-soko-y": {
+  "key": "G#m",
+  "sheetKey": "G#m",
+  "capo": 0,
+  "confidence": "low",
+  "source": "chord inference"
+ },
+ "co-mi-panie-dasz": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "high",
+  "source": "chord inference"
+ },
+ "dziwny-jest-ten-wiat": {
+  "key": "Fm",
+  "sheetKey": "Fm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "jolka-jolka-pami-tasz": {
+  "key": "D",
+  "sheetKey": "D",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "szampan": {
+  "key": "C#m",
+  "sheetKey": "C#m",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "ciernisco": {
+  "key": "Cm",
+  "sheetKey": "Cm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "zawsze-tam-gdzie-ty": {
+  "key": "C",
+  "sheetKey": "C",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "dzieci-wybieg-y": {
+  "key": "C",
+  "sheetKey": "C",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "czarny-chleb-i-czarna-kawa": {
+  "key": "F#m",
+  "sheetKey": "F#m",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "co-ty-tutaj-robisz": {
+  "key": "C",
+  "sheetKey": "C",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "by-a-dla-mnie-wszystkim": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "nie-sta-o-si-nic": {
+  "key": "Gm",
+  "sheetKey": "Gm",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "Tunebat"
+ },
+ "gdzie-ten-ktory-powie-mi": {
+  "key": "Gm",
+  "sheetKey": "Gm",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "Tunebat"
+ },
+ "dzie-dobry-kocham-ci": {
+  "key": "D",
+  "sheetKey": "D",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "twoje-oczy-lubi-mnie": {
+  "key": "Gm",
+  "sheetKey": "Gm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "na-jednej-z-dzikich-pla": {
+  "key": "C",
+  "sheetKey": "C",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "trudno-tak": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota"
+ },
+ "ostatni-raz-zata-czysz-ze-mn": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota"
+ },
+ "dlugosc-dzwieku-samotnosci": {
+  "key": "F",
+  "sheetKey": "F",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota Tonacja F"
+ },
+ "ydka": {
+  "key": "D",
+  "sheetKey": "D",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota"
+ },
+ "znowu-pada-deszcz": {
+  "key": "F",
+  "sheetKey": "F",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota"
+ },
+ "scenariusz-dla-moich-s-siad-w": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota"
+ },
+ "bohema": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota"
+ },
+ "bia-a-armia": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota"
+ },
+ "mniej-ni-zero": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota"
+ },
+ "na-zawsze-i-na-wieczno": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota"
+ },
+ "szara-piechota": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota Tonacja a"
+ },
+ "morskie-opowie-ci": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota Tonacja a"
+ },
+ "jej-czarne-oczy": {
+  "key": "E",
+  "sheetKey": "E",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota"
+ },
+ "nie-ma-nas": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota"
+ },
+ "wszystko-ma-sw-j-czas": {
+  "key": "G#m",
+  "sheetKey": "G#m",
+  "capo": 0,
+  "confidence": "high",
+  "source": "nutyoddarka"
+ },
+ "w-strone-slonca": {
+  "key": "Fm",
+  "sheetKey": "Fm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "midi24.pl"
+ },
+ "mam-t-moc-z-filmu-kraina-lodu": {
+  "key": "Fm",
+  "sheetKey": "Fm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "pitrustudio/Tunebat"
+ },
+ "disney": {
+  "key": "Bm",
+  "sheetKey": "Bm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "psalm-dla-ciebie": {
+  "key": "Cm",
+  "sheetKey": "Cm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "chords.pl"
+ },
+ "w-dzie-gor-cego-lata": {
+  "key": "D",
+  "sheetKey": "D",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Cifra Club"
+ },
+ "a-wszystko-to": {
+  "key": "C",
+  "sheetKey": "C",
+  "capo": 0,
+  "confidence": "high",
+  "source": "strefamuzyka"
+ },
+ "urke": {
+  "key": "C#m",
+  "sheetKey": "C#m",
+  "capo": 0,
+  "confidence": "high",
+  "source": "GetSongKEY"
+ },
+ "na-co-komu-dzi": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "nie-dokazuj": {
+  "key": "A",
+  "sheetKey": "G",
+  "capo": 2,
+  "confidence": "high",
+  "source": "nutyoddarka"
+ },
+ "w-kinie-w-lublinie-kochaj-mnie": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "ChordU"
+ },
+ "sacrum": {
+  "key": "A",
+  "sheetKey": "A",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "Chordify"
+ },
+ "b-dziesz-moj-pani": {
+  "key": "Cm",
+  "sheetKey": "Cm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Chordify"
+ },
+ "tyle-s-o-ca-w-ca-ym-mie-cie": {
+  "key": "Fm",
+  "sheetKey": "Dm",
+  "capo": 3,
+  "confidence": "medium",
+  "source": "pitrustudio"
+ },
+ "a-gdy-jest-ju-ciemno": {
+  "key": "D",
+  "sheetKey": "D",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "jak-anio-a-g-os": {
+  "key": "G",
+  "sheetKey": "G",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Tunebat"
+ },
+ "ezoteryczny-pozna": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota chords"
+ },
+ "napraw": {
+  "key": "C#m",
+  "sheetKey": "Am",
+  "capo": 4,
+  "confidence": "high",
+  "source": "Chordify"
+ },
+ "pszczolka-maja": {
+  "key": "E",
+  "sheetKey": "E",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "nutyoddarka"
+ },
+ "jesie-ta-cuj": {
+  "key": "Dm",
+  "sheetKey": "Dm",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "Chordify"
+ },
+ "kolorowy-wiatr": {
+  "key": "G",
+  "sheetKey": "G",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota Tonacja"
+ },
+ "dumka-na-dwa-serca": {
+  "key": "Bm",
+  "sheetKey": "Bm",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota"
+ },
+ "ostatnia-nocka": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota Tonacja"
+ },
+ "miasto-budzi-si": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "skrzydlate-r-ce": {
+  "key": "Cm",
+  "sheetKey": "Cm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "snaplyrics"
+ },
+ "ko-ysanka-dla-nieznajomej": {
+  "key": "B",
+  "sheetKey": "B",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota"
+ },
+ "cykady-na-cykladach-2011-remaster": {
+  "key": "F#m",
+  "sheetKey": "Em",
+  "capo": 2,
+  "confidence": "high",
+  "source": "wywrota capo2"
+ },
+ "nowa-wie-a-babel": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota"
+ },
+ "ycie-kocham-ci-nad-ycie": {
+  "key": "Bm",
+  "sheetKey": "Bm",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "tych-lat-nie-odda-nikt": {
+  "key": "Dm",
+  "sheetKey": "Dm",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "lepszy-model": {
+  "key": "Cm",
+  "sheetKey": "Cm",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "biegnij-przed-siebie": {
+  "key": "F",
+  "sheetKey": "F",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "wiem-e-jeste-tam": {
+  "key": "A",
+  "sheetKey": "A",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "za-ostatni-grosz": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "niech-yje-bal": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "my-li-i-s-owa": {
+  "key": "F#m",
+  "sheetKey": "F#m",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "soft": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "kto-nowy": {
+  "key": "Dm",
+  "sheetKey": "Dm",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "roda-czwartek": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "wszystko-jedno": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "niech-m-wi-e-to-nie-jest-mi-o": {
+  "key": "Bm",
+  "sheetKey": "Bm",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "przasniczka": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "chord inference"
+ },
+ "sing-sing": {
+  "key": "Am",
+  "sheetKey": "Am",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Chordify"
+ },
+ "ci-gle-pada": {
+  "key": "G",
+  "sheetKey": "G",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Chordify"
+ },
+ "oczarowanie": {
+  "key": "C",
+  "sheetKey": "C",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Chordify"
+ },
+ "szklanka-wody": {
+  "key": "D",
+  "sheetKey": "D",
+  "capo": 0,
+  "confidence": "medium",
+  "source": "wywrota"
+ },
+ "nie-nie-nie": {
+  "key": "Em",
+  "sheetKey": "Em",
+  "capo": 0,
+  "confidence": "high",
+  "source": "wywrota"
+ },
+ "otwieram-wino": {
+  "key": "Fm",
+  "sheetKey": "Em",
+  "capo": 1,
+  "confidence": "high",
+  "source": "ChordU"
+ },
+ "wezm-ci": {
+  "key": "Dm",
+  "sheetKey": "Dm",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Ultimate-Guitar"
+ },
+ "love-story": {
+  "key": "F#m",
+  "sheetKey": "F#m",
+  "capo": 0,
+  "confidence": "high",
+  "source": "Cifra Club"
+ }
+}
