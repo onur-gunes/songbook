@@ -1261,7 +1261,18 @@ main {
 
     .song-title { font-size: 1.4rem; }
 
-    .song-tools { gap: 10px 16px; padding: 10px 12px; }
+    .song-tools {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 10px 12px;
+    }
+    .tool-group { flex-direction: column; align-items: center; gap: 4px; }
+    .song-tools .tool-label { font-size: 0.65rem; }
+    .step-btn { min-width: 26px; padding: 0 6px; font-size: 0.9rem; }
+    .step-value { min-width: 30px; font-size: 0.75rem; }
+    .chord-mode-btn { padding: 4px 8px; font-size: 0.75rem; }
+    .step-divider { margin: 6px 0; }
 
     .chord-item img, .chord-item .missing { height: calc(62px * var(--chord-size, 1)); }
 
