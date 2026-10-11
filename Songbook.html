@@ -1953,7 +1953,7 @@ main {
     var svgStyle = '<style>.st{stroke:#5f6d80;stroke-width:1.4}.fw{stroke:#4c5765;stroke-width:1.4}' +
         '.nut{stroke:#8b95a5;stroke-width:4.5;stroke-linecap:round}.dot,.bar{fill:#3b6bd6}' +
         '.oc{fill:none;stroke:#77829a;stroke-width:1.7}.pos{fill:#828d9e;font-size:11px;font-weight:700}' +
-        '.muted{fill:#8b95a5;font-size:18px;font-weight:700}</style>';
+        '.muted{fill:#8b95a5;font-size:18px;font-weight:700;dominant-baseline:middle}</style>';
 
     function withStyle(svg) {
         return svg.replace('<svg ', '<svg ').replace(/^(<svg[^>]*>)/, '$1' + svgStyle);
