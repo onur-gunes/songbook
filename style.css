@@ -1059,7 +1059,7 @@ main {
 .sheet {
     font-family: Verdana, Tahoma, sans-serif;
     font-size: calc(14.5px * var(--sheet-size, 1));
-    line-height: 1.75;
+    line-height: 1.5;
     outline: none;
     overflow-wrap: anywhere;
     touch-action: pan-y;
@@ -1067,7 +1067,7 @@ main {
 
 .sheet .line {
     white-space: pre-wrap;
-    min-height: 1.75em;
+    min-height: 1.5em;
 }
 
 .sheet .line.is-pre {
@@ -1253,9 +1253,9 @@ main {
 
     .chord-item img, .chord-item .missing { height: calc(62px * var(--chord-size, 1)); }
 
-    .sheet { font-size: calc(15px * var(--sheet-size, 1)); line-height: 1.7; }
+    .sheet { font-size: calc(15px * var(--sheet-size, 1)); line-height: 1.5; }
 
-    .sheet .line { min-height: 1.7em; }
+    .sheet .line { min-height: 1.5em; }
 }
 
 @media (prefers-reduced-motion: reduce) {
