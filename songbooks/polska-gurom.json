@@ -22,16 +22,12 @@
    "sheet": [
     [
      [
-      "x",
-      "Cała piosenka na : "
-     ],
-     [
       "c",
       "[Am]"
      ],
      [
       "x",
-      " "
+      "Nanana, "
      ],
      [
       "c",
@@ -39,130 +35,134 @@
      ],
      [
       "x",
-      " "
-     ],
+      "nananan"
+     ]
+    ],
+    [
      [
       "c",
       "[C]"
      ],
      [
       "x",
-      " "
+      "Nanana, "
      ],
      [
       "c",
       "[G]"
+     ],
+     [
+      "x",
+      "nananan"
      ]
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      ""
+      "1. Mija wiele lat, "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "to nie był nasz czas"
      ]
     ],
     [
      [
+      "c",
+      "[C]"
+     ],
+     [
       "x",
-      ""
+      "Dużo się zmieniło, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "w pełni się skończyło"
      ]
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Nanana, nananan"
+      "Walczę by zapomnieć, "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "by już nie mieć wspomnień"
      ]
     ],
     [
      [
+      "c",
+      "[C]"
+     ],
+     [
       "x",
-      ""
+      "Wybrałeś te drogę, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "już Ci nie pomogę"
      ]
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Mija wiele lat,"
+      "Nie mów nic, daj mi żyć"
      ]
     ],
     [
      [
+      "c",
+      "[F]"
+     ],
+     [
       "x",
-      "To nie był nasz czas"
+      "Nie chce się męczyć znów"
      ]
     ],
     [
      [
+      "c",
+      "[C]"
+     ],
+     [
       "x",
-      "Dużo się zmieniło,"
+      "Szkoda słów, odejdź już"
      ]
     ],
     [
      [
-      "x",
-      "Wszystko się skończyło"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Walczę by zapomnieć,"
-     ]
-    ],
-    [
-     [
-      "x",
-      "By już nie mieć wspomnień"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Wybrałeś te drogę,"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Już Ci nie pomogę"
-     ]
-    ],
-    [
-     [
-      "x",
-      ""
-     ]
-    ],
-    [
-     [
-      "x",
-      "Nie mów nic,"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Daj mi żyć"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Nie chce się męczyć znów,"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Szkoda slow"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Odejdź już,"
-     ]
-    ],
-    [
+      "c",
+      "[G]"
+     ],
      [
       "x",
       "Nie ma i nie będzie mnie tu"
@@ -170,11 +170,19 @@
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
       "Oddaliłam się od ciebie,"
      ]
     ],
     [
+     [
+      "c",
+      "[F]"
+     ],
      [
       "x",
       "Strata czasu"
@@ -182,11 +190,19 @@
     ],
     [
      [
+      "c",
+      "[C]"
+     ],
+     [
       "x",
       "Nie chce więcej cierpieć i patrzeć jak"
      ]
     ],
     [
+     [
+      "c",
+      "[G]"
+     ],
      [
       "x",
       "Jesteś z nią, dotykasz ją wciąż"
@@ -194,41 +210,87 @@
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Nie chce więcej słuchać "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "twoich kłamstw"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Zabiłeś te miłość, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "zabiłeś nas"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Odejdź proszę, "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "odejdź gdzie się da"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Nie ma dla nas szans, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "już nie ma nas"
+     ]
+    ],
+    [
+     [
       "x",
       ""
      ]
     ],
     [
      [
-      "x",
-      "Nie chce więcej słuchać twoich kłamstw,"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Zabiłeś te miłość, zabiłeś nas"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Odejdź proszę, odejdź gdzie się da"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Nie ma dla nas szans, już nie ma nas"
-     ]
-    ],
-    [
-     [
-      "x",
-      ""
-     ]
-    ],
-    [
+      "c",
+      "[Am]"
+     ],
      [
       "x",
       "Jesteś gdzieś daleko,"
@@ -236,11 +298,19 @@
     ],
     [
      [
+      "c",
+      "[F]"
+     ],
+     [
       "x",
       "Już nie cofniesz tego"
      ]
     ],
     [
+     [
+      "c",
+      "[C]"
+     ],
      [
       "x",
       "Upadałeś nisko i straciłeś wszystko"
@@ -248,11 +318,19 @@
     ],
     [
      [
+      "c",
+      "[G]"
+     ],
+     [
       "x",
       "Pożegnałam się, już nie odzyskasz mnie"
      ]
     ],
     [
+     [
+      "c",
+      "[Am]"
+     ],
      [
       "x",
       "Zamknęłam ten dział, nie chce więcej ran"
@@ -266,35 +344,39 @@
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Nie mów nic,"
+      "Nie mów nic, daj mi żyć"
      ]
     ],
     [
      [
+      "c",
+      "[F]"
+     ],
+     [
       "x",
-      "Daj mi żyć"
+      "Nie chce się męczyć znów"
      ]
     ],
     [
      [
+      "c",
+      "[C]"
+     ],
+     [
       "x",
-      "Nie chce się męczyć znów,"
+      "Szkoda słów, odejdź już"
      ]
     ],
     [
      [
-      "x",
-      "Szkoda slow"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Odejdź już,"
-     ]
-    ],
-    [
+      "c",
+      "[G]"
+     ],
      [
       "x",
       "Nie ma i nie będzie mnie tu"
@@ -302,11 +384,19 @@
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
       "Oddaliłam się od ciebie,"
      ]
     ],
     [
+     [
+      "c",
+      "[F]"
+     ],
      [
       "x",
       "Strata czasu"
@@ -314,11 +404,19 @@
     ],
     [
      [
+      "c",
+      "[C]"
+     ],
+     [
       "x",
       "Nie chce więcej cierpieć i patrzeć jak"
      ]
     ],
     [
+     [
+      "c",
+      "[G]"
+     ],
      [
       "x",
       "Jesteś z nią, dotykasz ją wciąż"
@@ -326,32 +424,74 @@
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      ""
+      "Nie chce więcej słuchać "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "twoich kłamstw"
      ]
     ],
     [
      [
+      "c",
+      "[C]"
+     ],
+     [
       "x",
-      "Nie chce więcej słuchać twoich kłamstw,"
+      "Zabiłeś te miłość, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "zabiłeś nas"
      ]
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Zabiłeś te miłość, zabiłeś nas"
+      "Odejdź proszę, "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "odejdź gdzie się da"
      ]
     ],
     [
      [
-      "x",
-      "Odejdź proszę, odejdź gdzie się da"
-     ]
-    ],
-    [
+      "c",
+      "[C]"
+     ],
      [
       "x",
-      "Nie ma dla nas szans, już nie ma nas"
+      "Nie ma dla nas szans, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "już nie ma nas"
      ]
     ],
     [
@@ -362,38 +502,38 @@
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      ""
+      "Nie chce więcej słuchać "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "twoich kłamstw"
      ]
     ],
     [
      [
-      "x",
-      "Nie chce więcej słuchać twoich kłamstw,"
-     ]
-    ],
-    [
+      "c",
+      "[C]"
+     ],
      [
       "x",
-      "Zabiłeś te miłość, zabiłeś nas!"
-     ]
-    ],
-    [
+      "Zabiłeś te miłość, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
      [
       "x",
-      ""
-     ]
-    ],
-    [
-     [
-      "x",
-      ""
-     ]
-    ],
-    [
-     [
-      "x",
-      ""
+      "zabiłeś nas!"
      ]
     ]
    ],
