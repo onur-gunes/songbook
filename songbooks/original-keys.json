@@ -1,992 +1,1388 @@
 {
- "i-can-t-get-no-satisfaction": {
-  "key": "E",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "19-2000": {
-  "key": "G",
-  "confidence": "high",
-  "source": "GetSongKey; DoReSol"
- },
- "500-miles-i-m-gonna-be": {
-  "key": "E",
-  "confidence": "high",
-  "source": "Hooktheory; Tunebat"
- },
- "a-little-respect": {
-  "key": "C",
-  "confidence": "high",
-  "source": "Musicnotes; Hooktheory"
- },
- "accidentally-in-love": {
-  "key": "G",
-  "confidence": "high",
-  "source": "Musicnotes; TempoPeek"
- },
- "after-hours": {
-  "key": "Bb",
-  "confidence": "medium",
-  "source": "Hooktheory; SheetMusicGo"
- },
- "ain-t-no-sunshine": {
-  "key": "Am",
-  "confidence": "high",
-  "source": "Musicnotes; Hooktheory"
- },
- "all-about-that-bass": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "all-apologies": {
-  "key": "C#",
-  "confidence": "medium",
-  "source": "Piano Pronto (orig Db)"
- },
- "all-star-shrek": {
-  "key": "F#",
-  "confidence": "high",
-  "source": "Musicnotes; Hooktheory"
- },
- "american-idiot": {
-  "key": "G#",
-  "confidence": "high",
-  "source": "Musicnotes; Hooktheory"
- },
- "another-brick-in-the-wall": {
-  "key": "Dm",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "another-love": {
-  "key": "Em",
-  "confidence": "high",
-  "source": "Musicnotes; Hooktheory"
- },
- "bad-moon-rising": {
-  "key": "D",
-  "confidence": "high",
-  "source": "Musicnotes; Wikipedia"
- },
- "bad-romance": {
-  "key": "Am",
-  "confidence": "high",
-  "source": "Musicnotes; Wikipedia"
- },
- "bang-bang": {
-  "key": "Fm",
-  "confidence": "high",
-  "source": "Hooktheory"
- },
- "basket-case": {
-  "key": "D#",
-  "confidence": "high",
-  "source": "Wikipedia"
- },
- "beggin": {
-  "key": "Em",
-  "confidence": "high",
-  "source": "Tunebat"
- },
- "billie-jean": {
-  "key": "F#m",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "bitter-sweet-symphony": {
-  "key": "E",
-  "confidence": "medium",
-  "source": "Hooktheory; SingingCarrots"
- },
- "black": {
-  "key": "E",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "blinding-lights": {
-  "key": "Cm",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "blister-in-the-sun": {
-  "key": "G",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "blowing-in-the-wind": {
-  "key": "D",
-  "confidence": "high",
-  "source": "Musicnotes; dylanchords"
- },
- "bohemian-rhapsody": {
-  "key": "Bb",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "boys-don-t-cry": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "brown-eyed-girl": {
-  "key": "G",
-  "confidence": "high",
-  "source": "sheet/chord refs"
- },
- "budapest": {
-  "key": "F",
-  "confidence": "high",
-  "source": "Ultimate Guitar official"
- },
- "california-dreaming": {
-  "key": "C#m",
-  "confidence": "medium",
-  "source": "chord refs"
- },
- "californication": {
-  "key": "Am",
-  "confidence": "high",
-  "source": "chord/key refs"
- },
- "can-t-get-you-out-of-my-head": {
-  "key": "Am",
-  "confidence": "high",
-  "source": "Wikipedia"
- },
- "can-t-help-falling-in-love-with-you": {
-  "key": "D",
-  "confidence": "high",
-  "source": "Ultimate Guitar official"
- },
- "can-t-stop": {
-  "key": "Em",
-  "confidence": "high",
-  "source": "Wikipedia"
- },
- "can-t-take-my-eyes-off-you": {
-  "key": "C",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "careless-whisper": {
-  "key": "Dm",
-  "confidence": "high",
-  "source": "SongBPM"
- },
- "cecilia": {
-  "key": "C",
-  "confidence": "high",
-  "source": "sheet/chord refs"
- },
- "chop-suey": {
-  "key": "Gm",
-  "confidence": "high",
-  "source": "songdata.io"
- },
- "cold-heart": {
-  "key": "Bbm",
-  "confidence": "high",
-  "source": "Wikipedia"
- },
- "colors-of-the-wind": {
-  "key": "Bb",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "crazy": {
-  "key": "Cm",
-  "confidence": "high",
-  "source": "bellandcomusic"
- },
- "crazy-little-thing-called-love": {
-  "key": "D",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "creep": {
-  "key": "G",
-  "confidence": "high",
-  "source": "chord/key refs"
- },
- "dancing-queen": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Klangio"
- },
- "do-i-wanna-know": {
-  "key": "Gm",
-  "confidence": "high",
-  "source": "Wikipedia"
- },
- "dog-days-are-over": {
-  "key": "G",
-  "confidence": "high",
-  "source": "chord/key refs"
- },
- "don-t-let-me-be-misunderstood": {
-  "key": "Bm",
-  "confidence": "medium",
-  "source": "Music Gateway"
- },
- "don-t-let-me-down": {
-  "key": "E",
-  "confidence": "high",
-  "source": "Tunebat"
- },
- "don-t-look-back-in-anger": {
-  "key": "C",
-  "confidence": "medium",
-  "source": "chord/key refs"
- },
- "don-t-stop-me-now": {
-  "key": "F",
-  "confidence": "high",
-  "source": "Tunebat"
- },
- "don-t-worry-be-happy": {
-  "key": "B",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "dream-a-little-dream-of-me": {
-  "key": "C",
-  "confidence": "medium",
-  "source": "Wikipedia"
- },
- "englishman-in-new-york": {
-  "key": "Bm",
-  "confidence": "high",
-  "source": "Wikipedia"
- },
- "enjoy-the-silence": {
-  "key": "Cm",
-  "confidence": "high",
-  "source": "Tunebat"
- },
- "every-breath-you-take": {
-  "key": "A",
-  "confidence": "medium",
-  "source": "Wikipedia"
- },
- "everywhere": {
-  "key": "E",
-  "confidence": "high",
-  "source": "Hooktheory; SongBPM"
- },
- "eye-of-the-tiger": {
-  "key": "Cm",
-  "confidence": "high",
-  "source": "Tunebat"
- },
- "flowers": {
-  "key": "Am",
-  "confidence": "medium",
-  "source": "SongData.io"
- },
- "fluorescent-adolescent": {
-  "key": "E",
-  "confidence": "medium",
-  "source": "Ultimate Guitar official"
- },
- "fly-away": {
-  "key": "G",
-  "confidence": "high",
-  "source": "SongData.io"
- },
- "fly-me-to-the-moon": {
-  "key": "C",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "friday-i-m-in-love": {
-  "key": "D",
-  "confidence": "medium",
-  "source": "sheet/chord refs"
- },
- "get-lucky": {
-  "key": "F#m",
-  "confidence": "high",
-  "source": "SongData.io"
- },
- "go-your-own-way": {
-  "key": "F",
-  "confidence": "high",
-  "source": "Hooktheory"
- },
- "hallelujah": {
-  "key": "C",
-  "confidence": "high",
-  "source": "Wikipedia"
- },
- "happy": {
-  "key": "Fm",
-  "confidence": "high",
-  "source": "Wikipedia"
- },
- "happy-birthday": {
-  "key": "F",
-  "confidence": "medium",
-  "source": "sheet refs"
- },
- "happy-together": {
-  "key": "F#m",
-  "confidence": "high",
-  "source": "Wikipedia"
- },
- "have-you-ever-seen-the-rain": {
-  "key": "C",
-  "confidence": "high",
-  "source": "chord refs"
- },
- "here-comes-the-sun": {
-  "key": "A",
-  "confidence": "high",
-  "source": "ChordWiki"
- },
- "hey-jude": {
-  "key": "F",
-  "confidence": "high",
-  "source": "Hooktheory"
- },
- "hey-there-delilah": {
-  "key": "D",
-  "confidence": "high",
-  "source": "chord/tab refs"
- },
- "hey-ya": {
-  "key": "G",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "highway-to-hell": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Wikipedia"
- },
- "hit-me-baby-one-more-time": {
-  "key": "Cm",
-  "confidence": "high",
-  "source": "Wikipedia"
- },
- "hit-the-road-jack": {
-  "key": "G#m",
-  "confidence": "medium",
-  "source": "Musicnotes"
- },
- "ho-hey": {
-  "key": "C",
-  "confidence": "high",
-  "source": "Musicnotes; Tunebat"
- },
- "home": {
-  "key": "Bm",
-  "confidence": "medium",
-  "source": "Musicnotes"
- },
- "hotel-california": {
-  "key": "Bm",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "house-of-gold": {
-  "key": "C",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "house-of-the-rising-sun": {
-  "key": "Am",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "how-you-remind-me": {
-  "key": "Cm",
-  "confidence": "medium",
-  "source": "Hooktheory; Klangio"
- },
- "i-heard-it-through-the-grapevine": {
-  "key": "D#m",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "i-knew-you-were-trouble": {
-  "key": "F#",
-  "confidence": "high",
-  "source": "Klangio"
- },
- "i-still-haven-t-found-what-i-m-looking-for": {
-  "key": "C#",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "i-wanna-be-like-you-the-monkey-song": {
-  "key": "Cm",
-  "confidence": "medium",
-  "source": "Musicnotes"
- },
- "i-want-it-that-way": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "i-want-to-break-free": {
-  "key": "E",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "i-was-made-for-lovin-you": {
-  "key": "Em",
-  "confidence": "medium",
-  "source": "Hooktheory; GetSongKEY"
- },
- "i-will-survive": {
-  "key": "Am",
-  "confidence": "high",
-  "source": "Musicnotes; TempoPeek"
- },
- "i-ll-be-there-for-you-friends-theme": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "i-m-a-believer-from-shrek": {
-  "key": "G",
-  "confidence": "high",
-  "source": "Hooktheory"
- },
- "i-m-still-standing": {
-  "key": "Bb",
-  "confidence": "high",
-  "source": "Hooktheory"
- },
- "i-m-yours": {
-  "key": "B",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "imagine": {
-  "key": "C",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "in-the-summertime": {
-  "key": "E",
-  "confidence": "high",
-  "source": "Musicnotes; Hooktheory"
- },
- "it-s-my-life": {
-  "key": "Cm",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "it-s-raining-men": {
-  "key": "Fm",
-  "confidence": "high",
-  "source": "Musicnotes; Hooktheory"
- },
- "jammin": {
-  "key": "Bm",
-  "confidence": "high",
-  "source": "Musicnotes; AcousticBrainz"
- },
- "jolene": {
-  "key": "C#m",
-  "confidence": "high",
-  "source": "Hooktheory"
- },
- "just-like-heaven": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Wikipedia; MusicBrainz"
- },
- "karma-police": {
-  "key": "Em",
-  "confidence": "medium",
-  "source": "Musicnotes; Wikipedia"
- },
- "kids": {
-  "key": "A",
-  "confidence": "medium",
-  "source": "chord progression"
- },
- "killing-me-softly": {
-  "key": "Fm",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "knocking-on-heaven-s-door": {
-  "key": "G",
-  "confidence": "high",
-  "source": "chord refs"
- },
- "la-bamba": {
-  "key": "C",
-  "confidence": "high",
-  "source": "chord refs"
- },
- "la-vie-en-rose": {
-  "key": "C",
-  "confidence": "medium",
-  "source": "Cifra Club"
- },
- "lake-of-fire": {
-  "key": "Gm",
-  "confidence": "medium",
-  "source": "Meat Puppets"
- },
- "lazy-song-the": {
-  "key": "B",
-  "confidence": "high",
-  "source": "Wikipedia (Alfred sheet)"
- },
- "lemon-tree": {
-  "key": "Fm",
-  "confidence": "medium",
-  "source": "Ultimate Guitar official"
- },
- "let-her-go": {
-  "key": "G",
-  "confidence": "high",
-  "source": "chord refs"
- },
- "let-it-be": {
-  "key": "C",
-  "confidence": "high",
-  "source": "chord refs"
- },
- "light-my-fire": {
-  "key": "Am",
-  "confidence": "medium",
-  "source": "Wikipedia"
- },
- "lion-sleeps-tonight-the": {
-  "key": "C",
-  "confidence": "medium",
-  "source": "ukesters.org sheet"
- },
- "little-lion-man": {
-  "key": "Dm",
-  "confidence": "high",
-  "source": "Ultimate Guitar; Musicnotes"
- },
- "little-talks": {
-  "key": "Bbm",
-  "confidence": "medium",
-  "source": "Ultimate Guitar official"
- },
- "loneliest": {
-  "key": "D",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "losing-my-religion": {
-  "key": "Am",
-  "confidence": "high",
-  "source": "chord refs"
- },
- "lost-on-you": {
-  "key": "Fm",
-  "confidence": "medium",
-  "source": "chord refs"
- },
- "love-of-my-life": {
-  "key": "F",
-  "confidence": "medium",
-  "source": "Musicnotes"
- },
- "lovesong": {
-  "key": "Am",
-  "confidence": "high",
-  "source": "Wikipedia"
- },
- "lucy-in-the-sky-with-diamonds": {
-  "key": "A",
-  "confidence": "medium",
-  "source": "verse A major"
- },
- "mad-world": {
-  "key": "Fm",
-  "confidence": "medium",
-  "source": "Ultimate Guitar official"
- },
- "mamma-mia": {
-  "key": "D",
-  "confidence": "high",
-  "source": "GetSongKey; SongBPM"
- },
- "maria": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Wikipedia"
- },
- "maybe-tomorrow": {
-  "key": "Gm",
-  "confidence": "medium",
-  "source": "Chordify"
- },
- "mr-brightside": {
-  "key": "C#",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "mr-sandman": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Hooktheory"
- },
- "my-girl": {
-  "key": "C",
-  "confidence": "high",
-  "source": "Tunebat; GetSongKEY"
- },
- "my-heart-will-go-on-titanic": {
-  "key": "E",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "never-gonna-give-you-up": {
-  "key": "Bbm",
-  "confidence": "medium",
-  "source": "Hooktheory"
- },
- "number-1-party-anthem": {
-  "key": "G",
-  "confidence": "medium",
-  "source": "Hooktheory; GuitarTuna"
- },
- "one-love": {
-  "key": "Bb",
-  "confidence": "high",
-  "source": "Tunebat"
- },
- "otherside": {
-  "key": "Am",
-  "confidence": "high",
-  "source": "Hooktheory; Klangio"
- },
- "people-are-strange": {
-  "key": "Em",
-  "confidence": "high",
-  "source": "Musicnotes; Hooktheory"
- },
- "postcards-from-italy": {
-  "key": "F",
-  "confidence": "high",
-  "source": "Hooktheory; SongBPM"
- },
- "psycho-killer": {
-  "key": "Am",
-  "confidence": "high",
-  "source": "SingingCarrots; Hooktheory"
- },
- "pumped-up-kicks": {
-  "key": "Fm",
-  "confidence": "high",
-  "source": "Musicnotes; Wikipedia"
- },
- "raindrops-keep-fallin-on-my-head": {
-  "key": "F",
-  "confidence": "high",
-  "source": "Hooktheory; Musicnotes"
- },
- "relax-take-it-easy": {
-  "key": "F#m",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "ring-of-fire": {
-  "key": "G",
-  "confidence": "high",
-  "source": "Musicnotes; AcousticBrainz"
- },
- "riptide": {
-  "key": "C#",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "rolling-in-the-deep": {
-  "key": "Cm",
-  "confidence": "high",
-  "source": "Wikipedia; AcousticBrainz"
- },
- "roxanne": {
-  "key": "Gm",
-  "confidence": "high",
-  "source": "Musicnotes; MusicRadar"
- },
- "sailing": {
-  "key": "B",
-  "confidence": "high",
-  "source": "Musicnotes; AcousticBrainz"
- },
- "save-my-soul": {
-  "key": "C",
-  "confidence": "low",
-  "source": "Krakow chord chart (obscure)"
- },
- "shake-it-off": {
-  "key": "G",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "shallow": {
-  "key": "G",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "she-loves-you": {
-  "key": "G",
-  "confidence": "high",
-  "source": "Musicnotes; Pollack"
- },
- "shiny-happy-people": {
-  "key": "E",
-  "confidence": "low",
-  "source": "Hooktheory; Klangio (DBs split)"
- },
- "snow-hey-oh": {
-  "key": "G#m",
-  "confidence": "medium",
-  "source": "Wikipedia; Musicnotes"
- },
- "somebody-to-love": {
-  "key": "F#m",
-  "confidence": "high",
-  "source": "Hooktheory; Musicnotes"
- },
- "somebody-told-me": {
-  "key": "Bbm",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "somewhere-over-the-rainbow": {
-  "key": "C",
-  "confidence": "medium",
-  "source": "Musicnotes (IZ version)"
- },
- "sounds-of-silence": {
-  "key": "D#m",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "space-oddity": {
-  "key": "C",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "stand-by-me": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "stay-with-me": {
-  "key": "C",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "summer-nights": {
-  "key": "D",
-  "confidence": "high",
-  "source": "Musicnotes; Hooktheory"
- },
- "sunshine-reggae": {
-  "key": "G#",
-  "confidence": "high",
-  "source": "Tunebat; songdata.io"
- },
- "sweater-weather": {
-  "key": "Gm",
-  "confidence": "high",
-  "source": "Hooktheory; Musicnotes"
- },
- "sweet-caroline": {
-  "key": "B",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "sweet-child-of-mine": {
-  "key": "D",
-  "confidence": "medium",
-  "source": "Musicnotes (guitars Eb-tuned)"
- },
- "sweet-dreams": {
-  "key": "Cm",
-  "confidence": "high",
-  "source": "Hooktheory; Musicnotes"
- },
- "take-me-home-country-roads": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Musicnotes; Hooktheory"
- },
- "take-me-out": {
-  "key": "Em",
-  "confidence": "high",
-  "source": "Hooktheory; Musicnotes"
- },
- "take-on-me": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "teenage-dirtbag": {
-  "key": "E",
-  "confidence": "high",
-  "source": "Hooktheory; Musicnotes"
- },
- "tender": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Hooktheory"
- },
- "the-final-countdown": {
-  "key": "F#m",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "the-judge": {
-  "key": "C",
-  "confidence": "medium",
-  "source": "Hooktheory; GetSongKEY"
- },
- "the-man-who-sold-the-world": {
-  "key": "Dm",
-  "confidence": "medium",
-  "source": "Musicnotes"
- },
- "the-scientist": {
-  "key": "Dm",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "there-is-a-light-that-never-goes-out": {
-  "key": "C#m",
-  "confidence": "medium",
-  "source": "Wikipedia"
- },
- "these-boots-are-made-for-walking": {
-  "key": "E",
-  "confidence": "medium",
-  "source": "Musicnotes; Hooktheory"
- },
- "thinking-out-loud": {
-  "key": "D",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "this-charming-man": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Musicnotes; Hooktheory"
- },
- "three-little-birds": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "times-like-these": {
-  "key": "D",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "titanium": {
-  "key": "D#",
-  "confidence": "medium",
-  "source": "Wikipedia; Musicnotes"
- },
- "toxic": {
-  "key": "Cm",
-  "confidence": "high",
-  "source": "Wikipedia; MusicRadar"
- },
- "toxicity": {
-  "key": "Cm",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "twist-and-shout": {
-  "key": "D",
-  "confidence": "high",
-  "source": "Hooktheory"
- },
- "under-pressure": {
-  "key": "D",
-  "confidence": "high",
-  "source": "Musicnotes; Soundfly"
- },
- "use-somebody": {
-  "key": "C",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "valerie": {
-  "key": "D#",
-  "confidence": "high",
-  "source": "Musicnotes"
- },
- "wake-me-up": {
-  "key": "Bm",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "what-is-love-baby-don-t-hurt-me": {
-  "key": "Bb",
-  "confidence": "high",
-  "source": "Musicnotes; TempoPeek"
- },
- "what-s-up": {
-  "key": "A",
-  "confidence": "high",
-  "source": "Hooktheory; GuitarTuna"
- },
- "where-is-my-mind": {
-  "key": "E",
-  "confidence": "high",
-  "source": "Musicnotes; Hooktheory"
- },
- "why-don-t-you-get-a-job": {
-  "key": "F",
-  "confidence": "high",
-  "source": "Hooktheory"
- },
- "wicked-game": {
-  "key": "Bm",
-  "confidence": "medium",
-  "source": "Musicnotes; Wikipedia"
- },
- "wish-you-were-here": {
-  "key": "G",
-  "confidence": "high",
-  "source": "Musicnotes; Wikipedia"
- },
- "wonderwall": {
-  "key": "F#m",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- },
- "yellow": {
-  "key": "B",
-  "confidence": "high",
-  "source": "Wikipedia; Hooktheory"
- },
- "you-are-my-sunshine": {
-  "key": "A",
-  "confidence": "medium",
-  "source": "Hooktheory; SongBPM"
- },
- "you-know-i-m-no-good": {
-  "key": "Dm",
-  "confidence": "high",
-  "source": "Hooktheory"
- },
- "you-will-never-know": {
-  "key": "Gm",
-  "confidence": "high",
-  "source": "GuitarTuna; songdata"
- },
- "zombie": {
-  "key": "Em",
-  "confidence": "high",
-  "source": "Wikipedia; Musicnotes"
- }
+  "i-can-t-get-no-satisfaction": {
+    "key": "E",
+    "sheetKey": "E",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "19-2000": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "GetSongKey; DoReSol"
+  },
+  "500-miles-i-m-gonna-be": {
+    "key": "E",
+    "sheetKey": "D",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Hooktheory; Tunebat"
+  },
+  "a-little-respect": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; Hooktheory"
+  },
+  "accidentally-in-love": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; TempoPeek"
+  },
+  "after-hours": {
+    "key": "Bb",
+    "sheetKey": "C",
+    "capo": -2,
+    "confidence": "medium",
+    "source": "Hooktheory; SheetMusicGo"
+  },
+  "ain-t-no-sunshine": {
+    "key": "Am",
+    "sheetKey": "Am",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; Hooktheory"
+  },
+  "all-about-that-bass": {
+    "key": "A",
+    "sheetKey": "A",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "all-apologies": {
+    "key": "C#",
+    "sheetKey": "C",
+    "capo": 1,
+    "confidence": "medium",
+    "source": "Piano Pronto (orig Db)"
+  },
+  "all-star-shrek": {
+    "key": "F#",
+    "sheetKey": "C",
+    "capo": 6,
+    "confidence": "high",
+    "source": "Musicnotes; Hooktheory"
+  },
+  "american-idiot": {
+    "key": "G#",
+    "sheetKey": "A",
+    "capo": -1,
+    "confidence": "high",
+    "source": "Musicnotes; Hooktheory"
+  },
+  "another-brick-in-the-wall": {
+    "key": "Dm",
+    "sheetKey": "Dm",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "another-love": {
+    "key": "Em",
+    "sheetKey": "Em",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; Hooktheory"
+  },
+  "bad-moon-rising": {
+    "key": "D",
+    "sheetKey": "C",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Musicnotes; Wikipedia"
+  },
+  "bad-romance": {
+    "key": "Am",
+    "sheetKey": "Am",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; Wikipedia"
+  },
+  "bang-bang": {
+    "key": "Fm",
+    "sheetKey": "Am",
+    "capo": -4,
+    "confidence": "high",
+    "source": "Hooktheory"
+  },
+  "basket-case": {
+    "key": "D#",
+    "sheetKey": "C",
+    "capo": 3,
+    "confidence": "high",
+    "source": "Wikipedia"
+  },
+  "beggin": {
+    "key": "Em",
+    "sheetKey": "Am",
+    "capo": -5,
+    "confidence": "high",
+    "source": "Tunebat"
+  },
+  "billie-jean": {
+    "key": "F#m",
+    "sheetKey": "Em",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "bitter-sweet-symphony": {
+    "key": "E",
+    "sheetKey": "D",
+    "capo": 2,
+    "confidence": "medium",
+    "source": "Hooktheory; SingingCarrots"
+  },
+  "black": {
+    "key": "E",
+    "sheetKey": "E",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "blinding-lights": {
+    "key": "Cm",
+    "sheetKey": "Cm",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "blister-in-the-sun": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "blowing-in-the-wind": {
+    "key": "D",
+    "sheetKey": "C",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Musicnotes; dylanchords"
+  },
+  "bohemian-rhapsody": {
+    "key": "Bb",
+    "sheetKey": "G",
+    "capo": 3,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "boys-don-t-cry": {
+    "key": "A",
+    "sheetKey": "A",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "brown-eyed-girl": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "sheet/chord refs"
+  },
+  "budapest": {
+    "key": "F",
+    "sheetKey": "G",
+    "capo": -2,
+    "confidence": "high",
+    "source": "Ultimate Guitar official"
+  },
+  "california-dreaming": {
+    "key": "C#m",
+    "sheetKey": "Dm",
+    "capo": -1,
+    "confidence": "medium",
+    "source": "chord refs"
+  },
+  "californication": {
+    "key": "Am",
+    "sheetKey": "Am",
+    "capo": 0,
+    "confidence": "high",
+    "source": "chord/key refs"
+  },
+  "can-t-get-you-out-of-my-head": {
+    "key": "Am",
+    "sheetKey": "Dm",
+    "capo": -5,
+    "confidence": "high",
+    "source": "Wikipedia"
+  },
+  "can-t-help-falling-in-love-with-you": {
+    "key": "D",
+    "sheetKey": "C",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Ultimate Guitar official"
+  },
+  "can-t-stop": {
+    "key": "Em",
+    "sheetKey": "Em",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia"
+  },
+  "can-t-take-my-eyes-off-you": {
+    "key": "C",
+    "sheetKey": "G",
+    "capo": 5,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "careless-whisper": {
+    "key": "Dm",
+    "sheetKey": "Dm",
+    "capo": 0,
+    "confidence": "high",
+    "source": "SongBPM"
+  },
+  "cecilia": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "high",
+    "source": "sheet/chord refs"
+  },
+  "chop-suey": {
+    "key": "Gm",
+    "sheetKey": "Gm",
+    "capo": 0,
+    "confidence": "high",
+    "source": "songdata.io"
+  },
+  "cold-heart": {
+    "key": "Bbm",
+    "sheetKey": "Am",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Wikipedia"
+  },
+  "colors-of-the-wind": {
+    "key": "Bb",
+    "sheetKey": "Bm",
+    "capo": -1,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "crazy": {
+    "key": "Cm",
+    "sheetKey": "Am",
+    "capo": 3,
+    "confidence": "high",
+    "source": "bellandcomusic"
+  },
+  "crazy-little-thing-called-love": {
+    "key": "D",
+    "sheetKey": "G",
+    "capo": -5,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "creep": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "chord/key refs"
+  },
+  "dancing-queen": {
+    "key": "A",
+    "sheetKey": "G",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Klangio"
+  },
+  "do-i-wanna-know": {
+    "key": "Gm",
+    "sheetKey": "Am",
+    "capo": -2,
+    "confidence": "high",
+    "source": "Wikipedia"
+  },
+  "dog-days-are-over": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "chord/key refs"
+  },
+  "don-t-let-me-be-misunderstood": {
+    "key": "Bm",
+    "sheetKey": "Am",
+    "capo": 2,
+    "confidence": "medium",
+    "source": "Music Gateway"
+  },
+  "don-t-let-me-down": {
+    "key": "E",
+    "sheetKey": "F",
+    "capo": -1,
+    "confidence": "high",
+    "source": "Tunebat"
+  },
+  "don-t-look-back-in-anger": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "medium",
+    "source": "chord/key refs"
+  },
+  "don-t-stop-me-now": {
+    "key": "F",
+    "sheetKey": "F",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Tunebat"
+  },
+  "don-t-worry-be-happy": {
+    "key": "B",
+    "sheetKey": "C",
+    "capo": -1,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "dream-a-little-dream-of-me": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "medium",
+    "source": "Wikipedia"
+  },
+  "englishman-in-new-york": {
+    "key": "Bm",
+    "sheetKey": "Am",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Wikipedia"
+  },
+  "enjoy-the-silence": {
+    "key": "Cm",
+    "sheetKey": "Bm",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Tunebat"
+  },
+  "every-breath-you-take": {
+    "key": "A",
+    "sheetKey": "A",
+    "capo": 0,
+    "confidence": "medium",
+    "source": "Wikipedia"
+  },
+  "everywhere": {
+    "key": "E",
+    "sheetKey": "F",
+    "capo": -1,
+    "confidence": "high",
+    "source": "Hooktheory; SongBPM"
+  },
+  "eye-of-the-tiger": {
+    "key": "Cm",
+    "sheetKey": "Am",
+    "capo": 3,
+    "confidence": "high",
+    "source": "Tunebat"
+  },
+  "flowers": {
+    "key": "Am",
+    "sheetKey": "Am",
+    "capo": 0,
+    "confidence": "medium",
+    "source": "SongData.io"
+  },
+  "fluorescent-adolescent": {
+    "key": "E",
+    "sheetKey": "D",
+    "capo": 2,
+    "confidence": "medium",
+    "source": "Ultimate Guitar official"
+  },
+  "fly-away": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "SongData.io"
+  },
+  "fly-me-to-the-moon": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "friday-i-m-in-love": {
+    "key": "D",
+    "sheetKey": "G",
+    "capo": -5,
+    "confidence": "medium",
+    "source": "sheet/chord refs"
+  },
+  "get-lucky": {
+    "key": "F#m",
+    "sheetKey": "Em",
+    "capo": 2,
+    "confidence": "high",
+    "source": "SongData.io"
+  },
+  "go-your-own-way": {
+    "key": "F",
+    "sheetKey": "F",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Hooktheory"
+  },
+  "hallelujah": {
+    "key": "C",
+    "sheetKey": "G",
+    "capo": 5,
+    "confidence": "high",
+    "source": "Wikipedia"
+  },
+  "happy": {
+    "key": "Fm",
+    "sheetKey": "E",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Wikipedia"
+  },
+  "happy-birthday": {
+    "key": "F",
+    "sheetKey": "C",
+    "capo": 5,
+    "confidence": "medium",
+    "source": "sheet refs"
+  },
+  "happy-together": {
+    "key": "F#m",
+    "sheetKey": "Am",
+    "capo": -3,
+    "confidence": "high",
+    "source": "Wikipedia"
+  },
+  "have-you-ever-seen-the-rain": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "high",
+    "source": "chord refs"
+  },
+  "here-comes-the-sun": {
+    "key": "A",
+    "sheetKey": "G",
+    "capo": 2,
+    "confidence": "high",
+    "source": "ChordWiki"
+  },
+  "hey-jude": {
+    "key": "F",
+    "sheetKey": "G",
+    "capo": -2,
+    "confidence": "high",
+    "source": "Hooktheory"
+  },
+  "hey-there-delilah": {
+    "key": "D",
+    "sheetKey": "D",
+    "capo": 0,
+    "confidence": "high",
+    "source": "chord/tab refs"
+  },
+  "hey-ya": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "highway-to-hell": {
+    "key": "A",
+    "sheetKey": "A",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia"
+  },
+  "hit-me-baby-one-more-time": {
+    "key": "Cm",
+    "sheetKey": "Am",
+    "capo": 3,
+    "confidence": "high",
+    "source": "Wikipedia"
+  },
+  "hit-the-road-jack": {
+    "key": "G#m",
+    "sheetKey": "Am",
+    "capo": -1,
+    "confidence": "medium",
+    "source": "Musicnotes"
+  },
+  "ho-hey": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; Tunebat"
+  },
+  "home": {
+    "key": "Bm",
+    "sheetKey": "D",
+    "capo": -3,
+    "confidence": "medium",
+    "source": "Musicnotes"
+  },
+  "hotel-california": {
+    "key": "Bm",
+    "sheetKey": "Am",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "house-of-gold": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "house-of-the-rising-sun": {
+    "key": "Am",
+    "sheetKey": "Am",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "how-you-remind-me": {
+    "key": "Cm",
+    "sheetKey": "A",
+    "capo": 3,
+    "confidence": "medium",
+    "source": "Hooktheory; Klangio"
+  },
+  "i-heard-it-through-the-grapevine": {
+    "key": "D#m",
+    "sheetKey": "Dm",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "i-knew-you-were-trouble": {
+    "key": "F#",
+    "sheetKey": "F",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Klangio"
+  },
+  "i-still-haven-t-found-what-i-m-looking-for": {
+    "key": "C#",
+    "sheetKey": "C",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "i-wanna-be-like-you-the-monkey-song": {
+    "key": "Cm",
+    "sheetKey": "Am",
+    "capo": 3,
+    "confidence": "medium",
+    "source": "Musicnotes"
+  },
+  "i-want-it-that-way": {
+    "key": "A",
+    "sheetKey": "Am",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "i-want-to-break-free": {
+    "key": "E",
+    "sheetKey": "C",
+    "capo": 4,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "i-was-made-for-lovin-you": {
+    "key": "Em",
+    "sheetKey": "Em",
+    "capo": 0,
+    "confidence": "medium",
+    "source": "Hooktheory; GetSongKEY"
+  },
+  "i-will-survive": {
+    "key": "Am",
+    "sheetKey": "Am",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; TempoPeek"
+  },
+  "i-ll-be-there-for-you-friends-theme": {
+    "key": "A",
+    "sheetKey": "A",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "i-m-a-believer-from-shrek": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Hooktheory"
+  },
+  "i-m-still-standing": {
+    "key": "Bb",
+    "sheetKey": "Am",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Hooktheory"
+  },
+  "i-m-yours": {
+    "key": "B",
+    "sheetKey": "C",
+    "capo": -1,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "imagine": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "in-the-summertime": {
+    "key": "E",
+    "sheetKey": "C",
+    "capo": 4,
+    "confidence": "high",
+    "source": "Musicnotes; Hooktheory"
+  },
+  "it-s-my-life": {
+    "key": "Cm",
+    "sheetKey": "Am",
+    "capo": 3,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "it-s-raining-men": {
+    "key": "Fm",
+    "sheetKey": "Em",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Musicnotes; Hooktheory"
+  },
+  "jammin": {
+    "key": "Bm",
+    "sheetKey": "Bm",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; AcousticBrainz"
+  },
+  "jolene": {
+    "key": "C#m",
+    "sheetKey": "Am",
+    "capo": 4,
+    "confidence": "high",
+    "source": "Hooktheory"
+  },
+  "just-like-heaven": {
+    "key": "A",
+    "sheetKey": "A",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; MusicBrainz"
+  },
+  "karma-police": {
+    "key": "Em",
+    "sheetKey": "Am",
+    "capo": -5,
+    "confidence": "medium",
+    "source": "Musicnotes; Wikipedia"
+  },
+  "kids": {
+    "key": "A",
+    "sheetKey": "F#m",
+    "capo": 3,
+    "confidence": "medium",
+    "source": "chord progression"
+  },
+  "killing-me-softly": {
+    "key": "Fm",
+    "sheetKey": "Em",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "knocking-on-heaven-s-door": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "chord refs"
+  },
+  "la-bamba": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "high",
+    "source": "chord refs"
+  },
+  "la-vie-en-rose": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "medium",
+    "source": "Cifra Club"
+  },
+  "lake-of-fire": {
+    "key": "Gm",
+    "sheetKey": "Bm",
+    "capo": -4,
+    "confidence": "medium",
+    "source": "Meat Puppets"
+  },
+  "lazy-song-the": {
+    "key": "B",
+    "sheetKey": "C",
+    "capo": -1,
+    "confidence": "high",
+    "source": "Wikipedia (Alfred sheet)"
+  },
+  "lemon-tree": {
+    "key": "Fm",
+    "sheetKey": "Em",
+    "capo": 1,
+    "confidence": "medium",
+    "source": "Ultimate Guitar official"
+  },
+  "let-her-go": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "chord refs"
+  },
+  "let-it-be": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "high",
+    "source": "chord refs"
+  },
+  "light-my-fire": {
+    "key": "Am",
+    "sheetKey": "Am",
+    "capo": 0,
+    "confidence": "medium",
+    "source": "Wikipedia"
+  },
+  "lion-sleeps-tonight-the": {
+    "key": "C",
+    "sheetKey": "G",
+    "capo": 5,
+    "confidence": "medium",
+    "source": "ukesters.org sheet"
+  },
+  "little-lion-man": {
+    "key": "Dm",
+    "sheetKey": "Dm",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Ultimate Guitar; Musicnotes"
+  },
+  "little-talks": {
+    "key": "Bbm",
+    "sheetKey": "Am",
+    "capo": 1,
+    "confidence": "medium",
+    "source": "Ultimate Guitar official"
+  },
+  "loneliest": {
+    "key": "D",
+    "sheetKey": "D",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "losing-my-religion": {
+    "key": "Am",
+    "sheetKey": "Am",
+    "capo": 0,
+    "confidence": "high",
+    "source": "chord refs"
+  },
+  "lost-on-you": {
+    "key": "Fm",
+    "sheetKey": "Em",
+    "capo": 1,
+    "confidence": "medium",
+    "source": "chord refs"
+  },
+  "love-of-my-life": {
+    "key": "F",
+    "sheetKey": "F",
+    "capo": 0,
+    "confidence": "medium",
+    "source": "Musicnotes"
+  },
+  "lovesong": {
+    "key": "Am",
+    "sheetKey": "Am",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia"
+  },
+  "lucy-in-the-sky-with-diamonds": {
+    "key": "A",
+    "sheetKey": "A",
+    "capo": 0,
+    "confidence": "medium",
+    "source": "verse A major"
+  },
+  "mad-world": {
+    "key": "Fm",
+    "sheetKey": "Em",
+    "capo": 1,
+    "confidence": "medium",
+    "source": "Ultimate Guitar official"
+  },
+  "mamma-mia": {
+    "key": "D",
+    "sheetKey": "C",
+    "capo": 2,
+    "confidence": "high",
+    "source": "GetSongKey; SongBPM"
+  },
+  "maria": {
+    "key": "A",
+    "sheetKey": "C",
+    "capo": -3,
+    "confidence": "high",
+    "source": "Wikipedia"
+  },
+  "maybe-tomorrow": {
+    "key": "Gm",
+    "sheetKey": "Am",
+    "capo": -2,
+    "confidence": "medium",
+    "source": "Chordify"
+  },
+  "mr-brightside": {
+    "key": "C#",
+    "sheetKey": "C",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "mr-sandman": {
+    "key": "A",
+    "sheetKey": "C",
+    "capo": -3,
+    "confidence": "high",
+    "source": "Hooktheory"
+  },
+  "my-girl": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Tunebat; GetSongKEY"
+  },
+  "my-heart-will-go-on-titanic": {
+    "key": "E",
+    "sheetKey": "D",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "never-gonna-give-you-up": {
+    "key": "Bbm",
+    "sheetKey": "Am",
+    "capo": 1,
+    "confidence": "medium",
+    "source": "Hooktheory"
+  },
+  "number-1-party-anthem": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "medium",
+    "source": "Hooktheory; GuitarTuna"
+  },
+  "one-love": {
+    "key": "Bb",
+    "sheetKey": "A",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Tunebat"
+  },
+  "otherside": {
+    "key": "Am",
+    "sheetKey": "Am",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Hooktheory; Klangio"
+  },
+  "people-are-strange": {
+    "key": "Em",
+    "sheetKey": "Am",
+    "capo": -5,
+    "confidence": "high",
+    "source": "Musicnotes; Hooktheory"
+  },
+  "postcards-from-italy": {
+    "key": "F",
+    "sheetKey": "F",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Hooktheory; SongBPM"
+  },
+  "psycho-killer": {
+    "key": "Am",
+    "sheetKey": "Am",
+    "capo": 0,
+    "confidence": "high",
+    "source": "SingingCarrots; Hooktheory"
+  },
+  "pumped-up-kicks": {
+    "key": "Fm",
+    "sheetKey": "Em",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Musicnotes; Wikipedia"
+  },
+  "raindrops-keep-fallin-on-my-head": {
+    "key": "F",
+    "sheetKey": "G",
+    "capo": -2,
+    "confidence": "high",
+    "source": "Hooktheory; Musicnotes"
+  },
+  "relax-take-it-easy": {
+    "key": "F#m",
+    "sheetKey": "Am",
+    "capo": -3,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "ring-of-fire": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; AcousticBrainz"
+  },
+  "riptide": {
+    "key": "C#",
+    "sheetKey": "C",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "rolling-in-the-deep": {
+    "key": "Cm",
+    "sheetKey": "Am",
+    "capo": 3,
+    "confidence": "high",
+    "source": "Wikipedia; AcousticBrainz"
+  },
+  "roxanne": {
+    "key": "Gm",
+    "sheetKey": "Em",
+    "capo": 3,
+    "confidence": "high",
+    "source": "Musicnotes; MusicRadar"
+  },
+  "sailing": {
+    "key": "B",
+    "sheetKey": "C",
+    "capo": -1,
+    "confidence": "high",
+    "source": "Musicnotes; AcousticBrainz"
+  },
+  "save-my-soul": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "low",
+    "source": "Krakow chord chart (obscure)"
+  },
+  "shake-it-off": {
+    "key": "G",
+    "sheetKey": "D",
+    "capo": 5,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "shallow": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "she-loves-you": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; Pollack"
+  },
+  "shiny-happy-people": {
+    "key": "E",
+    "sheetKey": "A",
+    "capo": -5,
+    "confidence": "low",
+    "source": "Hooktheory; Klangio (DBs split)"
+  },
+  "snow-hey-oh": {
+    "key": "G#m",
+    "sheetKey": "Gm",
+    "capo": 1,
+    "confidence": "medium",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "somebody-to-love": {
+    "key": "F#m",
+    "sheetKey": "Em",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Hooktheory; Musicnotes"
+  },
+  "somebody-told-me": {
+    "key": "Bbm",
+    "sheetKey": "Am",
+    "capo": 1,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "somewhere-over-the-rainbow": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "medium",
+    "source": "Musicnotes (IZ version)"
+  },
+  "sounds-of-silence": {
+    "key": "D#m",
+    "sheetKey": "Em",
+    "capo": -1,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "space-oddity": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "stand-by-me": {
+    "key": "A",
+    "sheetKey": "G",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "stay-with-me": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "summer-nights": {
+    "key": "D",
+    "sheetKey": "D",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; Hooktheory"
+  },
+  "sunshine-reggae": {
+    "key": "G#",
+    "sheetKey": "C",
+    "capo": -4,
+    "confidence": "high",
+    "source": "Tunebat; songdata.io"
+  },
+  "sweater-weather": {
+    "key": "Gm",
+    "sheetKey": "Gm",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Hooktheory; Musicnotes"
+  },
+  "sweet-caroline": {
+    "key": "B",
+    "sheetKey": "G",
+    "capo": 4,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "sweet-child-of-mine": {
+    "key": "D",
+    "sheetKey": "C",
+    "capo": 2,
+    "confidence": "medium",
+    "source": "Musicnotes (guitars Eb-tuned)"
+  },
+  "sweet-dreams": {
+    "key": "Cm",
+    "sheetKey": "Am",
+    "capo": 3,
+    "confidence": "high",
+    "source": "Hooktheory; Musicnotes"
+  },
+  "take-me-home-country-roads": {
+    "key": "A",
+    "sheetKey": "A",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; Hooktheory"
+  },
+  "take-me-out": {
+    "key": "Em",
+    "sheetKey": "Em",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Hooktheory; Musicnotes"
+  },
+  "take-on-me": {
+    "key": "A",
+    "sheetKey": "A",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "teenage-dirtbag": {
+    "key": "E",
+    "sheetKey": "F",
+    "capo": -1,
+    "confidence": "high",
+    "source": "Hooktheory; Musicnotes"
+  },
+  "tender": {
+    "key": "A",
+    "sheetKey": "A",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Hooktheory"
+  },
+  "the-final-countdown": {
+    "key": "F#m",
+    "sheetKey": "Em",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "the-judge": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "medium",
+    "source": "Hooktheory; GetSongKEY"
+  },
+  "the-man-who-sold-the-world": {
+    "key": "Dm",
+    "sheetKey": "Dm",
+    "capo": 0,
+    "confidence": "medium",
+    "source": "Musicnotes"
+  },
+  "the-scientist": {
+    "key": "Dm",
+    "sheetKey": "F",
+    "capo": -3,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "there-is-a-light-that-never-goes-out": {
+    "key": "C#m",
+    "sheetKey": "Dm",
+    "capo": -1,
+    "confidence": "medium",
+    "source": "Wikipedia"
+  },
+  "these-boots-are-made-for-walking": {
+    "key": "E",
+    "sheetKey": "A",
+    "capo": -5,
+    "confidence": "medium",
+    "source": "Musicnotes; Hooktheory"
+  },
+  "thinking-out-loud": {
+    "key": "D",
+    "sheetKey": "D",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "this-charming-man": {
+    "key": "A",
+    "sheetKey": "G",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Musicnotes; Hooktheory"
+  },
+  "three-little-birds": {
+    "key": "A",
+    "sheetKey": "C",
+    "capo": -3,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "times-like-these": {
+    "key": "D",
+    "sheetKey": "D",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "titanium": {
+    "key": "D#",
+    "sheetKey": "Am",
+    "capo": 6,
+    "confidence": "medium",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "toxic": {
+    "key": "Cm",
+    "sheetKey": "Am",
+    "capo": 3,
+    "confidence": "high",
+    "source": "Wikipedia; MusicRadar"
+  },
+  "toxicity": {
+    "key": "Cm",
+    "sheetKey": "Am",
+    "capo": 3,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "twist-and-shout": {
+    "key": "D",
+    "sheetKey": "C",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Hooktheory"
+  },
+  "under-pressure": {
+    "key": "D",
+    "sheetKey": "D",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; Soundfly"
+  },
+  "use-somebody": {
+    "key": "C",
+    "sheetKey": "C",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "valerie": {
+    "key": "D#",
+    "sheetKey": "C",
+    "capo": 3,
+    "confidence": "high",
+    "source": "Musicnotes"
+  },
+  "wake-me-up": {
+    "key": "Bm",
+    "sheetKey": "Am",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "what-is-love-baby-don-t-hurt-me": {
+    "key": "Bb",
+    "sheetKey": "Em",
+    "capo": 6,
+    "confidence": "high",
+    "source": "Musicnotes; TempoPeek"
+  },
+  "what-s-up": {
+    "key": "A",
+    "sheetKey": "A",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Hooktheory; GuitarTuna"
+  },
+  "where-is-my-mind": {
+    "key": "E",
+    "sheetKey": "F",
+    "capo": -1,
+    "confidence": "high",
+    "source": "Musicnotes; Hooktheory"
+  },
+  "why-don-t-you-get-a-job": {
+    "key": "F",
+    "sheetKey": "F",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Hooktheory"
+  },
+  "wicked-game": {
+    "key": "Bm",
+    "sheetKey": "A",
+    "capo": 2,
+    "confidence": "medium",
+    "source": "Musicnotes; Wikipedia"
+  },
+  "wish-you-were-here": {
+    "key": "G",
+    "sheetKey": "G",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Musicnotes; Wikipedia"
+  },
+  "wonderwall": {
+    "key": "F#m",
+    "sheetKey": "Em",
+    "capo": 2,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  },
+  "yellow": {
+    "key": "B",
+    "sheetKey": "C",
+    "capo": -1,
+    "confidence": "high",
+    "source": "Wikipedia; Hooktheory"
+  },
+  "you-are-my-sunshine": {
+    "key": "A",
+    "sheetKey": "C",
+    "capo": -3,
+    "confidence": "medium",
+    "source": "Hooktheory; SongBPM"
+  },
+  "you-know-i-m-no-good": {
+    "key": "Dm",
+    "sheetKey": "Dm",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Hooktheory"
+  },
+  "you-will-never-know": {
+    "key": "Gm",
+    "sheetKey": "Am",
+    "capo": -2,
+    "confidence": "high",
+    "source": "GuitarTuna; songdata"
+  },
+  "zombie": {
+    "key": "Em",
+    "sheetKey": "Em",
+    "capo": 0,
+    "confidence": "high",
+    "source": "Wikipedia; Musicnotes"
+  }
 }

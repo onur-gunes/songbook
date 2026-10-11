@@ -108,9 +108,15 @@
             </div>
         </header>
 
-        <section id="origKey" class="orig-key" aria-label="Original key" hidden>
-            <span class="orig-key-label">Original key</span>
-            <span id="origKeyValue" class="orig-key-value">—</span>
+        <section id="origKey" class="orig-key" aria-label="Original key and capo" hidden>
+            <span class="key-part">
+                <span class="orig-key-label">Original key</span>
+                <span id="origKeyValue" class="orig-key-value">—</span>
+            </span>
+            <span class="key-part" id="capoPart" hidden>
+                <span class="orig-key-label">Capo</span>
+                <span id="capoValue" class="orig-key-value">—</span>
+            </span>
         </section>
 
         <div id="chordStrip" class="chord-strip" aria-label="Chord diagrams"></div>

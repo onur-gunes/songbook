@@ -131,6 +131,7 @@
             level: (s.level === 'Easy' || s.level === 'Medium' || s.level === 'Hard') ? s.level : 'Medium',
             new: !!s.new,
             key: s.key ? String(s.key) : '',
+            capo: (typeof s.capo === 'number' && isFinite(s.capo)) ? s.capo : null,
             dur: typeof s.dur === 'number' ? s.dur : 4,
             chords: Array.isArray(s.chords) ? s.chords.map(String) : [],
             sheet: Array.isArray(s.sheet) ? s.sheet : (s.sheet ? s.sheet : [])
@@ -492,6 +493,38 @@
 
     function updateTransposeLabel() {
         $('trValue').textContent = (transpose > 0 ? '+' : '') + transpose;
+    }
+
+    // Fold a semitone offset into the -5..6 range (nearest direction).
+    function wrapSigned(x) {
+        var r = ((x % 12) + 12) % 12;
+        return r > 6 ? r - 12 : r;
+    }
+
+    // Original-key badge plus the capo needed to sound like the recording.
+    // base capo = recording key - written (sheet) key, so live capo follows
+    // the transpose control: live = wrapSigned(capo - transpose).
+    function updateKeyHints() {
+        var sec = $('origKey');
+        if (!sec) return;
+        var song = currentSong;
+        if (!song || !song.key) { sec.hidden = true; return; }
+        sec.hidden = false;
+        $('origKeyValue').textContent = song.key;
+
+        var part = $('capoPart');
+        var val = $('capoValue');
+        if (!part || !val) return;
+        if (typeof song.capo !== 'number' || !isFinite(song.capo)) {
+            part.hidden = true;
+            val.textContent = '';
+            return;
+        }
+        var rel = wrapSigned(song.capo - transpose);
+        part.hidden = false;
+        if (rel > 0) val.textContent = 'Capo ' + rel;
+        else if (rel === 0) val.textContent = 'No capo';
+        else val.textContent = 'No capo · transpose ' + rel;
     }
 
     /* ---------------- chord strip (ChordKit) ---------------- */
@@ -937,17 +970,7 @@
         var badge = $('songLevel');
         badge.textContent = song.level;
         badge.className = 'level-badge level-' + song.level;
-        var ok = $('origKey');
-        if (ok) {
-            var okv = $('origKeyValue');
-            if (song.key) {
-                ok.hidden = false;
-                okv.textContent = song.key;
-            } else {
-                ok.hidden = true;
-                okv.textContent = '';
-            }
-        }
+        updateKeyHints();
         updateFavBtn();
 
         renderChordStrip(song);
@@ -968,12 +991,14 @@
             if (transpose >= 11) return;
             transpose++;
             updateTransposeLabel();
+            updateKeyHints();
             if (currentSong) { renderChordStrip(currentSong); renderSheet(currentSong); }
         });
         $('trDown').addEventListener('click', function () {
             if (transpose <= -11) return;
             transpose--;
             updateTransposeLabel();
+            updateKeyHints();
             if (currentSong) { renderChordStrip(currentSong); renderSheet(currentSong); }
         });
 

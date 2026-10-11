@@ -19,10 +19,15 @@ SONGBOOK_LOGO_DARK = 'images/ukulele-krakow-trans-dark.png'
 # ---------- helpers ----------
 
 def load_original_keys():
-    """Curated original-recording keys: song id -> key string.
+    """Curated recording keys + capo info: song id -> {key, sheetKey, capo}.
 
-    Source file songbooks/original-keys.json maps id -> {key, confidence, source}
-    (or a bare string). Hand-curated, since the recording key is not in legacy HTML.
+    Source file songbooks/original-keys.json maps id -> {key, sheetKey, capo,
+    confidence, source} (or a bare key string). Hand-curated, since neither the
+    recording key nor the sheet's written key is in legacy HTML.
+
+    'key' is the original recording key; 'sheetKey' is the key the printed
+    sheet is written in; 'capo' is the signed semitone offset (wrapSigned) that
+    turns the printed shapes into the recording, i.e. wrapSigned(key - sheetKey).
     """
     path = os.path.join(D, 'songbooks', 'original-keys.json')
     if not os.path.exists(path):
@@ -30,9 +35,18 @@ def load_original_keys():
     data = json.load(open(path, encoding='utf-8'))
     out = {}
     for k, v in data.items():
-        key = v.get('key') if isinstance(v, dict) else v
-        if key:
-            out[k] = key
+        if isinstance(v, dict):
+            entry = {}
+            if v.get('key'):
+                entry['key'] = str(v['key'])
+            if v.get('sheetKey'):
+                entry['sheetKey'] = str(v['sheetKey'])
+            if isinstance(v.get('capo'), int):
+                entry['capo'] = v['capo']
+            if entry:
+                out[k] = entry
+        elif v:
+            out[k] = {'key': str(v)}
     return out
 
 def slugify(t):
@@ -304,7 +318,13 @@ def main():
             'sheet': r['sheet'],
         }
         if sid in original_keys:
-            song['key'] = original_keys[sid]
+            meta = original_keys[sid]
+            if meta.get('key'):
+                song['key'] = meta['key']
+            if 'capo' in meta:
+                song['capo'] = meta['capo']
+            if meta.get('sheetKey'):
+                song['sheetKey'] = meta['sheetKey']
         if r['fb'] is not None:
             song['fb'] = r['fb']
         songs.append(song)
@@ -338,6 +358,10 @@ def main():
     lines.append('original keys: %d/%d' % (len(keyed), len(songs)))
     missing_keys = [s['id'] for s in songs if not s.get('key')]
     lines.append('missing original keys: %s' % (missing_keys[:10] or 'none'))
+    capoed = [s['id'] for s in songs if 'capo' in s]
+    lines.append('capo entries: %d/%d' % (len(capoed), len(songs)))
+    missing_capo = [s['id'] for s in songs if s.get('key') and 'capo' not in s]
+    lines.append('missing capo (keyed songs): %s' % (missing_capo[:10] or 'none'))
     nums = [s['n'] for s in songs]
     lines.append('numbers: %d..%d unique=%d' % (min(nums), max(nums), len(set(nums))))
     from collections import Counter

@@ -1306,7 +1306,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": 0,
+   "sheetKey": "E"
   },
   {
    "id": "19-2000",
@@ -1821,7 +1823,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "500-miles-i-m-gonna-be",
@@ -2681,7 +2685,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": 2,
+   "sheetKey": "D"
   },
   {
    "id": "a-little-respect",
@@ -3525,7 +3531,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "accidentally-in-love",
@@ -4679,7 +4687,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "after-hours",
@@ -5518,7 +5528,9 @@
      ]
     ]
    ],
-   "key": "Bb"
+   "key": "Bb",
+   "capo": -2,
+   "sheetKey": "C"
   },
   {
    "id": "ain-t-no-sunshine",
@@ -6045,7 +6057,9 @@
      ]
     ]
    ],
-   "key": "Am"
+   "key": "Am",
+   "capo": 0,
+   "sheetKey": "Am"
   },
   {
    "id": "all-about-that-bass",
@@ -6781,7 +6795,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "A"
   },
   {
    "id": "all-apologies",
@@ -7235,7 +7251,9 @@
      ]
     ]
    ],
-   "key": "C#"
+   "key": "C#",
+   "capo": 1,
+   "sheetKey": "C"
   },
   {
    "id": "all-star-shrek",
@@ -8918,7 +8936,9 @@
      ]
     ]
    ],
-   "key": "F#"
+   "key": "F#",
+   "capo": 6,
+   "sheetKey": "C"
   },
   {
    "id": "american-idiot",
@@ -9881,7 +9901,9 @@
      ]
     ]
    ],
-   "key": "G#"
+   "key": "G#",
+   "capo": -1,
+   "sheetKey": "A"
   },
   {
    "id": "another-brick-in-the-wall",
@@ -10226,7 +10248,9 @@
      ]
     ]
    ],
-   "key": "Dm"
+   "key": "Dm",
+   "capo": 0,
+   "sheetKey": "Dm"
   },
   {
    "id": "another-love",
@@ -11468,7 +11492,9 @@
      ]
     ]
    ],
-   "key": "Em"
+   "key": "Em",
+   "capo": 0,
+   "sheetKey": "Em"
   },
   {
    "id": "bad-moon-rising",
@@ -12307,7 +12333,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": 2,
+   "sheetKey": "C"
   },
   {
    "id": "bad-romance",
@@ -13874,7 +13902,9 @@
      ]
     ]
    ],
-   "key": "Am"
+   "key": "Am",
+   "capo": 0,
+   "sheetKey": "Am"
   },
   {
    "id": "bang-bang",
@@ -14378,7 +14408,9 @@
      ]
     ]
    ],
-   "key": "Fm"
+   "key": "Fm",
+   "capo": -4,
+   "sheetKey": "Am"
   },
   {
    "id": "basket-case",
@@ -15457,7 +15489,9 @@
      ]
     ]
    ],
-   "key": "D#"
+   "key": "D#",
+   "capo": 3,
+   "sheetKey": "C"
   },
   {
    "id": "beggin",
@@ -16224,7 +16258,9 @@
      ]
     ]
    ],
-   "key": "Em"
+   "key": "Em",
+   "capo": -5,
+   "sheetKey": "Am"
   },
   {
    "id": "billie-jean",
@@ -16827,7 +16863,9 @@
      ]
     ]
    ],
-   "key": "F#m"
+   "key": "F#m",
+   "capo": 2,
+   "sheetKey": "Em"
   },
   {
    "id": "bitter-sweet-symphony",
@@ -18830,7 +18868,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": 2,
+   "sheetKey": "D"
   },
   {
    "id": "black",
@@ -19680,7 +19720,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": 0,
+   "sheetKey": "E"
   },
   {
    "id": "blinding-lights",
@@ -20614,7 +20656,9 @@
      ]
     ]
    ],
-   "key": "Cm"
+   "key": "Cm",
+   "capo": 0,
+   "sheetKey": "Cm"
   },
   {
    "id": "blister-in-the-sun",
@@ -21884,7 +21928,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "blowing-in-the-wind",
@@ -22798,7 +22844,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": 2,
+   "sheetKey": "C"
   },
   {
    "id": "bohemian-rhapsody",
@@ -24417,7 +24465,9 @@
      ]
     ]
    ],
-   "key": "Bb"
+   "key": "Bb",
+   "capo": 3,
+   "sheetKey": "G"
   },
   {
    "id": "boys-don-t-cry",
@@ -25404,7 +25454,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "A"
   },
   {
    "id": "brown-eyed-girl",
@@ -26468,7 +26520,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "budapest",
@@ -27099,7 +27153,9 @@
      ]
     ]
    ],
-   "key": "F"
+   "key": "F",
+   "capo": -2,
+   "sheetKey": "G"
   },
   {
    "id": "california-dreaming",
@@ -28169,7 +28225,9 @@
      ]
     ]
    ],
-   "key": "C#m"
+   "key": "C#m",
+   "capo": -1,
+   "sheetKey": "Dm"
   },
   {
    "id": "californication",
@@ -29546,7 +29604,9 @@
      ]
     ]
    ],
-   "key": "Am"
+   "key": "Am",
+   "capo": 0,
+   "sheetKey": "Am"
   },
   {
    "id": "can-t-get-you-out-of-my-head",
@@ -30217,7 +30277,9 @@
      ]
     ]
    ],
-   "key": "Am"
+   "key": "Am",
+   "capo": -5,
+   "sheetKey": "Dm"
   },
   {
    "id": "can-t-help-falling-in-love-with-you",
@@ -31094,7 +31156,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": 2,
+   "sheetKey": "C"
   },
   {
    "id": "can-t-stop",
@@ -32439,7 +32503,9 @@
      ]
     ]
    ],
-   "key": "Em"
+   "key": "Em",
+   "capo": 0,
+   "sheetKey": "Em"
   },
   {
    "id": "can-t-take-my-eyes-off-you",
@@ -33331,7 +33397,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 5,
+   "sheetKey": "G"
   },
   {
    "id": "careless-whisper",
@@ -34154,7 +34222,9 @@
      ]
     ]
    ],
-   "key": "Dm"
+   "key": "Dm",
+   "capo": 0,
+   "sheetKey": "Dm"
   },
   {
    "id": "cecilia",
@@ -34975,7 +35045,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "chop-suey",
@@ -35744,7 +35816,9 @@
      ]
     ]
    ],
-   "key": "Gm"
+   "key": "Gm",
+   "capo": 0,
+   "sheetKey": "Gm"
   },
   {
    "id": "cold-heart",
@@ -36819,7 +36893,9 @@
      ]
     ]
    ],
-   "key": "Bbm"
+   "key": "Bbm",
+   "capo": 1,
+   "sheetKey": "Am"
   },
   {
    "id": "colors-of-the-wind",
@@ -37728,7 +37804,9 @@
      ]
     ]
    ],
-   "key": "Bb"
+   "key": "Bb",
+   "capo": -1,
+   "sheetKey": "Bm"
   },
   {
    "id": "crazy",
@@ -38307,7 +38385,9 @@
      ]
     ]
    ],
-   "key": "Cm"
+   "key": "Cm",
+   "capo": 3,
+   "sheetKey": "Am"
   },
   {
    "id": "crazy-little-thing-called-love",
@@ -39351,7 +39431,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": -5,
+   "sheetKey": "G"
   },
   {
    "id": "creep",
@@ -39931,7 +40013,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "dancing-queen",
@@ -40802,7 +40886,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 2,
+   "sheetKey": "G"
   },
   {
    "id": "do-i-wanna-know",
@@ -41916,7 +42002,9 @@
      ]
     ]
    ],
-   "key": "Gm"
+   "key": "Gm",
+   "capo": -2,
+   "sheetKey": "Am"
   },
   {
    "id": "dog-days-are-over",
@@ -42902,7 +42990,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "don-t-let-me-be-misunderstood",
@@ -43596,7 +43686,9 @@
      ]
     ]
    ],
-   "key": "Bm"
+   "key": "Bm",
+   "capo": 2,
+   "sheetKey": "Am"
   },
   {
    "id": "don-t-let-me-down",
@@ -44163,7 +44255,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": -1,
+   "sheetKey": "F"
   },
   {
    "id": "don-t-look-back-in-anger",
@@ -45278,7 +45372,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "don-t-stop-me-now",
@@ -46657,7 +46753,9 @@
      ]
     ]
    ],
-   "key": "F"
+   "key": "F",
+   "capo": 0,
+   "sheetKey": "F"
   },
   {
    "id": "don-t-worry-be-happy",
@@ -47264,7 +47362,9 @@
      ]
     ]
    ],
-   "key": "B"
+   "key": "B",
+   "capo": -1,
+   "sheetKey": "C"
   },
   {
    "id": "dream-a-little-dream-of-me",
@@ -48213,7 +48313,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "englishman-in-new-york",
@@ -49339,7 +49441,9 @@
      ]
     ]
    ],
-   "key": "Bm"
+   "key": "Bm",
+   "capo": 2,
+   "sheetKey": "Am"
   },
   {
    "id": "enjoy-the-silence",
@@ -50015,7 +50119,9 @@
      ]
     ]
    ],
-   "key": "Cm"
+   "key": "Cm",
+   "capo": 1,
+   "sheetKey": "Bm"
   },
   {
    "id": "every-breath-you-take",
@@ -50754,7 +50860,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "A"
   },
   {
    "id": "everywhere",
@@ -51866,7 +51974,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": -1,
+   "sheetKey": "F"
   },
   {
    "id": "eye-of-the-tiger",
@@ -52878,7 +52988,9 @@
      ]
     ]
    ],
-   "key": "Cm"
+   "key": "Cm",
+   "capo": 3,
+   "sheetKey": "Am"
   },
   {
    "id": "flowers",
@@ -53878,7 +53990,9 @@
      ]
     ]
    ],
-   "key": "Am"
+   "key": "Am",
+   "capo": 0,
+   "sheetKey": "Am"
   },
   {
    "id": "fluorescent-adolescent",
@@ -54779,7 +54893,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": 2,
+   "sheetKey": "D"
   },
   {
    "id": "fly-away",
@@ -55587,7 +55703,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "fly-me-to-the-moon",
@@ -56289,7 +56407,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "friday-i-m-in-love",
@@ -57228,7 +57348,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": -5,
+   "sheetKey": "G"
   },
   {
    "id": "get-lucky",
@@ -57900,7 +58022,9 @@
      ]
     ]
    ],
-   "key": "F#m"
+   "key": "F#m",
+   "capo": 2,
+   "sheetKey": "Em"
   },
   {
    "id": "go-your-own-way",
@@ -58578,7 +58702,9 @@
      ]
     ]
    ],
-   "key": "F"
+   "key": "F",
+   "capo": 0,
+   "sheetKey": "F"
   },
   {
    "id": "hallelujah",
@@ -59647,7 +59773,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 5,
+   "sheetKey": "G"
   },
   {
    "id": "happy",
@@ -60234,7 +60362,9 @@
      ]
     ]
    ],
-   "key": "Fm"
+   "key": "Fm",
+   "capo": 1,
+   "sheetKey": "E"
   },
   {
    "id": "happy-birthday",
@@ -60444,7 +60574,9 @@
      ]
     ]
    ],
-   "key": "F"
+   "key": "F",
+   "capo": 5,
+   "sheetKey": "C"
   },
   {
    "id": "happy-together",
@@ -61114,7 +61246,9 @@
      ]
     ]
    ],
-   "key": "F#m"
+   "key": "F#m",
+   "capo": -3,
+   "sheetKey": "Am"
   },
   {
    "id": "have-you-ever-seen-the-rain",
@@ -61681,7 +61815,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "here-comes-the-sun",
@@ -62650,7 +62786,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 2,
+   "sheetKey": "G"
   },
   {
    "id": "hey-jude",
@@ -63442,7 +63580,9 @@
      ]
     ]
    ],
-   "key": "F"
+   "key": "F",
+   "capo": -2,
+   "sheetKey": "G"
   },
   {
    "id": "hey-there-delilah",
@@ -64416,7 +64556,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": 0,
+   "sheetKey": "D"
   },
   {
    "id": "hey-ya",
@@ -65182,7 +65324,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "highway-to-hell",
@@ -66158,7 +66302,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "A"
   },
   {
    "id": "hit-me-baby-one-more-time",
@@ -66943,7 +67089,9 @@
      ]
     ]
    ],
-   "key": "Cm"
+   "key": "Cm",
+   "capo": 3,
+   "sheetKey": "Am"
   },
   {
    "id": "hit-the-road-jack",
@@ -68947,7 +69095,9 @@
      ]
     ]
    ],
-   "key": "G#m"
+   "key": "G#m",
+   "capo": -1,
+   "sheetKey": "Am"
   },
   {
    "id": "ho-hey",
@@ -69812,7 +69962,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "home",
@@ -71035,7 +71187,9 @@
      ]
     ]
    ],
-   "key": "Bm"
+   "key": "Bm",
+   "capo": -3,
+   "sheetKey": "D"
   },
   {
    "id": "hotel-california",
@@ -71862,7 +72016,9 @@
      ]
     ]
    ],
-   "key": "Bm"
+   "key": "Bm",
+   "capo": 2,
+   "sheetKey": "Am"
   },
   {
    "id": "house-of-gold",
@@ -72628,7 +72784,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "house-of-the-rising-sun",
@@ -73862,7 +74020,9 @@
      ]
     ]
    ],
-   "key": "Am"
+   "key": "Am",
+   "capo": 0,
+   "sheetKey": "Am"
   },
   {
    "id": "how-you-remind-me",
@@ -75264,7 +75424,9 @@
      ]
     ]
    ],
-   "key": "Cm"
+   "key": "Cm",
+   "capo": 3,
+   "sheetKey": "A"
   },
   {
    "id": "i-heard-it-through-the-grapevine",
@@ -75964,7 +76126,9 @@
      ]
     ]
    ],
-   "key": "D#m"
+   "key": "D#m",
+   "capo": 1,
+   "sheetKey": "Dm"
   },
   {
    "id": "i-knew-you-were-trouble",
@@ -77390,7 +77554,9 @@
      ]
     ]
    ],
-   "key": "F#"
+   "key": "F#",
+   "capo": 1,
+   "sheetKey": "F"
   },
   {
    "id": "i-still-haven-t-found-what-i-m-looking-for",
@@ -77918,7 +78084,9 @@
      ]
     ]
    ],
-   "key": "C#"
+   "key": "C#",
+   "capo": 1,
+   "sheetKey": "C"
   },
   {
    "id": "i-wanna-be-like-you-the-monkey-song",
@@ -78469,7 +78637,9 @@
      ]
     ]
    ],
-   "key": "Cm"
+   "key": "Cm",
+   "capo": 3,
+   "sheetKey": "Am"
   },
   {
    "id": "i-want-it-that-way",
@@ -79662,7 +79832,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "Am"
   },
   {
    "id": "i-want-to-break-free",
@@ -80313,7 +80485,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": 4,
+   "sheetKey": "C"
   },
   {
    "id": "i-was-made-for-lovin-you",
@@ -81062,7 +81236,9 @@
      ]
     ]
    ],
-   "key": "Em"
+   "key": "Em",
+   "capo": 0,
+   "sheetKey": "Em"
   },
   {
    "id": "i-will-survive",
@@ -81936,7 +82112,9 @@
      ]
     ]
    ],
-   "key": "Am"
+   "key": "Am",
+   "capo": 0,
+   "sheetKey": "Am"
   },
   {
    "id": "i-ll-be-there-for-you-friends-theme",
@@ -82899,7 +83077,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "A"
   },
   {
    "id": "i-m-a-believer-from-shrek",
@@ -84000,7 +84180,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "i-m-still-standing",
@@ -85316,7 +85498,9 @@
      ]
     ]
    ],
-   "key": "Bb"
+   "key": "Bb",
+   "capo": 1,
+   "sheetKey": "Am"
   },
   {
    "id": "i-m-yours",
@@ -86045,7 +86229,9 @@
      ]
     ]
    ],
-   "key": "B"
+   "key": "B",
+   "capo": -1,
+   "sheetKey": "C"
   },
   {
    "id": "imagine",
@@ -86705,7 +86891,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "in-the-summertime",
@@ -87438,7 +87626,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": 4,
+   "sheetKey": "C"
   },
   {
    "id": "it-s-my-life",
@@ -88404,7 +88594,9 @@
      ]
     ]
    ],
-   "key": "Cm"
+   "key": "Cm",
+   "capo": 3,
+   "sheetKey": "Am"
   },
   {
    "id": "it-s-raining-men",
@@ -89511,7 +89703,9 @@
      ]
     ]
    ],
-   "key": "Fm"
+   "key": "Fm",
+   "capo": 1,
+   "sheetKey": "Em"
   },
   {
    "id": "jammin",
@@ -90557,7 +90751,9 @@
      ]
     ]
    ],
-   "key": "Bm"
+   "key": "Bm",
+   "capo": 0,
+   "sheetKey": "Bm"
   },
   {
    "id": "jolene",
@@ -91443,7 +91639,9 @@
      ]
     ]
    ],
-   "key": "C#m"
+   "key": "C#m",
+   "capo": 4,
+   "sheetKey": "Am"
   },
   {
    "id": "just-like-heaven",
@@ -92444,7 +92642,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "A"
   },
   {
    "id": "karma-police",
@@ -93671,7 +93871,9 @@
      ]
     ]
    ],
-   "key": "Em"
+   "key": "Em",
+   "capo": -5,
+   "sheetKey": "Am"
   },
   {
    "id": "kids",
@@ -94466,7 +94668,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 3,
+   "sheetKey": "F#m"
   },
   {
    "id": "killing-me-softly",
@@ -95294,7 +95498,9 @@
      ]
     ]
    ],
-   "key": "Fm"
+   "key": "Fm",
+   "capo": 1,
+   "sheetKey": "Em"
   },
   {
    "id": "knocking-on-heaven-s-door",
@@ -96015,7 +96221,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "la-bamba",
@@ -97148,7 +97356,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "la-vie-en-rose",
@@ -97717,7 +97927,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "lake-of-fire",
@@ -98503,7 +98715,9 @@
      ]
     ]
    ],
-   "key": "Gm"
+   "key": "Gm",
+   "capo": -4,
+   "sheetKey": "Bm"
   },
   {
    "id": "lazy-song-the",
@@ -99729,7 +99943,9 @@
      ]
     ]
    ],
-   "key": "B"
+   "key": "B",
+   "capo": -1,
+   "sheetKey": "C"
   },
   {
    "id": "lemon-tree",
@@ -100685,7 +100901,9 @@
      ]
     ]
    ],
-   "key": "Fm"
+   "key": "Fm",
+   "capo": 1,
+   "sheetKey": "Em"
   },
   {
    "id": "let-her-go",
@@ -102025,7 +102243,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "let-it-be",
@@ -102899,7 +103119,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "light-my-fire",
@@ -103669,7 +103891,9 @@
      ]
     ]
    ],
-   "key": "Am"
+   "key": "Am",
+   "capo": 0,
+   "sheetKey": "Am"
   },
   {
    "id": "lion-sleeps-tonight-the",
@@ -104326,7 +104550,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 5,
+   "sheetKey": "G"
   },
   {
    "id": "little-lion-man",
@@ -105405,7 +105631,9 @@
      ]
     ]
    ],
-   "key": "Dm"
+   "key": "Dm",
+   "capo": 0,
+   "sheetKey": "Dm"
   },
   {
    "id": "little-talks",
@@ -107184,7 +107412,9 @@
      ]
     ]
    ],
-   "key": "Bbm"
+   "key": "Bbm",
+   "capo": 1,
+   "sheetKey": "Am"
   },
   {
    "id": "loneliest",
@@ -107985,7 +108215,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": 0,
+   "sheetKey": "D"
   },
   {
    "id": "losing-my-religion",
@@ -108854,7 +109086,9 @@
      ]
     ]
    ],
-   "key": "Am"
+   "key": "Am",
+   "capo": 0,
+   "sheetKey": "Am"
   },
   {
    "id": "lost-on-you",
@@ -109994,7 +110228,9 @@
      ]
     ]
    ],
-   "key": "Fm"
+   "key": "Fm",
+   "capo": 1,
+   "sheetKey": "Em"
   },
   {
    "id": "love-of-my-life",
@@ -110593,7 +110829,9 @@
      ]
     ]
    ],
-   "key": "F"
+   "key": "F",
+   "capo": 0,
+   "sheetKey": "F"
   },
   {
    "id": "lovesong",
@@ -111477,7 +111715,9 @@
      ]
     ]
    ],
-   "key": "Am"
+   "key": "Am",
+   "capo": 0,
+   "sheetKey": "Am"
   },
   {
    "id": "lucy-in-the-sky-with-diamonds",
@@ -112671,7 +112911,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "A"
   },
   {
    "id": "mad-world",
@@ -113277,7 +113519,9 @@
      ]
     ]
    ],
-   "key": "Fm"
+   "key": "Fm",
+   "capo": 1,
+   "sheetKey": "Em"
   },
   {
    "id": "mamma-mia",
@@ -114185,7 +114429,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": 2,
+   "sheetKey": "C"
   },
   {
    "id": "maria",
@@ -115488,7 +115734,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": -3,
+   "sheetKey": "C"
   },
   {
    "id": "maybe-tomorrow",
@@ -116298,7 +116546,9 @@
      ]
     ]
    ],
-   "key": "Gm"
+   "key": "Gm",
+   "capo": -2,
+   "sheetKey": "Am"
   },
   {
    "id": "mr-brightside",
@@ -117429,7 +117679,9 @@
      ]
     ]
    ],
-   "key": "C#"
+   "key": "C#",
+   "capo": 1,
+   "sheetKey": "C"
   },
   {
    "id": "mr-sandman",
@@ -118133,7 +118385,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": -3,
+   "sheetKey": "C"
   },
   {
    "id": "my-girl",
@@ -118886,7 +119140,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "my-heart-will-go-on-titanic",
@@ -119750,7 +120006,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": 2,
+   "sheetKey": "D"
   },
   {
    "id": "never-gonna-give-you-up",
@@ -120793,7 +121051,9 @@
      ]
     ]
    ],
-   "key": "Bbm"
+   "key": "Bbm",
+   "capo": 1,
+   "sheetKey": "Am"
   },
   {
    "id": "number-1-party-anthem",
@@ -121877,7 +122137,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "one-love",
@@ -122798,7 +123060,9 @@
      ]
     ]
    ],
-   "key": "Bb"
+   "key": "Bb",
+   "capo": 1,
+   "sheetKey": "A"
   },
   {
    "id": "otherside",
@@ -123754,7 +124018,9 @@
      ]
     ]
    ],
-   "key": "Am"
+   "key": "Am",
+   "capo": 0,
+   "sheetKey": "Am"
   },
   {
    "id": "people-are-strange",
@@ -124489,7 +124755,9 @@
      ]
     ]
    ],
-   "key": "Em"
+   "key": "Em",
+   "capo": -5,
+   "sheetKey": "Am"
   },
   {
    "id": "postcards-from-italy",
@@ -125153,7 +125421,9 @@
      ]
     ]
    ],
-   "key": "F"
+   "key": "F",
+   "capo": 0,
+   "sheetKey": "F"
   },
   {
    "id": "psycho-killer",
@@ -125951,7 +126221,9 @@
      ]
     ]
    ],
-   "key": "Am"
+   "key": "Am",
+   "capo": 0,
+   "sheetKey": "Am"
   },
   {
    "id": "pumped-up-kicks",
@@ -126678,7 +126950,9 @@
      ]
     ]
    ],
-   "key": "Fm"
+   "key": "Fm",
+   "capo": 1,
+   "sheetKey": "Em"
   },
   {
    "id": "raindrops-keep-fallin-on-my-head",
@@ -127591,7 +127865,9 @@
      ]
     ]
    ],
-   "key": "F"
+   "key": "F",
+   "capo": -2,
+   "sheetKey": "G"
   },
   {
    "id": "relax-take-it-easy",
@@ -128841,7 +129117,9 @@
      ]
     ]
    ],
-   "key": "F#m"
+   "key": "F#m",
+   "capo": -3,
+   "sheetKey": "Am"
   },
   {
    "id": "ring-of-fire",
@@ -129554,7 +129832,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "riptide",
@@ -130570,7 +130850,9 @@
      ]
     ]
    ],
-   "key": "C#"
+   "key": "C#",
+   "capo": 1,
+   "sheetKey": "C"
   },
   {
    "id": "rolling-in-the-deep",
@@ -131767,7 +132049,9 @@
      ]
     ]
    ],
-   "key": "Cm"
+   "key": "Cm",
+   "capo": 3,
+   "sheetKey": "Am"
   },
   {
    "id": "roxanne",
@@ -132566,7 +132850,9 @@
      ]
     ]
    ],
-   "key": "Gm"
+   "key": "Gm",
+   "capo": 3,
+   "sheetKey": "Em"
   },
   {
    "id": "sailing",
@@ -133100,7 +133386,9 @@
      ]
     ]
    ],
-   "key": "B"
+   "key": "B",
+   "capo": -1,
+   "sheetKey": "C"
   },
   {
    "id": "save-my-soul",
@@ -133520,7 +133808,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "shake-it-off",
@@ -134164,7 +134454,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 5,
+   "sheetKey": "D"
   },
   {
    "id": "shallow",
@@ -135169,7 +135461,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "she-loves-you",
@@ -136059,7 +136353,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "shiny-happy-people",
@@ -137094,7 +137390,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": -5,
+   "sheetKey": "A"
   },
   {
    "id": "snow-hey-oh",
@@ -138673,7 +138971,9 @@
      ]
     ]
    ],
-   "key": "G#m"
+   "key": "G#m",
+   "capo": 1,
+   "sheetKey": "Gm"
   },
   {
    "id": "somebody-to-love",
@@ -139706,7 +140006,9 @@
      ]
     ]
    ],
-   "key": "F#m"
+   "key": "F#m",
+   "capo": 2,
+   "sheetKey": "Em"
   },
   {
    "id": "somebody-told-me",
@@ -140945,7 +141247,9 @@
      ]
     ]
    ],
-   "key": "Bbm"
+   "key": "Bbm",
+   "capo": 1,
+   "sheetKey": "Am"
   },
   {
    "id": "somewhere-over-the-rainbow",
@@ -141702,7 +142006,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "sounds-of-silence",
@@ -142429,7 +142735,9 @@
      ]
     ]
    ],
-   "key": "D#m"
+   "key": "D#m",
+   "capo": -1,
+   "sheetKey": "Em"
   },
   {
    "id": "space-oddity",
@@ -143477,7 +143785,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "stand-by-me",
@@ -144005,7 +144315,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 2,
+   "sheetKey": "G"
   },
   {
    "id": "stay-with-me",
@@ -144941,7 +145253,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "summer-nights",
@@ -146831,7 +147145,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": 0,
+   "sheetKey": "D"
   },
   {
    "id": "sunshine-reggae",
@@ -147331,7 +147647,9 @@
      ]
     ]
    ],
-   "key": "G#"
+   "key": "G#",
+   "capo": -4,
+   "sheetKey": "C"
   },
   {
    "id": "sweater-weather",
@@ -148533,7 +148851,9 @@
      ]
     ]
    ],
-   "key": "Gm"
+   "key": "Gm",
+   "capo": 0,
+   "sheetKey": "Gm"
   },
   {
    "id": "sweet-caroline",
@@ -149409,7 +149729,9 @@
      ]
     ]
    ],
-   "key": "B"
+   "key": "B",
+   "capo": 4,
+   "sheetKey": "G"
   },
   {
    "id": "sweet-child-of-mine",
@@ -150323,7 +150645,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": 2,
+   "sheetKey": "C"
   },
   {
    "id": "sweet-dreams",
@@ -151389,7 +151713,9 @@
      ]
     ]
    ],
-   "key": "Cm"
+   "key": "Cm",
+   "capo": 3,
+   "sheetKey": "Am"
   },
   {
    "id": "take-me-home-country-roads",
@@ -152026,7 +152352,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "A"
   },
   {
    "id": "take-me-out",
@@ -152963,7 +153291,9 @@
      ]
     ]
    ],
-   "key": "Em"
+   "key": "Em",
+   "capo": 0,
+   "sheetKey": "Em"
   },
   {
    "id": "take-on-me",
@@ -153979,7 +154309,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "A"
   },
   {
    "id": "teenage-dirtbag",
@@ -155776,7 +156108,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": -1,
+   "sheetKey": "F"
   },
   {
    "id": "tender",
@@ -156668,7 +157002,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "A"
   },
   {
    "id": "the-final-countdown",
@@ -157625,7 +157961,9 @@
      ]
     ]
    ],
-   "key": "F#m"
+   "key": "F#m",
+   "capo": 2,
+   "sheetKey": "Em"
   },
   {
    "id": "the-judge",
@@ -159585,7 +159923,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "the-man-who-sold-the-world",
@@ -160347,7 +160687,9 @@
      ]
     ]
    ],
-   "key": "Dm"
+   "key": "Dm",
+   "capo": 0,
+   "sheetKey": "Dm"
   },
   {
    "id": "the-scientist",
@@ -161096,7 +161438,9 @@
      ]
     ]
    ],
-   "key": "Dm"
+   "key": "Dm",
+   "capo": -3,
+   "sheetKey": "F"
   },
   {
    "id": "there-is-a-light-that-never-goes-out",
@@ -162900,7 +163244,9 @@
      ]
     ]
    ],
-   "key": "C#m"
+   "key": "C#m",
+   "capo": -1,
+   "sheetKey": "Dm"
   },
   {
    "id": "these-boots-are-made-for-walking",
@@ -163440,7 +163786,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": -5,
+   "sheetKey": "A"
   },
   {
    "id": "thinking-out-loud",
@@ -164994,7 +165342,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": 0,
+   "sheetKey": "D"
   },
   {
    "id": "this-charming-man",
@@ -165864,7 +166214,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 2,
+   "sheetKey": "G"
   },
   {
    "id": "three-little-birds",
@@ -166270,7 +166622,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": -3,
+   "sheetKey": "C"
   },
   {
    "id": "times-like-these",
@@ -167060,7 +167414,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": 0,
+   "sheetKey": "D"
   },
   {
    "id": "titanium",
@@ -167948,7 +168304,9 @@
      ]
     ]
    ],
-   "key": "D#"
+   "key": "D#",
+   "capo": 6,
+   "sheetKey": "Am"
   },
   {
    "id": "toxic",
@@ -168695,7 +169053,9 @@
      ]
     ]
    ],
-   "key": "Cm"
+   "key": "Cm",
+   "capo": 3,
+   "sheetKey": "Am"
   },
   {
    "id": "toxicity",
@@ -169736,7 +170096,9 @@
      ]
     ]
    ],
-   "key": "Cm"
+   "key": "Cm",
+   "capo": 3,
+   "sheetKey": "Am"
   },
   {
    "id": "twist-and-shout",
@@ -170766,7 +171128,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": 2,
+   "sheetKey": "C"
   },
   {
    "id": "under-pressure",
@@ -171885,7 +172249,9 @@
      ]
     ]
    ],
-   "key": "D"
+   "key": "D",
+   "capo": 0,
+   "sheetKey": "D"
   },
   {
    "id": "use-somebody",
@@ -172821,7 +173187,9 @@
      ]
     ]
    ],
-   "key": "C"
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C"
   },
   {
    "id": "valerie",
@@ -173518,7 +173886,9 @@
      ]
     ]
    ],
-   "key": "D#"
+   "key": "D#",
+   "capo": 3,
+   "sheetKey": "C"
   },
   {
    "id": "wake-me-up",
@@ -175047,7 +175417,9 @@
      ]
     ]
    ],
-   "key": "Bm"
+   "key": "Bm",
+   "capo": 2,
+   "sheetKey": "Am"
   },
   {
    "id": "what-is-love-baby-don-t-hurt-me",
@@ -176151,7 +176523,9 @@
      ]
     ]
    ],
-   "key": "Bb"
+   "key": "Bb",
+   "capo": 6,
+   "sheetKey": "Em"
   },
   {
    "id": "what-s-up",
@@ -176844,7 +177218,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "A"
   },
   {
    "id": "where-is-my-mind",
@@ -178078,7 +178454,9 @@
      ]
     ]
    ],
-   "key": "E"
+   "key": "E",
+   "capo": -1,
+   "sheetKey": "F"
   },
   {
    "id": "why-don-t-you-get-a-job",
@@ -178817,7 +179195,9 @@
      ]
     ]
    ],
-   "key": "F"
+   "key": "F",
+   "capo": 0,
+   "sheetKey": "F"
   },
   {
    "id": "wicked-game",
@@ -179767,7 +180147,9 @@
      ]
     ]
    ],
-   "key": "Bm"
+   "key": "Bm",
+   "capo": 2,
+   "sheetKey": "A"
   },
   {
    "id": "wish-you-were-here",
@@ -180292,7 +180674,9 @@
      ]
     ]
    ],
-   "key": "G"
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G"
   },
   {
    "id": "wonderwall",
@@ -181314,7 +181698,9 @@
      ]
     ]
    ],
-   "key": "F#m"
+   "key": "F#m",
+   "capo": 2,
+   "sheetKey": "Em"
   },
   {
    "id": "yellow",
@@ -182022,7 +182408,9 @@
      ]
     ]
    ],
-   "key": "B"
+   "key": "B",
+   "capo": -1,
+   "sheetKey": "C"
   },
   {
    "id": "you-are-my-sunshine",
@@ -182723,7 +183111,9 @@
      ]
     ]
    ],
-   "key": "A"
+   "key": "A",
+   "capo": -3,
+   "sheetKey": "C"
   },
   {
    "id": "you-know-i-m-no-good",
@@ -183690,7 +184080,9 @@
      ]
     ]
    ],
-   "key": "Dm"
+   "key": "Dm",
+   "capo": 0,
+   "sheetKey": "Dm"
   },
   {
    "id": "you-will-never-know",
@@ -184707,7 +185099,9 @@
      ]
     ]
    ],
-   "key": "Gm"
+   "key": "Gm",
+   "capo": -2,
+   "sheetKey": "Am"
   },
   {
    "id": "zombie",
@@ -185489,7 +185883,9 @@
      ]
     ]
    ],
-   "key": "Em"
+   "key": "Em",
+   "capo": 0,
+   "sheetKey": "Em"
   }
  ]
 }

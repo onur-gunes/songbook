@@ -754,6 +754,17 @@ main {
     background: var(--surface);
 }
 
+.key-part {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.key-part + .key-part {
+    padding-left: 12px;
+    border-left: 1px solid var(--line);
+}
+
 .orig-key-label {
     color: var(--muted);
     font-size: 0.72rem;

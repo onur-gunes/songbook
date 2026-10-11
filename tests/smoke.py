@@ -46,6 +46,26 @@ def main():
            cdp.eval("document.getElementById('origKey').hidden") is False
            and cdp.eval("document.getElementById('origKeyValue').textContent") == 'C#',
            cdp.eval("document.getElementById('origKeyValue').textContent"))
+        ok('Riptide capo shown',
+           cdp.eval("document.getElementById('capoPart').hidden") is False
+           and cdp.eval("document.getElementById('capoValue').textContent") == 'Capo 1',
+           cdp.eval("document.getElementById('capoValue').textContent"))
+        cdp.eval("document.getElementById('trUp').click()")
+        time.sleep(0.1)
+        ok('capo follows transpose (+1 -> no capo)',
+           cdp.eval("document.getElementById('capoValue').textContent") == 'No capo',
+           cdp.eval("document.getElementById('capoValue').textContent"))
+        cdp.eval("document.getElementById('trDown').click()")
+        cdp.eval("document.getElementById('trDown').click()")
+        time.sleep(0.1)
+        ok('capo recovers at -1 (-> Capo 2)',
+           cdp.eval("document.getElementById('capoValue').textContent") == 'Capo 2',
+           cdp.eval("document.getElementById('capoValue').textContent"))
+        cdp.eval("location.hash = '#/krakow-ukulele/budapest'")
+        cdp.wait_js("document.getElementById('songTitle').textContent === 'Budapest'", timeout=10)
+        ok('negative capo -> no capo/transpose hint',
+           cdp.eval("document.getElementById('capoValue').textContent") == 'No capo · transpose -2',
+           cdp.eval("document.getElementById('capoValue').textContent"))
         cdp.eval("location.hash = '#/polska-gurom/czerwone-korale'")
         cdp.wait_js("document.getElementById('songTitle').textContent === 'Czerwone Korale'", timeout=10)
         ok('no key -> section hidden', cdp.eval("document.getElementById('origKey').hidden") is True)
