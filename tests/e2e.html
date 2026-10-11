@@ -223,11 +223,11 @@ async function main() {
     ok('Em default is classic open 0432', emRanks[0] === '0432', emRanks[0]);
     doc().querySelector('.chooser-close').click(); await wait(50);
 
-    // 8. NC song -> missing diagram fallback
+    // 8. NC renders as Chuck (muted voicing) in the strip, not as a missing diagram
     win().location.hash = '#/krakow-ukulele/home';
     await wait(400);
-    const missing = doc().querySelectorAll('#chordStrip .missing');
-    ok('NC missing fallback renders', missing.length >= 1 || Array.from(doc().querySelectorAll('#chordStrip .cname')).some(c => c.textContent === 'NC'), 'missing=' + missing.length);
+    const chuckItems = doc().querySelectorAll('#chordStrip .chord-item.chuck');
+    ok('NC renders as Chuck in strip', chuckItems.length >= 1 && Array.from(chuckItems).some(it => it.querySelector('.cname').textContent === 'Chuck'), 'chuck=' + chuckItems.length);
 
     // 9. prev/next respect sort/filter (default: title order)
     win().location.hash = '#/krakow-ukulele/riptide';

@@ -618,7 +618,6 @@
                 var cimg = new Image();
                 cimg.alt = 'Chuck – all strings muted';
                 cimg.title = 'Chuck – mute all strings and strum';
-                cimg.loading = 'lazy';
                 cimg.src = ChordKit.dataUri(instrument, ChordKit.mutedVoicing(instrument));
                 citem.appendChild(el('span', 'cname', 'Chuck'));
                 citem.appendChild(cimg);
@@ -633,7 +632,6 @@
                 var img = new Image();
                 img.alt = label + ' chord diagram';
                 img.title = label + (hard ? ' (hard chord – easy alternative in the picker)' : ' – click to choose voicing');
-                img.loading = 'lazy';
                 img.src = ChordKit.dataUri(instrument, v);
                 item.setAttribute('role', 'button');
                 item.setAttribute('tabindex', '0');
