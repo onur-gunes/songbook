@@ -1271,8 +1271,10 @@
         scrollState.durMs = v > 0 ? Math.max((max - scrollState.from) / v, 1) : scrollDurationMs();
         scrollState.lastY = window.pageYOffset;
     }
+    var ABOVE_SCROLL_FACTOR = 1.75;
     function scrollDurationMs() {
-        return ((currentSong && currentSong.dur ? currentSong.dur : 4) * 60 * 1000) / scrollSpeed;
+        var d = ((currentSong && currentSong.dur ? currentSong.dur : 4) * 60 * 1000) / scrollSpeed;
+        return chordMode === 'above' ? d * ABOVE_SCROLL_FACTOR : d;
     }
     function scrollBounds() {
         var doc = document.documentElement;
