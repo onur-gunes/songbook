@@ -395,6 +395,21 @@
         return v.length ? v[0] : null;
     }
 
+    // "No chord" / chuck: strum with every string muted. NC (and the legacy
+    // "muted"/"chuck" markers) map to this percussive hit, not a real chord.
+    function isMutedName(name) {
+        if (name == null) return false;
+        var k = String(name).trim();
+        return /^n\.?c\.?$/i.test(k) || /^(muted|chuck)$/i.test(k);
+    }
+
+    // A voicing of all-muted strings (every frets entry -1 -> the diagram draws
+    // an "x" over each string), sized for the instrument.
+    function mutedVoicing(instrumentId) {
+        var inst = instrumentOf(instrumentId);
+        return inst.strings.map(function () { return -1; });
+    }
+
     /* ---------------- diagram drawing ---------------- */
 
     function strX(i, gap, padX) { return padX + i * gap; }
@@ -501,6 +516,8 @@
         chordDifficulty: chordDifficulty,
         voicings: voicings,
         bestVoicing: bestVoicing,
+        isMutedName: isMutedName,
+        mutedVoicing: mutedVoicing,
         diagramSVG: diagramSVG,
         fretLabelsSVG: fretLabelsSVG,
         dataUri: dataUri,

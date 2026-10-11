@@ -66,6 +66,23 @@ def main():
         ok('negative capo -> no capo/transpose hint',
            cdp.eval("document.getElementById('capoValue').textContent") == 'No capo · transpose -2',
            cdp.eval("document.getElementById('capoValue').textContent"))
+        cdp.eval("location.hash = '#/krakow-ukulele/let-her-go'")
+        cdp.wait_js("document.getElementById('songTitle').textContent === 'Let Her Go'", timeout=10)
+        chuck_label = cdp.eval(
+            "(document.querySelector('#chordStrip .chord-item.chuck .cname')||{}).textContent")
+        ok('NC renders as Chuck in strip', chuck_label == 'Chuck', chuck_label)
+        chuck_src = cdp.eval(
+            "(document.querySelector('#chordStrip .chord-item.chuck img')||{}).src")
+        ok('Chuck diagram is an svg', bool(chuck_src) and chuck_src.startswith('data:image/svg'),
+           (chuck_src or '')[:32])
+        ok('NC notated as chuck in sheet',
+           cdp.eval("Array.from(document.querySelectorAll('#sheet .seg-chord')).some(function(e){return e.textContent.toLowerCase().indexOf('chuck')>=0;})"))
+        uke_mutes = cdp.eval(
+            "songbookTest.ChordKit.diagramSVG('ukulele', songbookTest.ChordKit.mutedVoicing('ukulele')).split('\\u00d7').length - 1")
+        ok('ukulele chuck mutes 4 strings', uke_mutes == 4, uke_mutes)
+        gtr_mutes = cdp.eval(
+            "songbookTest.ChordKit.diagramSVG('guitar', songbookTest.ChordKit.mutedVoicing('guitar')).split('\\u00d7').length - 1")
+        ok('guitar chuck mutes 6 strings', gtr_mutes == 6, gtr_mutes)
         cdp.eval("location.hash = '#/polska-gurom/czerwone-korale'")
         cdp.wait_js("document.getElementById('songTitle').textContent === 'Czerwone Korale'", timeout=10)
         ok('no key -> section hidden', cdp.eval("document.getElementById('origKey').hidden") is True)

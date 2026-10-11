@@ -331,6 +331,8 @@
                 var kind = seg[0], val = seg[1];
                 if (kind === 'c') {
                     var cv = transposeChordValue(val, transpose);
+                    var cm = cv.match(/^\[([\s\S]*)\]$/);
+                    if (cm) cv = '[' + mapChordTokens(cm[1]) + ']';
                     lineDiv.appendChild(el('span', 'seg-chord', cv));
                 } else if (kind === 'm') {
                     lineDiv.appendChild(el('span', 'seg-muted', val));
@@ -353,10 +355,17 @@
 
     /* ---- classic chord-sheet rendering (chords above the lyrics) ---- */
 
+    // "NC"/muted markers read as a percussive "chuck" in the lyric line.
+    function mapChordTokens(inner) {
+        return inner.split(/\s+/).map(function (t) {
+            return ChordKit.isMutedName(t) ? 'chuck' : t;
+        }).join(' ');
+    }
+
     function chordLabel(val) {
         var cv = transposeChordValue(val, transpose);
         var m = cv.match(/^\[([\s\S]*)\]$/);
-        return m ? m[1] : cv;
+        return m ? mapChordTokens(m[1]) : cv;
     }
 
     function plainText(seg) {
@@ -564,6 +573,18 @@
         (song.chords || []).forEach(function (name) {
             var tname = transposeChartName(name, transpose);
             var label = displayChord(tname);
+            if (ChordKit.isMutedName(tname)) {
+                var citem = el('div', 'chord-item chuck');
+                var cimg = new Image();
+                cimg.alt = 'Chuck – all strings muted';
+                cimg.title = 'Chuck – mute all strings and strum';
+                cimg.loading = 'lazy';
+                cimg.src = ChordKit.dataUri(instrument, ChordKit.mutedVoicing(instrument));
+                citem.appendChild(el('span', 'cname', 'Chuck'));
+                citem.appendChild(cimg);
+                strip.appendChild(citem);
+                return;
+            }
             var hard = ChordKit.chordDifficulty(tname) === 'hard';
             var item = el('div', 'chord-item' + (hard ? ' hard' : ''));
             var list = voicingsFor(tname);
