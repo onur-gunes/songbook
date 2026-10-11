@@ -410,6 +410,38 @@
         return out;
     }
 
+    // Chords above the lyrics are placed at exact pixel columns so they line up
+    // even with a proportional font: each chord's left edge = the rendered width
+    // of the lyric text running up to its column.
+    var lyricsCtx = null;
+    function lyricsMeasureCtx() {
+        if (!lyricsCtx) lyricsCtx = document.createElement('canvas').getContext('2d');
+        return lyricsCtx;
+    }
+
+    function sheetFontFor(kind) {
+        var cs = getComputedStyle($('sheet'));
+        var fam = cs.fontFamily || 'Verdana, Tahoma, sans-serif';
+        var size = parseFloat(cs.fontSize) || 14.4;
+        var style = 'normal', weight = '400';
+        if (kind === 'b') weight = '700';
+        else if (kind === 'i') style = 'italic';
+        else if (kind === 'y') { style = 'italic'; size *= 0.88; }
+        return style + ' ' + weight + ' ' + size + 'px ' + fam;
+    }
+
+    function lyricPrefixWidth(parts, r0, upto) {
+        var ctx = lyricsMeasureCtx();
+        var x = 0;
+        parts.forEach(function (p) {
+            var s = Math.max(p.start, r0), e = Math.min(p.start + p.text.length, upto);
+            if (s >= e) return;
+            ctx.font = sheetFontFor(p.kind);
+            x += ctx.measureText(p.text.slice(s - p.start, e - p.start)).width;
+        });
+        return x;
+    }
+
     function buildAboveLine(line, perLine) {
         var hasWord = false, L = '', parts = [], chords = [], prevEnd = 0, hadChord = false;
         line.forEach(function (seg) {
@@ -437,11 +469,13 @@
         if (!ranges.length) ranges = [[0, L.length]];
         ranges.forEach(function (r) {
             var unit = el('div', 'ln-unit');
+            unit.setAttribute('data-start', r[0]);
             var chor = el('div', 'ln-chords');
             chords.forEach(function (c) {
                 if (c.col >= r[0] && c.col < r[1]) {
                     var sp = el('span', 'seg-chord', c.label);
-                    sp.style.left = (c.col - r[0]) + 'ch';
+                    sp.style.left = lyricPrefixWidth(parts, r[0], c.col) + 'px';
+                    sp.setAttribute('data-col', c.col);
                     chor.appendChild(sp);
                 }
             });
