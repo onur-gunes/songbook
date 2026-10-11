@@ -120809,17 +120809,37 @@
    "sheet": [
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "O świcie i o zmroku"
+      "O świcie i o zmroku,"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "O świcie i o zmroku"
+      "O świcie i o zmroku,"
      ]
     ],
     [
+     [
+      "c",
+      "[F#7]"
+     ],
+     [
+      "c",
+      "[B]"
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
      [
       "x",
       "W południe, w nocy o świcie"
@@ -120827,67 +120847,139 @@
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "W Skarżysku i w Sanoku"
+      "W Skarżysku i w Sanoku,"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "W Skarżysku i w Sanoku"
+      "W Skarżysku i w Sanoku,"
      ]
     ],
     [
+     [
+      "c",
+      "[F#7]"
+     ],
+     [
+      "c",
+      "[B]"
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
      [
       "x",
       "Ty mnie pokochaj nad życie"
      ]
     ],
-    [],
+    [
+     "x",
+     ""
+    ],
     [
      [
+      "c",
+      "[F#m]"
+     ],
+     [
       "x",
-      "W berecie, w czapce, chustce"
+      "W berecie, w czapce, chustce,"
      ]
     ],
     [
      [
+      "c",
+      "[F#m]"
+     ],
+     [
       "x",
-      "W berecie, w czapce, chustce"
+      "W berecie, w czapce, chustce,"
      ]
     ],
     [
      [
+      "c",
+      "[G#7]"
+     ],
+     [
+      "c",
+      "[C#]"
+     ],
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
       "x",
-      "W czapce od stryjka ze Lwowa"
+      "W czapce od stryjka ze Lwowa,"
      ]
     ],
     [
      [
+      "c",
+      "[F#m]"
+     ],
+     [
       "x",
-      "Na falochronie w Ustce"
+      "Na falochronie w Ustce,"
      ]
     ],
     [
      [
+      "c",
+      "[F#m]"
+     ],
+     [
       "x",
-      "Na falochronie w Ustce"
+      "Na falochronie w Ustce,"
      ]
     ],
     [
+     [
+      "c",
+      "[G#7]"
+     ],
+     [
+      "c",
+      "[C#]"
+     ],
+     [
+      "c",
+      "[F#m]"
+     ],
      [
       "x",
       "Ty mnie pokochaj od nowa"
      ]
     ],
-    [],
     [
-     [
-      "x",
-      "Refren:"
-     ]
+     "x",
+     ""
     ],
     [
+     "x",
+     "Refren:"
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "c",
+      "[D]"
+     ],
      [
       "x",
       "W kinie, w Lublinie – kochaj mnie"
@@ -120895,380 +120987,8 @@
     ],
     [
      [
-      "x",
-      "W Kłaju, w tramwaju – kochaj mnie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Nie marudź, nie szlochaj"
-     ]
-    ],
-    [
-     [
-      "x",
-      "ale z calej siły kochaj"
-     ]
-    ],
-    [
-     [
-      "x",
-      "W gminie, w Kętrzynie – kochaj mnie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "W metrze i w swetrze – kochaj mnie"
-     ]
-    ],
-    [],
-    [
-     [
-      "x",
-      "Czy miasto czy wiocha ty mnie z całej siły kochaj"
-     ]
-    ],
-    [],
-    [
-     [
-      "x",
-      "W radości no i w smutku"
-     ]
-    ],
-    [
-     [
-      "x",
-      "W radości no i w smutku"
-     ]
-    ],
-    [
-     [
-      "x",
-      "W radości z ciepłego lata"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Na piasku plaży, w Gródku"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Na piasku plaży, w Gródku"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Kochaj mnie do końca świata"
-     ]
-    ],
-    [],
-    [
-     [
-      "x",
-      "W spokoju oraz w gniewie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "W spokoju oraz w gniewie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "W spokoju palmowych niedziel"
-     ]
-    ],
-    [
-     [
-      "x",
-      "W Marwałdzie i w Gętlewie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "W Marwałdzie i w Gętlewie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Kochaj w bogactwie i w biedzie"
-     ]
-    ],
-    [],
-    [
-     [
-      "x",
-      "Refren..."
-     ]
-    ],
-    [],
-    [
-     [
-      "x",
-      "Jak młody ułan dzielnie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Jak młody ułan dzielnie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Jak wartki na wiosnę strumień"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Na nartach wodnych w Mielnie"
-     ]
-    ],
-    [],
-    [
-     [
-      "x",
-      "Na nartach wodnych w Mielnie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Kochaj najmocniej jak umiesz"
-     ]
-    ],
-    [],
-    [
-     [
-      "x",
-      "Latem w przydrożnym rowie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Latem w przydrożnym rowie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Zimą na sankach i nartach"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Najmocniej zaś w Krakowie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Najmocniej zaś w Krakowie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Kochaj bom tego jest warta"
-     ]
-    ],
-    [],
-    [
-     [
-      "x",
-      "Refren:"
-     ]
-    ],
-    [
-     [
-      "x",
-      "W kinie, w Lublinie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "– kochaj mnie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "W Kłaju, w tramwaju"
-     ]
-    ],
-    [
-     [
-      "x",
-      "– kochaj mnie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Nie marudź, nie szlochaj"
-     ]
-    ],
-    [
-     [
-      "x",
-      "ale z całej siły kochaj"
-     ]
-    ],
-    [
-     [
-      "x",
-      "W gminie, w Kętrzynie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "– kochaj mnie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "W metrze i w swetrze"
-     ]
-    ],
-    [
-     [
-      "x",
-      "– kochaj mnie"
-     ]
-    ],
-    [
-     [
-      "x",
-      "Czy miasto czy wiocha ty"
-     ]
-    ],
-    [
-     [
-      "x",
-      "mnie z całej siły kochaj!"
-     ]
-    ],
-    [],
-    [
-     [
-      "x",
-      "zw. "
-     ],
-     [
       "c",
       "[Em]"
-     ],
-     [
-      "x",
-      " - "
-     ],
-     [
-      "c",
-      "[F#7]"
-     ],
-     [
-      "x",
-      " - "
-     ],
-     [
-      "c",
-      "[B]"
-     ],
-     [
-      "x",
-      " - "
-     ],
-     [
-      "c",
-      "[Em]"
-     ],
-     [
-      "x",
-      " x2"
-     ]
-    ],
-    [],
-    [
-     [
-      "c",
-      "[F#m]"
-     ],
-     [
-      "x",
-      " - "
-     ],
-     [
-      "c",
-      "[G#7]"
-     ],
-     [
-      "x",
-      " - "
-     ],
-     [
-      "c",
-      "[C#]"
-     ],
-     [
-      "x",
-      " - "
-     ],
-     [
-      "c",
-      "[F#m]"
-     ],
-     [
-      "x",
-      " x2"
-     ]
-    ],
-    [
-     [
-      "x",
-      "[Refren]"
-     ]
-    ],
-    [
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      " - "
-     ],
-     [
-      "c",
-      "[D]"
-     ],
-     [
-      "x",
-      " - "
-     ],
-     [
-      "c",
-      "[Em]"
-     ],
-     [
-      "x",
-      " - "
      ],
      [
       "c",
@@ -121276,38 +120996,95 @@
      ],
      [
       "x",
-      " - "
-     ],
+      "W Kłaju, w tramwaju – kochaj mnie"
+     ]
+    ],
+    [
      [
       "c",
       "[C]"
-     ]
-    ],
-    [],
-    [
+     ],
      [
       "c",
       "[G]"
      ],
      [
       "x",
-      " - "
-     ],
+      "Nie marudź, nie szlochaj,"
+     ]
+    ],
+    [
      [
       "c",
       "[Am]"
-     ],
-     [
-      "x",
-      " - "
      ],
      [
       "c",
       "[B]"
      ],
      [
+      "c",
+      "[Em]"
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
       "x",
-      " - "
+      "ale z całej siły kochaj"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "W gminie, w Kętrzynie – kochaj mnie"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "c",
+      "[F#]"
+     ],
+     [
+      "x",
+      "W metrze i w swetrze – kochaj mnie"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Czy miasto czy wiocha"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "c",
+      "[B]"
      ],
      [
       "c",
@@ -121315,11 +121092,467 @@
      ],
      [
       "x",
-      " - "
+      "ty mnie z całej siły kochaj"
+     ]
+    ],
+    [
+     "x",
+     ""
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "W radości no i w smutku,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "W radości no i w smutku,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F#7]"
+     ],
+     [
+      "c",
+      "[B]"
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "W radości z ciepłego lata,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Na piasku plaży, w Gródku,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Na piasku plaży, w Gródku,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F#7]"
+     ],
+     [
+      "c",
+      "[B]"
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Kochaj mnie do końca świata,"
+     ]
+    ],
+    [
+     "x",
+     ""
+    ],
+    [
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "W spokoju oraz w gniewie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "W spokoju oraz w gniewie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G#7]"
+     ],
+     [
+      "c",
+      "[C#]"
+     ],
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "W spokoju palmowych niedziel,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "W Marwałdzie i w Gętlewie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "W Marwałdzie i w Gętlewie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G#7]"
+     ],
+     [
+      "c",
+      "[C#]"
+     ],
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "Kochaj w bogactwie i w biedzie"
+     ]
+    ],
+    [
+     "x",
+     ""
+    ],
+    [
+     "x",
+     "Refren..."
+    ],
+    [
+     "x",
+     ""
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Jak młody ułan dzielnie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Jak młody ułan dzielnie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F#7]"
+     ],
+     [
+      "c",
+      "[B]"
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Jak wartki na wiosnę strumień,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Na nartach wodnych w Mielnie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Na nartach wodnych w Mielnie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F#7]"
+     ],
+     [
+      "c",
+      "[B]"
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Kochaj najmocniej jak umiesz"
+     ]
+    ],
+    [
+     "x",
+     ""
+    ],
+    [
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "Latem w przydrożnym rowie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "Latem w przydrożnym rowie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G#7]"
+     ],
+     [
+      "c",
+      "[C#]"
+     ],
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "Zimą na sankach i nartach,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "Najmocniej zaś w Krakowie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "Najmocniej zaś w Krakowie,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G#7]"
+     ],
+     [
+      "c",
+      "[C#]"
+     ],
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "Kochaj bom tego jest warta"
+     ]
+    ],
+    [
+     "x",
+     ""
+    ],
+    [
+     "x",
+     "Refren:"
+    ],
+    [
+     [
+      "c",
+      "[G]"
      ],
      [
       "c",
       "[D]"
+     ],
+     [
+      "x",
+      "W kinie, w Lublinie – kochaj mnie"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "c",
+      "[F#]"
+     ],
+     [
+      "x",
+      "W Kłaju, w tramwaju – kochaj mnie"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Nie marudź, nie szlochaj,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "c",
+      "[B]"
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "ale z całej siły kochaj"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "W gminie, w Kętrzynie – kochaj mnie"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "c",
+      "[F#]"
+     ],
+     [
+      "x",
+      "W metrze i w swetrze – kochaj mnie"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Czy miasto czy wiocha ty"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "c",
+      "[B]"
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "mnie z całej siły kochaj!"
      ]
     ]
    ],
@@ -131183,55 +131416,47 @@
       "[Em]"
      ],
      [
-      "x",
-      " "
+      "c",
+      "[Am7]"
      ],
      [
       "c",
       "[D]"
      ],
      [
-      "x",
-      " - (e w basie, D w górnej partji"
+      "c",
+      "[Em]"
      ]
     ],
     [
-     [
-      "x",
-      "Jaki jest wynik gry, nie wiem, "
-     ],
+     "x",
+     ""
+    ],
+    [
      [
       "c",
       "[Em]"
      ],
      [
       "x",
-      "nie pytaj mnie."
+      "Jaki jest wynik gry, nie wiem, nie pytaj mnie."
      ]
     ],
     [
-     [
-      "x",
-      "Jak na i"
-     ],
      [
       "c",
       "[Am7]"
      ],
      [
       "x",
-      "mię tej grze? tego n"
-     ],
+      "Jak na imię tej grze? tego nie wiem już też."
+     ]
+    ],
+    [
      [
       "c",
       "[Em]"
      ],
-     [
-      "x",
-      "ie wiem już też."
-     ]
-    ],
-    [
      [
       "x",
       "Wczoraj tak - było tak, nie – znaczyło zaś nie."
@@ -131239,12 +131464,23 @@
     ],
     [
      [
+      "c",
+      "[Am7]"
+     ],
+     [
       "x",
       "Nie mieszało się nam czarne z białym co dzień."
      ]
     ],
-    [],
     [
+     "x",
+     ""
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
      [
       "x",
       "Wczoraj niewinni tak, dzisiaj pionki w grze."
@@ -131252,48 +131488,50 @@
     ],
     [
      [
+      "c",
+      "[Am7]"
+     ],
+     [
       "x",
       "Wczoraj błękitny wiatr, dzisiaj duszny zły sen."
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "Z drugiej strony mych snów wszystko lepszy ma smak,"
+      "Z drugiej strony mych snów wszystko lepszy ma smak"
      ]
     ],
     [
+     [
+      "c",
+      "[Am7]"
+     ],
      [
       "x",
       "Bo w powietrzu jest luz i muzyka wciąż gra."
      ]
     ],
     [
-     [
-      "x",
-      "[Refren]"
-     ]
+     "x",
+     ""
     ],
     [
-     [
-      "x",
-      "Za ostatni gr"
-     ],
+     "x",
+     "[Refren]"
+    ],
+    [
      [
       "c",
       "[C]"
      ],
      [
-      "x",
-      "osz kupię d"
-     ],
-     [
       "c",
       "[D]"
-     ],
-     [
-      "x",
-      "ziś chociaż cień tamtych dn"
      ],
      [
       "c",
@@ -131301,24 +131539,36 @@
      ],
      [
       "x",
-      "i."
+      "Za ostatni grosz kupię dziś chociaż cień tamtych dni."
      ]
     ],
     [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
      [
       "x",
       "Za ostatni grosz wino z zielonych lat chcę znów pić."
      ]
     ],
     [
-     [
-      "x",
-      "Za ostatni grosz wino z zielonych lat chcę znów pić."
-     ]
+     "x",
+     ""
     ],
-    [],
-    [],
     [
+     [
+      "c",
+      "[Em]"
+     ],
      [
       "x",
       "Kiedy zaczął się wić kręty, pochyły szlak."
@@ -131326,11 +131576,19 @@
     ],
     [
      [
+      "c",
+      "[Am7]"
+     ],
+     [
       "x",
       "Gdzie był pierwszy nasz krok w rozpadlinę bez dna."
      ]
     ],
     [
+     [
+      "c",
+      "[Em]"
+     ],
      [
       "x",
       "Gdy srebrników garść przekonała nas, że"
@@ -131338,12 +131596,23 @@
     ],
     [
      [
+      "c",
+      "[Am7]"
+     ],
+     [
       "x",
-      "Kiedy dają to brać, każdy głupi to wie."
+      "Kiedy dają, to brać, każdy głupi to wie."
      ]
     ],
-    [],
     [
+     "x",
+     ""
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
      [
       "x",
       "Bilans zysków i strat prowadzimy od lat,"
@@ -131351,11 +131620,19 @@
     ],
     [
      [
+      "c",
+      "[Am7]"
+     ],
+     [
       "x",
       "Nie ma czego w nim kryć, nie ma czego się bać."
      ]
     ],
     [
+     [
+      "c",
+      "[Em]"
+     ],
      [
       "x",
       "Skąd więc na lustra dnie, z progu każdego dnia"
@@ -131363,36 +131640,30 @@
     ],
     [
      [
+      "c",
+      "[Am7]"
+     ],
+     [
       "x",
       "Wita Cię najpierw wstręt, potem brat jego strach."
      ]
     ],
     [
-     [
-      "x",
-      "[Refren]"
-     ]
+     "x",
+     ""
     ],
     [
-     [
-      "x",
-      "Za ostatni gr"
-     ],
+     "x",
+     "[Refren]"
+    ],
+    [
      [
       "c",
       "[C]"
      ],
      [
-      "x",
-      "osz kupię d"
-     ],
-     [
       "c",
       "[D]"
-     ],
-     [
-      "x",
-      "ziś chociaż cień tamtych dn"
      ],
      [
       "c",
@@ -131400,16 +131671,22 @@
      ],
      [
       "x",
-      "i."
+      "Za ostatni grosz kupię dziś chociaż cień tamtych dni."
      ]
     ],
     [
      [
-      "x",
-      "Za ostatni grosz wino z zielonych lat chcę znów pić."
-     ]
-    ],
-    [
+      "c",
+      "[C]"
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
      [
       "x",
       "Za ostatni grosz wino z zielonych lat chcę znów pić."
