@@ -544,6 +544,34 @@ async function main() {
     ok('dense instrumental chords never overlap', denseOverlap === null, denseOverlap || '');
     doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
     win().localStorage.removeItem('songbook:chordMode');
+
+    // 12m. above mode wraps by measured pixel width (not a fixed column count),
+    // so a proportional line uses the full sheet width instead of wrapping early.
+    win().location.hash = '#/krakow-ukulele/zombie';
+    await wait(300);
+    doc().querySelector('.chord-mode-btn[data-chord-mode="above"]').click(); await wait(30);
+    const sheetEl = $('sheet');
+    const wrapWidth = (u) => {
+        const r = doc().createRange();
+        r.selectNodeContents(u.querySelector('.ln-lyric'));
+        return r.getBoundingClientRect().width;
+    };
+    sheetEl.style.width = '360px';
+    win().dispatchEvent(new (win().Event)('resize'));
+    await wait(250);
+    const narrowSheetW = sheetEl.clientWidth;
+    const zombieUnits = Array.from(sheetEl.querySelectorAll('.ln-unit'));
+    const famUnit = zombieUnits.find(u => u.querySelector('.ln-lyric').textContent.indexOf('family') > -1);
+    const worst = Math.max.apply(null, zombieUnits.map(wrapWidth));
+    ok('above wrap keeps fitting words on the line', !!famUnit && famUnit.dataset.start === '0',
+        famUnit ? famUnit.querySelector('.ln-lyric').textContent : 'no family unit');
+    ok('above wrap does not overflow the sheet', worst <= narrowSheetW + 1,
+        Math.round(worst) + ' vs ' + narrowSheetW);
+    sheetEl.style.width = '';
+    win().dispatchEvent(new (win().Event)('resize'));
+    await wait(250);
+    doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
+    win().localStorage.removeItem('songbook:chordMode');
     win().location.hash = '#/krakow-ukulele';
     await wait(200);
     win().location.hash = '';

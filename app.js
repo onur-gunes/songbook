@@ -374,38 +374,24 @@
         return val;
     }
 
-    function measureCharWidthPx() {
-        var sheet = $('sheet');
-        var tmp = document.createElement('span');
-        tmp.style.position = 'absolute';
-        tmp.style.visibility = 'hidden';
-        tmp.style.whiteSpace = 'pre';
-        tmp.textContent = '00000000000000000000';
-        sheet.appendChild(tmp);
-        var w = tmp.offsetWidth / 20;
-        sheet.removeChild(tmp);
-        return w || 0;
-    }
-
-    function colsPerLine() {
-        var w = measureCharWidthPx();
-        if (!w) return 40;
-        return Math.max(8, Math.floor($('sheet').clientWidth / w));
-    }
-
-    function splitLyric(text, perLine) {
+    // Greedy word wrap by rendered pixel width. The sheet uses a proportional
+    // font and the lyric layer is white-space:pre, so a fixed character count
+    // (or the browser's own reflow) would either wrap far too early or not at
+    // all — we have to measure the text ourselves.
+    function splitLyric(parts, text, width) {
         var out = [], i = 0, n = text.length;
-        if (n <= perLine) {
-            if (n) out.push([0, n]);
-            return out;
-        }
+        if (!n) return out;
         while (i < n) {
-            var rest = text.slice(i);
-            if (rest.length <= perLine) { out.push([i, n]); break; }
-            var win = rest.slice(0, perLine);
-            var sp = win.lastIndexOf(' ');
-            if (sp > 0) { out.push([i, i + sp]); i += sp + 1; }
-            else { out.push([i, i + perLine]); i += perLine; }
+            if (lyricPrefixWidth(parts, i, n) <= width) { out.push([i, n]); break; }
+            var lastSpace = -1, j;
+            for (j = i + 1; j <= n; j++) {
+                if (lyricPrefixWidth(parts, i, j) > width) break;
+                if (text.charAt(j - 1) === ' ') lastSpace = j - 1;
+            }
+            var end = lastSpace > i ? lastSpace : Math.max(i + 1, j - 1);
+            out.push([i, end]);
+            i = end;
+            while (i < n && text.charAt(i) === ' ') i++;
         }
         return out;
     }
@@ -454,7 +440,7 @@
         return ctx.measureText(label).width;
     }
 
-    function buildAboveLine(line, perLine) {
+    function buildAboveLine(line, avail) {
         var hasWord = false, L = '', parts = [], chords = [], prevEnd = 0, hadChord = false;
         line.forEach(function (seg) {
             if (seg[0] === 'c') {
@@ -477,7 +463,7 @@
         });
 
         var div = el('div', 'line line-stacked');
-        var ranges = splitLyric(L, perLine);
+        var ranges = splitLyric(parts, L, avail);
         if (!ranges.length) ranges = [[0, L.length]];
         ranges.forEach(function (r) {
             var unit = el('div', 'ln-unit');
@@ -524,7 +510,7 @@
         var wrap = $('sheet');
         wrap.textContent = '';
         var frag = document.createDocumentFragment();
-        var perLine = colsPerLine();
+        var avail = Math.max(1, wrap.clientWidth - 0.5);
         (song.sheet || []).forEach(function (line) {
             var lineDiv = el('div', 'line');
             var isPre = line.length === 1 && line[0][0] === 'p';
@@ -537,7 +523,7 @@
             var hasChord = line.some(function (s) { return s[0] === 'c'; });
             var hasWord = line.some(function (s) { return s[0] !== 'c' && /\S/.test(plainText(s)); });
             if (hasChord && hasWord) {
-                frag.appendChild(buildAboveLine(line, perLine));
+                frag.appendChild(buildAboveLine(line, avail));
                 return;
             }
             line.forEach(function (seg) {
