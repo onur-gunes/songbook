@@ -1078,6 +1078,7 @@ main {
     padding: 5px 10px;
     margin: 6px 0;
     color: var(--text);
+    font-family: var(--mono);
 }
 
 .sheet .seg-chord {
@@ -1092,6 +1093,7 @@ main {
 
 .sheet.chords-above .line.is-pre {
     line-height: 1.5;
+    font-family: var(--mono);
 }
 
 .sheet.chords-above .ln-chords {
