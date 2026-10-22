@@ -108,7 +108,7 @@ imported songbook JSON lives in `IndexedDB`.
 
 ```sh
 python3 migrate.py                      # Krakow Ukulele Songbook
-python3 build_songbook.py chordpro/polska-gurom   # POLSKA GUROM
+python3 build_songbook.py chordpro/polska-gurom --allow-trusted-notes   # POLSKA GUROM
 ```
 
 `migrate.py` reads `legacy/*.html`, merges original keys from
@@ -138,15 +138,15 @@ chordpro/<book-id>/
 
 `book.json` carries `{id, name, description, instrument}` and optionally
 `logo` / `logoDark`. `instrument` must be `ukulele` or `guitar`. Song files are
-numbered in filename order unless a `{number: 12}` directive overrides it.
-If present, `original-keys.json` is merged by song id, mirroring how
+numbered in filename order unless a `{number: 12}` directive overrides it. If
+present, `original-keys.json` is merged by song id, mirroring how
 `migrate.py` uses `songbooks/original-keys.json` for the legacy book.
 
 Song directives:
 
 | Directive | Maps to | Notes |
 |---|---|---|
-| `{id: ...}` | `id` | optional stable URL id; defaults to a title slug |
+| `{id: ...}` | `id` | optional stable URL id; invalid ids are slugified + warned |
 | `{title: ...}` / `{t: ...}` | `title` | required |
 | `{artist: ...}` / `{subtitle: ...}` / `{st: ...}` | `artist` | required |
 | `{level: Easy\|Medium\|Hard}` | `level` | default `Medium` + warning |
@@ -156,8 +156,8 @@ Song directives:
 | `{capo: 2}` | `capo` | defaults to `0` when a key is given |
 | `{new: true}` | `new` | default `false` |
 | `{number: 12}` | `n` | defaults to file order |
-| `{chords: Am, C, G}` | `chords` | optional curated order; normally auto-derived |
-| `{trusted_note: ...}` | `y` | trusted `innerHTML` comment; never use for agent output |
+| `{chords: Am, C, G}` | `chords` | optional curated order; mismatch with the sheet warns |
+| `{trusted_note: ...}` | `y` | ignored unless `--allow-trusted-notes` is passed |
 
 Body syntax:
 
@@ -169,8 +169,9 @@ Body syntax:
 - A blank line → `[]` (never `["x", ""]`).
 - `{comment: ...}` / `{c: ...}` → one italic line (safe `textContent`, not the
   `innerHTML` comment kind).
-- `{trusted_note: ...}` → one legacy `y` line (rendered with `innerHTML`); use
-  only for trusted content from an existing book.
+- `{trusted_note: ...}` → one legacy `y` line (rendered with `innerHTML`). It is
+  ignored unless the build is run with `--allow-trusted-notes`; use that flag
+  only for trusted legacy conversions.
 - `{start_of_chorus}` / `{soc}` inserts an `(Chorus)` label; `{end_of_chorus}`
   / `{eoc}` closes it.
 - `{start_of_tab}` / `{sot}` … `{end_of_tab}` / `{eot}` keeps raw lines as
@@ -180,7 +181,8 @@ Body syntax:
 `chords[]` is derived automatically from the chord tokens (unique, in first
 appearance order), and ids are slugified from titles and de-duplicated per book.
 `{chords: ...}` exists only so legacy books can preserve a curated order that
-differs from first appearance.
+differs from first appearance; a mismatch between the override and the sheet
+produces a validation warning.
 
 Build one book, or every book under a directory:
 

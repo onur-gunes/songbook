@@ -125,7 +125,7 @@ def _warn(warnings, message):
         warnings.append(message)
 
 
-def parse_song(text, number=1, warnings=None):
+def parse_song(text, number=1, warnings=None, allow_trusted_notes=False):
     """Parse a ChordPro document into an app song dict.
 
     `number` is the default song order (normally its 1-based file position).
@@ -159,7 +159,9 @@ def parse_song(text, number=1, warnings=None):
             elif key == 'trusted_note':
                 # Legacy app note kind (`y`), rendered via innerHTML. Only use
                 # this for content that is trusted, never for agent output.
-                if value:
+                if not allow_trusted_notes:
+                    _warn(warnings, 'trusted_note ignored: book does not allow trusted notes')
+                elif value:
                     sheet.append([['y', value]])
             # Other directives (define, capo of unknown spelling, etc.) are
             # intentionally ignored: the agent subset is small.
@@ -222,8 +224,17 @@ def parse_song(text, number=1, warnings=None):
         else:
             new = parsed
 
+    raw_id = meta.get('id', '').strip()
+    song_id = slugify(title)
+    if raw_id:
+        if re.fullmatch(r'[a-z0-9-]+', raw_id):
+            song_id = raw_id
+        else:
+            _warn(warnings, 'invalid id %r, slugifying' % raw_id)
+            song_id = slugify(raw_id) or song_id
+
     song = {
-        'id': meta.get('id', '').strip() or slugify(title),
+        'id': song_id,
         'n': n,
         'title': title,
         'artist': artist,
@@ -253,6 +264,12 @@ def parse_song(text, number=1, warnings=None):
     if meta.get('chords', '').strip():
         overridden = [name.strip() for name in meta['chords'].split(',') if name.strip()]
         if overridden:
+            missing = sorted(set(song['chords']) - set(overridden))
+            unused = sorted(set(overridden) - set(song['chords']))
+            if missing or unused:
+                _warn(warnings, 'chords override differs from sheet '
+                                '(missing: %s, unused: %s)' % (missing or 'none',
+                                                              unused or 'none'))
             song['chords'] = overridden
     song['sheet'] = sheet
     return song

@@ -77,19 +77,53 @@ class ParseSongTests(unittest.TestCase):
         self.assertEqual(song['sheet'], [[['c', '[C]'], ['x', 'Hello']]])
 
     def test_id_and_chords_can_be_overridden(self):
+        warnings = []
         song = chordpro.parse_song(
             '{title: Some Long Title}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
-            '{id: stable-legacy-id}\n{chords: Am, C, G}\n[C]one [Am]two'
+            '{id: stable-legacy-id}\n{chords: Am, C}\n[C]one [Am]two',
+            warnings=warnings,
         )
         self.assertEqual(song['id'], 'stable-legacy-id')
-        self.assertEqual(song['chords'], ['Am', 'C', 'G'])
+        self.assertEqual(song['chords'], ['Am', 'C'])
+        self.assertEqual(warnings, [])
 
-    def test_trusted_note_keeps_trusted_y_token(self):
+    def test_invalid_id_is_slugified_with_warning(self):
+        warnings = []
         song = chordpro.parse_song(
             '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
-            '{trusted_note: Refren:}\n[C]x'
+            '{id: Not A Slug!}\n[C]x',
+            warnings=warnings,
+        )
+        self.assertEqual(song['id'], 'not-a-slug')
+        self.assertTrue(any('invalid id' in w for w in warnings))
+
+    def test_chords_override_mismatch_warns(self):
+        warnings = []
+        song = chordpro.parse_song(
+            '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+            '{chords: Am, F}\n[C]x',
+            warnings=warnings,
+        )
+        self.assertEqual(song['chords'], ['Am', 'F'])
+        self.assertTrue(any('chords override differs' in w for w in warnings))
+
+    def test_trusted_note_keeps_trusted_y_token_when_allowed(self):
+        song = chordpro.parse_song(
+            '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+            '{trusted_note: Refren:}\n[C]x',
+            allow_trusted_notes=True,
         )
         self.assertEqual(song['sheet'][0], [['y', 'Refren:']])
+
+    def test_trusted_note_is_ignored_by_default(self):
+        warnings = []
+        song = chordpro.parse_song(
+            '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+            '{trusted_note: Refren:}\n[C]x',
+            warnings=warnings,
+        )
+        self.assertEqual(song['sheet'], [[['c', '[C]'], ['x', 'x']]])
+        self.assertTrue(any('trusted_note ignored' in w for w in warnings))
 
     def test_defaults_and_warnings(self):
         warnings = []
@@ -339,6 +373,14 @@ class BuildTests(unittest.TestCase):
             self.assertEqual(song['sheetKey'], 'C')
             self.assertEqual(song['capo'], 2)
 
+    def test_original_keys_ignore_boolean_capo(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, 'original-keys.json'), 'w',
+                      encoding='utf-8') as f:
+                json.dump({'song': {'key': 'D', 'capo': True}}, f)
+            keys = build_songbook.load_original_keys(tmp)
+            self.assertEqual(keys['song'], {'key': 'D'})
+
     def test_bundled_polish_book_rebuilds_from_chordpro(self):
         source = os.path.join(ROOT, 'chordpro', 'polska-gurom')
         committed = os.path.join(ROOT, 'songbooks', 'polska-gurom.json')
@@ -346,9 +388,11 @@ class BuildTests(unittest.TestCase):
             result = build_songbook.build_book(
                 source, out_dir=os.path.join(tmp, 'songbooks'),
                 index_path=os.path.join(tmp, 'songbooks', 'index.json'),
-                report_path=os.path.join(tmp, 'report.txt'), chord_check=False)
+                report_path=os.path.join(tmp, 'report.txt'), chord_check=False,
+                allow_trusted_notes=True)
             self.assertEqual(result['errors'], [])
-            self.assertEqual(result['warnings'], [])
+            self.assertTrue(any('049-love-story.cho: chords override differs' in w
+                                for w in result['warnings']))
             with open(committed, encoding='utf-8') as f:
                 expected = f.read()
             with open(result['output'], encoding='utf-8') as f:

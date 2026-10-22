@@ -82,7 +82,7 @@ def load_original_keys(book_dir):
                 entry['key'] = str(value['key'])
             if value.get('sheetKey'):
                 entry['sheetKey'] = str(value['sheetKey'])
-            if isinstance(value.get('capo'), int):
+            if isinstance(value.get('capo'), int) and not isinstance(value.get('capo'), bool):
                 entry['capo'] = value['capo']
             if entry:
                 out[key] = entry
@@ -314,7 +314,7 @@ def _upsert_index(index_path, entry):
 
 
 def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
-               chord_check=True):
+               chord_check=True, allow_trusted_notes=False):
     out_dir = out_dir or SONGBOOKS
     index_path = index_path or INDEX
     errors = []
@@ -356,7 +356,8 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
                   errors='replace') as f:
             text = f.read()
         song_warnings = []
-        song = chordpro.parse_song(text, number=index, warnings=song_warnings)
+        song = chordpro.parse_song(text, number=index, warnings=song_warnings,
+                                   allow_trusted_notes=allow_trusted_notes)
         for warning in song_warnings:
             warnings.append('%s: %s' % (filename, warning))
 
@@ -499,7 +500,11 @@ def main(argv):
 
     failed = False
     for i, book_dir in enumerate(books):
-        result = build_book(book_dir, chord_check='--no-chord-check' not in argv[2:])
+        result = build_book(
+            book_dir,
+            chord_check='--no-chord-check' not in argv[2:],
+            allow_trusted_notes='--allow-trusted-notes' in argv[2:],
+        )
         if i:
             print()
         print(result['report'])
