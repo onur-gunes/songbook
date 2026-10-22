@@ -39,7 +39,6 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 | `migrate.py` | Rebuilds `songbooks/krakow-ukulele.json` from `legacy/` + validation |
 | `chordpro.py` | Parses the ChordPro authoring subset into the app's sheet format |
 | `build_songbook.py` | Builds `songbooks/<id>.json` from a `chordpro/<id>/` book |
-| `chordpro/demo/` | Example ChordPro book showing the authoring layout |
 | `build_single.py` | Bundles everything into `Songbook.html` |
 | `build_pages.py` | Assembles `_site/` for GitHub Pages |
 | `tests/` | CDP + headless-Chrome test suites |
@@ -165,8 +164,15 @@ appearance order), and ids are slugified from titles and de-duplicated per book.
 Build one book, or every book under a directory:
 
 ```sh
-python3 build_songbook.py chordpro/demo
+python3 build_songbook.py chordpro/my-book
 python3 build_songbook.py chordpro/
+```
+
+To try the authoring format, copy the test fixture as a starting point:
+
+```sh
+cp -R tests/fixtures/chordpro/demo chordpro/my-book
+python3 build_songbook.py chordpro/my-book
 ```
 
 The builder writes `songbooks/<id>.json`, upserts the entry in
