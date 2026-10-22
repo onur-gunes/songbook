@@ -691,6 +691,23 @@ async function main() {
         pickerIds.join(','));
     ok('import button present', !!$('importBtn'));
 
+    // 19d. legacy y-note HTML is sanitized before rendering (XSS)
+    const xssNote = win().songbookTest.noteNode(
+        '<img src=x onerror="window.__xss=1">safe ' +
+        '<span class="chord" onclick="window.__xss=2">[C]</span><br>' +
+        '<script>window.__xss=3<\/script>');
+    doc().body.appendChild(xssNote);
+    await wait(100);
+    ok('y note drops executable markup',
+        !xssNote.querySelector('img,script') &&
+        xssNote.querySelectorAll('span.chord').length === 1 &&
+        xssNote.querySelector('span.chord').getAttribute('onclick') === null &&
+        !!xssNote.querySelector('br') &&
+        xssNote.textContent.indexOf('safe [C]') >= 0,
+        xssNote.innerHTML);
+    ok('y note markup did not execute', win().__xss === undefined, String(win().__xss));
+    xssNote.remove();
+
     // 20. no console/page errors overall
     ok('no page errors', errors.length === 0, errors.join('; '));
 
