@@ -127,8 +127,8 @@ chordpro/<book-id>/
 ```
 
 `book.json` carries `{id, name, description, instrument}` and optionally
-`logo` / `logoDark`. Song files are numbered in filename order unless a
-`{number: 12}` directive overrides it.
+`logo` / `logoDark`. `instrument` must be `ukulele` or `guitar`. Song files are
+numbered in filename order unless a `{number: 12}` directive overrides it.
 
 Song directives:
 
@@ -176,11 +176,12 @@ python3 build_songbook.py chordpro/my-book
 ```
 
 The builder writes `songbooks/<id>.json`, upserts the entry in
-`songbooks/index.json`, and writes `<id>-report.txt`. The report checks song
-counts, duplicate ids/numbers, titles/artists, levels, durations, sheet shape,
-blank-line encoding, pre lines, chord brackets, broken unicode/entities, and
-chord playability via `ChordKit` (Node, or headless Chrome when Node is not
-installed).
+`songbooks/index.json`, and writes `<id>-report.txt`. If validation reports an
+error, the book is not published and the command exits non-zero. The report
+checks song counts, duplicate ids/numbers, titles/artists, levels, durations,
+sheet shape, blank-line encoding, pre lines, chord brackets, broken
+unicode/entities, and chord playability via `ChordKit` (Node, or headless Chrome
+when Node is not installed).
 
 Run the parser/builder tests with `python3 tests/chordpro.py`.
 

@@ -24,6 +24,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -34,6 +35,7 @@ D = os.path.dirname(os.path.abspath(__file__))
 SONGBOOKS = os.path.join(D, 'songbooks')
 INDEX = os.path.join(SONGBOOKS, 'index.json')
 ENTITIES_RE = re.compile(r'&(?:[a-zA-Z]+|#\d+);')
+INSTRUMENTS = ('ukulele', 'guitar')
 
 
 # ---------- discovery ----------
@@ -162,7 +164,7 @@ for (const raw of names) {
   if (ChordKit.isMutedName(head) || /^(stop|pause|riff|muted)$/i.test(head)) continue;
   if (!ChordKit.parse(raw) || !ChordKit.voicings(head, instrument).length) bad.push(raw);
 }
-console.log(JSON.stringify(bad));
+console.log('__CHORD_CHECK__' + JSON.stringify(bad));
 """
 
 
@@ -201,9 +203,10 @@ def _check_chords_chrome(names, instrument):
     tmp.write(html)
     tmp.close()
     proc = None
+    port = _free_port()
     try:
-        proc, _ = launch_chrome(9341)
-        target = new_tab(9341, 'file://' + tmp.name)
+        proc, _ = launch_chrome(port)
+        target = new_tab(port, 'file://' + tmp.name)
         cdp = CDP(target['webSocketDebuggerUrl'])
         cdp.enable()
         cdp.wait_js('window.__chordCheck !== undefined', timeout=20)
@@ -223,6 +226,15 @@ def _check_chords_chrome(names, instrument):
             pass
 
 
+def _free_port():
+    sock = socket.socket()
+    try:
+        sock.bind(('127.0.0.1', 0))
+        return sock.getsockname()[1]
+    finally:
+        sock.close()
+
+
 def check_chords(names, instrument):
     """Return (bad_names, engine, note); bad_names None means unavailable."""
     if not names:
@@ -238,8 +250,13 @@ def check_chords(names, instrument):
             proc = subprocess.run([node, '-e', script], capture_output=True,
                                   text=True, timeout=30)
             if proc.returncode == 0:
-                return json.loads(proc.stdout.strip() or '[]'), 'node', ''
-            return None, 'node', 'ChordKit check failed: %s' % proc.stderr.strip()[:200]
+                marker = '__CHORD_CHECK__'
+                for line in reversed(proc.stdout.splitlines()):
+                    line = line.strip()
+                    if line.startswith(marker):
+                        return json.loads(line[len(marker):]), 'node', ''
+            return None, 'node', 'ChordKit check failed: %s' % (
+                proc.stderr.strip()[:200] or proc.stdout.strip()[:200])
         except Exception as exc:
             return None, 'node', 'ChordKit check failed: %s' % exc
     return _check_chords_chrome(names, instrument)
@@ -275,7 +292,7 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
 
     meta_path = os.path.join(book_dir, 'book.json')
     try:
-        with open(meta_path, encoding='utf-8') as f:
+        with open(meta_path, encoding='utf-8-sig') as f:
             meta = json.load(f)
     except Exception as exc:
         errors.append('cannot read book.json: %s' % exc)
@@ -292,7 +309,10 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
     description = str(meta.get('description') or '').strip()
     if not description:
         warnings.append('book.json: missing description')
-    instrument = str(meta.get('instrument') or 'ukulele').strip()
+    instrument = str(meta.get('instrument') or 'ukulele').strip().lower()
+    if instrument not in INSTRUMENTS:
+        errors.append('book.json: invalid instrument %r (expected ukulele or guitar)'
+                      % instrument)
 
     files = song_files(book_dir)
     if not files:
@@ -302,14 +322,15 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
     seen_ids = set()
     deduped = []
     for index, filename in enumerate(files, 1):
-        with open(os.path.join(book_dir, filename), encoding='utf-8', errors='replace') as f:
+        with open(os.path.join(book_dir, filename), encoding='utf-8-sig',
+                  errors='replace') as f:
             text = f.read()
         song_warnings = []
         song = chordpro.parse_song(text, number=index, warnings=song_warnings)
         for warning in song_warnings:
             warnings.append('%s: %s' % (filename, warning))
 
-        base = song['id'] or chordpro.slugify(song.get('title') or filename)
+        base = song['id']
         sid = base
         suffix = 2
         while sid in seen_ids:
@@ -346,7 +367,7 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
             if chord not in chords:
                 chords.append(chord)
 
-    if chord_check:
+    if chord_check and instrument in INSTRUMENTS:
         bad, engine, note = check_chords(chords, instrument)
         if bad is None:
             warnings.append(note or 'ChordKit check unavailable')
@@ -356,12 +377,15 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
             chord_status = 'unplayable: %s' % bad
         else:
             chord_status = 'all %d playable' % len(chords)
+    elif chord_check:
+        engine = 'n/a'
+        chord_status = 'skipped (invalid instrument)'
     else:
         engine = 'disabled'
         chord_status = 'skipped (disabled)'
 
     output_path = os.path.join(out_dir, book_id + '.json')
-    wrote = bool(songs)
+    wrote = bool(songs) and not errors
     if wrote:
         os.makedirs(out_dir, exist_ok=True)
         with open(output_path, 'w', encoding='utf-8') as f:

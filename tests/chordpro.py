@@ -196,6 +196,73 @@ class BuildTests(unittest.TestCase):
             self.assertIn('pre lines: ok', result['report'])
             self.assertIn('chord engine (disabled)', result['report'])
 
+    def test_bom_and_instrument_normalization(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            book_dir = os.path.join(tmp, 'bom-book')
+            songbooks = os.path.join(tmp, 'songbooks')
+            os.makedirs(book_dir)
+            with open(os.path.join(book_dir, 'book.json'), 'w', encoding='utf-8-sig') as f:
+                json.dump({'id': 'bom-book', 'name': 'BOM Book', 'description': 'x',
+                           'instrument': 'Ukulele'}, f)
+            with open(os.path.join(book_dir, '01-bom.cho'), 'w', encoding='utf-8-sig') as f:
+                f.write('{title: BOM Song}\n{artist: A}\n{level: Easy}\n'
+                        '{duration: 1}\n[C]lyric\n')
+
+            result = build_songbook.build_book(
+                book_dir, out_dir=songbooks,
+                index_path=os.path.join(songbooks, 'index.json'),
+                report_path=os.path.join(tmp, 'report.txt'), chord_check=False)
+
+            self.assertEqual(result['errors'], [])
+            self.assertEqual(result['book']['instrument'], 'ukulele')
+            self.assertEqual(result['book']['songs'][0]['title'], 'BOM Song')
+            self.assertEqual(result['book']['songs'][0]['sheet'][0][1], ['x', 'lyric'])
+            self.assertNotIn('\ufeff', result['report'])
+
+    def test_invalid_instrument_is_not_published(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            book_dir = os.path.join(tmp, 'bad-instrument')
+            songbooks = os.path.join(tmp, 'songbooks')
+            os.makedirs(book_dir)
+            with open(os.path.join(book_dir, 'book.json'), 'w', encoding='utf-8') as f:
+                json.dump({'id': 'bad-instrument', 'name': 'Bad Instrument',
+                           'description': 'x', 'instrument': 'mandolin'}, f)
+            with open(os.path.join(book_dir, '01-song.cho'), 'w', encoding='utf-8') as f:
+                f.write('{title: Song}\n{artist: A}\n{level: Easy}\n'
+                        '{duration: 1}\n[C]lyric\n')
+
+            result = build_songbook.build_book(
+                book_dir, out_dir=songbooks,
+                index_path=os.path.join(songbooks, 'index.json'),
+                report_path=os.path.join(tmp, 'report.txt'), chord_check=True)
+
+            self.assertTrue(any('invalid instrument' in e for e in result['errors']))
+            self.assertFalse(os.path.exists(result['output']))
+            self.assertFalse(os.path.exists(os.path.join(songbooks, 'index.json')))
+            self.assertIn('chord engine (n/a): skipped (invalid instrument)', result['report'])
+            self.assertIn('wrote: not written', result['report'])
+
+    def test_validation_errors_are_not_published(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            book_dir = os.path.join(tmp, 'bad-song')
+            songbooks = os.path.join(tmp, 'songbooks')
+            os.makedirs(book_dir)
+            with open(os.path.join(book_dir, 'book.json'), 'w', encoding='utf-8') as f:
+                json.dump({'id': 'bad-song', 'name': 'Bad Song',
+                           'description': 'x', 'instrument': 'ukulele'}, f)
+            with open(os.path.join(book_dir, '01-song.cho'), 'w', encoding='utf-8') as f:
+                f.write('{artist: A}\n{level: Easy}\n{duration: 1}\n[C]lyric\n')
+
+            result = build_songbook.build_book(
+                book_dir, out_dir=songbooks,
+                index_path=os.path.join(songbooks, 'index.json'),
+                report_path=os.path.join(tmp, 'report.txt'), chord_check=False)
+
+            self.assertTrue(any('missing titles' in e for e in result['errors']))
+            self.assertFalse(os.path.exists(result['output']))
+            self.assertFalse(os.path.exists(os.path.join(songbooks, 'index.json')))
+            self.assertIn('wrote: not written', result['report'])
+
     def test_validation_flags_malformed_sheet(self):
         book = {
             'id': 'bad', 'name': 'Bad', 'description': '',

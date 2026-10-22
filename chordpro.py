@@ -127,6 +127,8 @@ def parse_song(text, number=1, warnings=None):
     when a list is supplied. The caller is responsible for de-duplicating ids
     across a book.
     """
+    if text.startswith('\ufeff'):
+        text = text[1:]
     meta = {}
     sheet = []
     in_tab = False
