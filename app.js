@@ -314,6 +314,37 @@
 
     var transpose = 0;
 
+    // Legacy `y` notes were authored as HTML. Imported songbooks are
+    // untrusted, so rebuild them from an allowlist instead of assigning
+    // innerHTML: only text, <br>, and <span class="chord"> survive.
+    function appendNoteContent(dst, src) {
+        for (var child = src.firstChild; child; child = child.nextSibling) {
+            if (child.nodeType === 3) {
+                dst.appendChild(document.createTextNode(child.nodeValue));
+            } else if (child.nodeType === 1) {
+                if (child.tagName === 'SCRIPT' || child.tagName === 'STYLE' ||
+                    child.tagName === 'TEMPLATE') continue;
+                if (child.tagName === 'BR') {
+                    dst.appendChild(document.createElement('br'));
+                } else if (child.tagName === 'SPAN' &&
+                           (' ' + (child.getAttribute('class') || '') + ' ').indexOf(' chord ') !== -1) {
+                    var span = el('span', 'chord');
+                    appendNoteContent(span, child);
+                    dst.appendChild(span);
+                } else {
+                    appendNoteContent(dst, child);
+                }
+            }
+        }
+    }
+
+    function noteNode(val) {
+        var note = el('span', 'seg-note');
+        var parsed = new DOMParser().parseFromString(String(val == null ? '' : val), 'text/html');
+        appendNoteContent(note, parsed.body);
+        return note;
+    }
+
     function renderSheet(song) {
         if (chordMode === 'above') { renderSheetAbove(song); return; }
         var wrap = $('sheet');
@@ -341,9 +372,7 @@
                 } else if (kind === 'i') {
                     lineDiv.appendChild(el('span', 'seg-italic', val));
                 } else if (kind === 'y') {
-                    var note = el('span', 'seg-note');
-                    note.innerHTML = val;
-                    lineDiv.appendChild(note);
+                    lineDiv.appendChild(noteNode(val));
                 } else {
                     lineDiv.appendChild(document.createTextNode(val));
                 }
@@ -532,7 +561,7 @@
                 else if (kind === 'm') { lineDiv.appendChild(el('span', 'seg-muted', val)); }
                 else if (kind === 'b') { lineDiv.appendChild(el('span', 'seg-bold', val)); }
                 else if (kind === 'i') { lineDiv.appendChild(el('span', 'seg-italic', val)); }
-                else if (kind === 'y') { var note = el('span', 'seg-note'); note.innerHTML = val; lineDiv.appendChild(note); }
+                else if (kind === 'y') { lineDiv.appendChild(noteNode(val)); }
                 else { lineDiv.appendChild(document.createTextNode(val)); }
             });
             frag.appendChild(lineDiv);
@@ -1505,6 +1534,7 @@
         transposeNote: transposeNote,
         transposeChartName: transposeChartName,
         displayChord: displayChord,
+        noteNode: noteNode,
         stripSortPrefix: stripSortPrefix,
         filteredSongs: filteredSongs,
         state: state,
