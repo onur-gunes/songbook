@@ -215,6 +215,13 @@ python3 build_single.py   # -> Songbook.html (portable, file://)
 python3 build_pages.py    # -> _site/ (runtime files + Songbook.html)
 ```
 
+`build_pages.py` regenerates the service worker's precache list (`CORE`) and
+cache-busting `VERSION` in the deployed `_site/sw.js` from the actual contents
+of `_site/`, so adding a songbook or asset never requires editing `sw.js` by
+hand. Only the built `_site/sw.js` is rewritten; the source `sw.js` keeps the
+`@generated-version` / `@generated-core` markers as a fallback for running the
+unbuilt tree.
+
 Pushing to `main` deploys `_site/` to GitHub Pages via
 `.github/workflows/deploy-pages.yml`.
 
