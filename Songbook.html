@@ -3108,7 +3108,10 @@ main {
 
         window.addEventListener('scroll', function () {
             if (!scrollState.playing || scrollState.lastY === null) return;
-            if (Math.abs(window.pageYOffset - scrollState.lastY) > 2) reanchorKeepSpeed();
+            if (Math.abs(window.pageYOffset - scrollState.lastY) > 2) {
+                scrollState.pos = window.pageYOffset;
+                scrollState.lastY = window.pageYOffset;
+            }
         }, { passive: true });
 
         var sheetResizeT = null;
@@ -3131,7 +3134,7 @@ main {
 
     /* ---------------- auto-scroll ---------------- */
 
-    var scrollState = { raf: null, last: 0, elapsed: 0, durMs: 1, from: 0, playing: false, started: false, finished: false, lastY: null };
+    var scrollState = { raf: null, last: 0, pos: 0, playing: false, started: false, finished: false, lastY: null };
     var scrollSpeed = 1;
     var textSize = 1;
     var chordSize = 1;
@@ -3254,31 +3257,23 @@ main {
     function setSpeed(v) {
         v = Math.min(3, Math.max(0.2, Math.round(v * 10) / 10));
         if (v === scrollSpeed) { updateSpeedLabel(); return; }
-        var f = scrollState.durMs > 0 ? scrollState.elapsed / scrollState.durMs : 0;
         scrollSpeed = v;
-        scrollState.durMs = scrollDurationMs();
-        scrollState.elapsed = Math.min(1, f) * scrollState.durMs;
         updateSpeedLabel();
         if (active && currentSong) {
             try { window.localStorage.setItem(speedKey(active.id, currentSong.id), String(scrollSpeed)); } catch (e) { /* ignore */ }
         }
     }
-    function reanchorKeepSpeed() {
-        if (!scrollState.playing) return;
-        var max = scrollBounds();
-        if (max <= 0) return;
-        var remaining = scrollState.durMs - scrollState.elapsed;
-        var spanLeft = max - scrollState.from;
-        var v = (remaining > 0 && spanLeft > 0) ? spanLeft / remaining : 0;
-        scrollState.from = Math.min(Math.max(window.pageYOffset, 0), max);
-        scrollState.elapsed = 0;
-        scrollState.durMs = v > 0 ? Math.max((max - scrollState.from) / v, 1) : scrollDurationMs();
-        scrollState.lastY = window.pageYOffset;
-    }
     var ABOVE_SCROLL_FACTOR = 1.75;
     function scrollDurationMs() {
         var d = ((currentSong && currentSong.dur ? currentSong.dur : 4) * 60 * 1000) / scrollSpeed;
         return chordMode === 'above' ? d * ABOVE_SCROLL_FACTOR : d;
+    }
+    // Pixels per millisecond for the whole sheet at the current speed.
+    // Always full-sheet-relative, so it is independent of current position.
+    function targetVel() {
+        var b = scrollBounds();
+        var d = scrollDurationMs();
+        return (b > 0 && d > 0) ? b / d : 0;
     }
     function scrollBounds() {
         var doc = document.documentElement;
@@ -3289,29 +3284,14 @@ main {
         return Math.min(Math.max(0, top), scrollBounds());
     }
     function freshScrollAnchor() {
-        scrollState.from = Math.min(Math.max(window.pageYOffset, 0), scrollBounds());
-        scrollState.elapsed = 0;
-        scrollState.durMs = scrollDurationMs();
+        scrollState.pos = Math.min(Math.max(window.pageYOffset, 0), scrollBounds());
         scrollState.started = true;
         scrollState.finished = false;
-    }
-    function reanchorElapsed() {
-        scrollState.durMs = scrollDurationMs();
-        var max = scrollBounds();
-        var span = max - scrollState.from;
-        var y = window.pageYOffset;
-        if (y <= scrollState.from || span <= 0) {
-            scrollState.from = Math.min(Math.max(y, 0), max);
-            scrollState.elapsed = 0;
-            return;
-        }
-        var f = (y - scrollState.from) / span;
-        scrollState.elapsed = Math.min(1, f) * scrollState.durMs;
     }
     function startScroll() {
         if (!currentSong || scrollBounds() <= 0) return;
         if (!scrollState.started || scrollState.finished) freshScrollAnchor();
-        else reanchorElapsed();
+        else scrollState.pos = Math.min(Math.max(window.pageYOffset, 0), scrollBounds());
         scrollState.playing = true;
         scrollState.last = 0;
         scrollState.lastY = window.pageYOffset;
@@ -3320,16 +3300,23 @@ main {
     }
     function stepScroll(ts) {
         if (!scrollState.playing) return;
-        if (scrollState.lastY !== null && Math.abs(window.pageYOffset - scrollState.lastY) > 2) reanchorKeepSpeed();
+        // If the user scrolled manually since the last frame, follow them —
+        // resync pos to the real offset, no velocity recomputation needed.
+        if (scrollState.lastY !== null && Math.abs(window.pageYOffset - scrollState.lastY) > 2) {
+            scrollState.pos = window.pageYOffset;
+        }
         if (!scrollState.last) scrollState.last = ts;
         var dt = Math.min(ts - scrollState.last, 100);
         scrollState.last = ts;
-        scrollState.elapsed += dt;
-        var f = Math.min(1, scrollState.elapsed / scrollState.durMs);
-        var y = scrollState.from + (scrollBounds() - scrollState.from) * f;
+
+        var max = scrollBounds();
+        scrollState.pos += targetVel() * dt;
+        if (scrollState.pos > max) scrollState.pos = max;
+        var y = scrollState.pos;
         window.scrollTo(0, y);
         scrollState.lastY = window.pageYOffset;
-        if (f >= 1) {
+
+        if (y >= max) {
             scrollState.playing = false;
             scrollState.finished = true;
             scrollState.raf = null;
@@ -3355,8 +3342,8 @@ main {
         scrollState.lastY = null;
         scrollState.started = false;
         scrollState.finished = false;
-        scrollState.elapsed = 0;
         if (!keepPosition) window.scrollTo(0, sheetStartY());
+        scrollState.pos = Math.min(Math.max(window.pageYOffset, 0), scrollBounds());
         updateScrollBtn();
     }
     function toggleAutoScroll() {
@@ -3534,7 +3521,8 @@ main {
         getInstrument: function () { return instrument; },
         chordSvg: chordSvg,
         scrollState: scrollState,
-        scrollBounds: scrollBounds
+        scrollBounds: scrollBounds,
+        targetVel: targetVel
     };
 })();
 
