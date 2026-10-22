@@ -1,7 +1,7 @@
-# Notice — song data is not MIT-licensed
+# Notice — song data is not covered by the code license
 
-The MIT license in [`LICENSE`](LICENSE) covers the **source code** of this
-project (the app, chord engine, build scripts and tests).
+The PolyForm Noncommercial license in [`LICENSE`](LICENSE) covers the **source
+code** of this project (the app, chord engine, build scripts and tests).
 
 It does **not** cover the bundled songs. Lyrics, melodies, chord charts,
 arrangements, tabs and transcriptions remain the property of their respective
