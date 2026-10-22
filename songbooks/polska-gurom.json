@@ -19515,7 +19515,7 @@
     [
      [
       "c",
-      "[Dm]"
+      "[Am]"
      ],
      [
       "x",
@@ -19600,6 +19600,85 @@
      [
       "x",
       "chcę."
+     ]
+    ],
+    [],
+    [
+     [
+      "x",
+      "Refren"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "I nawet kiedy będę "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "sam,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Nie zmienię się, to nie "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "mój świat."
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Przede mną droga, którą "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "znam,"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Którą ja wybrałem "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "sam."
      ]
     ],
     [],
@@ -35984,12 +36063,18 @@
    "level": "Easy",
    "new": false,
    "dur": 4.67,
-   "chords": [],
+   "chords": [
+    "Am",
+    "G",
+    "Em",
+    "F",
+    "C"
+   ],
    "sheet": [
     [
      [
       "y",
-      "Brak zweryfikowanego opracowania akordowego — tekst według tekstowo.pl."
+      "Opracowanie akordowe: Ultimate Guitar (ukulele)."
      ]
     ],
     [],
@@ -36001,26 +36086,74 @@
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Wychodź, druheńko, wyjdź, na wesele czas"
+      "Wychodź, druheńko, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "wyjdź, na wesele czas"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "Będą tam grały nam skrzypice, bęben, bas"
+      "Będą tam grały nam "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "skrzypice, bęben, bas"
      ]
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "A kto się nie naje, a kto nie napije"
+      "A kto się nie naje, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "a kto nie napije"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "Tego we dwa kije, na tego pomyje"
+      "Tego we dwa kije, na "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "tego pomyje"
      ]
     ],
     [],
@@ -36032,50 +36165,146 @@
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Weselne nowiny lecą już hen w świat"
+      "Weselne nowiny lecą "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "już hen w świat"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "Tańcuj i szalej jak dziki jesienny wiatr"
+      "Tańcuj i szalej jak "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "dziki jesienny wiatr"
      ]
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Za miłość, raz i dwa, za miłości kwiat"
+      "Za miłość, raz i dwa, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "za miłości kwiat"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "Za miłość wypij, brat, za miłość do dna"
+      "Za miłość wypij, brat, "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "za miłość do dna"
      ]
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Hej, tańcuj z nami tu, podłoga na wióry"
+      "Hej, tańcuj z nami tu, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "podłoga na wióry"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "Hej, tańcuj z nami tu nogami do góry"
+      "Hej, tańcuj z nami tu "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "nogami do góry"
      ]
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Biegajże za mną, a ja dam ci słodki miód"
+      "Biegajże za mną, a ja "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "dam ci słodki miód"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "Za biodra chwytaj mnie i całuj tak jak nut"
+      "Za biodra chwytaj mnie "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "i całuj tak jak nut"
      ]
     ],
     [],
@@ -36087,74 +36316,218 @@
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Kiedy dzień dopala się i przygasa w mrok"
+      "Kiedy dzień dopala się "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "i przygasa w mrok"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "Kiedy przyjdzie ciemna noc, goście, goście w dom"
+      "Kiedy przyjdzie ciemna noc, "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "goście, goście w dom"
      ]
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Grajcie, grajcie, muzykanty, nam siarczysty rytm"
+      "Grajcie, grajcie, muzykanty, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "nam siarczysty rytm"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "Już ci kulosy do tańców, tańca aż po świt"
+      "Już ci kulosy do tańców, "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "tańca aż po świt"
      ]
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Nie płacz, matko, nie płacz, ja sobie radę dam"
+      "Nie płacz, matko, nie płacz, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "ja sobie radę dam"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "Byłaś mi jak anioł stróż, teraz jego mam"
+      "Byłaś mi jak anioł stróż, "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "teraz jego mam"
      ]
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Kielichami w kielichy, hołopce w podłogę"
+      "Kielichami w kielichy, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "hołopce w podłogę"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "Już ci dudni izba, chór, noga o nogę"
+      "Już ci dudni izba, chór, "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "noga o nogę"
      ]
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Wszystkim bije ten sam rytm, nie stój ino rusz"
+      "Wszystkim bije ten sam rytm, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "nie stój ino rusz"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "Rwą się nogi, znowu łyk i wir samotnych dusz"
+      "Rwą się nogi, znowu łyk "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "i wir samotnych dusz"
      ]
     ],
     [
      [
+      "c",
+      "[Am]"
+     ],
+     [
       "x",
-      "Tańcuj, niech wiruje świat, zapomnij to, co złe"
+      "Tańcuj, niech wiruje świat, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "zapomnij to, co złe"
      ]
     ],
     [
      [
+      "c",
+      "[Em]"
+     ],
+     [
       "x",
-      "Radujmy się teraz, Panie, dzięki za ten dzień"
+      "Radujmy się teraz, Panie, "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "dzięki za ten dzień"
      ]
     ]
    ],
@@ -46330,6 +46703,97 @@
     "G6"
    ],
    "sheet": [
+    [
+     [
+      "x",
+      "Wstęp"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Dm7/G]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Dm7]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Dm7]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ]
+    ],
+    [],
     [
      [
       "x",
@@ -63282,6 +63746,73 @@
     "F"
    ],
    "sheet": [
+    [
+     [
+      "x",
+      "Wstęp"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[F]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[F]"
+     ]
+    ],
+    [],
     [
      [
       "x",
@@ -82936,16 +83467,83 @@
    "chords": [
     "C",
     "Cmaj7",
-    "F",
     "Dm",
-    "G",
-    "G7"
+    "G7",
+    "F",
+    "G"
    ],
    "sheet": [
     [
      [
       "y",
       "Uproszczone opracowanie (tonacja C):"
+     ]
+    ],
+    [],
+    [
+     [
+      "x",
+      "Wstęp"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Cmaj7]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G7]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Cmaj7]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G7]"
      ]
     ],
     [],
@@ -83052,6 +83650,73 @@
      [
       "x",
       "cię”"
+     ]
+    ],
+    [],
+    [
+     [
+      "x",
+      "Interludium"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Cmaj7]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G7]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Cmaj7]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G7]"
      ]
     ],
     [],
@@ -130253,6 +130918,111 @@
      [
       "x",
       "wysuszyły łzy"
+     ]
+    ],
+    [],
+    [
+     [
+      "x",
+      "Refren"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Już teraz wiem, że dni są "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "tylko po to"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "By do Ciebie wracać "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "każdą nocą złotą"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Nie znam słów, co mają "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "jakiś większy sens"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Jeśli tylko jedno - "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "jedno tylko wiem"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Być tam, zawsze tam, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "gdzie "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Ty"
      ]
     ],
     [],
