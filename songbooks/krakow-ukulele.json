@@ -37833,8 +37833,8 @@
     ]
    ],
    "key": "Bb",
-   "capo": -1,
-   "sheetKey": "Bm"
+   "capo": -4,
+   "sheetKey": "D"
   },
   {
    "id": "crazy",
@@ -60392,7 +60392,7 @@
    ],
    "key": "Fm",
    "capo": 1,
-   "sheetKey": "E"
+   "sheetKey": "Em"
   },
   {
    "id": "happy-birthday",
@@ -71216,8 +71216,8 @@
     ]
    ],
    "key": "Bm",
-   "capo": -3,
-   "sheetKey": "D"
+   "capo": 0,
+   "sheetKey": "Bm"
   },
   {
    "id": "hotel-california",
@@ -75453,8 +75453,8 @@
     ]
    ],
    "key": "Cm",
-   "capo": 3,
-   "sheetKey": "A"
+   "capo": 1,
+   "sheetKey": "Bm"
   },
   {
    "id": "i-heard-it-through-the-grapevine",
@@ -79861,8 +79861,8 @@
     ]
    ],
    "key": "A",
-   "capo": 0,
-   "sheetKey": "Am"
+   "capo": -3,
+   "sheetKey": "C"
   },
   {
    "id": "i-want-to-break-free",
@@ -85528,7 +85528,7 @@
    ],
    "key": "Bb",
    "capo": 1,
-   "sheetKey": "Am"
+   "sheetKey": "A"
   },
   {
    "id": "i-m-yours",
@@ -94781,8 +94781,8 @@
     ]
    ],
    "key": "A",
-   "capo": 3,
-   "sheetKey": "F#m"
+   "capo": 0,
+   "sheetKey": "A"
   },
   {
    "id": "killing-me-softly",
@@ -161491,8 +161491,8 @@
     ]
    ],
    "key": "Dm",
-   "capo": -3,
-   "sheetKey": "F"
+   "capo": 0,
+   "sheetKey": "Dm"
   },
   {
    "id": "there-is-a-light-that-never-goes-out",
@@ -168357,8 +168357,8 @@
     ]
    ],
    "key": "D#",
-   "capo": 6,
-   "sheetKey": "Am"
+   "capo": 3,
+   "sheetKey": "C"
   },
   {
    "id": "toxic",
@@ -176849,8 +176849,8 @@
     ]
    ],
    "key": "Bb",
-   "capo": 6,
-   "sheetKey": "Em"
+   "capo": 3,
+   "sheetKey": "G"
   },
   {
    "id": "what-s-up",
@@ -180501,8 +180501,8 @@
     ]
    ],
    "key": "Bm",
-   "capo": 2,
-   "sheetKey": "A"
+   "capo": -5,
+   "sheetKey": "Em"
   },
   {
    "id": "wish-you-were-here",
