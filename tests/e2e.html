@@ -652,6 +652,14 @@ async function main() {
     ok('riff scrolls horizontally', preLines.every(l => win().getComputedStyle(l).overflowX === 'auto'), win().getComputedStyle(preLines[0]).overflowX);
     ok('transpose did not throw', errors.length === 0, errors.join('; '));
 
+    // 19a. chords inside preformatted riff/intro blocks stay chords
+    win().location.hash = '#/krakow-ukulele/just-like-heaven';
+    await wait(250);
+    const preChords = Array.from(doc().querySelectorAll('.sheet .line.is-pre .seg-chord'));
+    ok('pre-block chords rendered as chords', preChords.length >= 4, preChords.length);
+    ok('pre-block chord labels kept', preChords.some(c => c.textContent === '[A]'),
+        preChords.map(c => c.textContent).join(' '));
+
     // 19b. global instrument toggle re-renders diagrams for guitar
     win().location.hash = '#/krakow-ukulele/riptide';
     await wait(250);
