@@ -1,7 +1,19 @@
-import os, re, sys, time, urllib.request, urllib.parse, posixpath
+import argparse, os, re, sys, time, urllib.request, urllib.parse, posixpath
 
 BASE = 'https://ukulelekrakow.pl/'
-DEST = '/Users/og/Projects/Ukulele-Songbook/'
+DEFAULT_DEST = 'ukulele-songbook-mirror'
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description='Mirror the Krakow Ukulele Songbook website for offline use.')
+    parser.add_argument(
+        'dest', nargs='?', default=DEFAULT_DEST,
+        help='destination directory (default: %(default)s)')
+    return parser.parse_args()
+
+
+DEST = os.path.abspath(parse_args().dest)
 
 UA = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'}
 
@@ -105,6 +117,7 @@ def save(path, data):
     with open(full, 'wb') as f:
         f.write(data)
 
+print('== destination:', DEST, '==')
 print('== step 1: fetch songs.html ==')
 index = fetch(BASE + 'songs.html')
 if index is None:
