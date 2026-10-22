@@ -37,6 +37,8 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 | `images/` | Logos (light/dark), favicon/PWA icons, QR code |
 | `legacy/` | The 198 original song pages (archived source) |
 | `migrate.py` | Rebuilds `songbooks/krakow-ukulele.json` from `legacy/` + validation |
+| `chordpro.py` | Parses the ChordPro authoring subset into the app's sheet format |
+| `build_songbook.py` | Builds `songbooks/<id>.json` from a `chordpro/<id>/` book |
 | `build_single.py` | Bundles everything into `Songbook.html` |
 | `build_pages.py` | Assembles `_site/` for GitHub Pages |
 | `tests/` | CDP + headless-Chrome test suites |
@@ -110,6 +112,78 @@ Reads `legacy/*.html`, merges original keys from `songbooks/original-keys.json`,
 writes `songbooks/krakow-ukulele.json`, and prints a validation report (198 songs,
 unique ids/numbers, levels 84/91/23, chord refs, no empty content, no broken
 unicode). Deterministic and byte-faithful to the original dataset.
+
+## Create a songbook from ChordPro
+
+New songbooks can be authored as ChordPro and converted to the same JSON shape
+the app renders. This is an input path for agent-generated books: `migrate.py`,
+`legacy/` and `songbooks/krakow-ukulele.json` are not involved.
+
+```
+chordpro/<book-id>/
+  book.json          # songbook metadata
+  01-song-title.cho  # one song per .cho / .chordpro / .pro file
+  02-another.cho
+```
+
+`book.json` carries `{id, name, description, instrument}` and optionally
+`logo` / `logoDark`. `instrument` must be `ukulele` or `guitar`. Song files are
+numbered in filename order unless a `{number: 12}` directive overrides it.
+
+Song directives:
+
+| Directive | Maps to | Notes |
+|---|---|---|
+| `{title: ...}` / `{t: ...}` | `title` | required |
+| `{artist: ...}` / `{subtitle: ...}` / `{st: ...}` | `artist` | required |
+| `{level: Easy\|Medium\|Hard}` | `level` | default `Medium` + warning |
+| `{duration: 3.5}` | `dur` | minutes; default `3` + warning |
+| `{key: Am}` | `key` | optional recording key |
+| `{sheetkey: Am}` | `sheetKey` | defaults to `key` |
+| `{capo: 2}` | `capo` | defaults to `0` when a key is given |
+| `{new: true}` | `new` | default `false` |
+| `{number: 12}` | `n` | defaults to file order |
+
+Body syntax:
+
+- `Po [C#m]co [A]budować` → alternating text/chord tokens.
+- `[C][Am]` → consecutive chord tokens; slash chords (`[C/G]`) and suffixes are
+  kept verbatim.
+- A blank line → `[]` (never `["x", ""]`).
+- `{comment: ...}` / `{c: ...}` → one italic line (safe `textContent`, not the
+  `innerHTML` comment kind).
+- `{start_of_chorus}` / `{soc}` inserts an `(Chorus)` label; `{end_of_chorus}`
+  / `{eoc}` closes it.
+- `{start_of_tab}` / `{sot}` … `{end_of_tab}` / `{eot}` keeps raw lines as
+  preformatted `p` tokens; no chord parsing inside.
+- `# source comment` lines are ignored.
+
+`chords[]` is derived automatically from the chord tokens (unique, in first
+appearance order), and ids are slugified from titles and de-duplicated per book.
+
+Build one book, or every book under a directory:
+
+```sh
+python3 build_songbook.py chordpro/my-book
+python3 build_songbook.py chordpro/
+```
+
+To try the authoring format, copy the test fixture as a starting point:
+
+```sh
+cp -R tests/fixtures/chordpro/demo chordpro/my-book
+python3 build_songbook.py chordpro/my-book
+```
+
+The builder writes `songbooks/<id>.json`, upserts the entry in
+`songbooks/index.json`, and writes `<id>-report.txt`. If validation reports an
+error, the book is not published and the command exits non-zero. The report
+checks song counts, duplicate ids/numbers, titles/artists, levels, durations,
+sheet shape, blank-line encoding, pre lines, chord brackets, broken
+unicode/entities, and chord playability via `ChordKit` (Node, or headless Chrome
+when Node is not installed).
+
+Run the parser/builder tests with `python3 tests/chordpro.py`.
 
 ## Builds
 
