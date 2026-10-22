@@ -1,0 +1,132 @@
+{
+ "id": "demo",
+ "name": "ChordPro Demo",
+ "description": "Fixture book for ChordPro parsing.",
+ "instrument": "ukulele",
+ "songs": [
+  {
+   "id": "nie-ma-nas",
+   "n": 1,
+   "title": "Nie ma nas",
+   "artist": "Patty",
+   "level": "Easy",
+   "new": false,
+   "dur": 3.38,
+   "key": "Am",
+   "sheetKey": "Am",
+   "capo": 0,
+   "chords": [
+    "Am",
+    "F",
+    "C",
+    "G"
+   ],
+   "sheet": [
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Nanana, "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "nananan"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Nanana, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "nananan"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Nie mów nic, daj mi żyć"
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "tab-song",
+   "n": 2,
+   "title": "Tab Song",
+   "artist": "Demo Band",
+   "level": "Medium",
+   "new": false,
+   "dur": 2.5,
+   "chords": [
+    "F",
+    "C"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "(Chorus)"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Hello "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "world"
+     ]
+    ],
+    [
+     [
+      "p",
+      "e|--0--|"
+     ]
+    ],
+    [
+     [
+      "p",
+      "  B|--1--|"
+     ]
+    ]
+   ]
+  }
+ ]
+}
