@@ -20,6 +20,7 @@ var CORE = [
     'index.html',
     'app.js',
     'chords.js',
+    'tuner.js',
     'style.css',
     'manifest.webmanifest',
     'songbooks/index.json'

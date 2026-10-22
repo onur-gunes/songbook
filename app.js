@@ -1422,6 +1422,7 @@
 
     function bindKeyboard() {
         document.addEventListener('keydown', function (e) {
+            if ($('tunerOverlay') && !$('tunerOverlay').hidden) return;
             var t = e.target;
             var typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
 
@@ -1491,6 +1492,16 @@
         Array.prototype.forEach.call(document.querySelectorAll('.instrument-btn'), function (b) {
             b.addEventListener('click', function () { setInstrument(b.dataset.instrument); });
         });
+
+        var tunerBtn = $('tunerBtn');
+        if (tunerBtn && window.SongbookTuner) {
+            tunerBtn.addEventListener('click', function () {
+                window.SongbookTuner.open({
+                    getInstrument: function () { return instrument; },
+                    setInstrument: setInstrument
+                });
+            });
+        }
 
         bindListControls();
         bindSongControls();

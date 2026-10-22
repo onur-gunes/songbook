@@ -41,6 +41,16 @@
             <button id="importBtn" class="pill-btn" type="button">Import list…</button>
             <button id="removeSongsBtn" class="link-btn" type="button" hidden>Remove</button>
             <input id="importFile" type="file" accept=".json,application/json" hidden>
+            <button id="tunerBtn" class="pill-btn tuner-open-btn" type="button"
+                    aria-haspopup="dialog" title="Open tuner">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" aria-hidden="true">
+                    <path d="M9 3v6.5a3 3 0 0 0 6 0V3"/>
+                    <path d="M12 12.5V21"/>
+                    <path d="M8 3h2M14 3h2"/>
+                </svg>
+                <span>Tuner</span>
+            </button>
         </div>
 
         <div class="controls">
@@ -169,8 +179,6 @@
             </div>
         </section>
 
-        
-
         <div id="scrollControl" class="scroll-control">
             <button id="scrollBtn" class="scroll-ctrl-btn" type="button"
                     aria-label="Start auto-scroll" title="Start auto-scroll (Space)">▶</button>
@@ -194,7 +202,71 @@
     Songs © their respective authors · personal, non-commercial use only
 </footer>
 
+<div id="tunerOverlay" class="tuner-overlay" hidden aria-hidden="true">
+    <div class="tuner-sheet" role="dialog" aria-modal="true" aria-labelledby="tunerTitle" tabindex="-1">
+        <header class="tuner-head">
+            <div>
+                <span class="tuner-kicker">Pitch</span>
+                <h2 id="tunerTitle">Tuner</h2>
+            </div>
+            <button id="tunerClose" class="tuner-close" type="button" aria-label="Close tuner">×</button>
+        </header>
+
+        <div class="tuner-top">
+            <div class="seg-group tuner-instruments" role="group" aria-label="Instrument">
+                <button class="tuner-inst active" data-tuner-instrument="ukulele" type="button"
+                        aria-pressed="true">Ukulele</button>
+                <button class="tuner-inst" data-tuner-instrument="guitar" type="button"
+                        aria-pressed="false">Guitar</button>
+            </div>
+            <label class="tuner-tuning">
+                <span class="sr-only">Tuning</span>
+                <select id="tunerTuning" aria-label="Tuning"></select>
+            </label>
+        </div>
+
+        <div id="tunerDisplay" class="tuner-display is-idle">
+            <div class="tuner-readout">
+                <div class="tuner-note-wrap">
+                    <span id="tunerNoteName" class="tuner-note-name">—</span>
+                    <span id="tunerAccidental" class="tuner-accidental" hidden></span>
+                    <sup id="tunerNoteOctave" class="tuner-note-octave"></sup>
+                </div>
+                <div id="tunerCents" class="tuner-cents">—</div>
+                <div id="tunerFreq" class="tuner-freq">—</div>
+            </div>
+
+            <div class="tuner-meter" aria-hidden="true">
+                <div class="tuner-meter-ticks"></div>
+                <div class="tuner-meter-center"></div>
+                <div id="tunerNeedle" class="tuner-needle"></div>
+            </div>
+            <div class="tuner-scale" aria-hidden="true">
+                <span>−50¢</span><span>0</span><span>+50¢</span>
+            </div>
+
+            <p id="tunerStatus" class="tuner-status" role="status" aria-live="polite">Tap start, then play a string.</p>
+        </div>
+
+        <div id="tunerStrings" class="tuner-strings" role="group" aria-label="Choose a string to tune"></div>
+
+        <div class="tuner-actions">
+            <button id="tunerStart" class="tuner-start" type="button">Start listening</button>
+            <div class="tuner-cal" role="group" aria-label="Reference pitch A4">
+                <button id="tunerCalDown" class="tuner-cal-btn" type="button" aria-label="Lower reference pitch">−</button>
+                <span class="tuner-cal-label">A4 <strong id="tunerCalValue">440</strong> Hz</span>
+                <button id="tunerCalUp" class="tuner-cal-btn" type="button" aria-label="Raise reference pitch">+</button>
+            </div>
+        </div>
+
+        <p class="tuner-attrib">Pitch engine adapted from
+            <a href="https://github.com/fgnass/tuner" target="_blank" rel="noopener noreferrer">fgnass/tuner</a> · MIT
+        </p>
+    </div>
+</div>
+
 <script src="chords.js"></script>
+<script src="tuner.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
