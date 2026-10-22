@@ -195,6 +195,21 @@ python3 build_pages.py    # -> _site/ (runtime files + Songbook.html)
 Pushing to `main` deploys `_site/` to GitHub Pages via
 `.github/workflows/deploy-pages.yml`.
 
+## License
+
+The **source code** (app, chord engine, build scripts, tests) is released under
+the [PolyForm Noncommercial License 1.0.0](LICENSE). You may use, study, modify
+and share it for noncommercial purposes; **commercial use, including selling the
+app or a derivative, is not permitted**.
+
+The **code license does not cover the bundled songs**, and they are not
+relicensed by this repository. Lyrics, chord charts and arrangements belong to
+their respective authors, arrangers and publishers. The Krakow Ukulele Songbook
+dataset is mirrored from <https://ukulelekrakow.pl/> for offline personal use.
+The bundled song data is provided for **personal, non-commercial use only** — do
+not sell, relicense or redistribute it as a collection. See
+[NOTICE.md](NOTICE.md) for full attribution and takedown information.
+
 ## Run the tests
 
 Start a server first, then run the suites. Chrome is driven over the DevTools

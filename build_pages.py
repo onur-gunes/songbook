@@ -19,6 +19,8 @@ FILES = [
     'style.css',
     'manifest.webmanifest',
     'sw.js',
+    'LICENSE',
+    'NOTICE.md',
 ]
 DIRS = ['songbooks', 'images']
 
