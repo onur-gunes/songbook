@@ -61,6 +61,36 @@ def song_files(book_dir):
     )
 
 
+def load_original_keys(book_dir):
+    """Load an optional per-book original-keys.json sidecar.
+
+    Same shape as songbooks/original-keys.json used by migrate.py: song id ->
+    {key, sheetKey, capo, confidence, source} (or a bare key string). This lets
+    curated recording keys live next to the ChordPro source instead of in a
+    dangling file nobody reads.
+    """
+    path = os.path.join(book_dir, 'original-keys.json')
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding='utf-8') as f:
+        data = json.load(f)
+    out = {}
+    for key, value in data.items():
+        if isinstance(value, dict):
+            entry = {}
+            if value.get('key'):
+                entry['key'] = str(value['key'])
+            if value.get('sheetKey'):
+                entry['sheetKey'] = str(value['sheetKey'])
+            if isinstance(value.get('capo'), int) and not isinstance(value.get('capo'), bool):
+                entry['capo'] = value['capo']
+            if entry:
+                out[key] = entry
+        elif value:
+            out[key] = {'key': str(value)}
+    return out
+
+
 # ---------- validation ----------
 
 def validate_songbook(book):
@@ -284,7 +314,7 @@ def _upsert_index(index_path, entry):
 
 
 def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
-               chord_check=True):
+               chord_check=True, allow_trusted_notes=False):
     out_dir = out_dir or SONGBOOKS
     index_path = index_path or INDEX
     errors = []
@@ -326,7 +356,8 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
                   errors='replace') as f:
             text = f.read()
         song_warnings = []
-        song = chordpro.parse_song(text, number=index, warnings=song_warnings)
+        song = chordpro.parse_song(text, number=index, warnings=song_warnings,
+                                   allow_trusted_notes=allow_trusted_notes)
         for warning in song_warnings:
             warnings.append('%s: %s' % (filename, warning))
 
@@ -346,6 +377,22 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
         warnings.append('de-duplicated ids: %s' % deduped)
 
     songs.sort(key=lambda s: s['n'])
+
+    original_keys = load_original_keys(book_dir)
+    if original_keys:
+        unused = sorted(set(original_keys) - seen_ids)
+        if unused:
+            warnings.append('original-keys.json: unused ids: %s' % unused)
+        for song in songs:
+            entry = original_keys.get(song['id'])
+            if not entry:
+                continue
+            if entry.get('key'):
+                song['key'] = entry['key']
+            if 'capo' in entry:
+                song['capo'] = entry['capo']
+            if entry.get('sheetKey'):
+                song['sheetKey'] = entry['sheetKey']
 
     book = {
         'id': book_id,
@@ -453,7 +500,11 @@ def main(argv):
 
     failed = False
     for i, book_dir in enumerate(books):
-        result = build_book(book_dir, chord_check='--no-chord-check' not in argv[2:])
+        result = build_book(
+            book_dir,
+            chord_check='--no-chord-check' not in argv[2:],
+            allow_trusted_notes='--allow-trusted-notes' in argv[2:],
+        )
         if i:
             print()
         print(result['report'])

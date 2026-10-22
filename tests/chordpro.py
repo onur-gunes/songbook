@@ -49,6 +49,12 @@ class ParseLineTests(unittest.TestCase):
     def test_empty_brackets_stay_text(self):
         self.assertEqual(chordpro.parse_line('a[]b'), [['x', 'a[]b']])
 
+    def test_escaped_brackets_and_edge_whitespace_are_preserved(self):
+        self.assertEqual(
+            chordpro.parse_line('  \\[Refren\\] [C]x  '),
+            [['x', '  [Refren] '], ['c', '[C]'], ['x', 'x  ']],
+        )
+
 
 class ParseSongTests(unittest.TestCase):
     def test_metadata_mapping(self):
@@ -69,6 +75,55 @@ class ParseSongTests(unittest.TestCase):
         self.assertEqual(song['id'], 'my-song')
         self.assertEqual(song['chords'], ['C'])
         self.assertEqual(song['sheet'], [[['c', '[C]'], ['x', 'Hello']]])
+
+    def test_id_and_chords_can_be_overridden(self):
+        warnings = []
+        song = chordpro.parse_song(
+            '{title: Some Long Title}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+            '{id: stable-legacy-id}\n{chords: Am, C}\n[C]one [Am]two',
+            warnings=warnings,
+        )
+        self.assertEqual(song['id'], 'stable-legacy-id')
+        self.assertEqual(song['chords'], ['Am', 'C'])
+        self.assertEqual(warnings, [])
+
+    def test_invalid_id_is_slugified_with_warning(self):
+        warnings = []
+        song = chordpro.parse_song(
+            '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+            '{id: Not A Slug!}\n[C]x',
+            warnings=warnings,
+        )
+        self.assertEqual(song['id'], 'not-a-slug')
+        self.assertTrue(any('invalid id' in w for w in warnings))
+
+    def test_chords_override_mismatch_warns(self):
+        warnings = []
+        song = chordpro.parse_song(
+            '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+            '{chords: Am, F}\n[C]x',
+            warnings=warnings,
+        )
+        self.assertEqual(song['chords'], ['Am', 'F'])
+        self.assertTrue(any('chords override differs' in w for w in warnings))
+
+    def test_trusted_note_keeps_trusted_y_token_when_allowed(self):
+        song = chordpro.parse_song(
+            '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+            '{trusted_note: Refren:}\n[C]x',
+            allow_trusted_notes=True,
+        )
+        self.assertEqual(song['sheet'][0], [['y', 'Refren:']])
+
+    def test_trusted_note_is_ignored_by_default(self):
+        warnings = []
+        song = chordpro.parse_song(
+            '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+            '{trusted_note: Refren:}\n[C]x',
+            warnings=warnings,
+        )
+        self.assertEqual(song['sheet'], [[['c', '[C]'], ['x', 'x']]])
+        self.assertTrue(any('trusted_note ignored' in w for w in warnings))
 
     def test_defaults_and_warnings(self):
         warnings = []
@@ -290,6 +345,59 @@ class BuildTests(unittest.TestCase):
         self.assertIn('pre lines must be single-token', joined)
         self.assertIn('leftover html entities', joined)
         self.assertTrue(facts['bad_blank'])
+
+    def test_original_keys_sidecar_is_merged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            book_dir = os.path.join(tmp, 'keys-book')
+            songbooks = os.path.join(tmp, 'songbooks')
+            os.makedirs(book_dir)
+            with open(os.path.join(book_dir, 'book.json'), 'w', encoding='utf-8') as f:
+                json.dump({'id': 'keys-book', 'name': 'Keys Book',
+                           'description': 'x', 'instrument': 'ukulele'}, f)
+            with open(os.path.join(book_dir, '01-song.cho'), 'w', encoding='utf-8') as f:
+                f.write('{title: Song}\n{artist: A}\n{level: Easy}\n'
+                        '{duration: 1}\n[C]lyric\n')
+            with open(os.path.join(book_dir, 'original-keys.json'), 'w',
+                      encoding='utf-8') as f:
+                json.dump({'song': {'key': 'D', 'sheetKey': 'C', 'capo': 2,
+                                    'source': 'test'}}, f)
+
+            result = build_songbook.build_book(
+                book_dir, out_dir=songbooks,
+                index_path=os.path.join(songbooks, 'index.json'),
+                report_path=os.path.join(tmp, 'report.txt'), chord_check=False)
+
+            self.assertEqual(result['errors'], [])
+            song = result['book']['songs'][0]
+            self.assertEqual(song['key'], 'D')
+            self.assertEqual(song['sheetKey'], 'C')
+            self.assertEqual(song['capo'], 2)
+
+    def test_original_keys_ignore_boolean_capo(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, 'original-keys.json'), 'w',
+                      encoding='utf-8') as f:
+                json.dump({'song': {'key': 'D', 'capo': True}}, f)
+            keys = build_songbook.load_original_keys(tmp)
+            self.assertEqual(keys['song'], {'key': 'D'})
+
+    def test_bundled_polish_book_rebuilds_from_chordpro(self):
+        source = os.path.join(ROOT, 'chordpro', 'polska-gurom')
+        committed = os.path.join(ROOT, 'songbooks', 'polska-gurom.json')
+        with tempfile.TemporaryDirectory() as tmp:
+            result = build_songbook.build_book(
+                source, out_dir=os.path.join(tmp, 'songbooks'),
+                index_path=os.path.join(tmp, 'songbooks', 'index.json'),
+                report_path=os.path.join(tmp, 'report.txt'), chord_check=False,
+                allow_trusted_notes=True)
+            self.assertEqual(result['errors'], [])
+            self.assertTrue(any('049-love-story.cho: chords override differs' in w
+                                for w in result['warnings']))
+            with open(committed, encoding='utf-8') as f:
+                expected = f.read()
+            with open(result['output'], encoding='utf-8') as f:
+                actual = f.read()
+            self.assertEqual(actual, expected)
 
     def test_find_book_dirs_accepts_root_and_single_book(self):
         self.assertEqual(build_songbook.find_book_dirs(FIXTURE), [FIXTURE])

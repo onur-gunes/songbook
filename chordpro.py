@@ -14,6 +14,7 @@ import re
 import unicodedata
 
 METADATA_DIRECTIVES = {
+    'id': 'id',
     'title': 'title', 't': 'title',
     'artist': 'artist', 'subtitle': 'artist', 'st': 'artist',
     'level': 'level',
@@ -23,6 +24,7 @@ METADATA_DIRECTIVES = {
     'capo': 'capo',
     'new': 'new',
     'number': 'n',
+    'chords': 'chords',
 }
 
 LEVELS = ('Easy', 'Medium', 'Hard')
@@ -57,18 +59,22 @@ def _directive(line):
 def parse_line(line):
     """Tokenize one ChordPro lyric line into app sheet tokens.
 
-    Chords keep their brackets: "[Am]". Text is preserved verbatim (apart from
-    leading/trailing line whitespace), so "Po [C#m]co" keeps the space before
-    the chord. A blank line becomes an empty list (never [["x", ""]]).
+    Chords keep their brackets: "[Am]". Text is preserved verbatim, so
+    "Po [C#m]co" keeps the space before the chord and indentation is kept.
+    A backslash escapes a literal bracket or backslash: "\\[Refren\\]".
+    A blank line becomes an empty list (never [["x", ""]]).
     """
     if not line or not line.strip():
         return []
-    text = line.strip()
+    text = line
     tokens = []
     buf = []
     pos = 0
     while pos < len(text):
-        if text[pos] == '[':
+        if text[pos] == '\\' and pos + 1 < len(text) and text[pos + 1] in '[]\\':
+            buf.append(text[pos + 1])
+            pos += 2
+        elif text[pos] == '[':
             end = text.find(']', pos + 1)
             if end < 0:
                 buf.append(text[pos:])
@@ -119,7 +125,7 @@ def _warn(warnings, message):
         warnings.append(message)
 
 
-def parse_song(text, number=1, warnings=None):
+def parse_song(text, number=1, warnings=None, allow_trusted_notes=False):
     """Parse a ChordPro document into an app song dict.
 
     `number` is the default song order (normally its 1-based file position).
@@ -150,6 +156,13 @@ def parse_song(text, number=1, warnings=None):
             elif key in ('comment', 'c'):
                 if value:
                     sheet.append([['i', value]])
+            elif key == 'trusted_note':
+                # Legacy app note kind (`y`), rendered via innerHTML. Only use
+                # this for content that is trusted, never for agent output.
+                if not allow_trusted_notes:
+                    _warn(warnings, 'trusted_note ignored: book does not allow trusted notes')
+                elif value:
+                    sheet.append([['y', value]])
             # Other directives (define, capo of unknown spelling, etc.) are
             # intentionally ignored: the agent subset is small.
             continue
@@ -211,8 +224,17 @@ def parse_song(text, number=1, warnings=None):
         else:
             new = parsed
 
+    raw_id = meta.get('id', '').strip()
+    song_id = slugify(title)
+    if raw_id:
+        if re.fullmatch(r'[a-z0-9-]+', raw_id):
+            song_id = raw_id
+        else:
+            _warn(warnings, 'invalid id %r, slugifying' % raw_id)
+            song_id = slugify(raw_id) or song_id
+
     song = {
-        'id': slugify(title),
+        'id': song_id,
         'n': n,
         'title': title,
         'artist': artist,
@@ -239,5 +261,15 @@ def parse_song(text, number=1, warnings=None):
         song['capo'] = 0
 
     song['chords'] = _derive_chords(sheet)
+    if meta.get('chords', '').strip():
+        overridden = [name.strip() for name in meta['chords'].split(',') if name.strip()]
+        if overridden:
+            missing = sorted(set(song['chords']) - set(overridden))
+            unused = sorted(set(overridden) - set(song['chords']))
+            if missing or unused:
+                _warn(warnings, 'chords override differs from sheet '
+                                '(missing: %s, unused: %s)' % (missing or 'none',
+                                                              unused or 'none'))
+            song['chords'] = overridden
     song['sheet'] = sheet
     return song
