@@ -64,7 +64,8 @@ class TabParser(HTMLParser):
         self.fmt_stack = []          # list of format markers in effect
         self.in_chord = False
         self.in_pre = None           # id of pre open events not needed; bool
-        self.pre_buf = None
+        self.pre_events = None
+        self.in_pre_chord = False
 
     # -- routing ------------------------------------------------
     def handle_startendtag(self, tag, attrs):
@@ -82,7 +83,11 @@ class TabParser(HTMLParser):
 
         if self.in_pre is not None:
             if tag == 'br':
-                self.pre_buf += '\n'
+                self.pre_events.append(('p', '\n'))
+            elif tag == 'span':
+                cls = ' ' + (d.get('class') or '') + ' '
+                if 'chord' in cls:
+                    self.in_pre_chord = True
             return
 
         if tag == 'br':
@@ -93,7 +98,7 @@ class TabParser(HTMLParser):
             if self.events and self.events[-1][0] in ('br',):
                 self.events.pop()  # pre already starts a fresh block
             self.in_pre = ''
-            self.pre_buf = ''
+            self.pre_events = []
         elif tag == 'span':
             cls = ' ' + (d.get('class') or '') + ' '
             if 'chord' in cls:
@@ -119,9 +124,12 @@ class TabParser(HTMLParser):
             return
         if self.in_pre is not None:
             if tag == 'pre':
-                self.events.append(('pre', self.pre_buf))
+                self.events.append(('pre', self.pre_events))
                 self.in_pre = None
-                self.pre_buf = None
+                self.pre_events = None
+                self.in_pre_chord = False
+            elif tag == 'span':
+                self.in_pre_chord = False
             return
         if tag == 'span':
             if self.in_chord:
@@ -135,7 +143,8 @@ class TabParser(HTMLParser):
         if not self.in_tab:
             return
         if self.in_pre is not None:
-            self.pre_buf += data
+            if data:
+                self.pre_events.append(('c' if self.in_pre_chord else 'p', data))
             return
         if self.in_chord:
             v = data.strip()
@@ -156,6 +165,31 @@ class TabParser(HTMLParser):
 def normalize_text(t):
     """Collapse whitespace runs to single spaces (mirrors HTML rendering)."""
     return re.sub(r'\s+', ' ', t)
+
+def pre_lines(events):
+    """Preformatted events -> lines, keeping chord spans and whitespace intact."""
+    lines = []
+    cur = []
+
+    def end_line():
+        nonlocal cur
+        lines.append(cur if cur else [['p', '']])
+        cur = []
+
+    for kind, val in events:
+        if kind == 'c':
+            v = val.strip()
+            if v:
+                cur.append(['c', v])
+            continue
+        parts = val.split('\n')
+        for i, part in enumerate(parts):
+            if part:
+                cur.append(['p', part])
+            if i != len(parts) - 1:
+                end_line()
+    end_line()
+    return lines
 
 def build_lines(events):
     """Event stream -> list of lines; each line is a list of [kind, value] segs.
@@ -202,8 +236,7 @@ def build_lines(events):
         elif kind == 'pre':
             if cur:
                 flush()
-            for part in val.split('\n'):
-                lines.append([['p', part]])
+            lines.extend(pre_lines(val))
         elif kind in TEXT_KINDS:
             push_text(kind, val)
         elif kind == 'chord':

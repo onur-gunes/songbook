@@ -352,12 +352,8 @@
         var frag = document.createDocumentFragment();
         (song.sheet || []).forEach(function (line) {
             var lineDiv = el('div', 'line');
-            if (line.length === 1 && line[0][0] === 'p') {
-                lineDiv.classList.add('is-pre');
-                lineDiv.textContent = line[0][1];
-                frag.appendChild(lineDiv);
-                return;
-            }
+            var isPre = line.some(function (seg) { return seg[0] === 'p'; });
+            if (isPre) lineDiv.classList.add('is-pre');
             line.forEach(function (seg) {
                 var kind = seg[0], val = seg[1];
                 if (kind === 'c') {
@@ -542,18 +538,17 @@
         var avail = Math.max(1, wrap.clientWidth - 0.5);
         (song.sheet || []).forEach(function (line) {
             var lineDiv = el('div', 'line');
-            var isPre = line.length === 1 && line[0][0] === 'p';
-            if (isPre) {
-                lineDiv.classList.add('is-pre');
-                lineDiv.textContent = line[0][1];
-                frag.appendChild(lineDiv);
-                return;
-            }
-            var hasChord = line.some(function (s) { return s[0] === 'c'; });
-            var hasWord = line.some(function (s) { return s[0] !== 'c' && /\S/.test(plainText(s)); });
-            if (hasChord && hasWord) {
-                frag.appendChild(buildAboveLine(line, avail));
-                return;
+            var isPre = line.some(function (s) { return s[0] === 'p'; });
+            if (isPre) lineDiv.classList.add('is-pre');
+            else {
+                var hasChord = line.some(function (s) { return s[0] === 'c'; });
+                var hasWord = line.some(function (s) {
+                    return s[0] !== 'c' && /\S/.test(plainText(s));
+                });
+                if (hasChord && hasWord) {
+                    frag.appendChild(buildAboveLine(line, avail));
+                    return;
+                }
             }
             line.forEach(function (seg) {
                 var kind = seg[0], val = seg[1];
