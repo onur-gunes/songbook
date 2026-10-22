@@ -32,10 +32,12 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 | `app.js` | Search, filters, sort, favorites, notes, transpose, auto-scroll, songbook switching, import, hash routing, service-worker registration |
 | `songbooks/index.json` | Manifest of bundled songbooks |
 | `songbooks/krakow-ukulele.json` | Bundled dataset (generated — don't hand-edit) |
+| `songbooks/polska-gurom.json` | Bundled dataset (generated from `chordpro/polska-gurom/` — don't hand-edit) |
 | `songbooks/original-keys.json` | Curated original-recording keys (id → key), merged in by `migrate.py` |
 | `manifest.webmanifest`, `sw.js` | PWA manifest + app-shell service worker |
 | `images/` | Logos (light/dark), favicon/PWA icons, QR code |
 | `legacy/` | The 198 original song pages (archived source) |
+| `chordpro/` | ChordPro source books (`<book-id>/book.json` + one file per song) |
 | `migrate.py` | Rebuilds `songbooks/krakow-ukulele.json` from `legacy/` + validation |
 | `chordpro.py` | Parses the ChordPro authoring subset into the app's sheet format |
 | `build_songbook.py` | Builds `songbooks/<id>.json` from a `chordpro/<id>/` book |
@@ -105,13 +107,20 @@ imported songbook JSON lives in `IndexedDB`.
 ## Regenerate the bundled data
 
 ```sh
-python3 migrate.py
+python3 migrate.py                      # Krakow Ukulele Songbook
+python3 build_songbook.py chordpro/polska-gurom   # POLSKA GUROM
 ```
 
-Reads `legacy/*.html`, merges original keys from `songbooks/original-keys.json`,
-writes `songbooks/krakow-ukulele.json`, and prints a validation report (198 songs,
-unique ids/numbers, levels 84/91/23, chord refs, no empty content, no broken
-unicode). Deterministic and byte-faithful to the original dataset.
+`migrate.py` reads `legacy/*.html`, merges original keys from
+`songbooks/original-keys.json`, writes `songbooks/krakow-ukulele.json`, and
+prints a validation report (198 songs, unique ids/numbers, levels 84/91/23,
+chord refs, no empty content, no broken unicode). Deterministic and
+byte-faithful to the original dataset.
+
+The Polish book is authored in `chordpro/polska-gurom/` and rebuilt with
+`build_songbook.py`; its curated keys live in that book's
+`original-keys.json` sidecar. `tests/chordpro.py` asserts that regenerating it
+reproduces the committed `songbooks/polska-gurom.json` byte for byte.
 
 ## Create a songbook from ChordPro
 
@@ -122,6 +131,7 @@ the app renders. This is an input path for agent-generated books: `migrate.py`,
 ```
 chordpro/<book-id>/
   book.json          # songbook metadata
+  original-keys.json # optional curated keys, id -> {key, sheetKey, capo}
   01-song-title.cho  # one song per .cho / .chordpro / .pro file
   02-another.cho
 ```
@@ -129,11 +139,14 @@ chordpro/<book-id>/
 `book.json` carries `{id, name, description, instrument}` and optionally
 `logo` / `logoDark`. `instrument` must be `ukulele` or `guitar`. Song files are
 numbered in filename order unless a `{number: 12}` directive overrides it.
+If present, `original-keys.json` is merged by song id, mirroring how
+`migrate.py` uses `songbooks/original-keys.json` for the legacy book.
 
 Song directives:
 
 | Directive | Maps to | Notes |
 |---|---|---|
+| `{id: ...}` | `id` | optional stable URL id; defaults to a title slug |
 | `{title: ...}` / `{t: ...}` | `title` | required |
 | `{artist: ...}` / `{subtitle: ...}` / `{st: ...}` | `artist` | required |
 | `{level: Easy\|Medium\|Hard}` | `level` | default `Medium` + warning |
@@ -143,15 +156,21 @@ Song directives:
 | `{capo: 2}` | `capo` | defaults to `0` when a key is given |
 | `{new: true}` | `new` | default `false` |
 | `{number: 12}` | `n` | defaults to file order |
+| `{chords: Am, C, G}` | `chords` | optional curated order; normally auto-derived |
+| `{trusted_note: ...}` | `y` | trusted `innerHTML` comment; never use for agent output |
 
 Body syntax:
 
 - `Po [C#m]co [A]budować` → alternating text/chord tokens.
 - `[C][Am]` → consecutive chord tokens; slash chords (`[C/G]`) and suffixes are
   kept verbatim.
+- `\[literal brackets\]` and `\\` escape text that would otherwise look like a
+  chord or an escape.
 - A blank line → `[]` (never `["x", ""]`).
 - `{comment: ...}` / `{c: ...}` → one italic line (safe `textContent`, not the
   `innerHTML` comment kind).
+- `{trusted_note: ...}` → one legacy `y` line (rendered with `innerHTML`); use
+  only for trusted content from an existing book.
 - `{start_of_chorus}` / `{soc}` inserts an `(Chorus)` label; `{end_of_chorus}`
   / `{eoc}` closes it.
 - `{start_of_tab}` / `{sot}` … `{end_of_tab}` / `{eot}` keeps raw lines as
@@ -160,6 +179,8 @@ Body syntax:
 
 `chords[]` is derived automatically from the chord tokens (unique, in first
 appearance order), and ids are slugified from titles and de-duplicated per book.
+`{chords: ...}` exists only so legacy books can preserve a curated order that
+differs from first appearance.
 
 Build one book, or every book under a directory:
 
