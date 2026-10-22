@@ -267,8 +267,8 @@
   },
   "colors-of-the-wind": {
     "key": "Bb",
-    "sheetKey": "Bm",
-    "capo": -1,
+    "sheetKey": "D",
+    "capo": -4,
     "confidence": "high",
     "source": "Musicnotes"
   },
@@ -449,7 +449,7 @@
   },
   "happy": {
     "key": "Fm",
-    "sheetKey": "E",
+    "sheetKey": "Em",
     "capo": 1,
     "confidence": "high",
     "source": "Wikipedia"
@@ -533,8 +533,8 @@
   },
   "home": {
     "key": "Bm",
-    "sheetKey": "D",
-    "capo": -3,
+    "sheetKey": "Bm",
+    "capo": 0,
     "confidence": "medium",
     "source": "Musicnotes"
   },
@@ -561,8 +561,8 @@
   },
   "how-you-remind-me": {
     "key": "Cm",
-    "sheetKey": "A",
-    "capo": 3,
+    "sheetKey": "Bm",
+    "capo": 1,
     "confidence": "medium",
     "source": "Hooktheory; Klangio"
   },
@@ -596,8 +596,8 @@
   },
   "i-want-it-that-way": {
     "key": "A",
-    "sheetKey": "Am",
-    "capo": 0,
+    "sheetKey": "C",
+    "capo": -3,
     "confidence": "high",
     "source": "Wikipedia; Hooktheory"
   },
@@ -638,7 +638,7 @@
   },
   "i-m-still-standing": {
     "key": "Bb",
-    "sheetKey": "Am",
+    "sheetKey": "A",
     "capo": 1,
     "confidence": "high",
     "source": "Hooktheory"
@@ -708,8 +708,8 @@
   },
   "kids": {
     "key": "A",
-    "sheetKey": "F#m",
-    "capo": 3,
+    "sheetKey": "A",
+    "capo": 0,
     "confidence": "medium",
     "source": "chord progression"
   },
@@ -1198,8 +1198,8 @@
   },
   "the-scientist": {
     "key": "Dm",
-    "sheetKey": "F",
-    "capo": -3,
+    "sheetKey": "Dm",
+    "capo": 0,
     "confidence": "high",
     "source": "Musicnotes"
   },
@@ -1247,8 +1247,8 @@
   },
   "titanium": {
     "key": "D#",
-    "sheetKey": "Am",
-    "capo": 6,
+    "sheetKey": "C",
+    "capo": 3,
     "confidence": "medium",
     "source": "Wikipedia; Musicnotes"
   },
@@ -1303,8 +1303,8 @@
   },
   "what-is-love-baby-don-t-hurt-me": {
     "key": "Bb",
-    "sheetKey": "Em",
-    "capo": 6,
+    "sheetKey": "G",
+    "capo": 3,
     "confidence": "high",
     "source": "Musicnotes; TempoPeek"
   },
@@ -1331,8 +1331,8 @@
   },
   "wicked-game": {
     "key": "Bm",
-    "sheetKey": "A",
-    "capo": 2,
+    "sheetKey": "Em",
+    "capo": -5,
     "confidence": "medium",
     "source": "Musicnotes; Wikipedia"
   },
