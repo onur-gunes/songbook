@@ -565,7 +565,8 @@
         highpass: null,
         lowpass: null,
         session: 0,
-        gumPending: null
+        gumPending: null,
+        retriedPermission: false
     };
 
     var opts = {};
@@ -846,14 +847,26 @@
         if (!query || !query.then) return;
         query.then(function (permission) {
             if (state.status !== 'denied') return;
-            if (permission && permission.state === 'granted') {
-                state.status = 'os-denied';
+            if (!permission || permission.state !== 'granted') return;
+            // The site grant is in place, so a rejection is either an OS
+            // block or a transient failure while the dialog had focus. Retry
+            // once, then report it as an OS-level block.
+            if (!state.retriedPermission) {
+                state.retriedPermission = true;
+                state.status = 'idle';
                 render();
+                // Give the page a moment to regain focus after the system
+                // dialog before retrying, if it is still open.
+                window.setTimeout(function () { if (state.open) start(); }, 250);
+                return;
             }
+            state.status = 'os-denied';
+            render();
         }).catch(function () { /* permission name unsupported */ });
     }
 
     function start() {
+        if (!state.open) return;
         if (state.status === 'requesting' || state.status === 'listening') return;
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             state.status = 'unsupported';
@@ -1161,7 +1174,10 @@
         });
         els.start.addEventListener('click', function () {
             if (state.status === 'listening') stop();
-            else start();
+            else {
+                state.retriedPermission = false;
+                start();
+            }
         });
         document.getElementById('tunerCalDown').addEventListener('click', function () {
             setA4(state.a4 - 1);
@@ -1217,6 +1233,7 @@
         state.auto = true;
         state.manualIndex = -1;
         state.status = 'idle';
+        state.retriedPermission = false;
         state.open = true;
         lastFocus = document.activeElement;
 
