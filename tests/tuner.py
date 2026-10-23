@@ -38,11 +38,12 @@ def main():
         statuses = cdp.eval("""
             (function () {
                 var T = SongbookTuner._test;
-                function s(name, message) {
-                    return T.statusForError({ name: name, message: message || '' });
+                function s(name, message, perm) {
+                    return T.statusForError({ name: name, message: message || '' }, perm);
                 }
                 return {
                     system: s('NotAllowedError', 'Permission denied by system'),
+                    granted: s('NotAllowedError', 'Permission denied', 'granted'),
                     denied: s('NotAllowedError', 'Permission denied'),
                     missing: s('NotFoundError'),
                     busy: s('NotReadableError'),
@@ -53,6 +54,8 @@ def main():
             })()
         """)
         ok('OS-level denial gets its own state', statuses['system'] == 'os-denied', statuses)
+        ok('granted site permission + rejection is an OS block',
+           statuses['granted'] == 'os-denied', statuses)
         ok('browser denial maps to denied', statuses['denied'] == 'denied', statuses)
         ok('missing device maps to no-device', statuses['missing'] == 'no-device', statuses)
         ok('busy device maps to busy', statuses['busy'] == 'busy', statuses)
