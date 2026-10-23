@@ -667,8 +667,8 @@
         if (state.status === 'idle') statusText = 'Tap start, then play a string.';
         else if (state.status === 'requesting') statusText = 'Waiting for microphone\u2026';
         else if (state.status === 'insecure') statusText = 'Microphone needs HTTPS. Open the hosted app or serve this folder over localhost.';
-        else if (state.status === 'os-denied') statusText = 'Your device is blocking Chrome from the microphone. Allow it in system settings.';
-        else if (state.status === 'denied') statusText = 'Microphone blocked. Allow access in your browser settings.';
+        else if (state.status === 'os-denied') statusText = 'Your device is blocking Chrome from the microphone. Allow it in system settings, then retry.';
+        else if (state.status === 'denied') statusText = 'Microphone blocked. Allow microphone access for this site in Chrome, then retry.';
         else if (state.status === 'no-device') statusText = 'No microphone found on this device.';
         else if (state.status === 'busy') statusText = 'Microphone is busy or unavailable. Close other apps using it and retry.';
         else if (state.status === 'unsupported') statusText = 'This browser does not support microphone input.';
@@ -819,16 +819,38 @@
         return null;
     }
 
-    function statusForError(err) {
+    function statusForError(err, permissionState) {
         var name = err && err.name;
         var message = (err && err.message) || '';
         if (name === 'NotFoundError' || name === 'DevicesNotFoundError') return 'no-device';
         if (name === 'NotReadableError' || name === 'TrackStartError') return 'busy';
         if (name === 'NotAllowedError' || name === 'SecurityError') {
-            // Chrome reports an OS-level block as "Permission denied by system".
-            return /system/i.test(message) ? 'os-denied' : 'denied';
+            // Chrome reports an OS-level block as "Permission denied by
+            // system" on desktop. On Android the message is generic, but if
+            // the site permission is already granted the block is at the
+            // OS/app layer too.
+            if (/system/i.test(message) || permissionState === 'granted') return 'os-denied';
+            return 'denied';
         }
         return 'error';
+    }
+
+    function refineDeniedStatus() {
+        if (!navigator.permissions || !navigator.permissions.query) return;
+        var query;
+        try {
+            query = navigator.permissions.query({ name: 'microphone' });
+        } catch (e) {
+            return;
+        }
+        if (!query || !query.then) return;
+        query.then(function (permission) {
+            if (state.status !== 'denied') return;
+            if (permission && permission.state === 'granted') {
+                state.status = 'os-denied';
+                render();
+            }
+        }).catch(function () { /* permission name unsupported */ });
     }
 
     function start() {
@@ -917,6 +939,7 @@
             releaseAudio();
             state.status = statusForError(err);
             render();
+            if (state.status === 'denied') refineDeniedStatus();
         });
     }
 
