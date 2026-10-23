@@ -716,6 +716,37 @@ async function main() {
     ok('y note markup did not execute', win().__xss === undefined, String(win().__xss));
     xssNote.remove();
 
+    // 19e. chord numbers (Roman numerals) toggle
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(250);
+    ok('numbers button present', !!$('numbersBtn'));
+    ok('numbers off by default',
+        $('numbersBtn').getAttribute('aria-pressed') === 'false' &&
+        doc().querySelectorAll('#chordStrip .cdeg').length === 0);
+    $('numbersBtn').click(); await wait(30);
+    const degs0 = Array.from(doc().querySelectorAll('#chordStrip .cdeg')).map(e => e.textContent);
+    const numNames = Array.from(doc().querySelectorAll('#chordStrip .cname')).map(e => e.textContent);
+    ok('numbers toggle on',
+        $('numbersBtn').getAttribute('aria-pressed') === 'true' && degs0.length === numNames.length,
+        degs0.join(','));
+    ok('numbers for Riptide in C', degs0.join(',') === 'vi,V,I,IV', degs0.join(','));
+    ok('numbers persisted', win().localStorage.getItem('songbook:numbers') === '1', win().localStorage.getItem('songbook:numbers'));
+    $('trUp').click(); await wait(30);
+    const degs1 = Array.from(doc().querySelectorAll('#chordStrip .cdeg')).map(e => e.textContent);
+    ok('numbers stay put when transposing', degs1.join(',') === degs0.join(','), degs1.join(','));
+    $('trDown').click(); await wait(30);
+
+    win().location.hash = '#/krakow-ukulele/house-of-the-rising-sun';
+    await wait(250);
+    const degsAm = Array.from(doc().querySelectorAll('#chordStrip .cdeg')).map(e => e.textContent);
+    ok('natural-minor numbers in Am', degsAm.join(',') === 'i,III,IV,VI,V7,iv', degsAm.join(','));
+    $('numbersBtn').click(); await wait(30);
+    ok('numbers toggle off',
+        $('numbersBtn').getAttribute('aria-pressed') === 'false' &&
+        doc().querySelectorAll('#chordStrip .cdeg').length === 0);
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(250);
+
     // 20. no console/page errors overall
     ok('no page errors', errors.length === 0, errors.join('; '));
 

@@ -602,6 +602,25 @@
 
     /* ---------------- chord strip (ChordKit) ---------------- */
 
+    // Tonic (pitch class) the sheet chords are written in: recording key minus capo.
+    function songTonic(song) {
+        if (!song || !song.key) return null;
+        var k = ChordKit.parse(song.key);
+        if (!k) return null;
+        var capo = (typeof song.capo === 'number' && isFinite(song.capo)) ? song.capo : 0;
+        return { pc: ((k.rootPc - capo) % 12 + 12) % 12, minor: k.type.id === 'm' };
+    }
+
+    // The number is computed from the untransposed chord and tonic so it stays
+    // put as the user transposes.
+    function addChordDegree(item, name, song) {
+        if (!showNumbers) return;
+        var tonic = songTonic(song);
+        if (!tonic) return;
+        var deg = ChordKit.scaleDegree(name, tonic.pc, tonic.minor);
+        if (deg) item.appendChild(el('span', 'cdeg', deg));
+    }
+
     function pickKey(chordName) { return NS + ':pick:' + instrument + ':' + chordName; }
 
     function storedPick(chordName) {
@@ -666,10 +685,12 @@
                     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSel(e); }
                 });
                 item.appendChild(el('span', 'cname', label));
+                addChordDegree(item, name, song);
                 item.appendChild(img);
             } else {
                 item.classList.add('no-diagram');
                 item.appendChild(el('span', 'cname', label));
+                addChordDegree(item, name, song);
                 item.appendChild(el('span', 'missing', 'no diagram'));
             }
             strip.appendChild(item);
@@ -1116,11 +1137,18 @@
             try { window.localStorage.setItem(NS + ':chordPin', chordPin ? '1' : '0'); } catch (e) { /* ignore */ }
             applyChordSettings();
         });
-        Array.prototype.forEach.call(document.querySelectorAll('.chord-mode-btn'), function (b) {
+        Array.prototype.forEach.call(document.querySelectorAll('.chord-mode-btn[data-chord-mode]'), function (b) {
             b.addEventListener('click', function () { setChordMode(b.dataset.chordMode); });
+        });
+        $('numbersBtn').addEventListener('click', function () {
+            showNumbers = !showNumbers;
+            try { window.localStorage.setItem(NS + ':numbers', showNumbers ? '1' : '0'); } catch (e) { /* ignore */ }
+            applyNumbers();
+            if (currentSong) renderChordStrip(currentSong);
         });
         applyChordSettings();
         applyChordMode();
+        applyNumbers();
         $('sheet').addEventListener('pointerdown', sheetPointerDown);
         $('sheet').addEventListener('pointermove', sheetPointerMove);
         $('sheet').addEventListener('pointerup', sheetPointerEnd);
@@ -1160,6 +1188,8 @@
     var chordSize = 1;
     var chordPin = true;
     var chordMode = 'inline';
+    var showNumbers = false;
+    try { showNumbers = window.localStorage.getItem(NS + ':numbers') === '1'; } catch (e) { /* ignore */ }
     try {
         var _cs = parseFloat(window.localStorage.getItem(NS + ':chordSize'));
         if (_cs >= 0.6 && _cs <= 1.5) chordSize = Math.round(_cs * 10) / 10;
@@ -1193,11 +1223,18 @@
 
     function applyChordMode() {
         $('sheet').classList.toggle('chords-above', chordMode === 'above');
-        Array.prototype.forEach.call(document.querySelectorAll('.chord-mode-btn'), function (b) {
+        Array.prototype.forEach.call(document.querySelectorAll('.chord-mode-btn[data-chord-mode]'), function (b) {
             var on = b.dataset.chordMode === chordMode;
             b.classList.toggle('active', on);
             b.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
+    }
+
+    function applyNumbers() {
+        var btn = $('numbersBtn');
+        if (!btn) return;
+        btn.classList.toggle('active', showNumbers);
+        btn.setAttribute('aria-pressed', showNumbers ? 'true' : 'false');
     }
 
     function setChordMode(mode) {
