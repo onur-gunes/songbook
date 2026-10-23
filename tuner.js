@@ -564,7 +564,8 @@
         source: null,
         highpass: null,
         lowpass: null,
-        session: 0
+        session: 0,
+        gumPending: null
     };
 
     var opts = {};
@@ -665,7 +666,11 @@
         var statusText;
         if (state.status === 'idle') statusText = 'Tap start, then play a string.';
         else if (state.status === 'requesting') statusText = 'Waiting for microphone\u2026';
+        else if (state.status === 'insecure') statusText = 'Microphone needs HTTPS. Open the hosted app or serve this folder over localhost.';
+        else if (state.status === 'os-denied') statusText = 'Your device is blocking Chrome from the microphone. Allow it in system settings.';
         else if (state.status === 'denied') statusText = 'Microphone blocked. Allow access in your browser settings.';
+        else if (state.status === 'no-device') statusText = 'No microphone found on this device.';
+        else if (state.status === 'busy') statusText = 'Microphone is busy or unavailable. Close other apps using it and retry.';
         else if (state.status === 'unsupported') statusText = 'This browser does not support microphone input.';
         else if (state.status === 'error') statusText = 'Could not access the microphone.';
         else if (!has) statusText = 'Listening\u2026 play a string.';
@@ -806,6 +811,26 @@
      * Audio lifecycle
      * ==================================================================== */
 
+    // Chrome refuses microphone access to file:// documents and its prompts
+    // never persist there, so asking anyway just produces a prompt loop.
+    function originProblem() {
+        if (window.isSecureContext === false) return 'insecure';
+        if (typeof location !== 'undefined' && location.protocol === 'file:') return 'insecure';
+        return null;
+    }
+
+    function statusForError(err) {
+        var name = err && err.name;
+        var message = (err && err.message) || '';
+        if (name === 'NotFoundError' || name === 'DevicesNotFoundError') return 'no-device';
+        if (name === 'NotReadableError' || name === 'TrackStartError') return 'busy';
+        if (name === 'NotAllowedError' || name === 'SecurityError') {
+            // Chrome reports an OS-level block as "Permission denied by system".
+            return /system/i.test(message) ? 'os-denied' : 'denied';
+        }
+        return 'error';
+    }
+
     function start() {
         if (state.status === 'requesting' || state.status === 'listening') return;
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -816,6 +841,21 @@
         var AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) {
             state.status = 'unsupported';
+            render();
+            return;
+        }
+        var originError = originProblem();
+        if (originError) {
+            state.status = originError;
+            render();
+            return;
+        }
+
+        // A prompt may still be pending after the tuner was closed and
+        // reopened. Never stack another getUserMedia request on top of it:
+        // each one shows its own prompt, which looks like a prompt loop.
+        if (state.gumPending) {
+            state.status = 'requesting';
             render();
             return;
         }
@@ -833,43 +873,49 @@
             return;
         }
         var resumed = ctx.resume ? ctx.resume() : Promise.resolve();
-        // The real handler is attached below; this prevents an unhandled
-        // rejection when getUserMedia itself fails first.
+        // Swallow rejection here; the context is not required to start the
+        // stream, and openAudio() nudges it again once capture is live.
         if (resumed && resumed.catch) resumed.catch(function () { /* handled below */ });
 
         var session = ++state.session;
         state.status = 'requesting';
         render();
 
-        navigator.mediaDevices.getUserMedia({
+        var request = navigator.mediaDevices.getUserMedia({
             audio: {
                 echoCancellation: false,
                 noiseSuppression: false,
                 autoGainControl: false
             }
-        }).then(function (stream) {
+        });
+        state.gumPending = request;
+
+        request.then(function (stream) {
+            if (state.gumPending === request) state.gumPending = null;
             if (!state.open || session !== state.session) {
                 stopTracks(stream);
+                // The user closed/reopened the tuner while the prompt was up.
+                // Let them start again now that permission was answered.
+                if (state.open && state.status === 'requesting') {
+                    state.status = 'idle';
+                    render();
+                }
                 return;
             }
-            // Assign before awaiting resume so releaseAudio() can stop the
-            // tracks if the context fails to resume.
             state.stream = stream;
-            return Promise.resolve(resumed).then(function () {
-                if (!state.open || session !== state.session) {
-                    stopTracks(stream);
-                    return;
-                }
-                return openAudio(stream, ctx, session);
-            });
+            openAudio(stream, ctx, session);
         }).catch(function (err) {
+            if (state.gumPending === request) state.gumPending = null;
             if (session !== state.session) {
                 closeContext(ctx);
+                if (state.open && state.status === 'requesting') {
+                    state.status = 'idle';
+                    render();
+                }
                 return;
             }
             releaseAudio();
-            state.status = (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError'))
-                ? 'denied' : 'error';
+            state.status = statusForError(err);
             render();
         });
     }
@@ -901,6 +947,15 @@
         state.buffer = new Float32Array(analyser.fftSize);
         state.lastDetectAt = 0;
         state.noiseFloor = NOISE_FLOOR_MIN;
+        // Never block capture on resume(): some Android builds keep the
+        // promise pending while the permission dialog is on screen. Nudge the
+        // context now that the graph is wired and let the loop wait for data.
+        if (ctx.state !== 'running' && ctx.resume) {
+            try {
+                var resuming = ctx.resume();
+                if (resuming && resuming.catch) resuming.catch(function () { /* ignore */ });
+            } catch (e) { /* ignore */ }
+        }
         state.status = 'listening';
         resetTracking();
         render();
@@ -1204,6 +1259,9 @@
             centsOff: centsOff,
             octaveSnap: octaveSnap,
             adaptFromSnr: adaptFromSnr,
+            statusForError: statusForError,
+            originProblem: originProblem,
+            gumPending: function () { return !!state.gumPending; },
             setConfidence: function (value) {
                 state.confidence = clamp(value, 0, 1);
                 renderConfidence();

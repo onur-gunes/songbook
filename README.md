@@ -77,8 +77,10 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 - **Tuner** — chromatic-style pitch detection from the microphone with
   ukulele/guitar presets, auto or manual string selection, A4 calibration
   (430–450 Hz), and an octave-safe detector. Requires a secure context
-  (HTTPS or localhost), so it works in the hosted/installed PWA but not
-  reliably from the `file://` single-file build.
+  (HTTPS or localhost), so use the hosted app or serve the folder locally;
+  Chrome blocks microphone capture from the `file://` single-file build.
+  On Android, Chrome also needs microphone permission at the OS level
+  (Settings → Apps → Chrome → Permissions → Microphone).
 - **PWA** — installable, caches the app shell and songbooks for offline use.
 
 ## Songbook JSON format

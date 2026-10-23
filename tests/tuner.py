@@ -34,6 +34,32 @@ def main():
         ok('tuner button exists', cdp.eval("!!document.getElementById('tunerBtn')"))
         ok('tuner starts closed', cdp.eval("SongbookTuner.isOpen()") is False)
 
+        # --- microphone error classification (no real capture needed) ---
+        statuses = cdp.eval("""
+            (function () {
+                var T = SongbookTuner._test;
+                function s(name, message) {
+                    return T.statusForError({ name: name, message: message || '' });
+                }
+                return {
+                    system: s('NotAllowedError', 'Permission denied by system'),
+                    denied: s('NotAllowedError', 'Permission denied'),
+                    missing: s('NotFoundError'),
+                    busy: s('NotReadableError'),
+                    other: s('TypeError'),
+                    origin: T.originProblem(),
+                    pending: T.gumPending()
+                };
+            })()
+        """)
+        ok('OS-level denial gets its own state', statuses['system'] == 'os-denied', statuses)
+        ok('browser denial maps to denied', statuses['denied'] == 'denied', statuses)
+        ok('missing device maps to no-device', statuses['missing'] == 'no-device', statuses)
+        ok('busy device maps to busy', statuses['busy'] == 'busy', statuses)
+        ok('unknown error maps to error', statuses['other'] == 'error', statuses)
+        ok('localhost is a usable origin', statuses['origin'] is None, statuses)
+        ok('no microphone request in flight', statuses['pending'] is False, statuses)
+
         # --- pitch engine accuracy on synthetic tones (no microphone) ---
         detect = """
             (function () {
