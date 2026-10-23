@@ -848,6 +848,13 @@ main {
     color: var(--accent);
 }
 
+.chord-item .cdeg {
+    display: block;
+    font-size: 0.8em;
+    opacity: 0.7;
+    font-style: italic;
+}
+
 .chord-item.hard .cname::after {
     content: '\25CF';
     font-size: 0.42rem;

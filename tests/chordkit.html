@@ -19,6 +19,27 @@ try {
     ok('parse NC -> null', ChordKit.parse('NC') === null);
     ok('parse Csharp -> C#', ChordKit.parse('Csharp') && ChordKit.parse('Csharp').rootPc === 1, ChordKit.parse('Csharp') && ChordKit.parse('Csharp').rootPc);
 
+    // Roman numerals / scale degrees
+    ok('C in C = I', ChordKit.romanNumeral('C', 'C') === 'I');
+    ok('F in C = IV', ChordKit.romanNumeral('F', 'C') === 'IV');
+    ok('G in C = V', ChordKit.romanNumeral('G', 'C') === 'V');
+    ok('Am in C = vi', ChordKit.romanNumeral('Am', 'C') === 'vi');
+    ok('G7 in C = V7', ChordKit.romanNumeral('G7', 'C') === 'V7');
+    ok('Dm7 in C = ii7', ChordKit.romanNumeral('Dm7', 'C') === 'ii7');
+    ok('Bdim in C = vii°', ChordKit.romanNumeral('Bdim', 'C') === 'vii\u00b0', ChordKit.romanNumeral('Bdim', 'C'));
+    ok('C in D = bVII', ChordKit.romanNumeral('C', 'D') === 'bVII');
+    ok('F/C in C = IV/I', ChordKit.romanNumeral('F/C', 'C') === 'IV/I');
+    ok('Am in Am = i', ChordKit.romanNumeral('Am', 'Am') === 'i');
+    ok('Dm in Am = iv', ChordKit.romanNumeral('Dm', 'Am') === 'iv');
+    ok('Em in Am = v', ChordKit.romanNumeral('Em', 'Am') === 'v');
+    ok('F in Am = VI', ChordKit.romanNumeral('F', 'Am') === 'VI');
+    ok('G in Am = VII', ChordKit.romanNumeral('G', 'Am') === 'VII');
+    ok('G#dim in Am = #vii°', ChordKit.romanNumeral('G#dim', 'Am') === '#vii\u00b0', ChordKit.romanNumeral('G#dim', 'Am'));
+    ok('Abdim in Am = bi°', ChordKit.romanNumeral('Abdim', 'Am') === 'bi\u00b0', ChordKit.romanNumeral('Abdim', 'Am'));
+    ok('Bm7b5 in C = viiø7', ChordKit.romanNumeral('Bm7b5', 'C') === 'vii\u00f87', ChordKit.romanNumeral('Bm7b5', 'C'));
+    ok('Eb in Bbm = IV', ChordKit.romanNumeral('Eb', 'Bbm') === 'IV', ChordKit.romanNumeral('Eb', 'Bbm'));
+    ok('unknown tonic -> empty', ChordKit.romanNumeral('C', 'nope') === '');
+
     // canonical open voicings rank first (ukulele)
     ok('C uke = 0003', eq(ChordKit.bestVoicing('C', 'ukulele'), [0, 0, 0, 3]));
     ok('Am uke = 2000', eq(ChordKit.bestVoicing('Am', 'ukulele'), [2, 0, 0, 0]));
