@@ -2742,6 +2742,7 @@ body.tuner-open { overflow: hidden; }
     var METER_TRAVEL = 0.9;
 
     var NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    var IS_ANDROID = /Android/i.test((typeof navigator !== 'undefined' && navigator.userAgent) || '');
 
     /* ======================================================================
      * Pitch engine (adapted from fgnass/tuner, MIT)
@@ -3357,8 +3358,12 @@ body.tuner-open { overflow: hidden; }
         if (state.status === 'idle') statusText = 'Tap start, then play a string.';
         else if (state.status === 'requesting') statusText = 'Waiting for microphone\u2026';
         else if (state.status === 'insecure') statusText = 'Microphone needs HTTPS. Open the hosted app or serve this folder over localhost.';
-        else if (state.status === 'os-denied') statusText = 'Your device is blocking Chrome from the microphone. Allow it in system settings, then retry.';
-        else if (state.status === 'denied') statusText = 'Microphone blocked. Allow microphone access for this site in Chrome, then retry.';
+        else if (state.status === 'os-denied') statusText = IS_ANDROID
+            ? 'Chrome is blocked from the microphone. Allow it in Settings \u2192 Apps \u2192 Chrome \u2192 Permissions, then retry.'
+            : 'Your device is blocking Chrome from the microphone. Allow it in system settings, then retry.';
+        else if (state.status === 'denied') statusText = IS_ANDROID
+            ? 'Microphone blocked for this site. Tap the lock icon \u2192 Permissions \u2192 Microphone \u2192 Allow, then retry.'
+            : 'Microphone blocked. Allow microphone access for this site in Chrome, then retry.';
         else if (state.status === 'no-device') statusText = 'No microphone found on this device.';
         else if (state.status === 'busy') statusText = 'Microphone is busy or unavailable. Close other apps using it and retry.';
         else if (state.status === 'unsupported') statusText = 'This browser does not support microphone input.';
