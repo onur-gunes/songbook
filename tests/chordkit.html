@@ -34,6 +34,10 @@ try {
     ok('Em in Am = v', ChordKit.romanNumeral('Em', 'Am') === 'v');
     ok('F in Am = VI', ChordKit.romanNumeral('F', 'Am') === 'VI');
     ok('G in Am = VII', ChordKit.romanNumeral('G', 'Am') === 'VII');
+    ok('G#dim in Am = #vii°', ChordKit.romanNumeral('G#dim', 'Am') === '#vii\u00b0', ChordKit.romanNumeral('G#dim', 'Am'));
+    ok('Abdim in Am = bi°', ChordKit.romanNumeral('Abdim', 'Am') === 'bi\u00b0', ChordKit.romanNumeral('Abdim', 'Am'));
+    ok('Bm7b5 in C = viiø7', ChordKit.romanNumeral('Bm7b5', 'C') === 'vii\u00f87', ChordKit.romanNumeral('Bm7b5', 'C'));
+    ok('Eb in Bbm = IV', ChordKit.romanNumeral('Eb', 'Bbm') === 'IV', ChordKit.romanNumeral('Eb', 'Bbm'));
     ok('unknown tonic -> empty', ChordKit.romanNumeral('C', 'nope') === '');
 
     // canonical open voicings rank first (ukulele)

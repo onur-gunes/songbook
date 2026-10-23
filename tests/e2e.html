@@ -725,7 +725,7 @@ async function main() {
         doc().querySelectorAll('#chordStrip .cdeg').length === 0);
     $('numbersBtn').click(); await wait(30);
     const degs0 = Array.from(doc().querySelectorAll('#chordStrip .cdeg')).map(e => e.textContent);
-    const numNames = Array.from(doc().querySelectorAll('#chordStrip .cname')).map(e => e.textContent);
+    const numNames = Array.from(doc().querySelectorAll('#chordStrip .chord-item:not(.chuck) .cname')).map(e => e.textContent);
     ok('numbers toggle on',
         $('numbersBtn').getAttribute('aria-pressed') === 'true' && degs0.length === numNames.length,
         degs0.join(','));

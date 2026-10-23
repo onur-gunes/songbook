@@ -131,6 +131,7 @@
             level: (s.level === 'Easy' || s.level === 'Medium' || s.level === 'Hard') ? s.level : 'Medium',
             new: !!s.new,
             key: s.key ? String(s.key) : '',
+            sheetKey: s.sheetKey ? String(s.sheetKey) : '',
             capo: (typeof s.capo === 'number' && isFinite(s.capo)) ? s.capo : null,
             dur: typeof s.dur === 'number' ? s.dur : 4,
             chords: Array.isArray(s.chords) ? s.chords.map(String) : [],
@@ -602,13 +603,19 @@
 
     /* ---------------- chord strip (ChordKit) ---------------- */
 
-    // Tonic (pitch class) the sheet chords are written in: recording key minus capo.
+    // Tonic the sheet chords are written in: the curated sheetKey when present,
+    // otherwise recording key minus capo.
     function songTonic(song) {
-        if (!song || !song.key) return null;
+        if (!song) return null;
+        if (song.sheetKey) {
+            var sk = ChordKit.parse(song.sheetKey);
+            if (sk) return { pc: sk.rootPc, minor: sk.type.id === 'm', name: song.sheetKey };
+        }
+        if (!song.key) return null;
         var k = ChordKit.parse(song.key);
         if (!k) return null;
         var capo = (typeof song.capo === 'number' && isFinite(song.capo)) ? song.capo : 0;
-        return { pc: ((k.rootPc - capo) % 12 + 12) % 12, minor: k.type.id === 'm' };
+        return { pc: ((k.rootPc - capo) % 12 + 12) % 12, minor: k.type.id === 'm', name: '' };
     }
 
     // The number is computed from the untransposed chord and tonic so it stays
@@ -617,7 +624,7 @@
         if (!showNumbers) return;
         var tonic = songTonic(song);
         if (!tonic) return;
-        var deg = ChordKit.scaleDegree(name, tonic.pc, tonic.minor);
+        var deg = ChordKit.scaleDegree(name, tonic.pc, tonic.minor, tonic.name);
         if (deg) item.appendChild(el('span', 'cdeg', deg));
     }
 

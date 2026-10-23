@@ -397,17 +397,14 @@
 
     /* ---------------- scale degrees (Roman / Nashville numbers) ---------------- */
 
-    // Semitones above the tonic -> { degree 1..7, accidental }. Flat spelling for
-    // the chromatic notes (bIII, bVI, bVII) — the common pop/folk convention.
-    var DEGREE_TABLE = [
-        { d: 1, a: '' },  { d: 2, a: 'b' }, { d: 2, a: '' }, { d: 3, a: 'b' },
-        { d: 3, a: '' },  { d: 4, a: '' },  { d: 4, a: '#' },{ d: 5, a: '' },
-        { d: 6, a: 'b' }, { d: 6, a: '' },  { d: 7, a: 'b' },{ d: 7, a: '' }
-    ];
+    var LETTER_INDEX = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6 };
+    var PC_SPELL = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    var MAJOR_STEPS = [0, 2, 4, 5, 7, 9, 11];
+    var MINOR_STEPS = [0, 2, 3, 5, 7, 8, 10];   // natural minor
     var ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
 
     // How each chord type shows up: whether the numeral is lower-case (minor) and
-    // the suffix. Diminished adds °, augmented +, half-dim ø.
+    // the suffix. Diminished adds °, augmented +, half-dim ø7.
     var ROMAN_TYPE = {
         maj:{minor:false,sfx:''},      m:{minor:true,sfx:''},
         '7':{minor:false,sfx:'7'},     maj7:{minor:false,sfx:'maj7'},
@@ -417,31 +414,62 @@
         '9':{minor:false,sfx:'9'},     m9:{minor:true,sfx:'9'},
         maj9:{minor:false,sfx:'maj9'}, add9:{minor:false,sfx:'add9'},
         dim:{minor:true,sfx:'\u00b0'}, dim7:{minor:true,sfx:'\u00b07'},
-        aug:{minor:false,sfx:'+'},     m7b5:{minor:true,sfx:'\u00f85'}
+        aug:{minor:false,sfx:'+'},     m7b5:{minor:true,sfx:'\u00f87'}
     };
 
-    function degreeOf(pc, tonicPc, minor) {
-        if (minor) {
-            // Natural-minor numerals are the relative major's degrees rotated so
-            // the minor tonic becomes 1 (A minor -> C major, then shift degrees).
-            var relMajor = ((tonicPc + 3) % 12 + 12) % 12;
-            var d0 = DEGREE_TABLE[((pc - relMajor) % 12 + 12) % 12];
-            return { d: ((d0.d - 6 + 7) % 7) + 1, a: d0.a };
+    function wrapSemis(n) {
+        var r = ((n % 12) + 12) % 12;
+        return r > 6 ? r - 12 : r;
+    }
+
+    function accidentalOf(diff) {
+        if (!diff) return '';
+        var mark = diff > 0 ? '#' : 'b';
+        var out = '';
+        for (var i = 0; i < Math.abs(diff); i++) out += mark;
+        return out;
+    }
+
+    // Letter of the tonic: use the supplied key name when possible (so flat keys
+    // keep their spelling), otherwise fall back to a canonical sharp spelling.
+    function tonicLetter(pc, name) {
+        var k = name ? parse(name) : null;
+        var letter = k ? k.letter : PC_SPELL[((pc % 12) + 12) % 12].charAt(0);
+        return LETTER_INDEX[letter];
+    }
+
+    function bassLetter(p) {
+        var slash = splitSlash(p.name);
+        if (slash.bass) {
+            var m = slash.bass.match(/^([A-G])/);
+            if (m) return m[1];
         }
-        return DEGREE_TABLE[((pc - tonicPc) % 12 + 12) % 12];
+        return PC_SPELL[((p.bass % 12) + 12) % 12].charAt(0);
+    }
+
+    // Degree letter comes from the chord's own spelling, so enharmonic notes get
+    // their conventional numeral (Am: G#dim -> #vii°, Abdim -> bi°).
+    function degreeOf(pc, letter, tonicPc, tonicLetterIdx, minor) {
+        var steps = minor ? MINOR_STEPS : MAJOR_STEPS;
+        var d = ((LETTER_INDEX[letter] - tonicLetterIdx) % 7 + 7) % 7;
+        d += 1;
+        var expected = ((tonicPc + steps[d - 1]) % 12 + 12) % 12;
+        return { d: d, a: accidentalOf(wrapSemis(pc - expected)) };
     }
 
     // Core: Roman-numeral label for a parsed chord against a tonic pitch class.
-    function scaleDegree(name, tonicPc, minor) {
+    // tonicName is optional but preserves enharmonic spelling for the tonic.
+    function scaleDegree(name, tonicPc, minor, tonicName) {
         var p = parse(name);
         if (!p || tonicPc == null) return '';
-        var dt = degreeOf(p.rootPc, tonicPc, minor);
+        var tLetter = tonicLetter(tonicPc, tonicName);
+        var dt = degreeOf(p.rootPc, p.letter, tonicPc, tLetter, minor);
         var info = ROMAN_TYPE[p.type.id] || ROMAN_TYPE.maj;
         var num = ROMAN[dt.d - 1];
         if (info.minor) num = num.toLowerCase();
         var label = dt.a + num + info.sfx;
         if (p.bass != null && p.bass !== p.rootPc) {       // slash chord -> /bassDegree
-            var b = degreeOf(p.bass, tonicPc, minor);
+            var b = degreeOf(p.bass, bassLetter(p), tonicPc, tLetter, minor);
             label += '/' + b.a + ROMAN[b.d - 1];
         }
         return label;
@@ -451,7 +479,7 @@
     // romanNumeral('F','C') -> 'IV'   romanNumeral('Am','C') -> 'vi'
     function romanNumeral(name, keyName) {
         var k = parse(keyName);
-        return k ? scaleDegree(name, k.rootPc, k.type.id === 'm') : '';
+        return k ? scaleDegree(name, k.rootPc, k.type.id === 'm', keyName) : '';
     }
 
     // "No chord" / chuck: strum with every string muted. NC (and the legacy
