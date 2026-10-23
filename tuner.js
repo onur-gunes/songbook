@@ -558,7 +558,8 @@
             state.auto = true;
             state.manualIndex = -1;
         }
-        state.detector = createPitchDetector(INSTRUMENTS[id].range);
+        var range = INSTRUMENTS[id].range;
+        state.detector = createPitchDetector({ minFreq: range.min, maxFreq: range.max });
         state.notes = notesForTuning(state.tuningId);
         state.tracker.reset();
         resetTracking();
@@ -601,12 +602,8 @@
 
         var has = state.hasReading && state.targetNote;
         var inTune = has && Math.abs(state.cents) <= IN_TUNE_CENTS;
-        var flat = has && state.cents < -IN_TUNE_CENTS;
-        var sharp = has && state.cents > IN_TUNE_CENTS;
 
         els.display.classList.toggle('in-tune', inTune);
-        els.display.classList.toggle('is-flat', flat);
-        els.display.classList.toggle('is-sharp', sharp);
         els.display.classList.toggle('is-idle', !has);
 
         if (has) {
@@ -1051,7 +1048,7 @@
             });
         }
         document.addEventListener('keydown', onKeyDown, true);
-        window.addEventListener('visibilitychange', function () {
+        document.addEventListener('visibilitychange', function () {
             if (document.hidden && state.open && state.status === 'listening') stop();
         });
         window.addEventListener('pagehide', function () {
@@ -1144,7 +1141,11 @@
             noteFromName: noteFromName,
             nearestNote: nearestNote,
             centsOff: centsOff,
-            octaveSnap: octaveSnap
+            octaveSnap: octaveSnap,
+            detectorRange: function () {
+                if (!state.detector) return null;
+                return { min: state.detector.minFreq, max: state.detector.maxFreq };
+            }
         }
     };
 })(typeof window !== 'undefined' ? window : this);

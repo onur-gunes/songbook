@@ -75,6 +75,8 @@ def main():
            cdp.eval("document.querySelectorAll('#tunerStrings .tuner-string').length") == 5)
         ok('ukulele tab active',
            cdp.eval("document.querySelector('[data-tuner-instrument=\"ukulele\"]').classList.contains('active')"))
+        ukulele_range = cdp.eval('SongbookTuner._test.detectorRange()')
+        ok('ukulele detector range', ukulele_range == {'min': 130, 'max': 900}, ukulele_range)
         ok('tuning selector populated',
            cdp.eval("document.getElementById('tunerTuning').options.length") >= 2)
         ok('default A4 shown', cdp.eval("document.getElementById('tunerCalValue').textContent") == '440')
@@ -90,6 +92,8 @@ def main():
            cdp.eval("songbookTest.getInstrument()") == 'guitar')
         ok('guitar strings rendered',
            cdp.eval("document.querySelectorAll('#tunerStrings .tuner-string').length") == 7)
+        guitar_range = cdp.eval('SongbookTuner._test.detectorRange()')
+        ok('guitar detector range', guitar_range == {'min': 55, 'max': 700}, guitar_range)
         cdp.eval("document.querySelector('[data-tuner-instrument=\"ukulele\"]').click()")
         time.sleep(0.15)
 
