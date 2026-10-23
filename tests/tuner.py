@@ -73,7 +73,9 @@ def main():
            noisy == {'gate': 0.93, 'window': 7, 'quality': 0}, noisy)
         ok('SNR adaptation is monotonic',
            cdp.eval("SongbookTuner._test.adaptFromSnr(10).gate > "
-                    "SongbookTuner._test.adaptFromSnr(25).gate"))
+                    "SongbookTuner._test.adaptFromSnr(25).gate") and
+           cdp.eval("SongbookTuner._test.adaptFromSnr(10).window >= "
+                    "SongbookTuner._test.adaptFromSnr(25).window"))
 
         # --- open the tuner ---
         cdp.eval("document.getElementById('tunerBtn').click()")

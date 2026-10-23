@@ -618,6 +618,7 @@
         state.effWindow = STABILITY_WINDOW;
         state.confTarget = 0;
         state.confidence = 0;
+        renderConfidence();
     }
 
     /* ======================================================================
