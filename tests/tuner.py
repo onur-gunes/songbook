@@ -65,6 +65,16 @@ def main():
         ok('A4 calibration changes target',
            abs(cdp.eval("SongbookTuner._test.noteFromName('A4', 442).freq") - 442) < 0.001)
 
+        clean = cdp.eval("SongbookTuner._test.adaptFromSnr(40)")
+        noisy = cdp.eval("SongbookTuner._test.adaptFromSnr(0)")
+        ok('clean SNR gives tight gate/window',
+           clean == {'gate': 0.82, 'window': 3, 'quality': 1}, clean)
+        ok('noisy SNR gives loose gate/window',
+           noisy == {'gate': 0.93, 'window': 7, 'quality': 0}, noisy)
+        ok('SNR adaptation is monotonic',
+           cdp.eval("SongbookTuner._test.adaptFromSnr(10).gate > "
+                    "SongbookTuner._test.adaptFromSnr(25).gate"))
+
         # --- open the tuner ---
         cdp.eval("document.getElementById('tunerBtn').click()")
         cdp.wait_js("SongbookTuner.isOpen() && !document.getElementById('tunerOverlay').hidden")
@@ -82,6 +92,17 @@ def main():
         ok('default A4 shown', cdp.eval("document.getElementById('tunerCalValue').textContent") == '440')
         ok('attribution credits fgnass',
            cdp.eval("document.querySelector('.tuner-attrib a').href.indexOf('fgnass/tuner') >= 0"))
+        ok('confidence bar exists', cdp.eval("!!document.getElementById('tunerConfidence')"))
+        bar = cdp.eval("""(function () {
+            SongbookTuner._test.setConfidence(0.8);
+            var el = document.getElementById('tunerConfidence');
+            var high = { width: el.style.width, good: el.classList.contains('good') };
+            SongbookTuner._test.setConfidence(0.5);
+            return { high: high, mid: { width: el.style.width, ok: el.classList.contains('ok') } };
+        })()""")
+        ok('confidence bar tracks level',
+           bar == {'high': {'width': '80%', 'good': True},
+                   'mid': {'width': '50%', 'ok': True}}, bar)
 
         # --- switch instrument from inside the tuner and sync the app ---
         cdp.eval("document.querySelector('[data-tuner-instrument=\"guitar\"]').click()")

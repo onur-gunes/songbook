@@ -1531,6 +1531,25 @@ body.tuner-open { overflow: hidden; }
     box-shadow: 0 0 0 3px var(--surface);
 }
 
+.tuner-confidence {
+    height: 4px;
+    margin: 10px 10px 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--muted) 25%, transparent);
+    overflow: hidden;
+}
+
+.tuner-confidence-fill {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--hard);
+    transition: width 0.12s linear, background-color 0.2s ease;
+}
+
+.tuner-confidence-fill.ok { background: var(--medium); }
+.tuner-confidence-fill.good { background: var(--easy); }
+
 .tuner-scale {
     display: flex;
     justify-content: space-between;

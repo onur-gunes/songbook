@@ -40,6 +40,13 @@
     var NEW_NOTE_CENTS = 250;
     var STABILITY_WINDOW = 5;
     var STABILITY_CENTS = 20;
+    var NOISE_FLOOR_MIN = 5e-4;
+    var NOISE_RISE = 0.02;
+    var NOISE_FALL = 0.30;
+    var TONAL_CLARITY = 0.6;
+    var SNR_LO = 6, SNR_HI = 30;
+    var GATE_NOISY = 0.93, GATE_CLEAN = 0.82;
+    var WINDOW_NOISY = 7, WINDOW_CLEAN = 3;
     var LOWPASS_HZ = 5000;
     var IN_TUNE_CENTS = 3;
     var METER_RANGE = 50;
@@ -493,6 +500,14 @@
         try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ignore */ }
     }
     function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+    function adaptFromSnr(snrDb) {
+        var t = clamp((snrDb - SNR_LO) / (SNR_HI - SNR_LO), 0, 1);
+        return {
+            gate: GATE_NOISY + (GATE_CLEAN - GATE_NOISY) * t,
+            window: Math.round(WINDOW_NOISY + (WINDOW_CLEAN - WINDOW_NOISY) * t),
+            quality: t
+        };
+    }
     function fmtCents(c) {
         var r = Math.round(c);
         return (r > 0 ? '+' : '') + r + '\u00a2';
@@ -532,6 +547,13 @@
         lastGoodAt: 0,
         lastDetectAt: 0,
         lastFilterAt: 0,
+
+        noiseFloor: NOISE_FLOOR_MIN,
+        snrDb: 0,
+        effGate: CLARITY_GATE,
+        effWindow: STABILITY_WINDOW,
+        confTarget: 0,
+        confidence: 0,
 
         raf: 0,
         meterRaf: 0,
@@ -591,6 +613,11 @@
         state.targetNote = null;
         state.cents = null;
         state.displayCents = 0;
+        state.snrDb = 0;
+        state.effGate = CLARITY_GATE;
+        state.effWindow = STABILITY_WINDOW;
+        state.confTarget = 0;
+        state.confidence = 0;
     }
 
     /* ======================================================================
@@ -761,7 +788,17 @@
         var cents = clamp(state.displayCents, -METER_RANGE, METER_RANGE);
         var left = 50 + cents * METER_TRAVEL;
         if (els.needle) els.needle.style.left = left.toFixed(2) + '%';
+        state.confidence += (state.confTarget - state.confidence) * 0.15;
+        renderConfidence();
         state.meterRaf = requestAnimationFrame(meterLoop);
+    }
+
+    function renderConfidence() {
+        if (!els.confidence) return;
+        var pct = Math.round(clamp(state.confidence, 0, 1) * 100);
+        els.confidence.style.width = pct + '%';
+        els.confidence.classList.toggle('good', state.confidence >= 0.7);
+        els.confidence.classList.toggle('ok', state.confidence >= 0.4 && state.confidence < 0.7);
     }
 
     /* ======================================================================
@@ -862,6 +899,7 @@
         state.analyser = analyser;
         state.buffer = new Float32Array(analyser.fftSize);
         state.lastDetectAt = 0;
+        state.noiseFloor = NOISE_FLOOR_MIN;
         state.status = 'listening';
         resetTracking();
         render();
@@ -918,12 +956,31 @@
         state.clarity = result.clarity;
         var listening = state.status === 'listening';
 
-        if (result.freq > 0 && result.clarity >= CLARITY_GATE) {
+        // Classify by a loose fixed bar so floor-tracking doesn't depend on
+        // the adaptive gate, then derive a live SNR and tune the gate to it.
+        var tonal = result.freq > 0 && result.clarity >= TONAL_CLARITY;
+        if (!tonal && result.rms > 0) {
+            var a = result.rms > state.noiseFloor ? NOISE_RISE : NOISE_FALL;
+            state.noiseFloor += a * (result.rms - state.noiseFloor);
+        }
+        state.noiseFloor = Math.max(state.noiseFloor, NOISE_FLOOR_MIN);
+
+        var rmsNow = result.rms > 0 ? result.rms : state.noiseFloor;
+        state.snrDb = 20 * Math.log(rmsNow / state.noiseFloor) / Math.LN10;
+        var adapt = adaptFromSnr(state.snrDb);
+        state.effGate = adapt.gate;
+        state.effWindow = adapt.window;
+
+        var confident = result.freq > 0 && result.clarity >= state.effGate;
+        var clarityScore = clamp((result.clarity - 0.5) / (0.97 - 0.5), 0, 1);
+        state.confTarget = confident ? (0.5 * clarityScore + 0.5 * adapt.quality) : 0;
+
+        if (confident) {
             var absCents = 1200 * Math.log(result.freq) / Math.LN2;
             state.recentCents.push(absCents);
-            while (state.recentCents.length > STABILITY_WINDOW) state.recentCents.shift();
+            while (state.recentCents.length > state.effWindow) state.recentCents.shift();
 
-            var stable = state.recentCents.length >= STABILITY_WINDOW;
+            var stable = state.recentCents.length >= state.effWindow;
             if (stable) {
                 var lo = state.recentCents[0], hi = state.recentCents[0];
                 for (var i = 1; i < state.recentCents.length; i++) {
@@ -952,7 +1009,9 @@
                 render();
             }
         } else {
-            state.recentCents.length = 0;
+            // Decay the window instead of clearing it, so a single noisy frame
+            // doesn't drop an otherwise stable lock.
+            if (state.recentCents.length) state.recentCents.shift();
             if (listening && state.lastGoodAt && now - state.lastGoodAt > HOLD_MS) {
                 state.filter.reset();
                 state.smoothedFreq = -1;
@@ -1007,6 +1066,7 @@
         els.cents = document.getElementById('tunerCents');
         els.freq = document.getElementById('tunerFreq');
         els.needle = document.getElementById('tunerNeedle');
+        els.confidence = document.getElementById('tunerConfidence');
         els.status = document.getElementById('tunerStatus');
         els.strings = document.getElementById('tunerStrings');
         els.start = document.getElementById('tunerStart');
@@ -1142,6 +1202,11 @@
             nearestNote: nearestNote,
             centsOff: centsOff,
             octaveSnap: octaveSnap,
+            adaptFromSnr: adaptFromSnr,
+            setConfidence: function (value) {
+                state.confidence = clamp(value, 0, 1);
+                renderConfidence();
+            },
             detectorRange: function () {
                 if (!state.detector) return null;
                 return { min: state.detector.minFreq, max: state.detector.maxFreq };
