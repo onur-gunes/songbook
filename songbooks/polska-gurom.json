@@ -125526,8 +125526,9 @@
    "dur": 4.83,
    "chords": [
     "Em",
-    "D",
+    "Bm",
     "Am7",
+    "D",
     "C"
    ],
    "sheet": [
@@ -125538,15 +125539,88 @@
      ],
      [
       "c",
+      "[Bm]"
+     ],
+     [
+      "c",
       "[Am7]"
+     ],
+     [
+      "c",
+      "[Em]"
+     ]
+    ],
+    [],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Jaki jest wynik gry, "
      ],
      [
       "c",
       "[D]"
      ],
      [
+      "x",
+      "nie wiem, nie pytaj mnie."
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am7]"
+     ],
+     [
+      "x",
+      "Jak na imię tej grze? "
+     ],
+     [
       "c",
       "[Em]"
+     ],
+     [
+      "x",
+      "tego nie wiem już też."
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Wczoraj tak - było tak, "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "nie – znaczyło zaś nie."
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am7]"
+     ],
+     [
+      "x",
+      "Nie mieszało się nam "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "czarne z białym co dzień."
      ]
     ],
     [],
@@ -125557,7 +125631,15 @@
      ],
      [
       "x",
-      "Jaki jest wynik gry, nie wiem, nie pytaj mnie."
+      "Wczoraj niewinni tak, "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "dzisiaj pionki w grze."
      ]
     ],
     [
@@ -125567,7 +125649,15 @@
      ],
      [
       "x",
-      "Jak na imię tej grze? tego nie wiem już też."
+      "Wczoraj błękitny wiatr, "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "dzisiaj duszny zły sen."
      ]
     ],
     [
@@ -125577,7 +125667,15 @@
      ],
      [
       "x",
-      "Wczoraj tak - było tak, nie – znaczyło zaś nie."
+      "Z drugiej strony mych snów "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "wszystko lepszy ma smak"
      ]
     ],
     [
@@ -125587,48 +125685,15 @@
      ],
      [
       "x",
-      "Nie mieszało się nam czarne z białym co dzień."
-     ]
-    ],
-    [],
-    [
+      "Bo w powietrzu jest luz "
+     ],
      [
       "c",
       "[Em]"
      ],
      [
       "x",
-      "Wczoraj niewinni tak, dzisiaj pionki w grze."
-     ]
-    ],
-    [
-     [
-      "c",
-      "[Am7]"
-     ],
-     [
-      "x",
-      "Wczoraj błękitny wiatr, dzisiaj duszny zły sen."
-     ]
-    ],
-    [
-     [
-      "c",
-      "[Em]"
-     ],
-     [
-      "x",
-      "Z drugiej strony mych snów wszystko lepszy ma smak"
-     ]
-    ],
-    [
-     [
-      "c",
-      "[Am7]"
-     ],
-     [
-      "x",
-      "Bo w powietrzu jest luz i muzyka wciąż gra."
+      "i muzyka wciąż gra."
      ]
     ],
     [],
@@ -125644,8 +125709,16 @@
       "[C]"
      ],
      [
+      "x",
+      "Za ostatni grosz "
+     ],
+     [
       "c",
       "[D]"
+     ],
+     [
+      "x",
+      "kupię dziś chociaż cień tamtych "
      ],
      [
       "c",
@@ -125653,7 +125726,7 @@
      ],
      [
       "x",
-      "Za ostatni grosz kupię dziś chociaż cień tamtych dni."
+      "dni."
      ]
     ],
     [
@@ -125662,16 +125735,24 @@
       "[C]"
      ],
      [
+      "x",
+      "Za ostatni grosz "
+     ],
+     [
       "c",
       "[D]"
      ],
      [
+      "x",
+      "wino z zielonych lat chcę znów "
+     ],
+     [
       "c",
       "[Em]"
      ],
      [
       "x",
-      "Za ostatni grosz wino z zielonych lat chcę znów pić."
+      "pić."
      ]
     ],
     [],
@@ -125682,7 +125763,15 @@
      ],
      [
       "x",
-      "Kiedy zaczął się wić kręty, pochyły szlak."
+      "Kiedy zaczął się wić "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "kręty, pochyły szlak."
      ]
     ],
     [
@@ -125692,7 +125781,15 @@
      ],
      [
       "x",
-      "Gdzie był pierwszy nasz krok w rozpadlinę bez dna."
+      "Gdzie był pierwszy nasz krok "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "w rozpadlinę bez dna."
      ]
     ],
     [
@@ -125702,7 +125799,15 @@
      ],
      [
       "x",
-      "Gdy srebrników garść przekonała nas, że"
+      "Gdy srebrników garść "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "przekonała nas, że"
      ]
     ],
     [
@@ -125712,7 +125817,15 @@
      ],
      [
       "x",
-      "Kiedy dają, to brać, każdy głupi to wie."
+      "Kiedy dają, to brać, "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "każdy głupi to wie."
      ]
     ],
     [],
@@ -125723,7 +125836,15 @@
      ],
      [
       "x",
-      "Bilans zysków i strat prowadzimy od lat,"
+      "Bilans zysków i strat "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "prowadzimy od lat,"
      ]
     ],
     [
@@ -125733,7 +125854,15 @@
      ],
      [
       "x",
-      "Nie ma czego w nim kryć, nie ma czego się bać."
+      "Nie ma czego w nim kryć, "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "nie ma czego się bać."
      ]
     ],
     [
@@ -125743,7 +125872,15 @@
      ],
      [
       "x",
-      "Skąd więc na lustra dnie, z progu każdego dnia"
+      "Skąd więc na lustra dnie, "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "z progu każdego dnia"
      ]
     ],
     [
@@ -125753,7 +125890,15 @@
      ],
      [
       "x",
-      "Wita Cię najpierw wstręt, potem brat jego strach."
+      "Wita Cię najpierw wstręt, "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "potem brat jego strach."
      ]
     ],
     [],
@@ -125769,8 +125914,16 @@
       "[C]"
      ],
      [
+      "x",
+      "Za ostatni grosz "
+     ],
+     [
       "c",
       "[D]"
+     ],
+     [
+      "x",
+      "kupię dziś chociaż cień tamtych "
      ],
      [
       "c",
@@ -125778,7 +125931,7 @@
      ],
      [
       "x",
-      "Za ostatni grosz kupię dziś chociaż cień tamtych dni."
+      "dni."
      ]
     ],
     [
@@ -125787,8 +125940,16 @@
       "[C]"
      ],
      [
+      "x",
+      "Za ostatni grosz "
+     ],
+     [
       "c",
       "[D]"
+     ],
+     [
+      "x",
+      "wino z zielonych lat chcę znów "
      ],
      [
       "c",
@@ -125796,7 +125957,7 @@
      ],
      [
       "x",
-      "Za ostatni grosz wino z zielonych lat chcę znów pić."
+      "pić."
      ]
     ]
    ],
