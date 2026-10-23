@@ -29,6 +29,7 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 | `index.html` | App shell (list view + song view in one document) |
 | `style.css` | Styling, light/dark themes via `[data-theme]` |
 | `chords.js` | **ChordKit** — the shared chord engine: parse chords, search voicings for ukulele and guitar, render SVG diagrams, expose data URIs |
+| `tuner.js` | Microphone tuner: YIN + FFT pitch detection, octave guards, smoothing, ukulele/guitar presets, A4 calibration |
 | `app.js` | Search, filters, sort, favorites, notes, transpose, auto-scroll, songbook switching, import, hash routing, service-worker registration |
 | `songbooks/index.json` | Manifest of bundled songbooks |
 | `songbooks/krakow-ukulele.json` | Bundled dataset (generated — don't hand-edit) |
@@ -73,6 +74,11 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 - Auto-scroll timed to each song's duration (0.2×–3.0×), play/reset, per-song
   speed, notes (localStorage), dark mode, keyboard shortcuts
   (`/` search, `Space` scroll, `←`/`→` songs, `Esc` back).
+- **Tuner** — chromatic-style pitch detection from the microphone with
+  ukulele/guitar presets, auto or manual string selection, A4 calibration
+  (430–450 Hz), and an octave-safe detector. Requires a secure context
+  (HTTPS or localhost), so it works in the hosted/installed PWA but not
+  reliably from the `file://` single-file build.
 - **PWA** — installable, caches the app shell and songbooks for offline use.
 
 ## Songbook JSON format

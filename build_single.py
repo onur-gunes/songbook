@@ -53,6 +53,7 @@ def load_songbooks():
 html = read('index.html')
 css = read('style.css')
 chords = read('chords.js')
+tuner = read('tuner.js')
 app = read('app.js')
 songbooks = load_songbooks()
 
@@ -94,9 +95,12 @@ html = re.sub(r'(src|href|data-light|data-dark)="([^"]+)"', inline_img, html)
 songbooks_js = json.dumps(songbooks, ensure_ascii=False).replace('<', '\\u003c')
 if '<script src="chords.js"></script>' not in html:
     raise SystemExit('chords.js <script> tag not found')
+if '<script src="tuner.js"></script>' not in html:
+    raise SystemExit('tuner.js <script> tag not found')
 if '<script src="app.js"></script>' not in html:
     raise SystemExit('app.js <script> tag not found')
 html = html.replace('<script src="chords.js"></script>', '<script>\n' + chords + '\n</script>')
+html = html.replace('<script src="tuner.js"></script>', '<script>\n' + tuner + '\n</script>')
 html = html.replace(
     '<script src="app.js"></script>',
     '<script>window.__SONGBOOKS__ = ' + songbooks_js + ';</script>\n<script>\n' + app + '\n</script>')
@@ -104,13 +108,14 @@ html = html.replace(
 # 5) self-containment sanity checks
 bad = []
 for pat in [r'src="chords/', r'src="images/', r'href="images/', r'data-light="images/', r'data-dark="images/',
-            r'href="style\.css', r'src="chords\.js', r'src="app\.js', r'href="manifest\.webmanifest',
-            r'href="sw\.js', r'https?://(?!www\.w3\.org)']:
+            r'href="style\.css', r'src="chords\.js', r'src="tuner\.js', r'src="app\.js',
+            r'href="manifest\.webmanifest', r'href="sw\.js',
+            r'https?://(?!www\.w3\.org|github\.com/fgnass/tuner)']:
     if re.search(pat, html):
         bad.append(pat)
 if bad:
     raise SystemExit('bundle still references external resources: ' + ', '.join(bad))
-for chunk, name in [(chords, 'chords.js'), (app, 'app.js'), (songbooks_js, 'songbooks')]:
+for chunk, name in [(chords, 'chords.js'), (tuner, 'tuner.js'), (app, 'app.js'), (songbooks_js, 'songbooks')]:
     if '</script' in chunk.lower():
         raise SystemExit('inline content %s contains a closing script tag sequence' % name)
 if 'images/' in songbooks_js:

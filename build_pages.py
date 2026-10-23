@@ -23,6 +23,7 @@ FILES = [
     'index.html',
     'app.js',
     'chords.js',
+    'tuner.js',
     'style.css',
     'manifest.webmanifest',
     'sw.js',
