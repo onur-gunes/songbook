@@ -113,8 +113,10 @@
 
         /* strum — the pattern chosen for the current song (a pattern object
          * from the library, or null when the song has no time signature and so
-         * no selector). See js/strum.js. */
-        strum: { pattern: null },
+         * no selector), plus how the row is drawn: 'arrows' (↓ ↑ ·) or
+         * 'letters' (D U ·). The notation is a global display preference, like
+         * chordMode, not a per-song value. See js/strum.js. */
+        strum: { pattern: null, notation: 'arrows' },
 
         textSize: 1,
         chordSize: 1,

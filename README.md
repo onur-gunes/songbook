@@ -124,17 +124,19 @@ attached to `SB`.
   `time`. Adjust the tempo and it is remembered for that song; the control is
   hidden for songs with no tempo data. Scheduled against the audio clock
   rather than a timer, so it does not drift.
-- **Strum pattern** — a row of arrows/slashes (`↓ ↑ ·`) under the chord strip,
-  chosen from a small library filtered by the song's `time` (4/4, 3/4, 6/8,
-  2/4). It defaults to the song's documented `strum` where one exists; a manual
-  choice is remembered per song. While the metronome runs the current slot is
-  highlighted in lockstep — the highlight reads the metronome's own audio clock,
-  not a second timer, so the two never diverge — and a one-bar count-in leads
-  in, because a pattern you can't start on beat 1 is not usable for playing
-  along. Hidden for songs with no `time`. **One pattern per song is an
-  approximation**: strum is far less reliably documented than key or bpm and
-  most songs change feel between verse and chorus; per-section patterns are a
-  later feature. Visual only — the metronome is the audio.
+- **Strum pattern** — a row of arrows (`↓ ↑ ·`) under the chord strip, chosen
+  from a library of common patterns filtered by the song's `time` (4/4, 3/4,
+  6/8, 2/4 — several per metre). A toggle switches the row between arrows and
+  `D`/`U` letters (remembered across songs). It defaults to the song's
+  documented `strum` where one exists; a manual choice is remembered per song.
+  While the metronome runs the current slot is highlighted in lockstep — the
+  highlight reads the metronome's own audio clock, not a second timer, so the
+  two never diverge — and a one-bar count-in leads in, because a pattern you
+  can't start on beat 1 is not usable for playing along. Hidden for songs with
+  no `time`. **One pattern per song is an approximation**: strum is far less
+  reliably documented than key or bpm and most songs change feel between verse
+  and chorus; per-section patterns are a later feature. Visual only — the
+  metronome is the audio.
 - **Tuner** — chromatic-style pitch detection from the microphone with
   ukulele/guitar presets, auto or manual string selection, A4 calibration
   (430–450 Hz), and an octave-safe detector. Requires a secure context
