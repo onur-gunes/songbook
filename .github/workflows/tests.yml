@@ -1,0 +1,87 @@
+name: Tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+  # Called by deploy-pages.yml so a push to main must pass the suites
+  # before it is allowed to deploy.
+  workflow_call:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      # ubuntu-latest runners ship Chrome; cdp.py finds it on PATH.
+      CHROME_NO_SANDBOX: '1'
+      BASE_URL: http://localhost:8777
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies
+        run: python3 -m pip install --upgrade websocket-client
+
+      - name: Show Chrome version
+        run: |
+          google-chrome --version || chromium --version
+
+      - name: Serve the app
+        run: |
+          python3 -m http.server 8777 >/tmp/http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS -o /dev/null "$BASE_URL/index.html"; then
+              echo "server up"; exit 0
+            fi
+            sleep 1
+          done
+          echo "server failed to start"; cat /tmp/http.log; exit 1
+
+      # --- unit / parser tests (no browser) ---
+      - name: ChordPro parser + builder tests
+        run: python3 tests/chordpro.py
+
+      # --- browser suites ---
+      - name: Chord engine unit tests
+        run: python3 tests/run_html.py "$BASE_URL/tests/chordkit.html"
+
+      - name: App smoke tests
+        run: python3 tests/smoke.py "$BASE_URL"
+
+      - name: Import / IndexedDB tests
+        run: python3 tests/import.py "$BASE_URL"
+
+      - name: Tuner tests
+        run: python3 tests/tuner.py "$BASE_URL"
+
+      - name: Full behaviour suite
+        run: python3 tests/run_html.py "$BASE_URL/tests/e2e.html"
+
+      - name: Fidelity — all 198 legacy songs
+        run: python3 tests/run_html.py "$BASE_URL/tests/fidelity-all.html"
+
+      # --- builds must succeed and stay reproducible ---
+      - name: Build portable single file
+        run: python3 build_single.py
+
+      - name: Build Pages site
+        run: python3 build_pages.py
+
+      # Songbook.html and songbooks/*.json are committed, so a build that
+      # changes them means the tree was pushed out of sync with its sources.
+      # (_site/ is gitignored and so never shows up here.)
+      - name: Builds are reproducible (no uncommitted drift)
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Build output differs from committed files:"
+            git status --porcelain
+            git diff
+            exit 1
+          fi
+          echo "working tree clean"
