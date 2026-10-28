@@ -747,6 +747,74 @@ async function main() {
     win().location.hash = '#/krakow-ukulele/riptide';
     await wait(250);
 
+    // 19f. degrees replace the chord names in the sheet itself.
+    // The numerals substitute for names rather than annotating them: showing
+    // both would more than double every chord label and push chords off their
+    // lyric column in chords-above mode.
+    const sheetChords = () =>
+        Array.from(doc().querySelectorAll('#sheet .seg-chord')).map(e => e.textContent);
+    const namesInline = sheetChords().slice(0, 6).join(' ');
+    ok('sheet shows chord names by default',
+        namesInline === '[Am] [G] [C] [Am] [G] [C]', namesInline);
+    ok('no show-degrees class by default',
+        !$('sheet').classList.contains('show-degrees'));
+
+    $('numbersBtn').click(); await wait(60);
+    const degsInline = sheetChords().slice(0, 6).join(' ');
+    ok('inline sheet shows degrees instead of names',
+        degsInline === '[vi] [V] [I] [vi] [V] [I]', degsInline);
+    ok('sheet marked show-degrees', $('sheet').classList.contains('show-degrees'));
+    ok('degrees replace names (no name left in the sheet)',
+        sheetChords().every(t => !/[A-G]/.test(t.replace(/[^A-Ga-g#b]/g, ''))
+                                 || !/^\[?[A-G][#b]?m?7?\]?$/.test(t)),
+        sheetChords().slice(0, 10).join(' '));
+
+    // the numeral is a property of the written key, so transposing must not
+    // move it (same guarantee the strip has)
+    $('trUp').click(); await wait(60);
+    ok('sheet degrees stay put when transposing',
+        sheetChords().slice(0, 6).join(' ') === degsInline, sheetChords().slice(0, 6).join(' '));
+    $('trDown').click(); await wait(60);
+
+    // and in chords-above mode
+    doc().querySelector('.chord-mode-btn[data-chord-mode="above"]').click();
+    await wait(300);
+    const aboveDegs = Array.from(doc().querySelectorAll('#sheet .ln-chords .seg-chord'))
+        .map(e => e.textContent).slice(0, 6).join(' ');
+    ok('chords-above shows degrees', aboveDegs === 'vi V I vi V I', aboveDegs);
+    // chords are absolutely positioned per lyric column; degree labels must not
+    // overlap each other (the whole point of substituting rather than adding)
+    const overlaps = (() => {
+        let ov = 0;
+        doc().querySelectorAll('#sheet .ln-chords').forEach(r => {
+            const cs = Array.from(r.querySelectorAll('.seg-chord'))
+                .map(e => { const b = e.getBoundingClientRect(); return [b.left, b.right]; })
+                .sort((a, b) => a[0] - b[0]);
+            for (let i = 1; i < cs.length; i++) if (cs[i][0] < cs[i - 1][1]) ov++;
+        });
+        return ov;
+    })();
+    ok('degree labels do not overlap in chords-above', overlaps === 0, 'overlaps=' + overlaps);
+
+    doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click();
+    await wait(200);
+    $('numbersBtn').click(); await wait(60);
+    ok('sheet returns to chord names',
+        sheetChords().slice(0, 6).join(' ') === namesInline, sheetChords().slice(0, 6).join(' '));
+
+    // strum strokes ("G//") and non-chord markers ("stop") are not chords:
+    // the stroke decoration survives and plain markers pass through untouched
+    win().location.hash = '#/polska-gurom/nie-ma-nas';
+    await wait(250);
+    $('numbersBtn').click(); await wait(60);
+    const strokeOk = sheetChords().every(t =>
+        !/[A-G][#b]?m?(maj)?\d*(sus\d)?(?=\/*\]?$)/.test(t.replace(/^\[|\]$/g, '').replace(/\/+$/, '')) ||
+        /^\[?[ivIVx#b\/°ø+\d\s]*\]?$/.test(t));
+    ok('no bare chord names left once degrees are on', strokeOk, sheetChords().slice(0, 12).join(' '));
+    $('numbersBtn').click(); await wait(60);
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(250);
+
     // 20. no console/page errors overall
     ok('no page errors', errors.length === 0, errors.join('; '));
 

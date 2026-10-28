@@ -66,6 +66,10 @@
     }
 
     function inlineChordLabel(val) {
+        if (SB.state.showNumbers) {
+            var dv = degreeChordValue(val);
+            if (dv !== null) return dv;
+        }
         var cv = SB.transposeChordValue(val, SB.state.transpose);
         var m = cv.match(/^\[([\s\S]*)\]$/);
         return m ? '[' + mapChordTokens(m[1]) + ']' : cv;
@@ -95,7 +99,66 @@
         }).join(' ');
     }
 
+    /* ---- scale-degree numerals in place of chord names ----
+     *
+     * Numerals REPLACE the names rather than annotating them. Showing both
+     * more than doubles every chord label (chord names here average 1.7
+     * chars, and the numeral is the longer of the two 35% of the time), which
+     * in chords-above mode pushes chords off their true lyric column — and in
+     * above mode the horizontal position IS the timing. Substituting costs
+     * ~1.1x width instead, and it is the mode that actually trains interval
+     * recognition: you cannot fall back on reading the letter.
+     *
+     * The chord strip still shows name + numeral together, so there is always
+     * a decoder ring on screen.
+     */
+
+    // Degrees depend only on (token, song key), and the written key cannot
+    // change without a re-render, so one cache per song is enough. A sheet
+    // averages ~97 chord tokens over ~7 distinct chords, and chords-above
+    // re-renders on every debounced resize.
+    var degCache = { song: null, tonic: null, map: null };
+
+    function degreeTonic() {
+        var song = SB.state.currentSong;
+        if (!song) return null;
+        if (degCache.song !== song) {
+            degCache.song = song;
+            degCache.tonic = SB.songTonic(song);
+            degCache.map = {};
+        }
+        return degCache.tonic;
+    }
+
+    function degreeToken(tok) {
+        var tonic = degreeTonic();
+        if (!tonic) return null;
+        if (!Object.prototype.hasOwnProperty.call(degCache.map, tok)) {
+            degCache.map[tok] = SB.tokenDegree(tok, tonic);
+        }
+        return degCache.map[tok];
+    }
+
+    // Rewrite a "[G C]" chord value into "[I IV]". Returns null when the song
+    // has no key at all, so the caller falls back to chord names.
+    function degreeChordValue(val) {
+        if (!degreeTonic()) return null;
+        var m = String(val).match(/^\[([\s\S]*)\]$/);
+        if (!m) return null;
+        var inner = m[1].split(/\s+/).map(function (t) {
+            if (ChordKit.isMutedName(t)) return 'chuck';
+            // Tokens with no numeral — "stop", "riff", repeat counts — are
+            // not chords and stay exactly as authored.
+            return degreeToken(t) || t;
+        }).join(' ');
+        return '[' + inner + ']';
+    }
+
     function chordLabel(val) {
+        if (SB.state.showNumbers) {
+            var dv = degreeChordValue(val);
+            if (dv !== null) return dv.slice(1, -1);
+        }
         var cv = SB.transposeChordValue(val, SB.state.transpose);
         var m = cv.match(/^\[([\s\S]*)\]$/);
         return m ? mapChordTokens(m[1]) : cv;
@@ -138,9 +201,9 @@
         return lyricsCtx;
     }
 
-    function sheetFontFor(kind) {
+    function sheetFontFor(kind, family) {
         var cs = getComputedStyle(SB.$('sheet'));
-        var fam = cs.fontFamily || 'Verdana, Tahoma, sans-serif';
+        var fam = family || cs.fontFamily || 'Verdana, Tahoma, sans-serif';
         var size = parseFloat(cs.fontSize) || 14.4;
         var style = 'normal', weight = '400';
         if (kind === 'b') weight = '700';
@@ -167,9 +230,16 @@
 
     // Width of a chord label as drawn (bold, same size as the sheet). Used to
     // keep consecutive chords from overlapping when the lyric column is narrow.
+    // In degree mode the labels are set in the mono face (see .show-degrees in
+    // style.css), so measure the family the chord spans actually use — not the
+    // sheet's proportional one — or the overlap guard works off the wrong width.
     function chordLabelWidth(label) {
+        var mono = null;
+        if (SB.state.showNumbers) {
+            mono = getComputedStyle(document.documentElement).getPropertyValue('--mono').trim() || null;
+        }
         var ctx = lyricsMeasureCtx();
-        ctx.font = sheetFontFor('b');
+        ctx.font = sheetFontFor('b', mono);
         return ctx.measureText(label).width;
     }
 

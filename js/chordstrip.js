@@ -9,28 +9,16 @@
 
     /* ---------------- chord strip (ChordKit) ---------------- */
 
-    // Tonic the sheet chords are written in: the curated sheetKey when present,
-    // otherwise recording key minus capo.
-    function songTonic(song) {
-        if (!song) return null;
-        if (song.sheetKey) {
-            var sk = ChordKit.parse(song.sheetKey);
-            if (sk) return { pc: sk.rootPc, minor: sk.type.id === 'm', name: song.sheetKey };
-        }
-        if (!song.key) return null;
-        var k = ChordKit.parse(song.key);
-        if (!k) return null;
-        var capo = (typeof song.capo === 'number' && isFinite(song.capo)) ? song.capo : 0;
-        return { pc: ((k.rootPc - capo) % 12 + 12) % 12, minor: k.type.id === 'm', name: '' };
-    }
-
     // The number is computed from the untransposed chord and tonic so it stays
-    // put as the user transposes.
+    // put as the user transposes. songTonic/tokenDegree live in js/transpose.js
+    // so the sheet renderers share them.
+    //
+    // The strip is the one place that shows the name AND the numeral together:
+    // it lists each chord once (~7 per song), so it stays the decoder ring
+    // while the sheet substitutes numerals for names.
     function addChordDegree(item, name, song) {
         if (!SB.state.showNumbers) return;
-        var tonic = songTonic(song);
-        if (!tonic) return;
-        var deg = ChordKit.scaleDegree(name, tonic.pc, tonic.minor, tonic.name);
+        var deg = SB.tokenDegree(name, SB.songTonic(song));
         if (deg) item.appendChild(SB.el('span', 'cdeg', deg));
     }
 

@@ -66,7 +66,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/songbooks.js` | Songbook normalisation/validation, indexing, active songbook |
 | `js/personal.js` | Favourites, per-song notes, recently played |
 | `js/instrument.js` | Ukulele/guitar selection |
-| `js/transpose.js` | Chord token parsing and semitone transposition |
+| `js/transpose.js` | Chord token parsing, semitone transposition, and the written-key scale degrees (`songTonic`, `tokenDegree`) shared by the sheet and the strip |
 | `js/sheet.js` | Both sheet renderers (inline chords and chords-above-lyrics) |
 | `js/chordstrip.js` | Sticky chord strip and the voicing chooser |
 | `js/list.js` | List view: search, filters, sort, songbook picker |
@@ -101,6 +101,15 @@ attached to `SB`.
 - Transpose −/+/0 (sharp spelling, slash basses and strum strokes preserved,
   non-chord tokens like `stop`/`NC`/riff tabs untouched; strip names and diagrams
   transpose too).
+- **Scale degrees** — `I-V` swaps the chord names in the sheet for Roman
+  numerals (`Am G C` → `vi V I`), in both chord placements, for practising
+  intervals. The numerals *replace* the names rather than annotating them:
+  showing both more than doubles every chord label, which in Above mode shoves
+  chords off the lyric column they are timed to. The chord strip keeps name +
+  numeral together as the decoder ring. Degrees come from the written key
+  (`sheetKey`, else `key` − `capo`), so they stay put while you transpose;
+  strum strokes keep their slashes (`G//` → `V//`) and non-chord markers are
+  left alone.
 - Chord diagrams are generated on the fly by **chords.js** — one consistent SVG
   per chart, for both instruments, including chords never in the original artwork.
 - Click a strip chord to open the **voicing chooser**: every playable voicing
