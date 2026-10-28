@@ -815,7 +815,127 @@ async function main() {
     win().location.hash = '#/krakow-ukulele/riptide';
     await wait(250);
 
-    // 20. no console/page errors overall
+    // 20. metronome
+    const mGroup = () => $('metronomeGroup');
+    const mState = () => win().songbookTest.metronome;
+
+    // the control only exists for songs that have a tempo
+    win().location.hash = '#/polska-gurom/nie-ma-nas';
+    await wait(250);
+    ok('metronome hidden without tempo data', mGroup().hidden === true, 'hidden=' + mGroup().hidden);
+    ok('no bpm without tempo data', mState().bpm === null, String(mState().bpm));
+    // the stepper must not invent a tempo for a song that has none: null
+    // coerces to 0 in arithmetic, which would clamp up to the 20 floor and
+    // un-hide the control
+    $('bpmUp').click(); $('bpmDown').click(); await wait(30);
+    ok('stepper does not invent a tempo', mState().bpm === null, String(mState().bpm));
+    ok('still hidden after stepping', mGroup().hidden === true, 'hidden=' + mGroup().hidden);
+    ok('no bpm key written without a tempo',
+        win().localStorage.getItem('songbook:bpm:polska-gurom\u0000nie-ma-nas') === null,
+        win().localStorage.getItem('songbook:bpm:polska-gurom\u0000nie-ma-nas'));
+
+    // arahja carries bpm 176 / 4-4 in the songbook
+    win().location.hash = '#/polska-gurom/arahja';
+    await wait(250);
+    ok('metronome shown with tempo data', mGroup().hidden === false, 'hidden=' + mGroup().hidden);
+    ok('bpm defaults from the song', $('bpmValue').textContent === '176', $('bpmValue').textContent);
+    ok('beats per bar from time signature', mState().beats === 4, String(mState().beats));
+    ok('6/8 counted in two dotted-quarter pulses',
+        win().songbookTest.metronomeBeatsPerBar('6/8') === 2 &&
+        win().songbookTest.metronomeBeatsPerBar('3/4') === 3 &&
+        win().songbookTest.metronomeBeatsPerBar(null) === 4);
+
+    // stepper adjusts and persists the override under the namespaced key
+    $('bpmUp').click(); await wait(30);
+    ok('bpm +1', $('bpmValue').textContent === '177', $('bpmValue').textContent);
+    $('bpmDown').click(); $('bpmDown').click(); await wait(30);
+    ok('bpm -1 twice', $('bpmValue').textContent === '175', $('bpmValue').textContent);
+    ok('bpm persisted', win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja') === '175',
+        win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja'));
+
+    // the override survives navigation away and back, and does not leak
+    // into another song that has its own tempo
+    win().location.hash = '#/polska-gurom/baranek';
+    await wait(250);
+    ok('other song keeps its own bpm', $('bpmValue').textContent === '87', $('bpmValue').textContent);
+    win().location.hash = '#/polska-gurom/arahja';
+    await wait(250);
+    ok('bpm override remembered', $('bpmValue').textContent === '175', $('bpmValue').textContent);
+
+    // clamps: the schema's 20-300 range
+    for (let i = 0; i < 200; i++) $('bpmDown').click();
+    ok('bpm clamps low', $('bpmValue').textContent === '20', $('bpmValue').textContent);
+    for (let i = 0; i < 320; i++) $('bpmUp').click();
+    ok('bpm clamps high', $('bpmValue').textContent === '300', $('bpmValue').textContent);
+
+    // A known, fast tempo keeps the drift assertion below both readable and
+    // quick: 240bpm is a click every 0.25s, so the window below covers more
+    // than a full 4/4 bar without a long wall-clock wait.
+    for (let i = 0; i < 200 && $('bpmValue').textContent !== '240'; i++) $('bpmDown').click();
+    ok('bpm set to 240', $('bpmValue').textContent === '240', $('bpmValue').textContent);
+
+    // start/stop and the scheduled grid
+    ok('metronome idle before start', mState().playing === false);
+    $('metronomeBtn').click();
+    await wait(1700);
+    ok('metronome starts', mState().playing === true);
+    ok('metronome button reflects playing',
+        $('metronomeBtn').getAttribute('aria-pressed') === 'true' &&
+        $('metronomeBtn').classList.contains('playing'));
+
+    const clicks = win().songbookTest.metronomeLog();
+    ok('clicks were scheduled across a full bar', clicks.length >= 5, 'n=' + clicks.length);
+    if (clicks.length >= 5) {
+        // Timer jitter must not reach the audio clock: every scheduled click
+        // sits on an exact 60/bpm grid, which is what "no audible drift"
+        // means. Compare against the ideal grid, not neighbour-to-neighbour,
+        // so accumulating error cannot hide.
+        const spb = 60 / 240;
+        const t0 = clicks[0].time;
+        let worst = 0;
+        clicks.forEach((c, i) => { worst = Math.max(worst, Math.abs((c.time - t0) - i * spb)); });
+        ok('scheduled clicks stay on the beat grid', worst < 1e-6, 'worst drift=' + worst.toExponential(2) + 's');
+        ok('beat 1 accented', clicks[0].accent === true && clicks[1].accent === false,
+            clicks.slice(0, 5).map(c => c.accent ? 'A' : '.').join(''));
+        const accents = clicks.map(c => c.accent);
+        ok('accent every 4 beats in 4/4',
+            accents.every((a, i) => a === (i % 4 === 0)),
+            accents.map(a => a ? 'A' : '.').join(''));
+    }
+
+    // a tempo change mid-count keeps the click track running rather than
+    // stalling it — the scheduler re-reads bpm on each pass
+    const nBefore = win().songbookTest.metronomeLog().length;
+    $('bpmDown').click(); await wait(600);
+    ok('keeps counting after a live tempo change',
+        mState().playing === true && win().songbookTest.metronomeLog().length > nBefore,
+        nBefore + ' -> ' + win().songbookTest.metronomeLog().length);
+
+    $('metronomeBtn').click(); await wait(50);
+    ok('metronome stops', mState().playing === false);
+    ok('stopped button state',
+        $('metronomeBtn').getAttribute('aria-pressed') === 'false' &&
+        !$('metronomeBtn').classList.contains('playing'));
+
+    // navigating away stops a running metronome
+    $('metronomeBtn').click(); await wait(100);
+    ok('metronome running again', mState().playing === true);
+    win().location.hash = '#/polska-gurom/baranek';
+    await wait(250);
+    ok('song navigation stops the metronome', mState().playing === false);
+
+    $('metronomeBtn').click(); await wait(100);
+    ok('metronome running before route change', mState().playing === true);
+    win().location.hash = '#/polska-gurom';
+    await wait(250);
+    ok('route change stops the metronome', mState().playing === false);
+
+    win().localStorage.removeItem('songbook:bpm:polska-gurom\u0000arahja');
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(250);
+    ok('metronome hidden on a book with no tempo data', mGroup().hidden === true, 'hidden=' + mGroup().hidden);
+
+    // 21. no console/page errors overall
     ok('no page errors', errors.length === 0, errors.join('; '));
 
     // done

@@ -76,6 +76,16 @@ def _launch_once(port, user_data_dir, timeout):
         '--user-data-dir=' + user_data_dir,
         '--no-first-run',
         '--no-default-browser-check',
+        # The metronome suite needs a running AudioContext, and a context is
+        # only allowed to start from a trusted user gesture. The suites drive
+        # the UI with in-page element.click(), which is untrusted, so without
+        # this flag Chrome leaves every context suspended with currentTime
+        # frozen at 0 and no click is ever scheduled. This relaxes the gesture
+        # requirement in the test browser only — it does not weaken the real
+        # rule the metronome and tuner are written against, which is that the
+        # context must be created inside the gesture (see js/metronome.js and
+        # tuner.js:898); iOS enforces that regardless of autoplay policy.
+        '--autoplay-policy=no-user-gesture-required',
     ]
     # CI containers run as root without a usable sandbox; these flags are
     # required there and harmless on a desktop.

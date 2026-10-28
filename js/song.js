@@ -28,6 +28,7 @@
 
     SB.openSong = function (id) {
         SB.closeVoicingChooser();
+        SB.stopMetronome();
         var song = SB.state.byId[id];
         if (!song) { location.hash = '#/' + (SB.state.active ? SB.state.active.id : ''); return; }
         SB.state.currentSong = song;
@@ -37,6 +38,7 @@
         SB.updateSpeedLabel();
         SB.state.textSize = SB.loadTextSizeForSong(SB.state.active.id, id);
         SB.applyTextSize();
+        SB.loadMetronomeForSong(song);
 
         SB.state.transpose = 0;
         SB.updateTransposeLabel();
@@ -122,6 +124,7 @@
                 SB.renderSheet(SB.state.currentSong);
             }
         });
+        SB.bindMetronome();
         SB.applyChordSettings();
         SB.applyChordMode();
         SB.applyNumbers();

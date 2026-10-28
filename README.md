@@ -73,6 +73,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/import.js` | Importing a songbook JSON from disk |
 | `js/song.js` | Song view and its controls |
 | `js/autoscroll.js` | Auto-scroll, text/chord sizing, pinch zoom |
+| `js/metronome.js` | Metronome: lookahead click scheduler and per-song BPM |
 | `js/router.js` | Hash routing |
 | `js/keyboard.js` | Global keyboard shortcuts |
 | `js/app.js` | Entry point: `init()`, service-worker registration, test export |
@@ -118,6 +119,10 @@ attached to `SB`.
 - Auto-scroll timed to each song's duration (0.2×–3.0×), play/reset, per-song
   speed, notes (localStorage), dark mode, keyboard shortcuts
   (`/` search, `Space` scroll, `←`/`→` songs, `Esc` back).
+- **Metronome** — clicks at the song's `bpm`, accenting beat 1 according to
+  `time`. Adjust the tempo and it is remembered for that song; the control is
+  hidden for songs with no tempo data. Scheduled against the audio clock
+  rather than a timer, so it does not drift.
 - **Tuner** — chromatic-style pitch detection from the microphone with
   ukulele/guitar presets, auto or manual string selection, A4 calibration
   (430–450 Hz), and an octave-safe detector. Requires a secure context
@@ -273,7 +278,8 @@ do not carry.
 `bpm` is the **felt pulse**, not the notated beat — quarter-note BPM in simple
 metres (`4/4`, `3/4`, `2/4`) and **dotted-quarter** BPM in compound `6/8`. So a
 6/8 song at 60 has two pulses per bar, not six. This keeps `bpm` meaning "what
-a metronome clicks" in every metre.
+a metronome clicks" in every metre, and is why the metronome accents every
+second click in `6/8` rather than every sixth.
 
 Tempo is validated, never guessed: a value outside 20–300, or a metre outside
 the allowlist, is a build error rather than a silent default, because a wrong
