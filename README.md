@@ -30,7 +30,7 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 | `style.css` | Styling, light/dark themes via `[data-theme]` |
 | `chords.js` | **ChordKit** — the shared chord engine: parse chords, search voicings for ukulele and guitar, render SVG diagrams, expose data URIs |
 | `tuner.js` | Microphone tuner: YIN + FFT pitch detection, octave guards, smoothing, ukulele/guitar presets, A4 calibration |
-| `app.js` | Search, filters, sort, favorites, notes, transpose, auto-scroll, songbook switching, import, hash routing, service-worker registration |
+| `js/` | The app itself, split by concern — search, filters, sort, favorites, notes, transpose, auto-scroll, songbook switching, import, hash routing, service-worker registration (see [App modules](#app-modules)) |
 | `songbooks/index.json` | Manifest of bundled songbooks |
 | `songbooks/krakow-ukulele.json` | Bundled dataset (generated — don't hand-edit) |
 | `songbooks/polska-gurom.json` | Bundled dataset (generated from `chordpro/polska-gurom/` — don't hand-edit) |
@@ -45,6 +45,41 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 | `build_single.py` | Bundles everything into `Songbook.html` |
 | `build_pages.py` | Assembles `_site/` for GitHub Pages |
 | `tests/` | CDP + headless-Chrome test suites |
+
+## App modules
+
+`js/` holds the app, one file per concern. They are **classic scripts sharing a
+single `window.SB` namespace — not ES modules**: native modules are CORS-blocked
+over `file://`, which would break the portable `Songbook.html`, and bundling them
+would mean adding a JS toolchain to a deliberately zero-dependency project.
+
+The ordered `<script src="js/*.js">` tags in `index.html` are the single source of
+truth for load order — `build_single.py` and `build_pages.py` both read them, so
+adding a module means editing `index.html` only. `core.js` must load first (it
+creates `SB.state`) and `app.js` last (it runs `init()`).
+
+| File | Purpose |
+| --- | --- |
+| `js/core.js` | Helpers (`$`, `el`, `lsGet`/`lsSet`), storage keys, and the shared `SB.state` container |
+| `js/theme.js` | Light/dark theme and the songbook brand logo |
+| `js/idb.js` | IndexedDB persistence for imported songbooks |
+| `js/songbooks.js` | Songbook normalisation/validation, indexing, active songbook |
+| `js/personal.js` | Favourites, per-song notes, recently played |
+| `js/instrument.js` | Ukulele/guitar selection |
+| `js/transpose.js` | Chord token parsing and semitone transposition |
+| `js/sheet.js` | Both sheet renderers (inline chords and chords-above-lyrics) |
+| `js/chordstrip.js` | Sticky chord strip and the voicing chooser |
+| `js/list.js` | List view: search, filters, sort, songbook picker |
+| `js/import.js` | Importing a songbook JSON from disk |
+| `js/song.js` | Song view and its controls |
+| `js/autoscroll.js` | Auto-scroll, text/chord sizing, pinch zoom |
+| `js/router.js` | Hash routing |
+| `js/keyboard.js` | Global keyboard shortcuts |
+| `js/app.js` | Entry point: `init()`, service-worker registration, test export |
+
+State shared by more than one module lives in `SB.state` (`js/core.js`); anything
+used by a single module stays a local `var`. Functions used across modules are
+attached to `SB`.
 
 ## Features
 
@@ -250,22 +285,30 @@ not sell, relicense or redistribute it as a collection. See
 
 ## Run the tests
 
-Start a server first, then run the suites. Chrome is driven over the DevTools
-Protocol (requires `pip install websocket-client`):
+Every suite below runs in CI on pull requests, and a push to `main` must pass
+them before it is allowed to deploy (`.github/workflows/tests.yml`).
+
+To run them locally, start a server first. Chrome is driven over the DevTools
+Protocol (requires `pip install websocket-client`); the browser is found
+automatically on macOS and Linux, or set `CHROME_PATH` if it lives somewhere
+unusual:
 
 ```sh
 python3 -m http.server 8777 &
 
-# engine unit tests (voicings, parsing, SVG) — 23 assertions
+# engine unit tests (voicings, parsing, SVG)
 python3 tests/run_html.py http://localhost:8777/tests/chordkit.html
 
-# app smoke: list, routing, instrument toggle, diagrams — 11 assertions
+# app smoke: list, routing, instrument toggle, diagrams
 python3 tests/smoke.py  http://localhost:8777
 
-# import -> IndexedDB -> reload -> remove — 12 assertions
+# import -> IndexedDB -> reload -> remove
 python3 tests/import.py http://localhost:8777
 
-# full behavior suite: search/filter/sort/fav/notes/scroll/theme/chooser/… — 168 assertions
+# tuner: presets, calibration, octave guards, overlay behaviour
+python3 tests/tuner.py  http://localhost:8777
+
+# full behavior suite: search/filter/sort/fav/notes/scroll/theme/chooser/…
 python3 tests/run_html.py http://localhost:8777/tests/e2e.html
 
 # all 198 songs: every legacy page line present in the rendered sheet + transpose cycles

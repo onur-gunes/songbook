@@ -21,7 +21,6 @@ SW = os.path.join(D, 'sw.js')
 
 FILES = [
     'index.html',
-    'app.js',
     'chords.js',
     'tuner.js',
     'style.css',
@@ -30,7 +29,8 @@ FILES = [
     'LICENSE',
     'NOTICE.md',
 ]
-DIRS = ['songbooks', 'images']
+# js/ holds the app modules; index.html sets their load order.
+DIRS = ['songbooks', 'images', 'js']
 
 # Files in _site/ that are intentionally left out of the offline precache.
 # Songbook.html is a large self-contained download, not part of the app shell.
@@ -120,6 +120,15 @@ def main():
             raise SystemExit('missing runtime dir: ' + name)
         dst = os.path.join(SITE, name)
         shutil.copytree(src, dst, ignore=shutil.ignore_patterns('.DS_Store'))
+
+    # Every script index.html loads must have made it into _site/, so a new
+    # module can't be left behind (and therefore left out of the precache).
+    page = open(os.path.join(D, 'index.html'), encoding='utf-8').read()
+    for src_attr in re.findall(r'<script src="([^"]+)"></script>', page):
+        if not os.path.exists(os.path.join(SITE, src_attr)):
+            raise SystemExit(
+                'index.html loads %s but it was not copied into _site/ — '
+                'add its directory to DIRS (or the file to FILES)' % src_attr)
 
     # portable offline build, downloadable from the site
     subprocess.check_call([sys.executable, os.path.join(D, 'build_single.py')])

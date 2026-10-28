@@ -52,10 +52,19 @@ def load_songbooks():
 
 html = read('index.html')
 css = read('style.css')
-chords = read('chords.js')
-tuner = read('tuner.js')
-app = read('app.js')
 songbooks = load_songbooks()
+
+# index.html's <script src=...> tags are the single source of truth for
+# which app modules exist and what order they load in, so adding a module
+# never means editing this script.
+SCRIPT_TAG = re.compile(r'<script src="([^"]+)"></script>')
+script_srcs = SCRIPT_TAG.findall(html)
+if not script_srcs:
+    raise SystemExit('no <script src="..."> tags found in index.html')
+missing = [s for s in script_srcs if not os.path.exists(os.path.join(D, s))]
+if missing:
+    raise SystemExit('index.html references missing script(s): ' + ', '.join(missing))
+scripts = [(s, read(s)) for s in script_srcs]
 
 # songbook logos live inside the JSON; inline them as data URIs so the bundle stays self-contained
 def inline_logo(val):
@@ -91,31 +100,32 @@ def inline_img(m):
 
 html = re.sub(r'(src|href|data-light|data-dark)="([^"]+)"', inline_img, html)
 
-# 4) inline the scripts; bundled songbooks become window.__SONGBOOKS__
+# 4) inline the scripts in index.html's order; bundled songbooks become
+#    window.__SONGBOOKS__, injected before the first app module so it is
+#    set by the time the app's entry point runs.
 songbooks_js = json.dumps(songbooks, ensure_ascii=False).replace('<', '\\u003c')
-if '<script src="chords.js"></script>' not in html:
-    raise SystemExit('chords.js <script> tag not found')
-if '<script src="tuner.js"></script>' not in html:
-    raise SystemExit('tuner.js <script> tag not found')
-if '<script src="app.js"></script>' not in html:
-    raise SystemExit('app.js <script> tag not found')
-html = html.replace('<script src="chords.js"></script>', '<script>\n' + chords + '\n</script>')
-html = html.replace('<script src="tuner.js"></script>', '<script>\n' + tuner + '\n</script>')
-html = html.replace(
-    '<script src="app.js"></script>',
-    '<script>window.__SONGBOOKS__ = ' + songbooks_js + ';</script>\n<script>\n' + app + '\n</script>')
+first_app_module = next((s for s, _ in scripts if s.startswith('js/')), None)
+for src, code in scripts:
+    tag = '<script src="%s"></script>' % src
+    block = '<script>\n' + code + '\n</script>'
+    if src == first_app_module:
+        block = ('<script>window.__SONGBOOKS__ = ' + songbooks_js + ';</script>\n'
+                 + block)
+    html = html.replace(tag, block)
 
 # 5) self-containment sanity checks
 bad = []
-for pat in [r'src="chords/', r'src="images/', r'href="images/', r'data-light="images/', r'data-dark="images/',
-            r'href="style\.css', r'src="chords\.js', r'src="tuner\.js', r'src="app\.js',
-            r'href="manifest\.webmanifest', r'href="sw\.js',
-            r'https?://(?!www\.w3\.org|github\.com/fgnass/tuner)']:
+# every script index.html loaded must now be inlined, not referenced
+patterns = [r'src="chords/', r'src="images/', r'href="images/', r'data-light="images/', r'data-dark="images/',
+            r'href="style\.css', r'href="manifest\.webmanifest', r'href="sw\.js',
+            r'https?://(?!www\.w3\.org|github\.com/fgnass/tuner)']
+patterns += [r'src="%s"' % re.escape(s) for s, _ in scripts]
+for pat in patterns:
     if re.search(pat, html):
         bad.append(pat)
 if bad:
     raise SystemExit('bundle still references external resources: ' + ', '.join(bad))
-for chunk, name in [(chords, 'chords.js'), (tuner, 'tuner.js'), (app, 'app.js'), (songbooks_js, 'songbooks')]:
+for chunk, name in [(songbooks_js, 'songbooks')] + [(c, s) for s, c in scripts]:
     if '</script' in chunk.lower():
         raise SystemExit('inline content %s contains a closing script tag sequence' % name)
 if 'images/' in songbooks_js:

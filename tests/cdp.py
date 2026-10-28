@@ -5,27 +5,71 @@ debugging port and lets tests navigate the page, evaluate JS, and surface
 console errors / uncaught exceptions without relying on flaky virtual time.
 """
 import json
+import os
+import shutil
 import subprocess
+import sys
 import time
 import urllib.parse
 import urllib.request
 
 import websocket
 
+# Where Chrome lives, per platform. macOS keeps it in /Applications; Linux
+# (and CI runners) put a binary on PATH under one of several names. Override
+# with CHROME_PATH when Chrome is somewhere non-standard.
+_MAC_CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+_CHROME_NAMES = (
+    'google-chrome',
+    'google-chrome-stable',
+    'chromium',
+    'chromium-browser',
+    'chrome',
+)
+
+
+def chrome_binary():
+    """Locate a headless-capable Chrome/Chromium for this machine."""
+    env = os.environ.get('CHROME_PATH')
+    if env:
+        if os.path.exists(env) or shutil.which(env):
+            return env
+        raise RuntimeError('CHROME_PATH is set but not usable: %s' % env)
+
+    if sys.platform == 'darwin' and os.path.exists(_MAC_CHROME):
+        return _MAC_CHROME
+
+    for name in _CHROME_NAMES:
+        found = shutil.which(name)
+        if found:
+            return found
+
+    if os.path.exists(_MAC_CHROME):
+        return _MAC_CHROME
+
+    raise RuntimeError(
+        'No Chrome/Chromium found. Install Google Chrome, or set CHROME_PATH '
+        'to the browser binary. Looked for: %s' % ', '.join(_CHROME_NAMES))
+
 
 def launch_chrome(port=9333, user_data_dir=None):
     import tempfile
     user_data_dir = user_data_dir or tempfile.mkdtemp(prefix='songbook-cdp-')
-    proc = subprocess.Popen([
-        '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    argv = [
+        chrome_binary(),
         '--headless=new',
         '--remote-debugging-port=%d' % port,
         '--remote-allow-origins=*',
         '--user-data-dir=' + user_data_dir,
         '--no-first-run',
         '--no-default-browser-check',
-        'about:blank',
-    ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    ]
+    # CI containers run as root without a usable sandbox; these flags are
+    # required there and harmless on a desktop.
+    if os.environ.get('CHROME_NO_SANDBOX'):
+        argv += ['--no-sandbox', '--disable-dev-shm-usage']
+    argv.append('about:blank')
+    proc = subprocess.Popen(argv, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     deadline = time.time() + 15
     while time.time() < deadline:
         try:
