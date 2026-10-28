@@ -36,6 +36,9 @@ DIRS = ['songbooks', 'images', 'js']
 # Songbook.html is a large self-contained download, not part of the app shell.
 CORE_EXCLUDE = {'sw.js', '.nojekyll', 'Songbook.html', '.DS_Store'}
 
+# Where the prod deploy nests the dev build (see .github/workflows/deploy-pages.yml).
+DEV_DIR = 'dev'
+
 VERSION_RE = re.compile(
     r'/\* @generated-version:start \*/.*?/\* @generated-version:end \*/',
     re.DOTALL)
@@ -45,12 +48,19 @@ CORE_RE = re.compile(
 
 
 def collect_core():
-    """Return the sorted list of _site/-relative paths to precache offline."""
+    """Return the sorted list of _site/-relative paths to precache offline.
+
+    The prod deploy nests the dev build at _site/dev/, so that subtree is
+    skipped: without this prod's service worker would precache the whole dev
+    site and ship it to every live user.
+    """
     core = ['./']
     for root, _, files in os.walk(SITE):
         for f in files:
             rel = os.path.relpath(os.path.join(root, f), SITE).replace(os.sep, '/')
             if rel in CORE_EXCLUDE:
+                continue
+            if rel == DEV_DIR or rel.startswith(DEV_DIR + '/'):
                 continue
             core.append(rel)
     core[1:] = sorted(core[1:])
@@ -86,6 +96,9 @@ def apply_generated_blocks(core, version):
     The source sw.js is left untouched as the template (its markers carry a
     safe fallback so the unbuilt tree still runs); only the copied file that
     actually ships gets the generated manifest and version.
+
+    ENV is deliberately not injected here: sw.js derives it from its own URL,
+    so the dev and prod artifacts stay byte-identical.
     """
     body = open(SW, 'r', encoding='utf-8').read()
     if not VERSION_RE.search(body) or not CORE_RE.search(body):
