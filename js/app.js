@@ -106,7 +106,12 @@
         targetVel: SB.targetVel,
         metronome: SB.state.metronome,
         metronomeBeatsPerBar: SB.metronomeBeatsPerBar,
-        metronomeLog: function () { return SB.metronomeLog.slice(); }
+        metronomeLog: function () { return SB.metronomeLog.slice(); },
+        metronomePosition: function () { return SB.metronomePosition(); },
+        strum: SB.state.strum,
+        strumPatterns: SB.strumPatterns,
+        strumPatternsFor: SB.strumPatternsFor,
+        setStrum: SB.setStrum
     };
 
 })(window.SB = window.SB || {});

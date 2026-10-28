@@ -111,6 +111,11 @@
          * accent beat 1. See js/metronome.js. */
         metronome: { playing: false, bpm: null, beats: 4 },
 
+        /* strum — the pattern chosen for the current song (a pattern object
+         * from the library, or null when the song has no time signature and so
+         * no selector). See js/strum.js. */
+        strum: { pattern: null },
+
         textSize: 1,
         chordSize: 1,
         chordPin: true,

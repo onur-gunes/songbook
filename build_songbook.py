@@ -94,14 +94,19 @@ def load_original_keys(book_dir):
 def load_tempo(book_dir):
     """Load an optional per-book tempo.json sidecar.
 
-    Shape mirrors original-keys.json: song id -> {bpm, time, confidence,
-    source} (or a bare bpm number). `confidence` and `source` are curation
-    metadata only and never reach the built book — published bpm values
-    disagree between sources, so the sidecar records where each one came from
-    and how much it is trusted, exactly as original-keys.json does for keys.
+    Shape mirrors original-keys.json: song id -> {bpm, time, strum,
+    confidence, source} (or a bare bpm number). `confidence` and `source` are
+    curation metadata only and never reach the built book — published bpm
+    values disagree between sources, so the sidecar records where each one came
+    from and how much it is trusted, exactly as original-keys.json does for
+    keys. Strum patterns are even less reliably documented than bpm, so their
+    `confidence`/`source` matter more, not less.
 
     Invalid entries are dropped here rather than merged, so a typo in the
     sidecar cannot be mistaken for a deliberate tempo on a song that has none.
+    The strum id's metre is checked against the entry's `time` in
+    validate_songbook, not here, because here each field is validated in
+    isolation.
     """
     path = os.path.join(book_dir, 'tempo.json')
     if not os.path.exists(path):
@@ -114,8 +119,9 @@ def load_tempo(book_dir):
         if isinstance(value, dict):
             raw_bpm = value.get('bpm')
             raw_time = value.get('time')
+            raw_strum = value.get('strum')
         else:
-            raw_bpm, raw_time = value, None
+            raw_bpm, raw_time, raw_strum = value, None, None
         entry = {}
         if raw_bpm is not None:
             bpm = chordpro.parse_bpm(raw_bpm)
@@ -129,6 +135,12 @@ def load_tempo(book_dir):
                 rejected.append('%s time=%r' % (key, raw_time))
             else:
                 entry['time'] = time_sig
+        if raw_strum is not None:
+            strum_id = chordpro.parse_strum(raw_strum)
+            if strum_id is None:
+                rejected.append('%s strum=%r' % (key, raw_strum))
+            else:
+                entry['strum'] = strum_id
         if entry:
             out[key] = entry
     return out, rejected
@@ -159,6 +171,22 @@ def validate_songbook(book):
                    if 'bpm' in s and chordpro.parse_bpm(s.get('bpm')) != s.get('bpm')]
     invalid_times = ['%s (%r)' % (s.get('id') or '?', s.get('time')) for s in songs
                      if 'time' in s and chordpro.parse_time(s.get('time')) != s.get('time')]
+    # strum is optional, but a present one must name a real pattern AND that
+    # pattern's metre must match the song's own `time` — a 3/4 pattern on a 4/4
+    # song would render a row that does not line up with the metronome. A strum
+    # with no time at all is also a mistake: the selector is driven by metre.
+    _strum_metre = {p['id']: p['time'] for p in chordpro.STRUM_PATTERNS}
+    invalid_strums = []
+    for s in songs:
+        if 'strum' not in s:
+            continue
+        sid = s.get('id') or '?'
+        val = s.get('strum')
+        if chordpro.parse_strum(val) != val:
+            invalid_strums.append('%s (%r: unknown pattern)' % (sid, val))
+        elif _strum_metre.get(val) != s.get('time'):
+            invalid_strums.append('%s (%r: %s pattern, song time %r)'
+                                  % (sid, val, _strum_metre.get(val), s.get('time')))
 
     bad_shape, bad_blank, bad_pre, bad_chords = [], [], [], []
     entities = []
@@ -211,6 +239,8 @@ def validate_songbook(book):
     if invalid_times:
         errors.append('invalid time signatures (expected %s): %s'
                       % (', '.join(chordpro.TIME_SIGNATURES), invalid_times))
+    if invalid_strums:
+        errors.append('invalid strum patterns: %s' % invalid_strums)
     if bad_shape:
         errors.append('sheet lines are not lists: %s' % bad_shape)
     if bad_blank:
@@ -231,8 +261,10 @@ def validate_songbook(book):
         'invalid_durations': invalid_durations,
         'invalid_bpm': invalid_bpm,
         'invalid_times': invalid_times,
+        'invalid_strums': invalid_strums,
         'with_bpm': sum(1 for s in songs if 'bpm' in s),
         'with_time': sum(1 for s in songs if 'time' in s),
+        'with_strum': sum(1 for s in songs if 'strum' in s),
         'bad_shape': bad_shape,
         'bad_blank': bad_blank,
         'bad_pre': bad_pre,
@@ -472,6 +504,8 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
                 song['bpm'] = entry['bpm']
             if 'time' in entry:
                 song['time'] = entry['time']
+            if 'strum' in entry:
+                song['strum'] = entry['strum']
 
     book = {
         'id': book_id,
@@ -544,10 +578,11 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
         'missing artists: %s' % (facts['missing_artists'] or 'none'),
         'invalid levels: %s' % (facts['invalid_levels'] or 'none'),
         'invalid durations: %s' % (facts['invalid_durations'] or 'none'),
-        'tempo: %d/%d songs with bpm, %d with time signature'
-        % (facts['with_bpm'], len(songs), facts['with_time']),
+        'tempo: %d/%d songs with bpm, %d with time signature, %d with strum'
+        % (facts['with_bpm'], len(songs), facts['with_time'], facts['with_strum']),
         'invalid bpm: %s' % (facts['invalid_bpm'] or 'none'),
         'invalid time signatures: %s' % (facts['invalid_times'] or 'none'),
+        'invalid strum patterns: %s' % (facts['invalid_strums'] or 'none'),
         'sheet shape: %s' % ('ok' if not facts['bad_shape'] else facts['bad_shape']),
         'blank lines: %s' % ('ok' if not facts['bad_blank'] else facts['bad_blank']),
         'pre lines: %s' % ('ok' if not facts['bad_pre'] else facts['bad_pre']),

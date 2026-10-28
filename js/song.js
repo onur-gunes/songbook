@@ -39,6 +39,7 @@
         SB.state.textSize = SB.loadTextSizeForSong(SB.state.active.id, id);
         SB.applyTextSize();
         SB.loadMetronomeForSong(song);
+        SB.loadStrumForSong(song);
 
         SB.state.transpose = 0;
         SB.updateTransposeLabel();
@@ -125,6 +126,7 @@
             }
         });
         SB.bindMetronome();
+        SB.bindStrum();
         SB.applyChordSettings();
         SB.applyChordMode();
         SB.applyNumbers();
