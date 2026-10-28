@@ -4028,7 +4028,33 @@ body.tuner-open { overflow: hidden; }
 
     SB.$ = function (id) { return document.getElementById(id); };
     SB.SEP = '\u0000';
-    SB.NS = 'songbook';        // storage namespace prefix
+
+    /* GitHub Pages serves prod (/songbook/) and dev (/songbook/dev/) from a
+     * single origin, and both localStorage and IndexedDB are scoped to the
+     * origin rather than the path. Deriving the environment from the URL and
+     * folding it into SB.NS gives dev its own storage world, so testing there
+     * cannot read, corrupt or delete a live user's favourites, notes or
+     * imported songbooks.
+     *
+     * Every storage key and the IndexedDB database name are built from SB.NS
+     * (see js/personal.js, js/theme.js, js/idb.js), so this one value isolates
+     * all of them. The same rule lives in sw.js for the cache names — keep the
+     * two in step; tests/env.py asserts they agree.
+     */
+    SB.envFor = function (pathname, protocol) {
+        // The portable Songbook.html runs from file:// and has no dev/prod
+        // split, so it is always prod — otherwise saving it into a folder
+        // that happens to be called "dev" would hide the user's own data.
+        if (protocol && protocol !== 'http:' && protocol !== 'https:') return 'prod';
+        var parts = String(pathname).split('/');
+        // drop a trailing filename ('index.html') or the empty segment left by
+        // a trailing slash, so the last entry is the containing directory
+        return parts[parts.length - 2] === 'dev' ? 'dev' : 'prod';
+    };
+    SB.ENV = SB.envFor(window.location.pathname, window.location.protocol);
+
+    // 'songbook' stays the prod namespace so existing users keep their data.
+    SB.NS = SB.ENV === 'dev' ? 'songbook-dev' : 'songbook';
 
     SB.lsGet = function (key, fallback) {
         try {
