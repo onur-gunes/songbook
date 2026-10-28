@@ -1073,6 +1073,17 @@ main {
 
 .pin-seg[aria-pressed="true"]:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 
+.metronome-seg {
+    color: var(--muted);
+}
+
+.metronome-seg.playing {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.metronome-seg.playing:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+
 /* sheet */
 
 .sheet {

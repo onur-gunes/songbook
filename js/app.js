@@ -103,7 +103,10 @@
         chordSvg: chordSvg,
         scrollState: SB.state.scrollState,
         scrollBounds: SB.scrollBounds,
-        targetVel: SB.targetVel
+        targetVel: SB.targetVel,
+        metronome: SB.state.metronome,
+        metronomeBeatsPerBar: SB.metronomeBeatsPerBar,
+        metronomeLog: function () { return SB.metronomeLog.slice(); }
     };
 
 })(window.SB = window.SB || {});

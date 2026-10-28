@@ -105,6 +105,12 @@
         /* song view + auto-scroll */
         scrollState: { raf: null, last: 0, pos: 0, playing: false, started: false, finished: false, lastY: null },
         scrollSpeed: 1,
+
+        /* metronome — bpm is null until a song with tempo data is opened or
+         * the user sets one; beats is the meter's beats per bar, used to
+         * accent beat 1. See js/metronome.js. */
+        metronome: { playing: false, bpm: null, beats: 4 },
+
         textSize: 1,
         chordSize: 1,
         chordPin: true,
