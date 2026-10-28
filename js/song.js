@@ -117,7 +117,10 @@
             SB.state.showNumbers = !SB.state.showNumbers;
             try { window.localStorage.setItem(SB.NS + ':numbers', SB.state.showNumbers ? '1' : '0'); } catch (e) { /* ignore */ }
             SB.applyNumbers();
-            if (SB.state.currentSong) SB.renderChordStrip(SB.state.currentSong);
+            if (SB.state.currentSong) {
+                SB.renderChordStrip(SB.state.currentSong);
+                SB.renderSheet(SB.state.currentSong);
+            }
         });
         SB.applyChordSettings();
         SB.applyChordMode();

@@ -1105,6 +1105,14 @@ main {
     font-weight: 700;
 }
 
+/* Scale degrees stand in for chord names. Roman numerals are all-caps letters
+   that would otherwise read as lyrics, so the mono face keeps them clearly a
+   notation layer rather than words. */
+.sheet.show-degrees .seg-chord {
+    font-family: var(--mono);
+    letter-spacing: -0.02em;
+}
+
 /* Chords rendered above the lyrics, classic chord-sheet style */
 .sheet.chords-above .line.line-stacked {
     margin: 0.15em 0 0.3em;

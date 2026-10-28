@@ -55,6 +55,13 @@
         if (!btn) return;
         btn.classList.toggle('active', SB.state.showNumbers);
         btn.setAttribute('aria-pressed', SB.state.showNumbers ? 'true' : 'false');
+        btn.title = SB.state.showNumbers
+            ? 'Scale degrees shown instead of chord names — click for names'
+            : 'Show scale degrees (I, IV, V) instead of chord names';
+        btn.setAttribute('aria-label', SB.state.showNumbers
+            ? 'Show chord names instead of scale degrees'
+            : 'Show scale degrees instead of chord names');
+        SB.$('sheet').classList.toggle('show-degrees', SB.state.showNumbers);
     }
 
     SB.setChordMode = function (mode) {
