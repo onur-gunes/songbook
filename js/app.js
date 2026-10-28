@@ -111,7 +111,8 @@
         strum: SB.state.strum,
         strumPatterns: SB.strumPatterns,
         strumPatternsFor: SB.strumPatternsFor,
-        setStrum: SB.setStrum
+        setStrum: SB.setStrum,
+        toggleStrumNotation: SB.toggleStrumNotation
     };
 
 })(window.SB = window.SB || {});

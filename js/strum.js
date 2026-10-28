@@ -34,19 +34,36 @@
     var PATTERNS = [
         // 4/4 — eighths (8 slots)
         { id: 'downs-4-4', name: 'All downs', time: '4/4', subdiv: 2, slots: 'D-D-D-D-' },
-        { id: 'dduudu-4-4', name: 'D DU UDU', time: '4/4', subdiv: 2, slots: 'D-DUUDU-' },
+        { id: 'eighths-4-4', name: 'All eighths', time: '4/4', subdiv: 2, slots: 'DUDUDUDU' },
+        { id: 'dduudu-4-4', name: 'D DU UDU', time: '4/4', subdiv: 2, slots: 'D-DU-UDU' },
         { id: 'dddudu-4-4', name: 'D D DU DU', time: '4/4', subdiv: 2, slots: 'D-D-DUDU' },
+        { id: 'ddudu-4-4', name: 'D DU D DU', time: '4/4', subdiv: 2, slots: 'D-DUD-DU' },
+        { id: 'duudu-4-4', name: 'D U UDU', time: '4/4', subdiv: 2, slots: 'D-U-UDU-' },
         // 3/4 — eighths (6 slots)
         { id: 'downs-3-4', name: 'All downs', time: '3/4', subdiv: 2, slots: 'D-D-D-' },
+        { id: 'eighths-3-4', name: 'All eighths', time: '3/4', subdiv: 2, slots: 'DUDUDU' },
         { id: 'waltz-3-4', name: 'D DU DU', time: '3/4', subdiv: 2, slots: 'D-DUDU' },
+        { id: 'dddu-3-4', name: 'D D DU', time: '3/4', subdiv: 2, slots: 'D-D-DU' },
         // 6/8 — two dotted-quarter pulses, 3 slots per pulse (6 slots)
         { id: 'downs-6-8', name: 'D . . D . .', time: '6/8', subdiv: 3, slots: 'D--D--' },
+        { id: 'du-6-8', name: 'D . U D . U', time: '6/8', subdiv: 3, slots: 'D-UD-U' },
+        { id: 'eighths-6-8', name: 'All eighths', time: '6/8', subdiv: 3, slots: 'DUDUDU' },
         // 2/4 — eighths (4 slots)
-        { id: 'downs-2-4', name: 'All downs', time: '2/4', subdiv: 2, slots: 'D-D-' }
+        { id: 'downs-2-4', name: 'All downs', time: '2/4', subdiv: 2, slots: 'D-D-' },
+        { id: 'eighths-2-4', name: 'All eighths', time: '2/4', subdiv: 2, slots: 'DUDU' },
+        { id: 'ddu-2-4', name: 'D DU', time: '2/4', subdiv: 2, slots: 'D-DU' }
     ];
 
     var byId = {};
     PATTERNS.forEach(function (p) { byId[p.id] = p; });
+
+    /* Notation is a global display preference (arrows ↓↑· vs letters DU·), like
+     * chordMode, remembered across songs and sessions. Restore it before any
+     * render so the first row drawn is already in the chosen notation. */
+    try {
+        var _sn = window.localStorage.getItem(SB.NS + ':strumNotation');
+        if (_sn === 'arrows' || _sn === 'letters') SB.state.strum.notation = _sn;
+    } catch (e) { /* ignore */ }
 
     SB.strumPatterns = function () { return PATTERNS.slice(); }
 
@@ -106,9 +123,11 @@
     var lastSlot = -1;
 
     function slotGlyph(ch) {
+        if (ch === '-') return '\u00b7';   // middle dot for a rest, either way
+        if (SB.state.strum.notation === 'letters') return ch;  // 'D' / 'U'
         if (ch === 'D') return '\u2193';   // downward arrow
         if (ch === 'U') return '\u2191';   // upward arrow
-        return '\u00b7';                   // middle dot for a rest
+        return '\u00b7';
     }
 
     /* Builds the subdivision row: an optional count-in bar, then the pattern
@@ -232,6 +251,36 @@
         group.hidden = !on;
     }
 
+    /* Reflects the notation preference on its button. Re-rendering the row (not
+     * just restyling it) is deliberate: the glyphs themselves change, and the
+     * highlight loop re-reads cells by data attributes, which renderRow rebuilds
+     * cleanly. */
+    SB.applyStrumNotation = function () {
+        var btn = SB.$('strumNotationBtn');
+        if (btn) {
+            var letters = SB.state.strum.notation === 'letters';
+            btn.textContent = letters ? 'DU' : '\u2193\u2191';
+            btn.setAttribute('aria-pressed', letters ? 'true' : 'false');
+            var label = letters
+                ? 'Showing D/U letters — click for arrows'
+                : 'Showing arrows — click for D/U letters';
+            btn.setAttribute('aria-label', label);
+            btn.title = label;
+        }
+        if (SB.state.strum.pattern) {
+            renderRow();
+            // Keep the highlight in step with the freshly rebuilt cells.
+            if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
+        }
+    }
+
+    SB.toggleStrumNotation = function () {
+        SB.state.strum.notation = SB.state.strum.notation === 'letters' ? 'arrows' : 'letters';
+        try { window.localStorage.setItem(SB.NS + ':strumNotation', SB.state.strum.notation); }
+        catch (e) { /* ignore */ }
+        SB.applyStrumNotation();
+    }
+
     /* Called from SB.openSong. Picks the pattern (manual choice, else the
      * documented default, else the first for the metre), renders the row and
      * the selector, and hides the whole control for songs with no time
@@ -261,8 +310,10 @@
 
     SB.bindStrum = function () {
         var sel = SB.$('strumSelect');
-        if (!sel) return;
-        sel.addEventListener('change', function () { SB.setStrum(sel.value); });
+        if (sel) sel.addEventListener('change', function () { SB.setStrum(sel.value); });
+        var nbtn = SB.$('strumNotationBtn');
+        if (nbtn) nbtn.addEventListener('click', SB.toggleStrumNotation);
+        SB.applyStrumNotation();
     }
 
 })(window.SB = window.SB || {});

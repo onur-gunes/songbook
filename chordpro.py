@@ -169,8 +169,9 @@ def parse_time(value):
 #     metres). len(slots) must therefore equal subdiv * beats-per-bar, so the
 #     row lines up with the metronome's accents (beat 1 is slot 0).
 #
-# Why small: a long list is a worse experience than six good ones. These are
-# generic, widely-taught patterns, NOT per-song transcriptions.
+# Kept small on purpose: a handful of generic, widely-taught patterns per metre,
+# NOT per-song transcriptions. The list is "common strums you could play over
+# almost anything in this metre", not every strum that exists.
 #
 # CAVEAT (stated here in the data, not only in the UI): strum patterns are far
 # less reliably documented than key or bpm, and most real songs change pattern
@@ -182,21 +183,39 @@ STRUM_PATTERNS = (
     # 4/4 — eighths (8 slots)
     {'id': 'downs-4-4', 'name': 'All downs', 'time': '4/4', 'subdiv': 2,
      'slots': 'D-D-D-D-'},
+    {'id': 'eighths-4-4', 'name': 'All eighths', 'time': '4/4', 'subdiv': 2,
+     'slots': 'DUDUDUDU'},
     {'id': 'dduudu-4-4', 'name': 'D DU UDU', 'time': '4/4', 'subdiv': 2,
-     'slots': 'D-DUUDU-'},
+     'slots': 'D-DU-UDU'},
     {'id': 'dddudu-4-4', 'name': 'D D DU DU', 'time': '4/4', 'subdiv': 2,
      'slots': 'D-D-DUDU'},
+    {'id': 'ddudu-4-4', 'name': 'D DU D DU', 'time': '4/4', 'subdiv': 2,
+     'slots': 'D-DUD-DU'},
+    {'id': 'duudu-4-4', 'name': 'D U UDU', 'time': '4/4', 'subdiv': 2,
+     'slots': 'D-U-UDU-'},
     # 3/4 — eighths (6 slots)
     {'id': 'downs-3-4', 'name': 'All downs', 'time': '3/4', 'subdiv': 2,
      'slots': 'D-D-D-'},
+    {'id': 'eighths-3-4', 'name': 'All eighths', 'time': '3/4', 'subdiv': 2,
+     'slots': 'DUDUDU'},
     {'id': 'waltz-3-4', 'name': 'D DU DU', 'time': '3/4', 'subdiv': 2,
      'slots': 'D-DUDU'},
+    {'id': 'dddu-3-4', 'name': 'D D DU', 'time': '3/4', 'subdiv': 2,
+     'slots': 'D-D-DU'},
     # 6/8 — counted in two dotted-quarter pulses, 3 slots per pulse (6 slots)
     {'id': 'downs-6-8', 'name': 'D . . D . .', 'time': '6/8', 'subdiv': 3,
      'slots': 'D--D--'},
+    {'id': 'du-6-8', 'name': 'D . U D . U', 'time': '6/8', 'subdiv': 3,
+     'slots': 'D-UD-U'},
+    {'id': 'eighths-6-8', 'name': 'All eighths', 'time': '6/8', 'subdiv': 3,
+     'slots': 'DUDUDU'},
     # 2/4 — eighths (4 slots)
     {'id': 'downs-2-4', 'name': 'All downs', 'time': '2/4', 'subdiv': 2,
      'slots': 'D-D-'},
+    {'id': 'eighths-2-4', 'name': 'All eighths', 'time': '2/4', 'subdiv': 2,
+     'slots': 'DUDU'},
+    {'id': 'ddu-2-4', 'name': 'D DU', 'time': '2/4', 'subdiv': 2,
+     'slots': 'D-DU'},
 )
 
 STRUM_IDS = frozenset(p['id'] for p in STRUM_PATTERNS)

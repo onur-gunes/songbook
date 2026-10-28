@@ -946,10 +946,14 @@ async function main() {
         win().songbookTest.strumPatternsFor('3/4').every(p => p.time === '3/4') &&
         win().songbookTest.strumPatternsFor('4/4').every(p => p.time === '4/4') &&
         win().songbookTest.strumPatternsFor('6/8').every(p => p.time === '6/8') &&
-        win().songbookTest.strumPatternsFor('4/4').length >= 2 &&
+        win().songbookTest.strumPatternsFor('2/4').every(p => p.time === '2/4') &&
         win().songbookTest.strumPatternsFor(null).length === 0,
         '3/4=' + win().songbookTest.strumPatternsFor('3/4').length +
         ' 4/4=' + win().songbookTest.strumPatternsFor('4/4').length);
+    // every allowlisted metre carries more than one option now
+    ok('every metre has several patterns',
+        ['4/4', '3/4', '6/8', '2/4'].every(t => win().songbookTest.strumPatternsFor(t).length >= 2),
+        ['4/4', '3/4', '6/8', '2/4'].map(t => t + '=' + win().songbookTest.strumPatternsFor(t).length).join(' '));
 
     // hidden for a song with no time signature
     win().location.hash = '#/polska-gurom/nie-ma-nas';
@@ -1035,6 +1039,38 @@ async function main() {
     await wait(80);
     ok('highlight cleared when the metronome stops',
         sRow().querySelector('.strum-slot.on') === null);
+
+    // notation toggle: arrows <-> D/U letters, persisted globally
+    win().localStorage.removeItem('songbook:strumNotation');
+    win().songbookTest.setStrum('downs-4-4');
+    await wait(30);
+    const firstDown = () => sRow().querySelector('.strum-bar.pattern .strum-slot:not(.rest)');
+    ok('strum defaults to arrow notation', sState().notation === 'arrows', sState().notation);
+    ok('down slot shows an arrow glyph', firstDown().textContent === '\u2193', firstDown().textContent);
+    ok('notation button reads arrows', $('strumNotationBtn').getAttribute('aria-pressed') === 'false');
+
+    $('strumNotationBtn').click();
+    await wait(30);
+    ok('toggled to letters', sState().notation === 'letters', sState().notation);
+    ok('down slot shows a D letter', firstDown().textContent === 'D', firstDown().textContent);
+    ok('rest slot stays a dot in letters mode',
+        sRow().querySelector('.strum-bar.pattern .strum-slot.rest').textContent === '\u00b7',
+        sRow().querySelector('.strum-bar.pattern .strum-slot.rest').textContent);
+    ok('notation button reflects letters', $('strumNotationBtn').getAttribute('aria-pressed') === 'true');
+    ok('notation persisted', win().localStorage.getItem('songbook:strumNotation') === 'letters',
+        win().localStorage.getItem('songbook:strumNotation'));
+
+    // the preference is global: it survives navigating to another song
+    win().location.hash = '#/polska-gurom/autobiografia';
+    await wait(250);
+    ok('notation preference carries across songs', sState().notation === 'letters', sState().notation);
+    ok('other song row drawn in letters', firstDown().textContent === 'D', firstDown().textContent);
+
+    // toggle back so the run leaves no sticky global state
+    win().songbookTest.toggleStrumNotation();
+    await wait(30);
+    ok('toggled back to arrows', sState().notation === 'arrows', sState().notation);
+    win().localStorage.removeItem('songbook:strumNotation');
 
     win().localStorage.removeItem('songbook:strum:polska-gurom\u0000arahja');
     win().localStorage.removeItem('songbook:bpm:polska-gurom\u0000arahja');
