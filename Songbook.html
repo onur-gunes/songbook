@@ -4354,6 +4354,36 @@ body.tuner-open { overflow: hidden; }
         return note;
     }
 
+    // Styled text kinds map 1:1 to a span class. `c` and `y` are not here:
+    // chords need transposing and notes need sanitising, so both renderers
+    // handle them explicitly below.
+    var SEG_CLASS = { m: 'seg-muted', b: 'seg-bold', i: 'seg-italic' };
+
+    // Shared kind-dispatch for whole-line rendering. The inline and
+    // chords-above renderers differ only in how a chord is labelled —
+    // inline keeps the [brackets], above strips them — so that is the one
+    // thing they pass in.
+    function appendLineSegments(lineDiv, line, chordLabelFn) {
+        line.forEach(function (seg) {
+            var kind = seg[0], val = seg[1];
+            if (kind === 'c') {
+                lineDiv.appendChild(el('span', 'seg-chord', chordLabelFn(val)));
+            } else if (SEG_CLASS[kind]) {
+                lineDiv.appendChild(el('span', SEG_CLASS[kind], val));
+            } else if (kind === 'y') {
+                lineDiv.appendChild(noteNode(val));
+            } else {
+                lineDiv.appendChild(document.createTextNode(val));
+            }
+        });
+    }
+
+    function inlineChordLabel(val) {
+        var cv = transposeChordValue(val, transpose);
+        var m = cv.match(/^\[([\s\S]*)\]$/);
+        return m ? '[' + mapChordTokens(m[1]) + ']' : cv;
+    }
+
     function renderSheet(song) {
         if (chordMode === 'above') { renderSheetAbove(song); return; }
         var wrap = $('sheet');
@@ -4363,25 +4393,7 @@ body.tuner-open { overflow: hidden; }
             var lineDiv = el('div', 'line');
             var isPre = line.some(function (seg) { return seg[0] === 'p'; });
             if (isPre) lineDiv.classList.add('is-pre');
-            line.forEach(function (seg) {
-                var kind = seg[0], val = seg[1];
-                if (kind === 'c') {
-                    var cv = transposeChordValue(val, transpose);
-                    var cm = cv.match(/^\[([\s\S]*)\]$/);
-                    if (cm) cv = '[' + mapChordTokens(cm[1]) + ']';
-                    lineDiv.appendChild(el('span', 'seg-chord', cv));
-                } else if (kind === 'm') {
-                    lineDiv.appendChild(el('span', 'seg-muted', val));
-                } else if (kind === 'b') {
-                    lineDiv.appendChild(el('span', 'seg-bold', val));
-                } else if (kind === 'i') {
-                    lineDiv.appendChild(el('span', 'seg-italic', val));
-                } else if (kind === 'y') {
-                    lineDiv.appendChild(noteNode(val));
-                } else {
-                    lineDiv.appendChild(document.createTextNode(val));
-                }
-            });
+            appendLineSegments(lineDiv, line, inlineChordLabel);
             frag.appendChild(lineDiv);
         });
         wrap.appendChild(frag);
@@ -4526,13 +4538,12 @@ body.tuner-open { overflow: hidden; }
                 if (cs >= ce) return;
                 var txt = p.text.slice(cs - p.start, ce - p.start);
                 if (!txt) return;
-                var node;
-                if (p.kind === 'm') node = el('span', 'seg-muted', txt);
-                else if (p.kind === 'b') node = el('span', 'seg-bold', txt);
-                else if (p.kind === 'i') node = el('span', 'seg-italic', txt);
-                else if (p.kind === 'y') node = el('span', 'seg-note', txt);
-                else node = document.createTextNode(txt);
-                ly.appendChild(node);
+                // Not appendLineSegments: these are character slices of
+                // text already flattened by plainText(), so a `y` note has
+                // had its markup stripped and must stay a plain span —
+                // re-parsing a fragment of it as HTML would be wrong.
+                var cls = p.kind === 'y' ? 'seg-note' : SEG_CLASS[p.kind];
+                ly.appendChild(cls ? el('span', cls, txt) : document.createTextNode(txt));
             });
             unit.appendChild(ly);
             div.appendChild(unit);
@@ -4559,15 +4570,7 @@ body.tuner-open { overflow: hidden; }
                     return;
                 }
             }
-            line.forEach(function (seg) {
-                var kind = seg[0], val = seg[1];
-                if (kind === 'c') { lineDiv.appendChild(el('span', 'seg-chord', chordLabel(val))); }
-                else if (kind === 'm') { lineDiv.appendChild(el('span', 'seg-muted', val)); }
-                else if (kind === 'b') { lineDiv.appendChild(el('span', 'seg-bold', val)); }
-                else if (kind === 'i') { lineDiv.appendChild(el('span', 'seg-italic', val)); }
-                else if (kind === 'y') { lineDiv.appendChild(noteNode(val)); }
-                else { lineDiv.appendChild(document.createTextNode(val)); }
-            });
+            appendLineSegments(lineDiv, line, chordLabel);
             frag.appendChild(lineDiv);
         });
         wrap.appendChild(frag);
