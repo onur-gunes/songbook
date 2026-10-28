@@ -56,6 +56,45 @@
         return name.replace(/sharp/g, '#').replace(/flat/g, 'b');
     }
 
+    /* ---------------- scale degrees in the sheet ---------------- */
+
+    // Tonic the sheet chords are written in: the curated sheetKey when present,
+    // otherwise recording key minus capo. Lives here (not in chordstrip.js) so
+    // both the strip and the two sheet renderers can reach it.
+    SB.songTonic = function (song) {
+        if (!song) return null;
+        if (song.sheetKey) {
+            var sk = ChordKit.parse(song.sheetKey);
+            if (sk) return { pc: sk.rootPc, minor: sk.type.id === 'm', name: song.sheetKey };
+        }
+        if (!song.key) return null;
+        var k = ChordKit.parse(song.key);
+        if (!k) return null;
+        var capo = (typeof song.capo === 'number' && isFinite(song.capo)) ? song.capo : 0;
+        return { pc: ((k.rootPc - capo) % 12 + 12) % 12, minor: k.type.id === 'm', name: '' };
+    };
+
+    // Strum strokes are authored as leading/trailing slashes on the token
+    // ("G//", "/Am"). ChordKit.parse rejects those, so 10.8% of chord tokens
+    // would silently lose their numeral if we handed the raw token over.
+    // Split the decoration off, number the core, then put it back.
+    var STROKE_RE = /^(\/*)([\s\S]*?)(\/*)$/;
+
+    // Degree label for one chord token, or null when it has no numeral
+    // (non-chord markers like "stop"/"riff"/"NC", or a bare "//").
+    // `name` must be the UNTRANSPOSED token: the numeral is a property of the
+    // written key, so it must not move when the user transposes.
+    SB.tokenDegree = function (tok, tonic) {
+        if (!tonic || !tok) return null;
+        var m = String(tok).match(STROKE_RE);
+        var core = m[2];
+        if (!core || ChordKit.isMutedName(core)) return null;
+        // FC is the legacy encoding of F/C (see transposeChartName above).
+        var deg = ChordKit.scaleDegree(core === 'FC' ? 'F/C' : core, tonic.pc, tonic.minor, tonic.name);
+        if (!deg) return null;
+        return m[1] + deg + m[3];
+    };
+
     SB.stripSortPrefix = function (t) {
         return t.replace(/^[🔥🎂\s]+/, '').replace(/^#?\d+\s*[-–—]\s+/, '').replace(/^The\s+/i, '');
     };
