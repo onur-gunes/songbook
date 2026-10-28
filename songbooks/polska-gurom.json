@@ -3420,7 +3420,8 @@
    "capo": 0,
    "sheetKey": "Dm",
    "bpm": 176,
-   "time": "4/4"
+   "time": "4/4",
+   "strum": "downs-4-4"
   },
   {
    "id": "autobiografia",
@@ -4352,7 +4353,8 @@
    "capo": 0,
    "sheetKey": "Em",
    "bpm": 113,
-   "time": "4/4"
+   "time": "4/4",
+   "strum": "dddudu-4-4"
   },
   {
    "id": "bal-wszystkich-wi-tych",

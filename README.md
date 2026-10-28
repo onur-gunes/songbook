@@ -74,6 +74,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/song.js` | Song view and its controls |
 | `js/autoscroll.js` | Auto-scroll, text/chord sizing, pinch zoom |
 | `js/metronome.js` | Metronome: lookahead click scheduler and per-song BPM |
+| `js/strum.js` | Strum-pattern row + selector, filtered by `time`, highlighted off the metronome clock |
 | `js/router.js` | Hash routing |
 | `js/keyboard.js` | Global keyboard shortcuts |
 | `js/app.js` | Entry point: `init()`, service-worker registration, test export |
@@ -123,6 +124,17 @@ attached to `SB`.
   `time`. Adjust the tempo and it is remembered for that song; the control is
   hidden for songs with no tempo data. Scheduled against the audio clock
   rather than a timer, so it does not drift.
+- **Strum pattern** — a row of arrows/slashes (`↓ ↑ ·`) under the chord strip,
+  chosen from a small library filtered by the song's `time` (4/4, 3/4, 6/8,
+  2/4). It defaults to the song's documented `strum` where one exists; a manual
+  choice is remembered per song. While the metronome runs the current slot is
+  highlighted in lockstep — the highlight reads the metronome's own audio clock,
+  not a second timer, so the two never diverge — and a one-bar count-in leads
+  in, because a pattern you can't start on beat 1 is not usable for playing
+  along. Hidden for songs with no `time`. **One pattern per song is an
+  approximation**: strum is far less reliably documented than key or bpm and
+  most songs change feel between verse and chorus; per-section patterns are a
+  later feature. Visual only — the metronome is the audio.
 - **Tuner** — chromatic-style pitch detection from the microphone with
   ukulele/guitar presets, auto or manual string selection, A4 calibration
   (430–450 Hz), and an octave-safe detector. Requires a secure context
@@ -213,6 +225,7 @@ Song directives:
 | `{duration: 3.5}` | `dur` | minutes; default `3` + warning |
 | `{tempo: 92}` / `{bpm: 92}` | `bpm` | optional; 20–300, rounded to an integer; invalid values fail the build |
 | `{time: 4/4}` / `{meter: 4/4}` | `time` | optional; one of `4/4`, `3/4`, `6/8`, `2/4`; invalid values fail the build |
+| `{strum: downs-4-4}` | `strum` | optional strum-pattern id; must exist in the library and match `time`; invalid values fail the build |
 | `{key: Am}` | `key` | optional recording key |
 | `{sheetkey: Am}` | `sheetKey` | defaults to `key` |
 | `{capo: 2}` | `capo` | defaults to `0` when a key is given |
@@ -293,7 +306,10 @@ exactly like `original-keys.json`, and take precedence over an inline
 
 ```json
 {
-  "arahja": { "bpm": 146, "time": "4/4", "confidence": "high", "source": "tunebat" }
+  "arahja": {
+    "bpm": 146, "time": "4/4", "confidence": "high", "source": "tunebat",
+    "strum": "downs-4-4", "strum_confidence": "low", "strum_source": "generic"
+  }
 }
 ```
 
@@ -302,8 +318,27 @@ They are worth keeping because published BPM values disagree between sources
 (and often differ by a factor of two), so it matters which ones were measured
 and which were guessed.
 
-Run the parser/builder tests with `python3 tests/chordpro.py`, and the
-dev/prod environment guard with `python3 tests/env.py`.
+### Strum pattern
+
+`strum` is an optional per-song pattern id drawn from the small library in
+`chordpro.py` (`STRUM_PATTERNS`), mirrored byte-for-byte in `js/strum.js`
+(`tests/strum.py` asserts the two agree, exactly as `TIME_SIGNATURES` is
+mirrored in `js/songbooks.js`). Each pattern is `D`/`U`/`-` slots at a stated
+subdivision, keyed by metre; the app renders it as the subdivision row under
+the chord strip and lights the current slot off the metronome clock.
+
+Like `bpm`, it is an allowlist, not freeform: an unknown id is a build error,
+and the id's metre must match the song's `time` (a 3/4 pattern on a 4/4 song is
+rejected — the row would not line up with the clicks). Give strum its own
+`strum_confidence` / `strum_source` in the sidecar rather than reusing the
+bpm's: strum is **less** reliably documented than bpm, so a per-song pattern is
+explicitly an approximation (most songs change feel between sections; per-
+section patterns are a later feature). The field is a single id today but is
+shaped so it can grow to a list without a data migration.
+
+Run the parser/builder tests with `python3 tests/chordpro.py`, the strum
+library mirror guard with `python3 tests/strum.py`, and the dev/prod
+environment guard with `python3 tests/env.py`.
 
 ## Builds
 

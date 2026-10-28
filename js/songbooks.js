@@ -33,6 +33,16 @@
         return TIME_SIGNATURES.indexOf(value) >= 0 ? value : null;
     }
 
+    /* A strum is kept as a bare id string here; js/strum.js owns the pattern
+     * library and resolves the id against it (and against the song's metre) at
+     * open time. Keeping it a string rather than resolving here avoids a load-
+     * order dependency on strum.js and leaves the field free to grow into a
+     * list of ids for per-section patterns later, which is why it is not
+     * coerced to a single scalar shape. */
+    function normalizeStrum(value) {
+        return (typeof value === 'string' && value) ? value : null;
+    }
+
     function normalizeSong(s, index) {
         if (!s || typeof s !== 'object') throw new Error('bad song entry');
         return {
@@ -48,6 +58,7 @@
             dur: typeof s.dur === 'number' ? s.dur : 4,
             bpm: normalizeBpm(s.bpm),
             time: normalizeTime(s.time),
+            strum: normalizeStrum(s.strum),
             chords: Array.isArray(s.chords) ? s.chords.map(String) : [],
             sheet: Array.isArray(s.sheet) ? s.sheet : (s.sheet ? s.sheet : [])
         };

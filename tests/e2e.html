@@ -935,6 +935,110 @@ async function main() {
     await wait(250);
     ok('metronome hidden on a book with no tempo data', mGroup().hidden === true, 'hidden=' + mGroup().hidden);
 
+    // 20b. strum pattern selector (issue #41)
+    const sGroup = () => $('strumGroup');
+    const sRow = () => $('strumRow');
+    const sSel = () => $('strumSelect');
+    const sState = () => win().songbookTest.strum;
+
+    // library is filtered by metre
+    ok('strum library filtered by metre',
+        win().songbookTest.strumPatternsFor('3/4').every(p => p.time === '3/4') &&
+        win().songbookTest.strumPatternsFor('4/4').every(p => p.time === '4/4') &&
+        win().songbookTest.strumPatternsFor('6/8').every(p => p.time === '6/8') &&
+        win().songbookTest.strumPatternsFor('4/4').length >= 2 &&
+        win().songbookTest.strumPatternsFor(null).length === 0,
+        '3/4=' + win().songbookTest.strumPatternsFor('3/4').length +
+        ' 4/4=' + win().songbookTest.strumPatternsFor('4/4').length);
+
+    // hidden for a song with no time signature
+    win().location.hash = '#/polska-gurom/nie-ma-nas';
+    await wait(250);
+    ok('strum hidden without a time signature', sGroup().hidden === true, 'hidden=' + sGroup().hidden);
+    ok('strum row hidden too', sRow().hidden === true, 'hidden=' + sRow().hidden);
+    ok('no strum pattern without time', sState().pattern === null, String(sState().pattern));
+
+    // arahja carries time 4/4 and the documented default strum downs-4-4
+    win().localStorage.removeItem('songbook:strum:polska-gurom\u0000arahja');
+    win().location.hash = '#/polska-gurom/arahja';
+    await wait(250);
+    ok('strum shown for a song with a time signature', sGroup().hidden === false, 'hidden=' + sGroup().hidden);
+    ok('documented default selected automatically', sState().pattern && sState().pattern.id === 'downs-4-4',
+        sState().pattern && sState().pattern.id);
+    ok('selector reflects the default', sSel().value === 'downs-4-4', sSel().value);
+    // every option in the selector is a 4/4 pattern
+    ok('selector lists only 4/4 patterns',
+        Array.prototype.every.call(sSel().options, o =>
+            win().songbookTest.strumPatterns().some(p => p.id === o.value && p.time === '4/4')),
+        Array.prototype.map.call(sSel().options, o => o.value).join(','));
+
+    // the row renders a count-in bar and a pattern bar with bar lines
+    ok('row has a count-in bar and a pattern bar',
+        sRow().querySelector('.strum-bar.countin') !== null &&
+        sRow().querySelector('.strum-bar.pattern') !== null);
+    ok('pattern bar has one slot per pattern char',
+        sRow().querySelectorAll('.strum-bar.pattern .strum-slot').length === 8,
+        sRow().querySelectorAll('.strum-bar.pattern .strum-slot').length);
+
+    // manual choice persists per song under the namespaced key
+    win().songbookTest.setStrum('dddudu-4-4');
+    await wait(30);
+    ok('manual strum choice applied', sState().pattern.id === 'dddudu-4-4', sState().pattern.id);
+    ok('manual strum choice persisted',
+        win().localStorage.getItem('songbook:strum:polska-gurom\u0000arahja') === 'dddudu-4-4',
+        win().localStorage.getItem('songbook:strum:polska-gurom\u0000arahja'));
+    // survives navigation away and back
+    win().location.hash = '#/polska-gurom/baranek';
+    await wait(250);
+    win().location.hash = '#/polska-gurom/arahja';
+    await wait(250);
+    ok('manual strum choice remembered', sState().pattern.id === 'dddudu-4-4', sState().pattern.id);
+
+    // the highlight stays locked to the metronome with no second timer: the
+    // lit slot always equals what metronomePosition() implies, across a run
+    $('bpmValue').textContent; // ensure the metronome group is live
+    win().songbookTest.setStrum('downs-4-4');
+    await wait(30);
+    ok('metronome not running yet', mState().playing === false);
+    ok('no slot lit while stopped', sRow().querySelector('.strum-slot.on') === null);
+    $('metronomeBtn').click();
+    await wait(400);
+    ok('metronome running for strum test', mState().playing === true);
+
+    let lockOk = true, lockDetail = '';
+    const pat = sState().pattern;
+    const countin = win().songbookTest.metronomeBeatsPerBar(pat.time) * pat.subdiv;
+    for (let i = 0; i < 20; i++) {
+        const pos = win().songbookTest.metronomePosition();
+        const onCell = sRow().querySelector('.strum-slot.on');
+        if (pos !== null && onCell) {
+            const slotsElapsed = Math.floor(pos * pat.subdiv);
+            const expectCls = slotsElapsed < countin ? 'countin' : 'pattern';
+            const expectIdx = slotsElapsed < countin
+                ? slotsElapsed
+                : (slotsElapsed - countin) % pat.slots.length;
+            // allow a one-slot slack: pos is read a frame after the paint
+            const gotIdx = parseInt(onCell.dataset.idx, 10);
+            const gotCls = onCell.dataset.cls;
+            const near = gotCls === expectCls &&
+                (Math.abs(gotIdx - expectIdx) <= 1 ||
+                 Math.abs(gotIdx - expectIdx) >= pat.slots.length - 1);
+            if (!near) { lockOk = false; lockDetail = 'pos=' + pos.toFixed(3) +
+                ' expect ' + expectCls + '#' + expectIdx + ' got ' + gotCls + '#' + gotIdx; }
+        }
+        await wait(60);
+    }
+    ok('highlight stays locked to the metronome clock', lockOk, lockDetail);
+    ok('a slot is lit while the metronome runs', sRow().querySelector('.strum-slot.on') !== null);
+
+    $('metronomeBtn').click();
+    await wait(80);
+    ok('highlight cleared when the metronome stops',
+        sRow().querySelector('.strum-slot.on') === null);
+
+    win().localStorage.removeItem('songbook:strum:polska-gurom\u0000arahja');
+    win().localStorage.removeItem('songbook:bpm:polska-gurom\u0000arahja');
+
     // 21. no console/page errors overall
     ok('no page errors', errors.length === 0, errors.join('; '));
 

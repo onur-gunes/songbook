@@ -21,6 +21,7 @@ METADATA_DIRECTIVES = {
     'duration': 'dur',
     'tempo': 'bpm', 'bpm': 'bpm',
     'time': 'time', 'meter': 'time',
+    'strum': 'strum',
     'key': 'key',
     'sheetkey': 'sheetKey',
     'capo': 'capo',
@@ -151,6 +152,74 @@ def parse_time(value):
         return None
     text = str(value).strip().replace(' ', '')
     return text if text in TIME_SIGNATURES else None
+
+
+# ---------- strum pattern library ----------
+
+# A deliberately small library of strum patterns, keyed by metre. This is the
+# canonical source; js/strum.js carries a byte-identical mirror (tests/strum.py
+# asserts the two agree), exactly as TIME_SIGNATURES is mirrored in
+# js/songbooks.js.
+#
+# Each pattern is {id, name, time, subdiv, slots}:
+#   - `slots` is a string of 'D' (down), 'U' (up) and '-' (rest), one char per
+#     subdivision slot. It is the *subdivision row* the UI renders under the
+#     chord strip, with bar lines around it.
+#   - `subdiv` is how many slots fall on one felt beat (2 = eighths in simple
+#     metres). len(slots) must therefore equal subdiv * beats-per-bar, so the
+#     row lines up with the metronome's accents (beat 1 is slot 0).
+#
+# Why small: a long list is a worse experience than six good ones. These are
+# generic, widely-taught patterns, NOT per-song transcriptions.
+#
+# CAVEAT (stated here in the data, not only in the UI): strum patterns are far
+# less reliably documented than key or bpm, and most real songs change pattern
+# between verse and chorus. A per-song `strum` is one pattern for the whole
+# song and is explicitly an approximation; per-section patterns are a later
+# feature. The per-song field is a single id today but is designed so it can
+# grow to a list without a data migration.
+STRUM_PATTERNS = (
+    # 4/4 — eighths (8 slots)
+    {'id': 'downs-4-4', 'name': 'All downs', 'time': '4/4', 'subdiv': 2,
+     'slots': 'D-D-D-D-'},
+    {'id': 'dduudu-4-4', 'name': 'D DU UDU', 'time': '4/4', 'subdiv': 2,
+     'slots': 'D-DUUDU-'},
+    {'id': 'dddudu-4-4', 'name': 'D D DU DU', 'time': '4/4', 'subdiv': 2,
+     'slots': 'D-D-DUDU'},
+    # 3/4 — eighths (6 slots)
+    {'id': 'downs-3-4', 'name': 'All downs', 'time': '3/4', 'subdiv': 2,
+     'slots': 'D-D-D-'},
+    {'id': 'waltz-3-4', 'name': 'D DU DU', 'time': '3/4', 'subdiv': 2,
+     'slots': 'D-DUDU'},
+    # 6/8 — counted in two dotted-quarter pulses, 3 slots per pulse (6 slots)
+    {'id': 'downs-6-8', 'name': 'D . . D . .', 'time': '6/8', 'subdiv': 3,
+     'slots': 'D--D--'},
+    # 2/4 — eighths (4 slots)
+    {'id': 'downs-2-4', 'name': 'All downs', 'time': '2/4', 'subdiv': 2,
+     'slots': 'D-D-'},
+)
+
+STRUM_IDS = frozenset(p['id'] for p in STRUM_PATTERNS)
+
+
+def strum_patterns_for(time_sig):
+    """Patterns whose metre matches `time_sig`, in library order."""
+    return [p for p in STRUM_PATTERNS if p['time'] == time_sig]
+
+
+def parse_strum(value):
+    """Return a known strum pattern id, or None.
+
+    Like parse_time, this is an allowlist, not freeform: the id must name a
+    pattern that actually exists in STRUM_PATTERNS, otherwise the row has
+    nothing to render. The metre the pattern belongs to is validated against
+    the song's `time` separately (in build_songbook), so this only checks the
+    id is real.
+    """
+    if value is None or isinstance(value, bool):
+        return None
+    text = str(value).strip()
+    return text if text in STRUM_IDS else None
 
 
 def _derive_chords(sheet):
@@ -330,6 +399,19 @@ def parse_song(text, number=1, warnings=None, allow_trusted_notes=False):
             song['time'] = time_raw
         else:
             song['time'] = time_sig
+
+    # Like bpm, an unknown strum id is kept verbatim for validate_songbook to
+    # reject rather than silently dropped: a typo'd pattern id should fail the
+    # build, not quietly leave the song with no strum row.
+    strum_raw = meta.get('strum', '').strip()
+    if strum_raw:
+        strum_id = parse_strum(strum_raw)
+        if strum_id is None:
+            _warn(warnings, 'invalid strum %r (expected one of %s)'
+                            % (strum_raw, ', '.join(sorted(STRUM_IDS))))
+            song['strum'] = strum_raw
+        else:
+            song['strum'] = strum_id
 
     song['chords'] = _derive_chords(sheet)
     if meta.get('chords', '').strip():

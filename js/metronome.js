@@ -43,6 +43,7 @@
     var timer = null;       // setInterval handle for the scheduler
     var nextTime = 0;       // AudioContext time of the next click, seconds
     var beat = 0;           // 0-based index of the next click within the bar
+    var startTime = 0;      // AudioContext time of beat 0 (the first click)
 
     function AudioCtx() { return window.AudioContext || window.webkitAudioContext; }
 
@@ -114,6 +115,27 @@
         }
     }
 
+    /* The metronome's audio clock, exposed for the strum row so its slot
+     * highlight reads the one clock the clicks are on rather than starting a
+     * second timer (two independent clocks visibly diverge — see issue #41).
+     *
+     * Returns null when nothing is counting. Otherwise returns how many beats
+     * have elapsed since beat 0 as a float: the integer part is the beat index
+     * (unbounded, so the caller can run a count-in first and then subtract it),
+     * and the fractional part is the position within the current beat. A caller
+     * wanting the slot within a bar takes floor(beats * subdiv) and reduces it
+     * modulo the pattern length. Reading currentTime here, not a cached value,
+     * is what keeps it locked to the clicks over a long run. */
+    SB.metronomePosition = function () {
+        if (!ctx || !SB.state.metronome.playing || !SB.state.metronome.bpm) return null;
+        var spb = 60 / SB.state.metronome.bpm;
+        var beats = (ctx.currentTime - startTime) / spb;
+        // Before the first click actually sounds (startTime is a hair ahead of
+        // the start gesture) the elapsed count is negative; clamp to 0 so the
+        // highlight sits on the downbeat rather than reading a bar behind.
+        return beats < 0 ? 0 : beats;
+    }
+
     SB.startMetronome = function () {
         if (SB.state.metronome.playing) return;
         if (!SB.state.metronome.bpm) return;
@@ -137,10 +159,20 @@
         // Start just far enough ahead that the first click is scheduled
         // rather than fired late.
         nextTime = ctx.currentTime + 0.06;
+        // Beat 0 (the accented downbeat) sounds at nextTime. This is the one
+        // clock everything downstream reads: the strum row derives its current
+        // slot from (currentTime - startTime), so the highlight can never run
+        // on a second timer that drifts away from the audio. See
+        // SB.metronomePosition below.
+        startTime = nextTime;
         SB.state.metronome.playing = true;
         scheduler();
         timer = window.setInterval(scheduler, TICK_MS);
         SB.updateMetronomeUi();
+        // The strum row's highlight rides this same clock. Starting its render
+        // loop here (rather than it polling forever) keeps it off when nothing
+        // is counting, while still reading the audio clock when it runs.
+        if (SB.strumOnMetronomeStart) SB.strumOnMetronomeStart();
     }
 
     SB.stopMetronome = function () {
@@ -151,6 +183,7 @@
         // building a new one on the next start, and on iOS that must happen
         // inside a gesture. Not scheduling is enough to be silent.
         SB.updateMetronomeUi();
+        if (SB.strumOnMetronomeStop) SB.strumOnMetronomeStop();
     }
 
     SB.toggleMetronome = function () {
@@ -174,6 +207,15 @@
         if (typeof v !== 'number' || !isFinite(v)) return;
         var bpm = clampBpm(Math.min(BPM_MAX, Math.max(BPM_MIN, Math.round(v))));
         if (bpm === null || bpm === SB.state.metronome.bpm) { SB.updateMetronomeUi(); return; }
+        // Re-anchor the phase clock so a live tempo change does not make the
+        // strum highlight jump or drift: keep the current beat phase fixed and
+        // only change how fast it advances from here. Done before writing bpm
+        // so the old seconds-per-beat is still in SB.state.metronome.bpm.
+        if (SB.state.metronome.playing && ctx) {
+            var oldSpb = 60 / SB.state.metronome.bpm;
+            var beatsNow = (ctx.currentTime - startTime) / oldSpb;
+            startTime = ctx.currentTime - beatsNow * (60 / bpm);
+        }
         SB.state.metronome.bpm = bpm;
         SB.updateMetronomeUi();
         if (SB.state.active && SB.state.currentSong) {

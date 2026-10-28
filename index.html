@@ -132,6 +132,8 @@
 
         <div id="chordStrip" class="chord-strip" aria-label="Chord diagrams"></div>
 
+        <div id="strumRow" class="strum-row" aria-label="Strum pattern" role="img" hidden></div>
+
         <div class="song-tools" role="toolbar" aria-label="Song tools">
             <div class="tool-group" role="group" aria-label="Transpose">
                 <span class="tool-label">Transpose</span>
@@ -167,6 +169,13 @@
                     <span id="bpmValue" class="step-value" aria-live="polite">—</span>
                     <button id="bpmUp" class="step-btn" type="button" aria-label="Faster tempo">+</button>
                 </div>
+            </div>
+            <div id="strumGroup" class="tool-group" role="group" aria-label="Strum pattern" hidden>
+                <span class="tool-label">Strum</span>
+                <label class="strum-select-wrap">
+                    <span class="sr-only">Strum pattern</span>
+                    <select id="strumSelect" class="strum-select" aria-label="Strum pattern"></select>
+                </label>
             </div>
             <div class="tool-group" role="group" aria-label="Chord diagram size">
                 <span class="tool-label">Diagram</span>
@@ -300,6 +309,7 @@
 <script src="js/song.js"></script>
 <script src="js/autoscroll.js"></script>
 <script src="js/metronome.js"></script>
+<script src="js/strum.js"></script>
 <script src="js/router.js"></script>
 <script src="js/keyboard.js"></script>
 <script src="js/app.js"></script>
