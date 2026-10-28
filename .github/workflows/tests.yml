@@ -47,6 +47,9 @@ jobs:
       - name: ChordPro parser + builder tests
         run: python3 tests/chordpro.py
 
+      - name: Dev/prod environment split
+        run: python3 tests/env.py
+
       # --- browser suites ---
       - name: Chord engine unit tests
         run: python3 tests/run_html.py "$BASE_URL/tests/chordkit.html"

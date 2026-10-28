@@ -1,8 +1,18 @@
 name: Deploy to GitHub Pages
 
+# One Pages site hosts both environments:
+#
+#   main -> https://onur-gunes.github.io/songbook/
+#   dev  -> https://onur-gunes.github.io/songbook/dev/
+#
+# A Pages deployment replaces the whole site, so a push to either branch has
+# to rebuild both environments — otherwise publishing one would delete the
+# other. Each environment is always built from its own branch, so a push to
+# dev can never change what prod serves.
+
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   workflow_dispatch:
 
 permissions:
@@ -10,13 +20,17 @@ permissions:
   pages: write
   id-token: write
 
+# Serialise deployments so two pushes can't race and publish a half-built
+# site. Never cancel in progress: the running job is mid-deploy to the live
+# site.
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  # Pushing to main deploys straight to the live site, so gate it on the
-  # full suite rather than deploying and testing in parallel.
+  # Pushing to either branch republishes the live site, so gate on the full
+  # suite rather than deploying and testing in parallel. A failing run simply
+  # publishes nothing and leaves the current site up.
   tests:
     uses: ./.github/workflows/tests.yml
 
@@ -25,17 +39,59 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: prod
+
+      # The dev branch is optional: until it exists the site is just prod.
+      - name: Check whether the dev branch exists
+        id: devbranch
+        run: |
+          if git ls-remote --exit-code --heads "$REPO" dev >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "no dev branch yet — deploying prod only"
+          fi
+        env:
+          REPO: ${{ github.server_url }}/${{ github.repository }}
+
+      - uses: actions/checkout@v4
+        if: steps.devbranch.outputs.exists == 'true'
+        with:
+          ref: dev
+          path: dev
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - name: Build site
+
+      - name: Build prod
         run: python3 build_pages.py
+        working-directory: prod
+
+      - name: Build dev
+        if: steps.devbranch.outputs.exists == 'true'
+        run: python3 build_pages.py
+        working-directory: dev
+
+      # Nest dev inside the prod site. build_pages.py skips the dev/ subtree
+      # when generating prod's precache manifest, so prod never ships the dev
+      # build to users.
+      - name: Assemble the combined site
+        run: |
+          if [ "${{ steps.devbranch.outputs.exists }}" = "true" ]; then
+            cp -R dev/_site prod/_site/dev
+          fi
+          find prod/_site -maxdepth 2 -name index.html -print
+
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: prod/_site
 
   deploy:
     needs: build

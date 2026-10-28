@@ -249,7 +249,8 @@ sheet shape, blank-line encoding, pre lines, chord brackets, broken
 unicode/entities, and chord playability via `ChordKit` (Node, or headless Chrome
 when Node is not installed).
 
-Run the parser/builder tests with `python3 tests/chordpro.py`.
+Run the parser/builder tests with `python3 tests/chordpro.py`, and the
+dev/prod environment guard with `python3 tests/env.py`.
 
 ## Builds
 
@@ -265,8 +266,38 @@ hand. Only the built `_site/sw.js` is rewritten; the source `sw.js` keeps the
 `@generated-version` / `@generated-core` markers as a fallback for running the
 unbuilt tree.
 
-Pushing to `main` deploys `_site/` to GitHub Pages via
-`.github/workflows/deploy-pages.yml`.
+### Environments
+
+One Pages site hosts two environments, each built from its own branch:
+
+| Branch | URL | Purpose |
+| --- | --- | --- |
+| `main` | <https://onur-gunes.github.io/songbook/> | live site |
+| `dev` | <https://onur-gunes.github.io/songbook/dev/> | staging |
+
+Work on `dev`, check it on a real device, then merge to `main` to release.
+Pushing to either branch runs the full suite first and republishes the site via
+`.github/workflows/deploy-pages.yml`; a Pages deployment replaces the whole
+site, so both environments are rebuilt from their own branches on every push
+and a dev push can never change what prod serves. The `dev` branch is optional
+— until it exists, the site is just prod.
+
+Both environments share one origin, and `localStorage`, IndexedDB and
+`CacheStorage` are all scoped to the origin rather than the path. So the
+environment is derived from the URL and folded into the storage namespace
+(`SB.NS` in `js/core.js`) and the cache names (`sw.js`): prod keeps
+`songbook`, dev gets `songbook-dev`. Testing on dev therefore cannot read,
+corrupt or delete a live user's favourites, notes or imported songbooks, and
+the two service workers no longer evict each other's offline caches.
+
+The environment is resolved at runtime rather than baked in at build time, so
+the dev and prod artifacts are byte-identical — what is smoke-tested on `/dev/`
+is exactly what ships. `tests/env.py` guards the rule, which is necessarily
+duplicated between `js/core.js` and `sw.js` (a page script and a worker cannot
+share an import).
+
+Dev is public: GitHub Pages has no access control on a public repo. It is
+obscure, not private.
 
 ## License
 
