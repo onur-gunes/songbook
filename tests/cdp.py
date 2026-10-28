@@ -52,7 +52,20 @@ def chrome_binary():
         'to the browser binary. Looked for: %s' % ', '.join(_CHROME_NAMES))
 
 
-def launch_chrome(port=9333, user_data_dir=None):
+class ChromeStartupError(RuntimeError):
+    """Chrome did not expose its devtools endpoint in time."""
+
+
+# How long to wait for Chrome's devtools endpoint to start listening, and how
+# many times to retry. Each retry gets a proportionally longer budget (30s,
+# then 60s, then 90s), so a briefly contended runner recovers instead of
+# failing the whole suite. Override with CHROME_STARTUP_TIMEOUT /
+# CHROME_STARTUP_ATTEMPTS.
+_STARTUP_TIMEOUT = float(os.environ.get('CHROME_STARTUP_TIMEOUT', '30'))
+_STARTUP_ATTEMPTS = int(os.environ.get('CHROME_STARTUP_ATTEMPTS', '3'))
+
+
+def _launch_once(port, user_data_dir, timeout):
     import tempfile
     user_data_dir = user_data_dir or tempfile.mkdtemp(prefix='songbook-cdp-')
     argv = [
@@ -69,9 +82,23 @@ def launch_chrome(port=9333, user_data_dir=None):
     if os.environ.get('CHROME_NO_SANDBOX'):
         argv += ['--no-sandbox', '--disable-dev-shm-usage']
     argv.append('about:blank')
-    proc = subprocess.Popen(argv, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    deadline = time.time() + 15
+    # Keep Chrome's own output so a startup failure can report why, rather
+    # than just "did not come up".
+    proc = subprocess.Popen(argv, stdout=subprocess.DEVNULL,
+                            stderr=subprocess.PIPE)
+    deadline = time.time() + timeout
     while time.time() < deadline:
+        # If Chrome died (bad flag, missing sandbox, OOM) there is nothing to
+        # wait for — fail now with its actual error instead of at the deadline.
+        if proc.poll() is not None:
+            err = ''
+            try:
+                err = (proc.stderr.read() or b'').decode('utf-8', 'replace').strip()
+            except Exception:
+                pass
+            raise ChromeStartupError(
+                'Chrome exited during startup (code %s)%s'
+                % (proc.returncode, ': ' + err[-500:] if err else ''))
         try:
             with urllib.request.urlopen('http://127.0.0.1:%d/json/version' % port, timeout=1) as r:
                 if r.status == 200:
@@ -79,7 +106,41 @@ def launch_chrome(port=9333, user_data_dir=None):
         except Exception:
             pass
         time.sleep(0.2)
-    raise RuntimeError('Chrome devtools did not come up')
+
+    proc.kill()
+    proc.wait()
+    raise ChromeStartupError(
+        'Chrome devtools did not come up within %gs' % timeout)
+
+
+def launch_chrome(port=9333, user_data_dir=None):
+    """Start headless Chrome, retrying a startup that loses a race with load.
+
+    Chrome's cold start is the slowest, least predictable part of the suite:
+    measured here it takes under a second on an idle machine but ~10s when
+    the cores are busy and ~15s under heavier contention. A single fixed
+    budget therefore either fails on a loaded runner or hides a real hang,
+    so a timeout is retried (with a fresh profile and a longer budget) rather
+    than failing the suite. A Chrome that exits immediately is a real fault —
+    a bad flag or a missing sandbox — and is not retried.
+    """
+    last = None
+    for attempt in range(_STARTUP_ATTEMPTS):
+        timeout = _STARTUP_TIMEOUT * (attempt + 1)
+        try:
+            return _launch_once(port, user_data_dir, timeout)
+        except ChromeStartupError as e:
+            last = e
+            if 'exited during startup' in str(e):
+                raise
+            if attempt + 1 < _STARTUP_ATTEMPTS:
+                print('chrome startup attempt %d/%d timed out after %gs; retrying'
+                      % (attempt + 1, _STARTUP_ATTEMPTS, timeout), file=sys.stderr)
+                time.sleep(2)
+    raise ChromeStartupError(
+        '%s after %d attempts. This is usually a slow or contended machine '
+        'rather than a test failure; raise CHROME_STARTUP_TIMEOUT or '
+        'CHROME_STARTUP_ATTEMPTS if it persists.' % (last, _STARTUP_ATTEMPTS))
 
 
 def new_tab(port, url='about:blank'):
