@@ -91,6 +91,49 @@ def load_original_keys(book_dir):
     return out
 
 
+def load_tempo(book_dir):
+    """Load an optional per-book tempo.json sidecar.
+
+    Shape mirrors original-keys.json: song id -> {bpm, time, confidence,
+    source} (or a bare bpm number). `confidence` and `source` are curation
+    metadata only and never reach the built book — published bpm values
+    disagree between sources, so the sidecar records where each one came from
+    and how much it is trusted, exactly as original-keys.json does for keys.
+
+    Invalid entries are dropped here rather than merged, so a typo in the
+    sidecar cannot be mistaken for a deliberate tempo on a song that has none.
+    """
+    path = os.path.join(book_dir, 'tempo.json')
+    if not os.path.exists(path):
+        return {}, []
+    with open(path, encoding='utf-8') as f:
+        data = json.load(f)
+    out = {}
+    rejected = []
+    for key, value in data.items():
+        if isinstance(value, dict):
+            raw_bpm = value.get('bpm')
+            raw_time = value.get('time')
+        else:
+            raw_bpm, raw_time = value, None
+        entry = {}
+        if raw_bpm is not None:
+            bpm = chordpro.parse_bpm(raw_bpm)
+            if bpm is None:
+                rejected.append('%s bpm=%r' % (key, raw_bpm))
+            else:
+                entry['bpm'] = bpm
+        if raw_time is not None:
+            time_sig = chordpro.parse_time(raw_time)
+            if time_sig is None:
+                rejected.append('%s time=%r' % (key, raw_time))
+            else:
+                entry['time'] = time_sig
+        if entry:
+            out[key] = entry
+    return out, rejected
+
+
 # ---------- validation ----------
 
 def validate_songbook(book):
@@ -109,6 +152,13 @@ def validate_songbook(book):
                       if s.get('level') not in chordpro.LEVELS]
     invalid_durations = [s.get('id') or '?' for s in songs
                          if isinstance(s.get('dur'), bool) or not isinstance(s.get('dur'), (int, float))]
+    # bpm/time are optional: absent is fine, present-but-wrong is a build
+    # error. A bad tempo must never reach a published book, because the
+    # metronome has no way to tell a typo from a deliberate 300bpm punk song.
+    invalid_bpm = ['%s (%r)' % (s.get('id') or '?', s.get('bpm')) for s in songs
+                   if 'bpm' in s and chordpro.parse_bpm(s.get('bpm')) != s.get('bpm')]
+    invalid_times = ['%s (%r)' % (s.get('id') or '?', s.get('time')) for s in songs
+                     if 'time' in s and chordpro.parse_time(s.get('time')) != s.get('time')]
 
     bad_shape, bad_blank, bad_pre, bad_chords = [], [], [], []
     entities = []
@@ -155,6 +205,12 @@ def validate_songbook(book):
         errors.append('invalid levels: %s' % invalid_levels)
     if invalid_durations:
         errors.append('invalid durations: %s' % invalid_durations)
+    if invalid_bpm:
+        errors.append('invalid bpm (expected %d-%d): %s'
+                      % (chordpro.BPM_MIN, chordpro.BPM_MAX, invalid_bpm))
+    if invalid_times:
+        errors.append('invalid time signatures (expected %s): %s'
+                      % (', '.join(chordpro.TIME_SIGNATURES), invalid_times))
     if bad_shape:
         errors.append('sheet lines are not lists: %s' % bad_shape)
     if bad_blank:
@@ -173,6 +229,10 @@ def validate_songbook(book):
         'missing_artists': missing_artists,
         'invalid_levels': invalid_levels,
         'invalid_durations': invalid_durations,
+        'invalid_bpm': invalid_bpm,
+        'invalid_times': invalid_times,
+        'with_bpm': sum(1 for s in songs if 'bpm' in s),
+        'with_time': sum(1 for s in songs if 'time' in s),
         'bad_shape': bad_shape,
         'bad_blank': bad_blank,
         'bad_pre': bad_pre,
@@ -394,6 +454,25 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
             if entry.get('sheetKey'):
                 song['sheetKey'] = entry['sheetKey']
 
+    tempo, rejected_tempo = load_tempo(book_dir)
+    if rejected_tempo:
+        errors.append('tempo.json: invalid entries: %s' % rejected_tempo)
+    if tempo:
+        unused = sorted(set(tempo) - seen_ids)
+        if unused:
+            warnings.append('tempo.json: unused ids: %s' % unused)
+        for song in songs:
+            entry = tempo.get(song['id'])
+            if not entry:
+                continue
+            # The sidecar is the curated source of truth, same as keys: a
+            # ChordPro {tempo:} directive is an author's inline note, the
+            # sidecar is the researched value, so the sidecar wins.
+            if 'bpm' in entry:
+                song['bpm'] = entry['bpm']
+            if 'time' in entry:
+                song['time'] = entry['time']
+
     book = {
         'id': book_id,
         'name': name,
@@ -465,6 +544,10 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
         'missing artists: %s' % (facts['missing_artists'] or 'none'),
         'invalid levels: %s' % (facts['invalid_levels'] or 'none'),
         'invalid durations: %s' % (facts['invalid_durations'] or 'none'),
+        'tempo: %d/%d songs with bpm, %d with time signature'
+        % (facts['with_bpm'], len(songs), facts['with_time']),
+        'invalid bpm: %s' % (facts['invalid_bpm'] or 'none'),
+        'invalid time signatures: %s' % (facts['invalid_times'] or 'none'),
         'sheet shape: %s' % ('ok' if not facts['bad_shape'] else facts['bad_shape']),
         'blank lines: %s' % ('ok' if not facts['bad_blank'] else facts['bad_blank']),
         'pre lines: %s' % ('ok' if not facts['bad_pre'] else facts['bad_pre']),

@@ -3418,7 +3418,9 @@
    ],
    "key": "Dm",
    "capo": 0,
-   "sheetKey": "Dm"
+   "sheetKey": "Dm",
+   "bpm": 176,
+   "time": "4/4"
   },
   {
    "id": "autobiografia",
@@ -4348,7 +4350,9 @@
    ],
    "key": "Em",
    "capo": 0,
-   "sheetKey": "Em"
+   "sheetKey": "Em",
+   "bpm": 113,
+   "time": "4/4"
   },
   {
    "id": "bal-wszystkich-wi-tych",
@@ -6562,7 +6566,9 @@
    ],
    "key": "Dm",
    "capo": 0,
-   "sheetKey": "Dm"
+   "sheetKey": "Dm",
+   "bpm": 87,
+   "time": "4/4"
   },
   {
    "id": "ba-ka",
@@ -7421,7 +7427,9 @@
    ],
    "key": "G",
    "capo": 0,
-   "sheetKey": "G"
+   "sheetKey": "G",
+   "bpm": 101,
+   "time": "4/4"
   },
   {
    "id": "b-dziesz-moj-pani",
@@ -8635,7 +8643,9 @@
    ],
    "key": "Em",
    "capo": 0,
-   "sheetKey": "Em"
+   "sheetKey": "Em",
+   "bpm": 99,
+   "time": "4/4"
   },
   {
    "id": "biegnij-przed-siebie",
@@ -10071,7 +10081,9 @@
    ],
    "key": "Am",
    "capo": 0,
-   "sheetKey": "Am"
+   "sheetKey": "Am",
+   "bpm": 134,
+   "time": "4/4"
   },
   {
    "id": "bylam-roza",
@@ -20058,7 +20070,9 @@
    ],
    "key": "F",
    "capo": 0,
-   "sheetKey": "F"
+   "sheetKey": "F",
+   "bpm": 98,
+   "time": "4/4"
   },
   {
    "id": "dni-kt-rych-nie-znamy",
@@ -40541,7 +40555,9 @@
    ],
    "key": "B",
    "capo": 0,
-   "sheetKey": "B"
+   "sheetKey": "B",
+   "bpm": 100,
+   "time": "4/4"
   },
   {
    "id": "ko-na-bia-ym-rycerzu",
@@ -42914,7 +42930,9 @@
    ],
    "key": "Bm",
    "capo": 0,
-   "sheetKey": "Bm"
+   "sheetKey": "Bm",
+   "bpm": 100,
+   "time": "4/4"
   },
   {
    "id": "kryzysowa-narzeczona",
@@ -43840,7 +43858,9 @@
    ],
    "key": "Am",
    "capo": 0,
-   "sheetKey": "Am"
+   "sheetKey": "Am",
+   "bpm": 148,
+   "time": "4/4"
   },
   {
    "id": "kto-nowy",
@@ -54664,7 +54684,9 @@
    ],
    "key": "Em",
    "capo": 0,
-   "sheetKey": "Em"
+   "sheetKey": "Em",
+   "bpm": 137,
+   "time": "4/4"
   },
   {
    "id": "m-j-jest-ten-kawa-ek-pod-ogi",

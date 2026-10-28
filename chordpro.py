@@ -19,6 +19,8 @@ METADATA_DIRECTIVES = {
     'artist': 'artist', 'subtitle': 'artist', 'st': 'artist',
     'level': 'level',
     'duration': 'dur',
+    'tempo': 'bpm', 'bpm': 'bpm',
+    'time': 'time', 'meter': 'time',
     'key': 'key',
     'sheetkey': 'sheetKey',
     'capo': 'capo',
@@ -29,6 +31,15 @@ METADATA_DIRECTIVES = {
 
 LEVELS = ('Easy', 'Medium', 'Hard')
 SONG_EXTENSIONS = ('.cho', '.chordpro', '.pro')
+
+# Tempo is the *felt* pulse, not the notated beat: quarter-note BPM in simple
+# metres (4/4, 3/4, 2/4) and dotted-quarter BPM in compound 6/8, so a 6/8 song
+# at 60 has 60 dotted-quarter pulses (two per bar), not 180 eighths. That makes
+# bpm mean "what a metronome clicks" in every metre, which is what the
+# metronome and the strum library both want.
+BPM_MIN = 20
+BPM_MAX = 300
+TIME_SIGNATURES = ('4/4', '3/4', '6/8', '2/4')
 
 _DIRECTIVE_RE = re.compile(r'^\s*\{([^{}]*)\}\s*$')
 
@@ -104,6 +115,42 @@ def _as_bool(value):
     if v in ('0', 'false', 'no', 'n', 'off', ''):
         return False
     return None
+
+
+def parse_bpm(value):
+    """Return an int BPM in range, or None if it is not a valid tempo.
+
+    Accepts ints and floats ("92", "92.0"); rejects anything outside
+    BPM_MIN..BPM_MAX. Shared with the tempo.json sidecar loader so the
+    ChordPro directive and the sidecar can never disagree on what is valid.
+    """
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        number = float(value)
+    else:
+        try:
+            number = float(str(value).strip())
+        except (TypeError, ValueError):
+            return None
+    if number != number or number in (float('inf'), float('-inf')):
+        return None
+    number = round(number)
+    if number < BPM_MIN or number > BPM_MAX:
+        return None
+    return int(number)
+
+
+def parse_time(value):
+    """Return an allowlisted time signature string, or None.
+
+    Deliberately not freeform: the strum library is indexed by metre, so an
+    unrecognised meter is a mistake to surface, not a value to pass through.
+    """
+    if value is None or isinstance(value, bool):
+        return None
+    text = str(value).strip().replace(' ', '')
+    return text if text in TIME_SIGNATURES else None
 
 
 def _derive_chords(sheet):
@@ -259,6 +306,30 @@ def parse_song(text, number=1, warnings=None, allow_trusted_notes=False):
             song['capo'] = 0
     elif key or sheet_key:
         song['capo'] = 0
+
+    # Unlike duration and capo there is no safe default tempo to fall back to,
+    # so an unparseable value is kept verbatim and left for validate_songbook
+    # to reject: a wrong metronome is worse than no metronome, and the build
+    # must refuse to publish rather than quietly guess.
+    bpm_raw = meta.get('bpm', '').strip()
+    if bpm_raw:
+        bpm = parse_bpm(bpm_raw)
+        if bpm is None:
+            _warn(warnings, 'invalid tempo %r (expected %d-%d bpm)'
+                            % (bpm_raw, BPM_MIN, BPM_MAX))
+            song['bpm'] = bpm_raw
+        else:
+            song['bpm'] = bpm
+
+    time_raw = meta.get('time', '').strip()
+    if time_raw:
+        time_sig = parse_time(time_raw)
+        if time_sig is None:
+            _warn(warnings, 'invalid time signature %r (expected %s)'
+                            % (time_raw, ', '.join(TIME_SIGNATURES)))
+            song['time'] = time_raw
+        else:
+            song['time'] = time_sig
 
     song['chords'] = _derive_chords(sheet)
     if meta.get('chords', '').strip():
