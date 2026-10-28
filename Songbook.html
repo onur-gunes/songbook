@@ -4038,6 +4038,57 @@ body.tuner-open { overflow: hidden; }
     }
     function compositeId(sbId, songId) { return sbId + SEP + songId; }
 
+    var FAV_KEY = NS + ':favorites';
+    var RECENT_KEY = NS + ':recent';
+    var RECENT_MAX = 15;
+
+    /* ---------------- shared state ----------------
+     * Every value read or written by more than one section lives here, so
+     * the sections can be split into separate files later without relying
+     * on a shared closure. Anything used by a single section stays a local
+     * var in that section.
+     *
+     * Declared after the helpers above because several initialisers call
+     * lsGet() / use NS.
+     */
+    var SB = window.SB = window.SB || {};
+    SB.state = {
+        /* songbook store */
+        bundled: [],
+        imported: [],
+        bySb: {},
+        active: null,           // current songbook
+        byId: {},               // active songs by id
+        currentSong: null,
+
+        /* personal data */
+        favorites: new Set(lsGet(FAV_KEY, [])),   // composite "sbId\0songId"
+        recent: lsGet(RECENT_KEY, []),            // [{sb,id}]
+
+        /* instrument + transpose */
+        instrument: lsGet(NS + ':instrument', null),
+        transpose: 0,
+
+        /* list view */
+        state: {
+            q: '',
+            levels: new Set(),
+            isNew: false,
+            favOnly: false,
+            sort: 'title',
+            compact: false
+        },
+
+        /* song view + auto-scroll */
+        scrollState: { raf: null, last: 0, pos: 0, playing: false, started: false, finished: false, lastY: null },
+        scrollSpeed: 1,
+        textSize: 1,
+        chordSize: 1,
+        chordPin: true,
+        chordMode: 'inline',
+        showNumbers: false
+    };
+
     /* ---------------- theme ---------------- */
 
     var THEME_KEY = NS + ':theme';
@@ -4055,8 +4106,8 @@ body.tuner-open { overflow: hidden; }
     function applyBrand() {
         var logo = $('logo');
         if (!logo) return;
-        var light = (active && active.logo) || '';
-        var dark = (active && (active.logoDark || active.logo)) || '';
+        var light = (SB.state.active && SB.state.active.logo) || '';
+        var dark = (SB.state.active && (SB.state.active.logoDark || SB.state.active.logo)) || '';
         var dark_on = document.documentElement.getAttribute('data-theme') === 'dark';
         var src = dark_on ? dark : light;
         if (src) {
@@ -4119,15 +4170,9 @@ body.tuner-open { overflow: hidden; }
 
     /* ---------------- songbook store ---------------- */
 
-    var bundled = [];
-    var imported = [];
-    var bySb = {};
-    var active = null;          // current songbook
-    var byId = {};              // active songs by id
-    var currentSong = null;
 
-    function activeSongs() { return active ? active.songs : []; }
-    function allSongbooks() { return bundled.concat(imported); }
+    function activeSongs() { return SB.state.active ? SB.state.active.songs : []; }
+    function allSongbooks() { return SB.state.bundled.concat(SB.state.imported); }
 
     function normalizeSong(s, index) {
         if (!s || typeof s !== 'object') throw new Error('bad song entry');
@@ -4191,15 +4236,15 @@ body.tuner-open { overflow: hidden; }
     }
 
     function rebuildIndex() {
-        bySb = {};
-        allSongbooks().forEach(function (sb) { bySb[sb.id] = sb; });
+        SB.state.bySb = {};
+        allSongbooks().forEach(function (sb) { SB.state.bySb[sb.id] = sb; });
         buildSongbookSelect();
     }
 
     function setActive(sb) {
-        active = sb;
-        byId = {};
-        if (sb) sb.songs.forEach(function (s) { byId[s.id] = s; });
+        SB.state.active = sb;
+        SB.state.byId = {};
+        if (sb) sb.songs.forEach(function (s) { SB.state.byId[s.id] = s; });
         var sel = $('songbookSelect');
         if (sel && sb) sel.value = sb.id;
         var rm = $('removeSongsBtn');
@@ -4219,26 +4264,19 @@ body.tuner-open { overflow: hidden; }
     }
 
     function defaultSongbook() {
-        return bundled[0] || allSongbooks()[0] || null;
+        return SB.state.bundled[0] || allSongbooks()[0] || null;
     }
 
     /* ---------------- personal data ---------------- */
 
-    var FAV_KEY = NS + ':favorites';
-    var RECENT_KEY = NS + ':recent';
-    var RECENT_MAX = 15;
-
-    var favorites = new Set(lsGet(FAV_KEY, []));   // composite "sbId\0songId"
-    var recent = lsGet(RECENT_KEY, []);            // [{sb,id}]
-
-    function saveFavorites() { lsSet(FAV_KEY, Array.from(favorites)); }
-    function isFav(sbId, songId) { return favorites.has(compositeId(sbId, songId)); }
+    function saveFavorites() { lsSet(FAV_KEY, Array.from(SB.state.favorites)); }
+    function isFav(sbId, songId) { return SB.state.favorites.has(compositeId(sbId, songId)); }
 
     function addRecent(sbId, songId) {
-        recent = [{ sb: sbId, id: songId }].concat(recent.filter(function (r) {
+        SB.state.recent = [{ sb: sbId, id: songId }].concat(SB.state.recent.filter(function (r) {
             return !(r.sb === sbId && r.id === songId);
         })).slice(0, RECENT_MAX);
-        lsSet(RECENT_KEY, recent);
+        lsSet(RECENT_KEY, SB.state.recent);
     }
 
     function noteKey(sbId, songId) { return NS + ':note:' + sbId + SEP + songId; }
@@ -4247,23 +4285,22 @@ body.tuner-open { overflow: hidden; }
 
     /* ---------------- instrument ---------------- */
 
-    var instrument = lsGet(NS + ':instrument', null);
-    if (instrument !== 'ukulele' && instrument !== 'guitar') instrument = null;
+    if (SB.state.instrument !== 'ukulele' && SB.state.instrument !== 'guitar') SB.state.instrument = null;
 
     function applyInstrumentUi() {
         Array.prototype.forEach.call(document.querySelectorAll('.instrument-btn'), function (b) {
-            var on = b.dataset.instrument === instrument;
+            var on = b.dataset.instrument === SB.state.instrument;
             b.classList.toggle('active', on);
             b.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
     }
     function setInstrument(inst) {
         if (inst !== 'ukulele' && inst !== 'guitar') return;
-        instrument = inst;
-        lsSet(NS + ':instrument', instrument);
+        SB.state.instrument = inst;
+        lsSet(NS + ':instrument', SB.state.instrument);
         applyInstrumentUi();
         closeVoicingChooser();
-        if (currentSong) renderChordStrip(currentSong);
+        if (SB.state.currentSong) renderChordStrip(SB.state.currentSong);
     }
 
     /* ---------------- transpose ---------------- */
@@ -4321,7 +4358,6 @@ body.tuner-open { overflow: hidden; }
 
     /* ---------------- sheet rendering ---------------- */
 
-    var transpose = 0;
 
     // Legacy `y` notes were authored as HTML. Imported songbooks are
     // untrusted, so rebuild them from an allowlist instead of assigning
@@ -4379,13 +4415,13 @@ body.tuner-open { overflow: hidden; }
     }
 
     function inlineChordLabel(val) {
-        var cv = transposeChordValue(val, transpose);
+        var cv = transposeChordValue(val, SB.state.transpose);
         var m = cv.match(/^\[([\s\S]*)\]$/);
         return m ? '[' + mapChordTokens(m[1]) + ']' : cv;
     }
 
     function renderSheet(song) {
-        if (chordMode === 'above') { renderSheetAbove(song); return; }
+        if (SB.state.chordMode === 'above') { renderSheetAbove(song); return; }
         var wrap = $('sheet');
         wrap.textContent = '';
         var frag = document.createDocumentFragment();
@@ -4409,7 +4445,7 @@ body.tuner-open { overflow: hidden; }
     }
 
     function chordLabel(val) {
-        var cv = transposeChordValue(val, transpose);
+        var cv = transposeChordValue(val, SB.state.transpose);
         var m = cv.match(/^\[([\s\S]*)\]$/);
         return m ? mapChordTokens(m[1]) : cv;
     }
@@ -4577,7 +4613,7 @@ body.tuner-open { overflow: hidden; }
     }
 
     function updateTransposeLabel() {
-        $('trValue').textContent = (transpose > 0 ? '+' : '') + transpose;
+        $('trValue').textContent = (SB.state.transpose > 0 ? '+' : '') + SB.state.transpose;
     }
 
     // Fold a semitone offset into the -5..6 range (nearest direction).
@@ -4592,7 +4628,7 @@ body.tuner-open { overflow: hidden; }
     function updateKeyHints() {
         var sec = $('origKey');
         if (!sec) return;
-        var song = currentSong;
+        var song = SB.state.currentSong;
         if (!song || !song.key) { sec.hidden = true; return; }
         sec.hidden = false;
         $('origKeyValue').textContent = song.key;
@@ -4605,7 +4641,7 @@ body.tuner-open { overflow: hidden; }
             val.textContent = '';
             return;
         }
-        var rel = wrapSigned(song.capo - transpose);
+        var rel = wrapSigned(song.capo - SB.state.transpose);
         part.hidden = false;
         if (rel > 0) val.textContent = 'Capo ' + rel;
         else if (rel === 0) val.textContent = 'No capo';
@@ -4632,21 +4668,21 @@ body.tuner-open { overflow: hidden; }
     // The number is computed from the untransposed chord and tonic so it stays
     // put as the user transposes.
     function addChordDegree(item, name, song) {
-        if (!showNumbers) return;
+        if (!SB.state.showNumbers) return;
         var tonic = songTonic(song);
         if (!tonic) return;
         var deg = ChordKit.scaleDegree(name, tonic.pc, tonic.minor, tonic.name);
         if (deg) item.appendChild(el('span', 'cdeg', deg));
     }
 
-    function pickKey(chordName) { return NS + ':pick:' + instrument + ':' + chordName; }
+    function pickKey(chordName) { return NS + ':pick:' + SB.state.instrument + ':' + chordName; }
 
     function storedPick(chordName) {
         try {
             var s = window.localStorage.getItem(pickKey(chordName));
             if (!s) return null;
             var f = s.split(',').map(Number);
-            var n = ChordKit.instrumentOf(instrument).tuning.length;
+            var n = ChordKit.instrumentOf(SB.state.instrument).tuning.length;
             if (f.length === n && f.every(function (v) { return v >= -1 && v <= 12; })) return f;
         } catch (e) { /* ignore */ }
         return null;
@@ -4655,7 +4691,7 @@ body.tuner-open { overflow: hidden; }
         try { window.localStorage.setItem(pickKey(chordName), frets.join(',')); } catch (e) { /* ignore */ }
     }
 
-    function voicingsFor(chordName) { return ChordKit.voicings(chordName, instrument); }
+    function voicingsFor(chordName) { return ChordKit.voicings(chordName, SB.state.instrument); }
 
     function chosenVoicing(chordName) {
         var list = voicingsFor(chordName);
@@ -4672,14 +4708,14 @@ body.tuner-open { overflow: hidden; }
         var strip = $('chordStrip');
         strip.textContent = '';
         (song.chords || []).forEach(function (name) {
-            var tname = transposeChartName(name, transpose);
+            var tname = transposeChartName(name, SB.state.transpose);
             var label = displayChord(tname);
             if (ChordKit.isMutedName(tname)) {
                 var citem = el('div', 'chord-item chuck');
                 var cimg = new Image();
                 cimg.alt = 'Chuck – all strings muted';
                 cimg.title = 'Chuck – mute all strings and strum';
-                cimg.src = ChordKit.dataUri(instrument, ChordKit.mutedVoicing(instrument));
+                cimg.src = ChordKit.dataUri(SB.state.instrument, ChordKit.mutedVoicing(SB.state.instrument));
                 citem.appendChild(el('span', 'cname', 'Chuck'));
                 citem.appendChild(cimg);
                 strip.appendChild(citem);
@@ -4693,7 +4729,7 @@ body.tuner-open { overflow: hidden; }
                 var img = new Image();
                 img.alt = label + ' chord diagram';
                 img.title = label + (hard ? ' (hard chord – easy alternative in the picker)' : ' – click to choose voicing');
-                img.src = ChordKit.dataUri(instrument, v);
+                img.src = ChordKit.dataUri(SB.state.instrument, v);
                 item.setAttribute('role', 'button');
                 item.setAttribute('tabindex', '0');
                 item.setAttribute('aria-label', label + ' chord diagram – choose voicing');
@@ -4735,7 +4771,7 @@ body.tuner-open { overflow: hidden; }
         ov.setAttribute('aria-label', 'Choose voicing for ' + label);
         var box = el('div', 'chooser');
         var head = el('div', 'chooser-head');
-        head.appendChild(el('span', 'chooser-title', label + ' – choose a voicing (' + ChordKit.instrumentOf(instrument).label + ')'));
+        head.appendChild(el('span', 'chooser-title', label + ' – choose a voicing (' + ChordKit.instrumentOf(SB.state.instrument).label + ')'));
         var closeBtn = el('button', 'chooser-close');
         closeBtn.type = 'button';
         closeBtn.setAttribute('aria-label', 'Close');
@@ -4755,12 +4791,12 @@ body.tuner-open { overflow: hidden; }
             if (f.join(',') === curKey) opt.classList.add('sel');
             var oi = new Image();
             oi.alt = '';
-            oi.src = ChordKit.dataUri(instrument, f);
+            oi.src = ChordKit.dataUri(SB.state.instrument, f);
             opt.appendChild(oi);
             opt.appendChild(el('span', 'choosing-frets', fretsTxt));
             opt.addEventListener('click', function () {
                 savePick(chordName, f);
-                img.src = ChordKit.dataUri(instrument, f);
+                img.src = ChordKit.dataUri(SB.state.instrument, f);
                 closeVoicingChooser();
             });
             grid.appendChild(opt);
@@ -4779,11 +4815,11 @@ body.tuner-open { overflow: hidden; }
         var block = $('recentBlock');
         var list = $('recentList');
         list.textContent = '';
-        var items = recent.filter(function (r) { return bySb[r.sb] && bySb[r.sb].songs.some(function (s) { return s.id === r.id; }); });
+        var items = SB.state.recent.filter(function (r) { return SB.state.bySb[r.sb] && SB.state.bySb[r.sb].songs.some(function (s) { return s.id === r.id; }); });
         if (!items.length) { block.hidden = true; return; }
         block.hidden = false;
         items.forEach(function (r) {
-            var sb = bySb[r.sb];
+            var sb = SB.state.bySb[r.sb];
             var s = sb.songs.filter(function (x) { return x.id === r.id; })[0];
             var li = document.createElement('li');
             var b = el('button', null, s.title);
@@ -4796,25 +4832,17 @@ body.tuner-open { overflow: hidden; }
 
     /* ---------------- list view ---------------- */
 
-    var state = {
-        q: '',
-        levels: new Set(),
-        isNew: false,
-        favOnly: false,
-        sort: 'title',
-        compact: false
-    };
-    try { state.compact = window.localStorage.getItem(NS + ':compact') === '1'; } catch (e) { /* ignore */ }
+    try { SB.state.state.compact = window.localStorage.getItem(NS + ':compact') === '1'; } catch (e) { /* ignore */ }
 
     function applyViewToggle() {
         var b = $('viewToggle');
-        b.setAttribute('aria-pressed', state.compact ? 'true' : 'false');
-        b.textContent = state.compact ? '▤' : '☰';
-        b.setAttribute('aria-label', state.compact
+        b.setAttribute('aria-pressed', SB.state.state.compact ? 'true' : 'false');
+        b.textContent = SB.state.state.compact ? '▤' : '☰';
+        b.setAttribute('aria-label', SB.state.state.compact
             ? 'Switch back to card view'
             : 'Switch to compact one-line song list');
-        b.title = state.compact ? 'Back to cards' : 'Compact list';
-        $('songList').classList.toggle('is-compact', state.compact);
+        b.title = SB.state.state.compact ? 'Back to cards' : 'Compact list';
+        $('songList').classList.toggle('is-compact', SB.state.state.compact);
     }
 
     // Diacritic-insensitive fold: typing "pszczolka" finds "Pszczółka".
@@ -4826,19 +4854,19 @@ body.tuner-open { overflow: hidden; }
     }
 
     function filteredSongs() {
-        var q = fold(state.q.trim());
-        var sbId = active ? active.id : '';
+        var q = fold(SB.state.state.q.trim());
+        var sbId = SB.state.active ? SB.state.active.id : '';
         var out = activeSongs().filter(function (s) {
-            if (state.levels.size && !state.levels.has(s.level)) return false;
-            if (state.isNew && !s.new) return false;
-            if (state.favOnly && !isFav(sbId, s.id)) return false;
+            if (SB.state.state.levels.size && !SB.state.state.levels.has(s.level)) return false;
+            if (SB.state.state.isNew && !s.new) return false;
+            if (SB.state.state.favOnly && !isFav(sbId, s.id)) return false;
             if (q) {
                 var hay = fold(s.title + ' ' + s.artist);
                 if (hay.indexOf(q) === -1) return false;
             }
             return true;
         });
-        if (state.sort === 'artist') {
+        if (SB.state.state.sort === 'artist') {
             out.sort(function (a, b) {
                 var c = a.artist.localeCompare(b.artist, 'en', { sensitivity: 'base' });
                 return c !== 0 ? c : a.n - b.n;
@@ -4855,7 +4883,7 @@ body.tuner-open { overflow: hidden; }
         var ul = $('songList');
         ul.textContent = '';
         var frag = document.createDocumentFragment();
-        var sbId = active ? active.id : '';
+        var sbId = SB.state.active ? SB.state.active.id : '';
         songs.forEach(function (s) {
             var li = el('li', 'song-row');
             li.dataset.id = s.id;
@@ -4891,20 +4919,20 @@ body.tuner-open { overflow: hidden; }
         $('resultCount').textContent = songs.length === total
             ? total + ' songs'
             : songs.length + ' of ' + total + ' songs';
-        $('searchClear').hidden = !state.q;
+        $('searchClear').hidden = !SB.state.state.q;
         applyViewToggle();
     }
 
     function toggleFavorite(sbId, songId) {
         var cid = compositeId(sbId, songId);
-        if (favorites.has(cid)) favorites.delete(cid);
-        else favorites.add(cid);
+        if (SB.state.favorites.has(cid)) SB.state.favorites.delete(cid);
+        else SB.state.favorites.add(cid);
         saveFavorites();
-        if (!$('listView').hidden && active && active.id === sbId) {
-            if (state.favOnly) renderList();
+        if (!$('listView').hidden && SB.state.active && SB.state.active.id === sbId) {
+            if (SB.state.state.favOnly) renderList();
             else updateStarInPlace(songId);
         }
-        if (currentSong && active && active.id === sbId && currentSong.id === songId) updateFavBtn();
+        if (SB.state.currentSong && SB.state.active && SB.state.active.id === sbId && SB.state.currentSong.id === songId) updateFavBtn();
     }
 
     function updateStarInPlace(id) {
@@ -4913,7 +4941,7 @@ body.tuner-open { overflow: hidden; }
             if (rows[i].dataset.id !== id) continue;
             var star = rows[i].querySelector('.star-btn');
             if (!star) break;
-            var on = isFav(active.id, id);
+            var on = isFav(SB.state.active.id, id);
             star.classList.toggle('on', on);
             star.textContent = on ? '★' : '☆';
             star.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -4922,8 +4950,8 @@ body.tuner-open { overflow: hidden; }
     }
 
     function updateFavBtn() {
-        if (!currentSong || !active) return;
-        var on = isFav(active.id, currentSong.id);
+        if (!SB.state.currentSong || !SB.state.active) return;
+        var on = isFav(SB.state.active.id, SB.state.currentSong.id);
         var btn = $('favBtn');
         btn.textContent = on ? '★' : '☆';
         btn.classList.toggle('on', on);
@@ -4932,7 +4960,7 @@ body.tuner-open { overflow: hidden; }
 
     function syncSortButtons() {
         Array.prototype.forEach.call(document.querySelectorAll('.sort-btn'), function (b) {
-            var on = b.dataset.sort === state.sort;
+            var on = b.dataset.sort === SB.state.state.sort;
             b.classList.toggle('active', on);
             b.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
@@ -4941,10 +4969,10 @@ body.tuner-open { overflow: hidden; }
     function syncFilterButtons() {
         Array.prototype.forEach.call(document.querySelectorAll('.filter-btn'), function (b) {
             var lv = b.dataset.level;
-            var on = lv === 'New' ? state.isNew
-                : lv === 'Favorites' ? state.favOnly
-                : lv === 'All' ? state.levels.size === 0
-                : state.levels.has(lv);
+            var on = lv === 'New' ? SB.state.state.isNew
+                : lv === 'Favorites' ? SB.state.state.favOnly
+                : lv === 'All' ? SB.state.state.levels.size === 0
+                : SB.state.state.levels.has(lv);
             b.classList.toggle('active', on);
             b.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
@@ -4953,12 +4981,12 @@ body.tuner-open { overflow: hidden; }
     function bindListControls() {
         var input = $('search');
         input.addEventListener('input', function () {
-            state.q = input.value;
+            SB.state.state.q = input.value;
             renderList();
         });
         $('searchClear').addEventListener('click', function () {
             input.value = '';
-            state.q = '';
+            SB.state.state.q = '';
             renderList();
             input.focus();
         });
@@ -4966,11 +4994,11 @@ body.tuner-open { overflow: hidden; }
         document.querySelectorAll('.filter-btn').forEach(function (b) {
             b.addEventListener('click', function () {
                 var lv = b.dataset.level;
-                if (lv === 'New') state.isNew = !state.isNew;
-                else if (lv === 'Favorites') state.favOnly = !state.favOnly;
-                else if (lv === 'All') state.levels.clear();
-                else if (state.levels.has(lv)) state.levels.delete(lv);
-                else state.levels.add(lv);
+                if (lv === 'New') SB.state.state.isNew = !SB.state.state.isNew;
+                else if (lv === 'Favorites') SB.state.state.favOnly = !SB.state.state.favOnly;
+                else if (lv === 'All') SB.state.state.levels.clear();
+                else if (SB.state.state.levels.has(lv)) SB.state.state.levels.delete(lv);
+                else SB.state.state.levels.add(lv);
                 syncFilterButtons();
                 renderList();
             });
@@ -4978,7 +5006,7 @@ body.tuner-open { overflow: hidden; }
 
         document.querySelectorAll('.sort-btn').forEach(function (b) {
             b.addEventListener('click', function () {
-                state.sort = b.dataset.sort;
+                SB.state.state.sort = b.dataset.sort;
                 syncSortButtons();
                 renderList();
             });
@@ -4987,20 +5015,20 @@ body.tuner-open { overflow: hidden; }
 
         $('randomBtn').addEventListener('click', function () {
             var songs = filteredSongs();
-            if (!songs.length || !active) return;
+            if (!songs.length || !SB.state.active) return;
             var pick = songs[Math.floor(Math.random() * songs.length)];
-            location.hash = '#/' + active.id + '/' + pick.id;
+            location.hash = '#/' + SB.state.active.id + '/' + pick.id;
         });
 
         $('recentClear').addEventListener('click', function () {
-            recent = [];
-            lsSet(RECENT_KEY, recent);
+            SB.state.recent = [];
+            lsSet(RECENT_KEY, SB.state.recent);
             renderRecent();
         });
 
         $('viewToggle').addEventListener('click', function () {
-            state.compact = !state.compact;
-            try { window.localStorage.setItem(NS + ':compact', state.compact ? '1' : '0'); } catch (e) { /* ignore */ }
+            SB.state.state.compact = !SB.state.state.compact;
+            try { window.localStorage.setItem(NS + ':compact', SB.state.state.compact ? '1' : '0'); } catch (e) { /* ignore */ }
             renderList();
         });
 
@@ -5014,11 +5042,11 @@ body.tuner-open { overflow: hidden; }
             e.target.value = '';
         });
         $('removeSongsBtn').addEventListener('click', function () {
-            if (!active || !active.imported) return;
-            if (!window.confirm('Remove imported songbook "' + active.name + '"? Your notes and favorites for it are kept.')) return;
-            var id = active.id;
+            if (!SB.state.active || !SB.state.active.imported) return;
+            if (!window.confirm('Remove imported songbook "' + SB.state.active.name + '"? Your notes and favorites for it are kept.')) return;
+            var id = SB.state.active.id;
             idbDelete(id).then(function () {
-                imported = imported.filter(function (sb) { return sb.id !== id; });
+                SB.state.imported = SB.state.imported.filter(function (sb) { return sb.id !== id; });
                 rebuildIndex();
                 location.hash = '#/' + (defaultSongbook() ? defaultSongbook().id : '');
             }).catch(function (err) { window.alert('Could not remove: ' + err.message); });
@@ -5037,13 +5065,13 @@ body.tuner-open { overflow: hidden; }
                 window.alert('Import failed: ' + err.message);
                 return;
             }
-            if (bySb[sb.id]) {
+            if (SB.state.bySb[sb.id]) {
                 window.alert('A songbook with id "' + sb.id + '" already exists. Rename it (the "id" field) and try again.');
                 return;
             }
             sb.imported = true;
             idbPut(sb).then(function () {
-                imported.push(sb);
+                SB.state.imported.push(sb);
                 rebuildIndex();
                 location.hash = '#/' + sb.id;
             }).catch(function (err) { window.alert('Could not save import: ' + err.message); });
@@ -5057,10 +5085,10 @@ body.tuner-open { overflow: hidden; }
     function navContext() {
         var list = filteredSongs();
         var idx = -1;
-        for (var i = 0; i < list.length; i++) if (list[i].id === currentSong.id) { idx = i; break; }
+        for (var i = 0; i < list.length; i++) if (list[i].id === SB.state.currentSong.id) { idx = i; break; }
         if (idx === -1) {
             list = activeSongs().slice().sort(function (a, b) { return a.n - b.n; });
-            for (var j = 0; j < list.length; j++) if (list[j].id === currentSong.id) { idx = j; break; }
+            for (var j = 0; j < list.length; j++) if (list[j].id === SB.state.currentSong.id) { idx = j; break; }
         }
         return { list: list, idx: idx };
     }
@@ -5073,17 +5101,17 @@ body.tuner-open { overflow: hidden; }
 
     function openSong(id) {
         closeVoicingChooser();
-        var song = byId[id];
-        if (!song) { location.hash = '#/' + (active ? active.id : ''); return; }
-        currentSong = song;
-        addRecent(active.id, id);
+        var song = SB.state.byId[id];
+        if (!song) { location.hash = '#/' + (SB.state.active ? SB.state.active.id : ''); return; }
+        SB.state.currentSong = song;
+        addRecent(SB.state.active.id, id);
         resetScroll(true);
-        scrollSpeed = loadSpeedForSong(active.id, id);
+        SB.state.scrollSpeed = loadSpeedForSong(SB.state.active.id, id);
         updateSpeedLabel();
-        textSize = loadTextSizeForSong(active.id, id);
+        SB.state.textSize = loadTextSizeForSong(SB.state.active.id, id);
         applyTextSize();
 
-        transpose = 0;
+        SB.state.transpose = 0;
         updateTransposeLabel();
 
         $('songNumber').textContent = '#' + song.n;
@@ -5099,7 +5127,7 @@ body.tuner-open { overflow: hidden; }
         renderSheet(song);
 
         var note = '';
-        try { note = window.localStorage.getItem(noteKey(active.id, id)) || ''; } catch (e) { /* ignore */ }
+        try { note = window.localStorage.getItem(noteKey(SB.state.active.id, id)) || ''; } catch (e) { /* ignore */ }
         $('notesBox').value = note;
         $('notesStatus').classList.remove('show');
 
@@ -5110,31 +5138,31 @@ body.tuner-open { overflow: hidden; }
 
     function bindSongControls() {
         $('trUp').addEventListener('click', function () {
-            if (transpose >= 11) return;
-            transpose++;
+            if (SB.state.transpose >= 11) return;
+            SB.state.transpose++;
             updateTransposeLabel();
             updateKeyHints();
-            if (currentSong) { renderChordStrip(currentSong); renderSheet(currentSong); }
+            if (SB.state.currentSong) { renderChordStrip(SB.state.currentSong); renderSheet(SB.state.currentSong); }
         });
         $('trDown').addEventListener('click', function () {
-            if (transpose <= -11) return;
-            transpose--;
+            if (SB.state.transpose <= -11) return;
+            SB.state.transpose--;
             updateTransposeLabel();
             updateKeyHints();
-            if (currentSong) { renderChordStrip(currentSong); renderSheet(currentSong); }
+            if (SB.state.currentSong) { renderChordStrip(SB.state.currentSong); renderSheet(SB.state.currentSong); }
         });
 
         $('favBtn').addEventListener('click', function () {
-            if (currentSong && active) toggleFavorite(active.id, currentSong.id);
+            if (SB.state.currentSong && SB.state.active) toggleFavorite(SB.state.active.id, SB.state.currentSong.id);
         });
 
         $('prevBtn').addEventListener('click', function () {
             var ctx = navContext();
-            if (ctx.idx > 0) location.hash = '#/' + active.id + '/' + ctx.list[ctx.idx - 1].id;
+            if (ctx.idx > 0) location.hash = '#/' + SB.state.active.id + '/' + ctx.list[ctx.idx - 1].id;
         });
         $('nextBtn').addEventListener('click', function () {
             var ctx = navContext();
-            if (ctx.idx !== -1 && ctx.idx < ctx.list.length - 1) location.hash = '#/' + active.id + '/' + ctx.list[ctx.idx + 1].id;
+            if (ctx.idx !== -1 && ctx.idx < ctx.list.length - 1) location.hash = '#/' + SB.state.active.id + '/' + ctx.list[ctx.idx + 1].id;
         });
 
         $('notesSave').addEventListener('click', saveNotes);
@@ -5144,25 +5172,25 @@ body.tuner-open { overflow: hidden; }
 
         $('scrollBtn').addEventListener('click', toggleAutoScroll);
         $('scrollReset').addEventListener('click', function () { resetScroll(false); });
-        $('speedDown').addEventListener('click', function () { setSpeed(scrollSpeed - 0.1); });
-        $('speedUp').addEventListener('click', function () { setSpeed(scrollSpeed + 0.1); });
-        $('sizeDown').addEventListener('click', function () { setTextSize(textSize - 0.1); });
-        $('sizeUp').addEventListener('click', function () { setTextSize(textSize + 0.1); });
-        $('chordSizeDown').addEventListener('click', function () { setChordSize(chordSize - 0.1); });
-        $('chordSizeUp').addEventListener('click', function () { setChordSize(chordSize + 0.1); });
+        $('speedDown').addEventListener('click', function () { setSpeed(SB.state.scrollSpeed - 0.1); });
+        $('speedUp').addEventListener('click', function () { setSpeed(SB.state.scrollSpeed + 0.1); });
+        $('sizeDown').addEventListener('click', function () { setTextSize(SB.state.textSize - 0.1); });
+        $('sizeUp').addEventListener('click', function () { setTextSize(SB.state.textSize + 0.1); });
+        $('chordSizeDown').addEventListener('click', function () { setChordSize(SB.state.chordSize - 0.1); });
+        $('chordSizeUp').addEventListener('click', function () { setChordSize(SB.state.chordSize + 0.1); });
         $('chordPinBtn').addEventListener('click', function () {
-            chordPin = !chordPin;
-            try { window.localStorage.setItem(NS + ':chordPin', chordPin ? '1' : '0'); } catch (e) { /* ignore */ }
+            SB.state.chordPin = !SB.state.chordPin;
+            try { window.localStorage.setItem(NS + ':chordPin', SB.state.chordPin ? '1' : '0'); } catch (e) { /* ignore */ }
             applyChordSettings();
         });
         Array.prototype.forEach.call(document.querySelectorAll('.chord-mode-btn[data-chord-mode]'), function (b) {
             b.addEventListener('click', function () { setChordMode(b.dataset.chordMode); });
         });
         $('numbersBtn').addEventListener('click', function () {
-            showNumbers = !showNumbers;
-            try { window.localStorage.setItem(NS + ':numbers', showNumbers ? '1' : '0'); } catch (e) { /* ignore */ }
+            SB.state.showNumbers = !SB.state.showNumbers;
+            try { window.localStorage.setItem(NS + ':numbers', SB.state.showNumbers ? '1' : '0'); } catch (e) { /* ignore */ }
             applyNumbers();
-            if (currentSong) renderChordStrip(currentSong);
+            if (SB.state.currentSong) renderChordStrip(SB.state.currentSong);
         });
         applyChordSettings();
         applyChordMode();
@@ -5173,24 +5201,24 @@ body.tuner-open { overflow: hidden; }
         $('sheet').addEventListener('pointercancel', sheetPointerEnd);
 
         window.addEventListener('scroll', function () {
-            if (!scrollState.playing || scrollState.lastY === null) return;
-            if (Math.abs(window.pageYOffset - scrollState.lastY) > 2) {
-                scrollState.pos = window.pageYOffset;
-                scrollState.lastY = window.pageYOffset;
+            if (!SB.state.scrollState.playing || SB.state.scrollState.lastY === null) return;
+            if (Math.abs(window.pageYOffset - SB.state.scrollState.lastY) > 2) {
+                SB.state.scrollState.pos = window.pageYOffset;
+                SB.state.scrollState.lastY = window.pageYOffset;
             }
         }, { passive: true });
 
         var sheetResizeT = null;
         window.addEventListener('resize', function () {
-            if (chordMode !== 'above' || !currentSong) return;
+            if (SB.state.chordMode !== 'above' || !SB.state.currentSong) return;
             clearTimeout(sheetResizeT);
-            sheetResizeT = setTimeout(function () { renderSheet(currentSong); }, 150);
+            sheetResizeT = setTimeout(function () { renderSheet(SB.state.currentSong); }, 150);
         }, { passive: true });
     }
 
     function saveNotes() {
-        if (!currentSong || !active) return;
-        try { window.localStorage.setItem(noteKey(active.id, currentSong.id), $('notesBox').value); } catch (e) { /* ignore */ }
+        if (!SB.state.currentSong || !SB.state.active) return;
+        try { window.localStorage.setItem(noteKey(SB.state.active.id, SB.state.currentSong.id), $('notesBox').value); } catch (e) { /* ignore */ }
         var st = $('notesStatus');
         st.textContent = 'Saved';
         st.classList.add('show');
@@ -5200,49 +5228,42 @@ body.tuner-open { overflow: hidden; }
 
     /* ---------------- auto-scroll ---------------- */
 
-    var scrollState = { raf: null, last: 0, pos: 0, playing: false, started: false, finished: false, lastY: null };
-    var scrollSpeed = 1;
-    var textSize = 1;
-    var chordSize = 1;
-    var chordPin = true;
-    var chordMode = 'inline';
-    var showNumbers = false;
-    try { showNumbers = window.localStorage.getItem(NS + ':numbers') === '1'; } catch (e) { /* ignore */ }
+    try { SB.state.showNumbers = window.localStorage.getItem(NS + ':numbers') === '1'; } catch (e) { /* ignore */ }
     try {
         var _cs = parseFloat(window.localStorage.getItem(NS + ':chordSize'));
-        if (_cs >= 0.6 && _cs <= 1.5) chordSize = Math.round(_cs * 10) / 10;
+        if (_cs >= 0.6 && _cs <= 1.5) SB.state.chordSize = Math.round(_cs * 10) / 10;
     } catch (e) { /* ignore */ }
-    try { chordPin = window.localStorage.getItem(NS + ':chordPin') !== '0'; } catch (e) { /* ignore */ }
+    try { SB.state.chordPin = window.localStorage.getItem(NS + ':chordPin') !== '0'; } catch (e) { /* ignore */ }
     try {
         var _cm = window.localStorage.getItem(NS + ':chordMode');
-        if (_cm === 'inline' || _cm === 'above') chordMode = _cm;
+        if (_cm === 'inline' || _cm === 'above') SB.state.chordMode = _cm;
     } catch (e) { /* ignore */ }
 
     function applyChordSettings() {
-        document.documentElement.style.setProperty('--chord-size', chordSize);
-        $('chordSizeValue').textContent = Math.round(chordSize * 100) + '%';
+        document.documentElement.style.setProperty('--chord-size', SB.state.chordSize);
+        $('chordSizeValue').textContent = Math.round(SB.state.chordSize * 100) + '%';
         var p = $('chordPinBtn');
-        p.setAttribute('aria-pressed', chordPin ? 'true' : 'false');
-        p.textContent = chordPin ? '📌' : '📍';
-        p.setAttribute('aria-label', chordPin
+        p.setAttribute('aria-pressed', SB.state.chordPin ? 'true' : 'false');
+        p.textContent = SB.state.chordPin ? '📌' : '📍';
+        p.setAttribute('aria-label', SB.state.chordPin
             ? 'Chord strip pinned to the top — click to let it scroll with the lyrics'
             : 'Chord strip scrolls — click to keep it pinned to the top');
-        p.title = chordPin
+        p.title = SB.state.chordPin
             ? 'Pinned — click to let the chord strip scroll'
             : 'Not pinned — click to keep the chord strip at the top';
-        $('chordStrip').classList.toggle('is-static', !chordPin);
+        $('chordStrip').classList.toggle('is-static', !SB.state.chordPin);
     }
 
     function setChordSize(v) {
-        chordSize = Math.min(1.5, Math.max(0.6, Math.round(v * 10) / 10));
+        SB.state.chordSize = Math.min(1.5, Math.max(0.6, Math.round(v * 10) / 10));
         applyChordSettings();
-        try { window.localStorage.setItem(NS + ':chordSize', String(chordSize)); } catch (e) { /* ignore */ }
+        try { window.localStorage.setItem(NS + ':chordSize', String(SB.state.chordSize)); } catch (e) { /* ignore */ }
     }
 
     function applyChordMode() {
-        $('sheet').classList.toggle('chords-above', chordMode === 'above');
+        $('sheet').classList.toggle('chords-above', SB.state.chordMode === 'above');
         Array.prototype.forEach.call(document.querySelectorAll('.chord-mode-btn[data-chord-mode]'), function (b) {
-            var on = b.dataset.chordMode === chordMode;
+            var on = b.dataset.chordMode === SB.state.chordMode;
             b.classList.toggle('active', on);
             b.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
@@ -5251,17 +5272,17 @@ body.tuner-open { overflow: hidden; }
     function applyNumbers() {
         var btn = $('numbersBtn');
         if (!btn) return;
-        btn.classList.toggle('active', showNumbers);
-        btn.setAttribute('aria-pressed', showNumbers ? 'true' : 'false');
+        btn.classList.toggle('active', SB.state.showNumbers);
+        btn.setAttribute('aria-pressed', SB.state.showNumbers ? 'true' : 'false');
     }
 
     function setChordMode(mode) {
         if (mode !== 'inline' && mode !== 'above') return;
-        if (mode === chordMode) return;
-        chordMode = mode;
-        try { window.localStorage.setItem(NS + ':chordMode', chordMode); } catch (e) { /* ignore */ }
+        if (mode === SB.state.chordMode) return;
+        SB.state.chordMode = mode;
+        try { window.localStorage.setItem(NS + ':chordMode', SB.state.chordMode); } catch (e) { /* ignore */ }
         applyChordMode();
-        if (currentSong) renderSheet(currentSong);
+        if (SB.state.currentSong) renderSheet(SB.state.currentSong);
     }
 
     var pinch = { pts: {}, active: false, base: 0 };
@@ -5288,8 +5309,8 @@ body.tuner-open { overflow: hidden; }
         var d = pinchDistance(pinch.pts[ids[0]], pinch.pts[ids[1]]);
         if (d < 8) return;
         var ratio = d / pinch.base;
-        if (ratio >= 1.15) { setTextSize(textSize + 0.1); pinch.base = d; }
-        else if (ratio <= 1 / 1.15) { setTextSize(textSize - 0.1); pinch.base = d; }
+        if (ratio >= 1.15) { setTextSize(SB.state.textSize + 0.1); pinch.base = d; }
+        else if (ratio <= 1 / 1.15) { setTextSize(SB.state.textSize - 0.1); pinch.base = d; }
     }
     function sheetPointerEnd(e) {
         if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
@@ -5305,7 +5326,7 @@ body.tuner-open { overflow: hidden; }
         } catch (e) { /* ignore */ }
         return v;
     }
-    function updateSpeedLabel() { $('speedValue').textContent = scrollSpeed.toFixed(1) + '×'; }
+    function updateSpeedLabel() { $('speedValue').textContent = SB.state.scrollSpeed.toFixed(1) + '×'; }
 
     function loadTextSizeForSong(sbId, id) {
         var v = 1;
@@ -5316,32 +5337,32 @@ body.tuner-open { overflow: hidden; }
         return v;
     }
     function applyTextSize() {
-        $('sheet').style.setProperty('--sheet-size', textSize);
-        $('sizeValue').textContent = Math.round(textSize * 100) + '%';
+        $('sheet').style.setProperty('--sheet-size', SB.state.textSize);
+        $('sizeValue').textContent = Math.round(SB.state.textSize * 100) + '%';
     }
     function setTextSize(v) {
         v = Math.min(1.5, Math.max(0.7, Math.round(v * 10) / 10));
-        if (v === textSize) { applyTextSize(); return; }
-        textSize = v;
+        if (v === SB.state.textSize) { applyTextSize(); return; }
+        SB.state.textSize = v;
         applyTextSize();
-        if (chordMode === 'above' && currentSong) renderSheet(currentSong);
-        if (active && currentSong) {
-            try { window.localStorage.setItem(sizeKey(active.id, currentSong.id), String(textSize)); } catch (e) { /* ignore */ }
+        if (SB.state.chordMode === 'above' && SB.state.currentSong) renderSheet(SB.state.currentSong);
+        if (SB.state.active && SB.state.currentSong) {
+            try { window.localStorage.setItem(sizeKey(SB.state.active.id, SB.state.currentSong.id), String(SB.state.textSize)); } catch (e) { /* ignore */ }
         }
     }
     function setSpeed(v) {
         v = Math.min(3, Math.max(0.2, Math.round(v * 10) / 10));
-        if (v === scrollSpeed) { updateSpeedLabel(); return; }
-        scrollSpeed = v;
+        if (v === SB.state.scrollSpeed) { updateSpeedLabel(); return; }
+        SB.state.scrollSpeed = v;
         updateSpeedLabel();
-        if (active && currentSong) {
-            try { window.localStorage.setItem(speedKey(active.id, currentSong.id), String(scrollSpeed)); } catch (e) { /* ignore */ }
+        if (SB.state.active && SB.state.currentSong) {
+            try { window.localStorage.setItem(speedKey(SB.state.active.id, SB.state.currentSong.id), String(SB.state.scrollSpeed)); } catch (e) { /* ignore */ }
         }
     }
     var ABOVE_SCROLL_FACTOR = 1.75;
     function scrollDurationMs() {
-        var d = ((currentSong && currentSong.dur ? currentSong.dur : 4) * 60 * 1000) / scrollSpeed;
-        return chordMode === 'above' ? d * ABOVE_SCROLL_FACTOR : d;
+        var d = ((SB.state.currentSong && SB.state.currentSong.dur ? SB.state.currentSong.dur : 4) * 60 * 1000) / SB.state.scrollSpeed;
+        return SB.state.chordMode === 'above' ? d * ABOVE_SCROLL_FACTOR : d;
     }
     // Pixels per millisecond for the whole sheet at the current speed.
     // Always full-sheet-relative, so it is independent of current position.
@@ -5359,78 +5380,78 @@ body.tuner-open { overflow: hidden; }
         return Math.min(Math.max(0, top), scrollBounds());
     }
     function freshScrollAnchor() {
-        scrollState.pos = Math.min(Math.max(window.pageYOffset, 0), scrollBounds());
-        scrollState.started = true;
-        scrollState.finished = false;
+        SB.state.scrollState.pos = Math.min(Math.max(window.pageYOffset, 0), scrollBounds());
+        SB.state.scrollState.started = true;
+        SB.state.scrollState.finished = false;
     }
     function startScroll() {
-        if (!currentSong || scrollBounds() <= 0) return;
-        if (!scrollState.started || scrollState.finished) freshScrollAnchor();
-        else scrollState.pos = Math.min(Math.max(window.pageYOffset, 0), scrollBounds());
-        scrollState.playing = true;
-        scrollState.last = 0;
-        scrollState.lastY = window.pageYOffset;
-        scrollState.raf = requestAnimationFrame(stepScroll);
+        if (!SB.state.currentSong || scrollBounds() <= 0) return;
+        if (!SB.state.scrollState.started || SB.state.scrollState.finished) freshScrollAnchor();
+        else SB.state.scrollState.pos = Math.min(Math.max(window.pageYOffset, 0), scrollBounds());
+        SB.state.scrollState.playing = true;
+        SB.state.scrollState.last = 0;
+        SB.state.scrollState.lastY = window.pageYOffset;
+        SB.state.scrollState.raf = requestAnimationFrame(stepScroll);
         updateScrollBtn();
     }
     function stepScroll(ts) {
-        if (!scrollState.playing) return;
+        if (!SB.state.scrollState.playing) return;
         // If the user scrolled manually since the last frame, follow them —
         // resync pos to the real offset, no velocity recomputation needed.
-        if (scrollState.lastY !== null && Math.abs(window.pageYOffset - scrollState.lastY) > 2) {
-            scrollState.pos = window.pageYOffset;
+        if (SB.state.scrollState.lastY !== null && Math.abs(window.pageYOffset - SB.state.scrollState.lastY) > 2) {
+            SB.state.scrollState.pos = window.pageYOffset;
         }
-        if (!scrollState.last) scrollState.last = ts;
-        var dt = Math.min(ts - scrollState.last, 100);
-        scrollState.last = ts;
+        if (!SB.state.scrollState.last) SB.state.scrollState.last = ts;
+        var dt = Math.min(ts - SB.state.scrollState.last, 100);
+        SB.state.scrollState.last = ts;
 
         var max = scrollBounds();
-        scrollState.pos += targetVel() * dt;
-        if (scrollState.pos > max) scrollState.pos = max;
-        var y = scrollState.pos;
+        SB.state.scrollState.pos += targetVel() * dt;
+        if (SB.state.scrollState.pos > max) SB.state.scrollState.pos = max;
+        var y = SB.state.scrollState.pos;
         window.scrollTo(0, y);
-        scrollState.lastY = window.pageYOffset;
+        SB.state.scrollState.lastY = window.pageYOffset;
 
         if (y >= max) {
-            scrollState.playing = false;
-            scrollState.finished = true;
-            scrollState.raf = null;
-            scrollState.last = 0;
+            SB.state.scrollState.playing = false;
+            SB.state.scrollState.finished = true;
+            SB.state.scrollState.raf = null;
+            SB.state.scrollState.last = 0;
             updateScrollBtn();
             return;
         }
-        scrollState.raf = requestAnimationFrame(stepScroll);
+        SB.state.scrollState.raf = requestAnimationFrame(stepScroll);
     }
     function pauseScroll() {
-        scrollState.playing = false;
-        if (scrollState.raf) cancelAnimationFrame(scrollState.raf);
-        scrollState.raf = null;
-        scrollState.last = 0;
-        scrollState.lastY = null;
+        SB.state.scrollState.playing = false;
+        if (SB.state.scrollState.raf) cancelAnimationFrame(SB.state.scrollState.raf);
+        SB.state.scrollState.raf = null;
+        SB.state.scrollState.last = 0;
+        SB.state.scrollState.lastY = null;
         updateScrollBtn();
     }
     function resetScroll(keepPosition) {
-        scrollState.playing = false;
-        if (scrollState.raf) cancelAnimationFrame(scrollState.raf);
-        scrollState.raf = null;
-        scrollState.last = 0;
-        scrollState.lastY = null;
-        scrollState.started = false;
-        scrollState.finished = false;
+        SB.state.scrollState.playing = false;
+        if (SB.state.scrollState.raf) cancelAnimationFrame(SB.state.scrollState.raf);
+        SB.state.scrollState.raf = null;
+        SB.state.scrollState.last = 0;
+        SB.state.scrollState.lastY = null;
+        SB.state.scrollState.started = false;
+        SB.state.scrollState.finished = false;
         if (!keepPosition) window.scrollTo(0, sheetStartY());
-        scrollState.pos = Math.min(Math.max(window.pageYOffset, 0), scrollBounds());
+        SB.state.scrollState.pos = Math.min(Math.max(window.pageYOffset, 0), scrollBounds());
         updateScrollBtn();
     }
     function toggleAutoScroll() {
-        if (scrollState.playing) pauseScroll();
+        if (SB.state.scrollState.playing) pauseScroll();
         else startScroll();
     }
     function updateScrollBtn() {
         var btn = $('scrollBtn');
-        if (scrollState.playing) {
+        if (SB.state.scrollState.playing) {
             btn.textContent = '⏸';
             btn.setAttribute('aria-label', 'Pause auto-scroll');
-        } else if (scrollState.started && !scrollState.finished) {
+        } else if (SB.state.scrollState.started && !SB.state.scrollState.finished) {
             btn.textContent = '▶';
             btn.setAttribute('aria-label', 'Resume auto-scroll');
         } else {
@@ -5438,7 +5459,7 @@ body.tuner-open { overflow: hidden; }
             btn.setAttribute('aria-label', 'Start auto-scroll');
         }
         btn.title = btn.getAttribute('aria-label') + ' (Space)';
-        btn.classList.toggle('playing', scrollState.playing);
+        btn.classList.toggle('playing', SB.state.scrollState.playing);
     }
 
     /* ---------------- routing ---------------- */
@@ -5448,23 +5469,23 @@ body.tuner-open { overflow: hidden; }
         var m = h.match(/^#\/([^\/]+)(?:\/(.+))?$/);
         var sb = null, songId = null;
         if (m) {
-            sb = bySb[decodeURIComponent(m[1])];
+            sb = SB.state.bySb[decodeURIComponent(m[1])];
             if (m[2]) songId = decodeURIComponent(m[2]);
         }
         // A bare "#/" means "back to the song list I'm browsing" — keep the
         // current songbook instead of snapping to the default starter one.
-        if (!sb) sb = (active && bySb[active.id]) || defaultSongbook();
+        if (!sb) sb = (SB.state.active && SB.state.bySb[SB.state.active.id]) || defaultSongbook();
         if (!sb) return;
 
         setActive(sb);
 
-        if (songId && byId[songId]) {
+        if (songId && SB.state.byId[songId]) {
             $('listView').hidden = true;
             $('songView').hidden = false;
             openSong(songId);
         } else {
             resetScroll(true);
-            currentSong = null;
+            SB.state.currentSong = null;
             $('songView').hidden = true;
             $('listView').hidden = false;
             renderList();
@@ -5484,16 +5505,16 @@ body.tuner-open { overflow: hidden; }
             if (e.key === 'Escape') {
                 if (t === $('search')) {
                     $('search').value = '';
-                    state.q = '';
+                    SB.state.state.q = '';
                     renderList();
                     t.blur();
                     return;
                 }
                 if (typing) { t.blur(); return; }
-                if (!$('songView').hidden) { location.hash = '#/' + (active ? active.id : ''); return; }
-                if (state.q) {
+                if (!$('songView').hidden) { location.hash = '#/' + (SB.state.active ? SB.state.active.id : ''); return; }
+                if (SB.state.state.q) {
                     $('search').value = '';
-                    state.q = '';
+                    SB.state.state.q = '';
                     renderList();
                 }
                 return;
@@ -5517,7 +5538,7 @@ body.tuner-open { overflow: hidden; }
 
     function chordSvg(chordName) {
         var v = chosenVoicing(chordName);
-        return v ? ChordKit.dataUri(instrument, v) : null;
+        return v ? ChordKit.dataUri(SB.state.instrument, v) : null;
     }
 
     /* ---------------- init ---------------- */
@@ -5552,7 +5573,7 @@ body.tuner-open { overflow: hidden; }
         if (tunerBtn && window.SongbookTuner) {
             tunerBtn.addEventListener('click', function () {
                 window.SongbookTuner.open({
-                    getInstrument: function () { return instrument; },
+                    getInstrument: function () { return SB.state.instrument; },
                     setInstrument: setInstrument
                 });
             });
@@ -5566,13 +5587,13 @@ body.tuner-open { overflow: hidden; }
         window.addEventListener('hashchange', route);
 
         Promise.all([loadBundled(), idbAll().catch(function () { return []; })]).then(function (res) {
-            bundled = res[0];
-            imported = res[1].map(function (raw) {
+            SB.state.bundled = res[0];
+            SB.state.imported = res[1].map(function (raw) {
                 try { var sb = normalizeSongbook(raw); sb.imported = true; return sb; }
                 catch (e) { return null; }
             }).filter(Boolean);
-            if (!bundled.length && !imported.length) { showFatal('No songbooks available.'); return; }
-            if (!instrument) instrument = (defaultSongbook() && defaultSongbook().instrument) || 'ukulele';
+            if (!SB.state.bundled.length && !SB.state.imported.length) { showFatal('No songbooks available.'); return; }
+            if (!SB.state.instrument) SB.state.instrument = (defaultSongbook() && defaultSongbook().instrument) || 'ukulele';
             applyInstrumentUi();
             rebuildIndex();
             $('bootMsg').hidden = true;
@@ -5598,16 +5619,16 @@ body.tuner-open { overflow: hidden; }
         noteNode: noteNode,
         stripSortPrefix: stripSortPrefix,
         filteredSongs: filteredSongs,
-        state: state,
-        favorites: favorites,
+        state: SB.state.state,
+        favorites: SB.state.favorites,
         activeSongs: activeSongs,
         allSongbooks: allSongbooks,
-        getActive: function () { return active; },
-        getSong: function (id) { return byId[id]; },
+        getActive: function () { return SB.state.active; },
+        getSong: function (id) { return SB.state.byId[id]; },
         setInstrument: setInstrument,
-        getInstrument: function () { return instrument; },
+        getInstrument: function () { return SB.state.instrument; },
         chordSvg: chordSvg,
-        scrollState: scrollState,
+        scrollState: SB.state.scrollState,
         scrollBounds: scrollBounds,
         targetVel: targetVel
     };
