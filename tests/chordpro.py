@@ -157,6 +157,70 @@ class ParseSongTests(unittest.TestCase):
         self.assertTrue(any('invalid level' in w for w in warnings))
         self.assertTrue(any('invalid duration' in w for w in warnings))
 
+    def test_tempo_and_time_directives(self):
+        song = chordpro.parse_song(
+            '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+            '{tempo: 92}\n{time: 3/4}\n[C]x'
+        )
+        self.assertEqual(song['bpm'], 92)
+        self.assertEqual(song['time'], '3/4')
+
+    def test_bpm_and_meter_aliases(self):
+        song = chordpro.parse_song(
+            '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+            '{bpm: 120}\n{meter: 6/8}\n[C]x'
+        )
+        self.assertEqual(song['bpm'], 120)
+        self.assertEqual(song['time'], '6/8')
+
+    def test_tempo_and_time_are_absent_when_not_given(self):
+        song = chordpro.parse_song(
+            '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n[C]x'
+        )
+        self.assertNotIn('bpm', song)
+        self.assertNotIn('time', song)
+
+    def test_invalid_tempo_and_time_warn_and_keep_raw(self):
+        # Kept verbatim on purpose: validate_songbook turns these into build
+        # errors, so a bad tempo fails the build instead of silently vanishing.
+        warnings = []
+        song = chordpro.parse_song(
+            '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+            '{tempo: fast}\n{time: 9/4}\n[C]x',
+            warnings=warnings,
+        )
+        self.assertEqual(song['bpm'], 'fast')
+        self.assertEqual(song['time'], '9/4')
+        self.assertTrue(any('invalid tempo' in w for w in warnings))
+        self.assertTrue(any('invalid time signature' in w for w in warnings))
+
+    def test_out_of_range_tempo_warns(self):
+        warnings = []
+        song = chordpro.parse_song(
+            '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+            '{tempo: 400}\n[C]x',
+            warnings=warnings,
+        )
+        self.assertEqual(song['bpm'], '400')
+        self.assertTrue(any('invalid tempo' in w for w in warnings))
+
+    def test_parse_bpm_bounds_and_rounding(self):
+        self.assertEqual(chordpro.parse_bpm('92.4'), 92)
+        self.assertEqual(chordpro.parse_bpm(20), 20)
+        self.assertEqual(chordpro.parse_bpm(300), 300)
+        self.assertIsNone(chordpro.parse_bpm(19))
+        self.assertIsNone(chordpro.parse_bpm(301))
+        self.assertIsNone(chordpro.parse_bpm(True))
+        self.assertIsNone(chordpro.parse_bpm('fast'))
+        self.assertIsNone(chordpro.parse_bpm(''))
+
+    def test_parse_time_allowlist(self):
+        self.assertEqual(chordpro.parse_time('4/4'), '4/4')
+        self.assertEqual(chordpro.parse_time(' 6/8 '), '6/8')
+        self.assertIsNone(chordpro.parse_time('9/4'))
+        self.assertIsNone(chordpro.parse_time('common'))
+        self.assertIsNone(chordpro.parse_time(None))
+
     def test_comments_are_safe_italic(self):
         song = chordpro.parse_song(
             '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
@@ -317,6 +381,87 @@ class BuildTests(unittest.TestCase):
             self.assertFalse(os.path.exists(result['output']))
             self.assertFalse(os.path.exists(os.path.join(songbooks, 'index.json')))
             self.assertIn('wrote: not written', result['report'])
+
+    def test_bad_tempo_is_not_published(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            book_dir = os.path.join(tmp, 'bad-tempo')
+            songbooks = os.path.join(tmp, 'songbooks')
+            os.makedirs(book_dir)
+            with open(os.path.join(book_dir, 'book.json'), 'w', encoding='utf-8') as f:
+                json.dump({'id': 'bad-tempo', 'name': 'Bad Tempo',
+                           'description': 'x', 'instrument': 'ukulele'}, f)
+            with open(os.path.join(book_dir, '01-song.cho'), 'w', encoding='utf-8') as f:
+                f.write('{title: Song}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+                        '{tempo: fast}\n{time: 9/4}\n[C]lyric\n')
+
+            result = build_songbook.build_book(
+                book_dir, out_dir=songbooks,
+                index_path=os.path.join(songbooks, 'index.json'),
+                report_path=os.path.join(tmp, 'report.txt'), chord_check=False)
+
+            self.assertTrue(any('invalid bpm' in e for e in result['errors']))
+            self.assertTrue(any('invalid time signatures' in e for e in result['errors']))
+            self.assertFalse(os.path.exists(result['output']))
+            self.assertIn('wrote: not written', result['report'])
+
+    def test_tempo_sidecar_merges_and_reports(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            book_dir = os.path.join(tmp, 'tempo-book')
+            songbooks = os.path.join(tmp, 'songbooks')
+            os.makedirs(book_dir)
+            with open(os.path.join(book_dir, 'book.json'), 'w', encoding='utf-8') as f:
+                json.dump({'id': 'tempo-book', 'name': 'Tempo Book',
+                           'description': 'x', 'instrument': 'ukulele'}, f)
+            with open(os.path.join(book_dir, '01-song.cho'), 'w', encoding='utf-8') as f:
+                f.write('{title: Song}\n{artist: A}\n{level: Easy}\n'
+                        '{duration: 1}\n[C]lyric\n')
+            with open(os.path.join(book_dir, '02-other.cho'), 'w', encoding='utf-8') as f:
+                f.write('{title: Other}\n{artist: A}\n{level: Easy}\n'
+                        '{duration: 1}\n[C]lyric\n')
+            with open(os.path.join(book_dir, 'tempo.json'), 'w', encoding='utf-8') as f:
+                json.dump({
+                    'song': {'bpm': 92, 'time': '4/4',
+                             'confidence': 'high', 'source': 'tunebat'},
+                    'ghost': {'bpm': 100},
+                }, f)
+
+            result = build_songbook.build_book(
+                book_dir, out_dir=songbooks,
+                index_path=os.path.join(songbooks, 'index.json'),
+                report_path=os.path.join(tmp, 'report.txt'), chord_check=False)
+
+            self.assertEqual(result['errors'], [])
+            songs = {s['id']: s for s in result['book']['songs']}
+            self.assertEqual(songs['song']['bpm'], 92)
+            self.assertEqual(songs['song']['time'], '4/4')
+            # curation metadata stays in the sidecar, never in the book
+            self.assertNotIn('confidence', songs['song'])
+            self.assertNotIn('source', songs['song'])
+            self.assertNotIn('bpm', songs['other'])
+            self.assertTrue(any('tempo.json: unused ids' in w for w in result['warnings']))
+            self.assertIn('tempo: 1/2 songs with bpm, 1 with time signature',
+                          result['report'])
+
+    def test_tempo_sidecar_rejects_invalid_entries(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, 'tempo.json'), 'w', encoding='utf-8') as f:
+                json.dump({
+                    'ok': {'bpm': 120, 'time': '3/4'},
+                    'bare': 85,
+                    'bad-bpm': {'bpm': 'fast'},
+                    'bad-time': {'bpm': 90, 'time': '9/4'},
+                }, f)
+            tempo, rejected = build_songbook.load_tempo(tmp)
+
+            self.assertEqual(tempo['ok'], {'bpm': 120, 'time': '3/4'})
+            self.assertEqual(tempo['bare'], {'bpm': 85})
+            self.assertNotIn('bad-bpm', tempo)
+            self.assertEqual(tempo['bad-time'], {'bpm': 90})
+            self.assertEqual(len(rejected), 2)
+
+    def test_tempo_sidecar_absent_is_empty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(build_songbook.load_tempo(tmp), ({}, []))
 
     def test_validation_flags_malformed_sheet(self):
         book = {

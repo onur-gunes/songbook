@@ -144,6 +144,8 @@ attached to `SB`.
       "new": false,
       "key": "Am",             // original recording key (optional, shown in the song view)
       "dur": 4,                // minutes, drives auto-scroll
+      "bpm": 92,               // optional tempo, 20-300 (see "Tempo and metre")
+      "time": "4/4",           // optional metre: 4/4 | 3/4 | 6/8 | 2/4
       "chords": ["Am", "G"],
       "sheet": [ [ ["c", "[Am]"], ["x", " lyric"], ... ], [] ]   // lines of [kind, text]
     }
@@ -184,6 +186,7 @@ the app renders. This is an input path for agent-generated books: `migrate.py`,
 chordpro/<book-id>/
   book.json          # songbook metadata
   original-keys.json # optional curated keys, id -> {key, sheetKey, capo}
+  tempo.json         # optional curated tempo, id -> {bpm, time, confidence, source}
   01-song-title.cho  # one song per .cho / .chordpro / .pro file
   02-another.cho
 ```
@@ -203,6 +206,8 @@ Song directives:
 | `{artist: ...}` / `{subtitle: ...}` / `{st: ...}` | `artist` | required |
 | `{level: Easy\|Medium\|Hard}` | `level` | default `Medium` + warning |
 | `{duration: 3.5}` | `dur` | minutes; default `3` + warning |
+| `{tempo: 92}` / `{bpm: 92}` | `bpm` | optional; 20–300, rounded to an integer; invalid values fail the build |
+| `{time: 4/4}` / `{meter: 4/4}` | `time` | optional; one of `4/4`, `3/4`, `6/8`, `2/4`; invalid values fail the build |
 | `{key: Am}` | `key` | optional recording key |
 | `{sheetkey: Am}` | `sheetKey` | defaults to `key` |
 | `{capo: 2}` | `capo` | defaults to `0` when a key is given |
@@ -254,9 +259,42 @@ The builder writes `songbooks/<id>.json`, upserts the entry in
 `songbooks/index.json`, and writes `<id>-report.txt`. If validation reports an
 error, the book is not published and the command exits non-zero. The report
 checks song counts, duplicate ids/numbers, titles/artists, levels, durations,
-sheet shape, blank-line encoding, pre lines, chord brackets, broken
+tempo/metre, sheet shape, blank-line encoding, pre lines, chord brackets, broken
 unicode/entities, and chord playability via `ChordKit` (Node, or headless Chrome
 when Node is not installed).
+
+### Tempo and metre
+
+`bpm` and `time` are both optional; songs without them keep working exactly as
+before. They are independent of `dur`: `dur` is a wall-clock length that drives
+auto-scroll, and deriving one from the other would need a bar count the songs
+do not carry.
+
+`bpm` is the **felt pulse**, not the notated beat — quarter-note BPM in simple
+metres (`4/4`, `3/4`, `2/4`) and **dotted-quarter** BPM in compound `6/8`. So a
+6/8 song at 60 has two pulses per bar, not six. This keeps `bpm` meaning "what
+a metronome clicks" in every metre.
+
+Tempo is validated, never guessed: a value outside 20–300, or a metre outside
+the allowlist, is a build error rather than a silent default, because a wrong
+metronome is worse than no metronome. Imported (untrusted) songbooks are
+normalised instead — a bad `bpm` or `time` becomes `null` and the song still
+renders.
+
+Curated values live in the per-book `tempo.json` sidecar, merged by song id
+exactly like `original-keys.json`, and take precedence over an inline
+`{tempo:}` directive:
+
+```json
+{
+  "arahja": { "bpm": 146, "time": "4/4", "confidence": "high", "source": "tunebat" }
+}
+```
+
+`confidence` and `source` are curation metadata and never reach the built book.
+They are worth keeping because published BPM values disagree between sources
+(and often differ by a factor of two), so it matters which ones were measured
+and which were guessed.
 
 Run the parser/builder tests with `python3 tests/chordpro.py`, and the
 dev/prod environment guard with `python3 tests/env.py`.
