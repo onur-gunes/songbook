@@ -105,6 +105,25 @@
         /* song view + auto-scroll */
         scrollState: { raf: null, last: 0, pos: 0, playing: false, started: false, finished: false, lastY: null },
         scrollSpeed: 1,
+
+        /* metronome — bpm is null until a song with tempo data is opened or
+         * the user sets one; beats is the meter's beats per bar, used to
+         * accent beat 1. See js/metronome.js. */
+        metronome: { playing: false, bpm: null, beats: 4 },
+
+        /* strum — the pattern chosen for the current song (a pattern object
+         * from the library, or null when the song has no time signature and so
+         * no selector), plus how the row is drawn: 'arrows' (↓ ↑ ·) or
+         * 'letters' (D U ·). The notation is a global display preference, like
+         * chordMode, not a per-song value. See js/strum.js. */
+        strum: { pattern: null, notation: 'arrows' },
+
+        /* strum row display, matching chordSize/chordPin: size scales the
+         * slots, pin keeps the row on screen while the lyrics scroll. Both are
+         * global preferences remembered in localStorage. */
+        strumSize: 1,
+        strumPin: true,
+
         textSize: 1,
         chordSize: 1,
         chordPin: true,

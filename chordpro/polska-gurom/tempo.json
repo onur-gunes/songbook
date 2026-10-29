@@ -1,0 +1,74 @@
+{
+ "arahja": {
+  "bpm": 176,
+  "time": "4/4",
+  "strum": "downs-4-4",
+  "strum_confidence": "low",
+  "strum_source": "generic driving-rock downstrokes; not a transcription. Strum is an approximation — the song shifts feel between sections.",
+  "confidence": "medium",
+  "source": "songbpm 88 doubled (driving rock, 88 is the half-time reading)"
+ },
+ "autobiografia": {
+  "bpm": 113,
+  "time": "4/4",
+  "strum": "dddudu-4-4",
+  "strum_confidence": "low",
+  "strum_source": "generic D D DU DU pop pattern; approximation only.",
+  "confidence": "high",
+  "source": "songbpm (duration 4:34 matches)"
+ },
+ "ba-ka": {
+  "bpm": 101,
+  "time": "4/4",
+  "confidence": "high",
+  "source": "songbpm (duration 3:35 and key G match)"
+ },
+ "baranek": {
+  "bpm": 87,
+  "time": "4/4",
+  "confidence": "high",
+  "source": "songbpm (duration 4:20 matches)"
+ },
+ "bia-a-armia": {
+  "bpm": 99,
+  "time": "4/4",
+  "confidence": "high",
+  "source": "songbpm (duration 4:35 matches)"
+ },
+ "bohema": {
+  "bpm": 134,
+  "time": "4/4",
+  "confidence": "high",
+  "source": "songbpm (duration 3:39 matches)"
+ },
+ "dlugosc-dzwieku-samotnosci": {
+  "bpm": 98,
+  "time": "4/4",
+  "confidence": "high",
+  "source": "songbpm (duration 4:11 matches)"
+ },
+ "ko-ysanka-dla-nieznajomej": {
+  "bpm": 100,
+  "time": "4/4",
+  "confidence": "high",
+  "source": "songbpm (duration 3:35 matches)"
+ },
+ "krakowski-spleen": {
+  "bpm": 100,
+  "time": "4/4",
+  "confidence": "medium",
+  "source": "songbpm (duration 4:45 vs our 4:39, different master)"
+ },
+ "kryzysowa-narzeczona": {
+  "bpm": 148,
+  "time": "4/4",
+  "confidence": "medium",
+  "source": "songbpm (duration 4:28 vs our 4:00, different version)"
+ },
+ "mniej-ni-zero": {
+  "bpm": 137,
+  "time": "4/4",
+  "confidence": "high",
+  "source": "songbpm (duration 4:01 matches)"
+ }
+}

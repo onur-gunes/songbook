@@ -22,6 +22,8 @@
     SB.noteKey = function (sbId, songId) { return SB.NS + ':note:' + sbId + SB.SEP + songId; }
     SB.speedKey = function (sbId, songId) { return SB.NS + ':speed:' + sbId + SB.SEP + songId; }
     SB.sizeKey = function (sbId, songId) { return SB.NS + ':size:' + sbId + SB.SEP + songId; }
+    SB.bpmKey = function (sbId, songId) { return SB.NS + ':bpm:' + sbId + SB.SEP + songId; }
+    SB.strumKey = function (sbId, songId) { return SB.NS + ':strum:' + sbId + SB.SEP + songId; }
 
     /* ---------------- recent ---------------- */
 

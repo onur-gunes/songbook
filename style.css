@@ -1073,6 +1073,131 @@ main {
 
 .pin-seg[aria-pressed="true"]:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 
+.metronome-seg {
+    color: var(--muted);
+}
+
+.metronome-seg.playing {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.metronome-seg.playing:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+
+/* strum pattern row + selector */
+
+.strum-select-wrap {
+    display: inline-flex;
+    align-items: center;
+}
+
+.strum-select {
+    height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    padding: 0 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Both notations are equal choices, so this is never drawn as an "active"
+ * state — the glyph itself (↓↑ or DU) already says which one is showing.
+ * Sized to match .stepper so it sits level with the controls beside it. */
+.strum-notation-btn {
+    height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    min-width: 44px;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* Pinned by default, stacked directly under the chord strip. The `top` offset
+ * is set from JS (see updateStickyOffset in js/strum.js) because the strip's
+ * height varies with the diagram size and it leaves the sticky stack when its
+ * own pin is off — a fixed value here would overlap or float. z-index sits
+ * just below the strip so the two never fight if their edges meet. */
+.strum-row {
+    position: sticky;
+    top: var(--topbar-h);
+    z-index: 49;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    gap: 14px;
+    align-items: flex-end;
+    overflow-x: auto;
+    padding: 8px 4px 10px;
+    margin: -8px -4px 16px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.strum-row.is-static {
+    position: static;
+}
+
+.strum-bar {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    /* bar lines around the bar: the row reads as notated bars, not a flat
+     * strip of arrows */
+    padding: 0 10px;
+    border-left: 2px solid var(--line);
+    border-right: 2px solid var(--line);
+}
+
+.strum-bar.countin {
+    opacity: 0.6;
+}
+
+.strum-bar-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    text-align: center;
+}
+
+.strum-cells {
+    display: flex;
+    gap: 6px;
+}
+
+.strum-slot {
+    flex: none;
+    min-width: calc(20px * var(--strum-size, 1));
+    height: calc(28px * var(--strum-size, 1));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: calc(1.05rem * var(--strum-size, 1));
+    font-weight: 700;
+    color: var(--text);
+    border-radius: 6px;
+    background: var(--surface-2);
+}
+
+.strum-slot.rest {
+    color: var(--muted);
+    font-weight: 400;
+}
+
+.strum-slot.beat {
+    box-shadow: inset 0 -2px 0 var(--line);
+}
+
+.strum-slot.on {
+    background: var(--accent);
+    color: var(--surface);
+}
+
 /* sheet */
 
 .sheet {
@@ -1771,6 +1896,11 @@ body.tuner-open { overflow: hidden; }
     .tool-group { flex-direction: column; align-items: center; gap: 4px; }
     .song-tools .tool-label { font-size: 0.65rem; }
     .step-btn { min-width: 26px; padding: 0 6px; font-size: 0.9rem; }
+    /* Stated rather than inherited: .strum-notation-btn is more specific than
+     * .step-btn, so without this it would keep its desktop 44x36 while every
+     * control beside it shrinks. It stays a comfortable tap target (36px) —
+     * it is a standalone button, not one segment of a .stepper. */
+    .strum-notation-btn { min-width: 36px; height: 32px; padding: 0 6px; }
     .step-value { min-width: 30px; font-size: 0.75rem; }
     .chord-mode-btn { padding: 4px 8px; font-size: 0.75rem; }
     .step-divider { margin: 6px 0; }

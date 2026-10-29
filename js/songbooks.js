@@ -13,6 +13,36 @@
     SB.activeSongs = function () { return SB.state.active ? SB.state.active.songs : []; }
     SB.allSongbooks = function () { return SB.state.bundled.concat(SB.state.imported); }
 
+    /* Tempo bounds and metres, mirroring chordpro.py (BPM_MIN/BPM_MAX,
+     * TIME_SIGNATURES). bpm is the felt pulse: quarter-note in simple metres,
+     * dotted-quarter in 6/8. Keep the two lists in step. */
+    var BPM_MIN = 20, BPM_MAX = 300;
+    var TIME_SIGNATURES = ['4/4', '3/4', '6/8', '2/4'];
+
+    /* Imported songbooks are untrusted JSON, so an out-of-range or non-numeric
+     * tempo is dropped to null rather than clamped: clamping "0" to 20 would
+     * invent a tempo the song never had and silently drive the metronome at a
+     * fabricated speed. null means "unknown", which every consumer can handle. */
+    function normalizeBpm(value) {
+        if (typeof value !== 'number' || !isFinite(value)) return null;
+        var bpm = Math.round(value);
+        return (bpm >= BPM_MIN && bpm <= BPM_MAX) ? bpm : null;
+    }
+
+    function normalizeTime(value) {
+        return TIME_SIGNATURES.indexOf(value) >= 0 ? value : null;
+    }
+
+    /* A strum is kept as a bare id string here; js/strum.js owns the pattern
+     * library and resolves the id against it (and against the song's metre) at
+     * open time. Keeping it a string rather than resolving here avoids a load-
+     * order dependency on strum.js and leaves the field free to grow into a
+     * list of ids for per-section patterns later, which is why it is not
+     * coerced to a single scalar shape. */
+    function normalizeStrum(value) {
+        return (typeof value === 'string' && value) ? value : null;
+    }
+
     function normalizeSong(s, index) {
         if (!s || typeof s !== 'object') throw new Error('bad song entry');
         return {
@@ -26,6 +56,9 @@
             sheetKey: s.sheetKey ? String(s.sheetKey) : '',
             capo: (typeof s.capo === 'number' && isFinite(s.capo)) ? s.capo : null,
             dur: typeof s.dur === 'number' ? s.dur : 4,
+            bpm: normalizeBpm(s.bpm),
+            time: normalizeTime(s.time),
+            strum: normalizeStrum(s.strum),
             chords: Array.isArray(s.chords) ? s.chords.map(String) : [],
             sheet: Array.isArray(s.sheet) ? s.sheet : (s.sheet ? s.sheet : [])
         };

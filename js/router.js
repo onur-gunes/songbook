@@ -30,6 +30,7 @@
             SB.openSong(songId);
         } else {
             SB.resetScroll(true);
+            SB.stopMetronome();
             SB.state.currentSong = null;
             SB.$('songView').hidden = true;
             SB.$('listView').hidden = false;

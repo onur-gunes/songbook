@@ -19,6 +19,9 @@ METADATA_DIRECTIVES = {
     'artist': 'artist', 'subtitle': 'artist', 'st': 'artist',
     'level': 'level',
     'duration': 'dur',
+    'tempo': 'bpm', 'bpm': 'bpm',
+    'time': 'time', 'meter': 'time',
+    'strum': 'strum',
     'key': 'key',
     'sheetkey': 'sheetKey',
     'capo': 'capo',
@@ -29,6 +32,15 @@ METADATA_DIRECTIVES = {
 
 LEVELS = ('Easy', 'Medium', 'Hard')
 SONG_EXTENSIONS = ('.cho', '.chordpro', '.pro')
+
+# Tempo is the *felt* pulse, not the notated beat: quarter-note BPM in simple
+# metres (4/4, 3/4, 2/4) and dotted-quarter BPM in compound 6/8, so a 6/8 song
+# at 60 has 60 dotted-quarter pulses (two per bar), not 180 eighths. That makes
+# bpm mean "what a metronome clicks" in every metre, which is what the
+# metronome and the strum library both want.
+BPM_MIN = 20
+BPM_MAX = 300
+TIME_SIGNATURES = ('4/4', '3/4', '6/8', '2/4')
 
 _DIRECTIVE_RE = re.compile(r'^\s*\{([^{}]*)\}\s*$')
 
@@ -104,6 +116,133 @@ def _as_bool(value):
     if v in ('0', 'false', 'no', 'n', 'off', ''):
         return False
     return None
+
+
+def parse_bpm(value):
+    """Return an int BPM in range, or None if it is not a valid tempo.
+
+    Accepts ints and floats ("92", "92.0"); rejects anything outside
+    BPM_MIN..BPM_MAX. Shared with the tempo.json sidecar loader so the
+    ChordPro directive and the sidecar can never disagree on what is valid.
+    """
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        number = float(value)
+    else:
+        try:
+            number = float(str(value).strip())
+        except (TypeError, ValueError):
+            return None
+    if number != number or number in (float('inf'), float('-inf')):
+        return None
+    number = round(number)
+    if number < BPM_MIN or number > BPM_MAX:
+        return None
+    return int(number)
+
+
+def parse_time(value):
+    """Return an allowlisted time signature string, or None.
+
+    Deliberately not freeform: the strum library is indexed by metre, so an
+    unrecognised meter is a mistake to surface, not a value to pass through.
+    """
+    if value is None or isinstance(value, bool):
+        return None
+    text = str(value).strip().replace(' ', '')
+    return text if text in TIME_SIGNATURES else None
+
+
+# ---------- strum pattern library ----------
+
+# A deliberately small library of strum patterns, keyed by metre. This is the
+# canonical source; js/strum.js carries a byte-identical mirror (tests/strum.py
+# asserts the two agree), exactly as TIME_SIGNATURES is mirrored in
+# js/songbooks.js.
+#
+# Each pattern is {id, name, time, subdiv, slots}:
+#   - `slots` is a string of 'D' (down), 'U' (up) and '-' (rest), one char per
+#     subdivision slot. It is the *subdivision row* the UI renders under the
+#     chord strip, with bar lines around it.
+#   - `subdiv` is how many slots fall on one felt beat (2 = eighths in simple
+#     metres). len(slots) must therefore equal subdiv * beats-per-bar, so the
+#     row lines up with the metronome's accents (beat 1 is slot 0).
+#
+# Kept small on purpose: a handful of generic, widely-taught patterns per metre,
+# NOT per-song transcriptions. The list is "common strums you could play over
+# almost anything in this metre", not every strum that exists.
+#
+# CAVEAT (stated here in the data, not only in the UI): strum patterns are far
+# less reliably documented than key or bpm, and most real songs change pattern
+# between verse and chorus. A per-song `strum` is one pattern for the whole
+# song and is explicitly an approximation; per-section patterns are a later
+# feature. The per-song field is a single id today but is designed so it can
+# grow to a list without a data migration.
+STRUM_PATTERNS = (
+    # 4/4 — eighths (8 slots)
+    {'id': 'downs-4-4', 'name': 'All downs', 'time': '4/4', 'subdiv': 2,
+     'slots': 'D-D-D-D-'},
+    {'id': 'eighths-4-4', 'name': 'All eighths', 'time': '4/4', 'subdiv': 2,
+     'slots': 'DUDUDUDU'},
+    {'id': 'dduudu-4-4', 'name': 'D DU UDU', 'time': '4/4', 'subdiv': 2,
+     'slots': 'D-DU-UDU'},
+    {'id': 'dddudu-4-4', 'name': 'D D DU DU', 'time': '4/4', 'subdiv': 2,
+     'slots': 'D-D-DUDU'},
+    {'id': 'ddudu-4-4', 'name': 'D DU D DU', 'time': '4/4', 'subdiv': 2,
+     'slots': 'D-DUD-DU'},
+    {'id': 'duudu-4-4', 'name': 'D U UDU', 'time': '4/4', 'subdiv': 2,
+     'slots': 'D-U-UDU-'},
+    # 3/4 — eighths (6 slots)
+    {'id': 'downs-3-4', 'name': 'All downs', 'time': '3/4', 'subdiv': 2,
+     'slots': 'D-D-D-'},
+    {'id': 'eighths-3-4', 'name': 'All eighths', 'time': '3/4', 'subdiv': 2,
+     'slots': 'DUDUDU'},
+    {'id': 'waltz-3-4', 'name': 'D DU DU', 'time': '3/4', 'subdiv': 2,
+     'slots': 'D-DUDU'},
+    {'id': 'dddu-3-4', 'name': 'D D DU', 'time': '3/4', 'subdiv': 2,
+     'slots': 'D-D-DU'},
+    # 6/8 — counted in two dotted-quarter pulses, 3 slots per pulse (6 slots)
+    {'id': 'downs-6-8', 'name': 'D . . D . .', 'time': '6/8', 'subdiv': 3,
+     'slots': 'D--D--'},
+    {'id': 'du-6-8', 'name': 'D . U D . U', 'time': '6/8', 'subdiv': 3,
+     'slots': 'D-UD-U'},
+    # Alternating eighths in 6/8 must restart on the second pulse: strict
+    # D-U alternation (DUDUDU) would land an UP-stroke on pulse 2, fighting
+    # the metronome's accent. A rest-free pattern strums down on every felt
+    # beat; tests/strum.py enforces it.
+    {'id': 'eighths-6-8', 'name': 'All eighths', 'time': '6/8', 'subdiv': 3,
+     'slots': 'DUDDUD'},
+    # 2/4 — eighths (4 slots)
+    {'id': 'downs-2-4', 'name': 'All downs', 'time': '2/4', 'subdiv': 2,
+     'slots': 'D-D-'},
+    {'id': 'eighths-2-4', 'name': 'All eighths', 'time': '2/4', 'subdiv': 2,
+     'slots': 'DUDU'},
+    {'id': 'ddu-2-4', 'name': 'D DU', 'time': '2/4', 'subdiv': 2,
+     'slots': 'D-DU'},
+)
+
+STRUM_IDS = frozenset(p['id'] for p in STRUM_PATTERNS)
+
+
+def strum_patterns_for(time_sig):
+    """Patterns whose metre matches `time_sig`, in library order."""
+    return [p for p in STRUM_PATTERNS if p['time'] == time_sig]
+
+
+def parse_strum(value):
+    """Return a known strum pattern id, or None.
+
+    Like parse_time, this is an allowlist, not freeform: the id must name a
+    pattern that actually exists in STRUM_PATTERNS, otherwise the row has
+    nothing to render. The metre the pattern belongs to is validated against
+    the song's `time` separately (in build_songbook), so this only checks the
+    id is real.
+    """
+    if value is None or isinstance(value, bool):
+        return None
+    text = str(value).strip()
+    return text if text in STRUM_IDS else None
 
 
 def _derive_chords(sheet):
@@ -259,6 +398,43 @@ def parse_song(text, number=1, warnings=None, allow_trusted_notes=False):
             song['capo'] = 0
     elif key or sheet_key:
         song['capo'] = 0
+
+    # Unlike duration and capo there is no safe default tempo to fall back to,
+    # so an unparseable value is kept verbatim and left for validate_songbook
+    # to reject: a wrong metronome is worse than no metronome, and the build
+    # must refuse to publish rather than quietly guess.
+    bpm_raw = meta.get('bpm', '').strip()
+    if bpm_raw:
+        bpm = parse_bpm(bpm_raw)
+        if bpm is None:
+            _warn(warnings, 'invalid tempo %r (expected %d-%d bpm)'
+                            % (bpm_raw, BPM_MIN, BPM_MAX))
+            song['bpm'] = bpm_raw
+        else:
+            song['bpm'] = bpm
+
+    time_raw = meta.get('time', '').strip()
+    if time_raw:
+        time_sig = parse_time(time_raw)
+        if time_sig is None:
+            _warn(warnings, 'invalid time signature %r (expected %s)'
+                            % (time_raw, ', '.join(TIME_SIGNATURES)))
+            song['time'] = time_raw
+        else:
+            song['time'] = time_sig
+
+    # Like bpm, an unknown strum id is kept verbatim for validate_songbook to
+    # reject rather than silently dropped: a typo'd pattern id should fail the
+    # build, not quietly leave the song with no strum row.
+    strum_raw = meta.get('strum', '').strip()
+    if strum_raw:
+        strum_id = parse_strum(strum_raw)
+        if strum_id is None:
+            _warn(warnings, 'invalid strum %r (expected one of %s)'
+                            % (strum_raw, ', '.join(sorted(STRUM_IDS))))
+            song['strum'] = strum_raw
+        else:
+            song['strum'] = strum_id
 
     song['chords'] = _derive_chords(sheet)
     if meta.get('chords', '').strip():

@@ -132,6 +132,8 @@
 
         <div id="chordStrip" class="chord-strip" aria-label="Chord diagrams"></div>
 
+        <div id="strumRow" class="strum-row" aria-label="Strum pattern" role="img" hidden></div>
+
         <div class="song-tools" role="toolbar" aria-label="Song tools">
             <div class="tool-group" role="group" aria-label="Transpose">
                 <span class="tool-label">Transpose</span>
@@ -155,6 +157,34 @@
                     <button class="chord-mode-btn active" data-chord-mode="inline" type="button" aria-pressed="true">In text</button>
                     <button class="chord-mode-btn" data-chord-mode="above" type="button" aria-pressed="false">Above</button>
                     <button id="numbersBtn" class="chord-mode-btn" type="button" aria-pressed="false" aria-label="Show scale degrees instead of chord names" title="Show scale degrees (I, IV, V) instead of chord names">I-V</button>
+                </div>
+            </div>
+            <div id="metronomeGroup" class="tool-group" role="group" aria-label="Metronome" hidden>
+                <span class="tool-label">Tempo</span>
+                <div class="stepper">
+                    <button id="metronomeBtn" class="step-btn metronome-seg" type="button"
+                            aria-pressed="false" aria-label="Start the metronome" title="Start the metronome">▶</button>
+                    <span class="step-divider" role="separator"></span>
+                    <button id="bpmDown" class="step-btn" type="button" aria-label="Slower tempo">−</button>
+                    <span id="bpmValue" class="step-value" aria-live="polite">—</span>
+                    <button id="bpmUp" class="step-btn" type="button" aria-label="Faster tempo">+</button>
+                </div>
+            </div>
+            <div id="strumGroup" class="tool-group" role="group" aria-label="Strum pattern" hidden>
+                <span class="tool-label">Strum</span>
+                <label class="strum-select-wrap">
+                    <span class="sr-only">Strum pattern</span>
+                    <select id="strumSelect" class="strum-select" aria-label="Strum pattern"></select>
+                </label>
+                <button id="strumNotationBtn" class="step-btn strum-notation-btn" type="button"
+                        aria-label="Showing arrows — click for D/U letters"
+                        title="Showing arrows — click for D/U letters">↓↑</button>
+                <div class="stepper">
+                    <button id="strumSizeDown" class="step-btn" type="button" aria-label="Smaller strum row">−</button>
+                    <span id="strumSizeValue" class="step-value" aria-live="polite">100%</span>
+                    <button id="strumSizeUp" class="step-btn" type="button" aria-label="Bigger strum row">+</button>
+                    <span class="step-divider" role="separator"></span>
+                    <button id="strumPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
                 </div>
             </div>
             <div class="tool-group" role="group" aria-label="Chord diagram size">
@@ -288,6 +318,8 @@
 <script src="js/import.js"></script>
 <script src="js/song.js"></script>
 <script src="js/autoscroll.js"></script>
+<script src="js/metronome.js"></script>
+<script src="js/strum.js"></script>
 <script src="js/router.js"></script>
 <script src="js/keyboard.js"></script>
 <script src="js/app.js"></script>
