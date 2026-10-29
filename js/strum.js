@@ -97,7 +97,12 @@
 
     /* The count-in is one full bar of clicks before the pattern starts: a strum
      * you cannot start on beat 1 is not usable for playing along. Expressed in
-     * subdivision slots so it shares the pattern's own grid. */
+     * subdivision slots so it shares the pattern's own grid.
+     *
+     * One bar at the pattern's own subdivision is exactly the pattern's own
+     * slot count (tests/strum.py asserts slots.length === beatsPerBar * subdiv
+     * for every pattern), which is what lets the count-in run through the
+     * pattern's cells instead of needing a bar of its own. */
     function countInSlots(pattern) {
         return SB.metronomeBeatsPerBar(pattern.time) * pattern.subdiv;
     }
@@ -134,6 +139,10 @@
 
     var raf = null;
     var lastSlot = -1;
+    /* 'countin' while the lead-in bar runs, 'pattern' once it hands over. The
+     * two phases share one set of cells (see renderRow), so this is what says
+     * which glyphs those cells are currently showing. */
+    var phase = null;
 
     function slotGlyph(ch) {
         if (ch === '-') return '\u00b7';   // middle dot for a rest, either way
@@ -143,9 +152,26 @@
         return '\u00b7';
     }
 
-    /* Builds the subdivision row: an optional count-in bar, then the pattern
-     * bar, with bar lines between and around them. Each slot is one cell so the
-     * highlight can toggle a single class without re-rendering. */
+    /* The count-in's label for a slot: the felt beat number on each beat
+     * ("1 2 3 4"), a dot on the subdivisions in between. Counting out loud is
+     * how a count-in is actually given, and the numbers also say how long it
+     * lasts — which a bar of identical rests never did. */
+    function countGlyph(pattern, i) {
+        if (i % pattern.subdiv !== 0) return '\u00b7';
+        return String(i / pattern.subdiv + 1);
+    }
+
+    /* Builds the subdivision row: one bar of cells for the pattern, with bar
+     * lines around it. Each slot is one cell so the highlight can toggle a
+     * single class without re-rendering.
+     *
+     * There is no separate count-in bar. A count-in bar doubled the row's width
+     * for something that is only meaningful for the two seconds it runs, and on
+     * a phone that is the difference between the pattern fitting on screen and
+     * not. One bar at the pattern's subdivision is exactly as many slots as the
+     * pattern has, so the count-in can run through these same cells — see
+     * setPhase. The row carries the phase, not the cells, because the cells are
+     * the same elements in both. */
     function renderRow() {
         var row = SB.$('strumRow');
         if (!row) return;
@@ -153,28 +179,44 @@
         var pattern = SB.state.strum.pattern;
         if (!pattern) return;
 
-        function bar(label, slots, cls) {
-            var b = SB.el('div', 'strum-bar' + (cls ? ' ' + cls : ''));
-            if (label) b.appendChild(SB.el('span', 'strum-bar-label', label));
-            var cells = SB.el('div', 'strum-cells');
-            for (var i = 0; i < slots.length; i++) {
-                var cell = SB.el('div', 'strum-slot', slotGlyph(slots[i]));
-                if (slots[i] === '-') cell.classList.add('rest');
-                // Mark the first slot of each felt beat so beat 1 and the pulse
-                // read clearly even when stopped.
-                if (i % pattern.subdiv === 0) cell.classList.add('beat');
-                cell.dataset.cls = cls;
-                cell.dataset.idx = String(i);
-                cells.appendChild(cell);
-            }
-            b.appendChild(cells);
-            return b;
+        var bar = SB.el('div', 'strum-bar pattern');
+        var cells = SB.el('div', 'strum-cells');
+        for (var i = 0; i < pattern.slots.length; i++) {
+            var cell = SB.el('div', 'strum-slot', slotGlyph(pattern.slots[i]));
+            if (pattern.slots[i] === '-') cell.classList.add('rest');
+            // Mark the first slot of each felt beat so beat 1 and the pulse
+            // read clearly even when stopped.
+            if (i % pattern.subdiv === 0) cell.classList.add('beat');
+            cell.dataset.idx = String(i);
+            cells.appendChild(cell);
         }
-
-        var countin = new Array(countInSlots(pattern) + 1).join('-'); // all rests
-        row.appendChild(bar('Count-in', countin, 'countin'));
-        row.appendChild(bar(null, pattern.slots, 'pattern'));
+        bar.appendChild(cells);
+        row.appendChild(bar);
+        phase = null;
+        setPhase('pattern');
         lastSlot = -1;
+    }
+
+    /* Swaps the cells between counting you in and showing the pattern. Only the
+     * glyphs and the row's phase change — the cells, their order and their
+     * data-idx stay put, so the highlight indexes the same grid either way and
+     * nothing reflows when the count-in hands over on beat 1. */
+    function setPhase(next) {
+        if (phase === next) return;
+        var row = SB.$('strumRow');
+        var pattern = SB.state.strum.pattern;
+        if (!row || !pattern) return;
+        phase = next;
+        var counting = next === 'countin';
+        row.dataset.phase = next;
+        row.classList.toggle('is-countin', counting);
+        Array.prototype.forEach.call(row.querySelectorAll('.strum-slot'), function (cell) {
+            var i = parseInt(cell.dataset.idx, 10);
+            cell.textContent = counting ? countGlyph(pattern, i) : slotGlyph(pattern.slots[i]);
+            cell.classList.toggle('rest', counting
+                ? i % pattern.subdiv !== 0
+                : pattern.slots[i] === '-');
+        });
     }
 
     function buildSelect() {
@@ -216,20 +258,24 @@
             cls = 'pattern';
         }
 
+        // Phase first: the cells have to be showing the right glyphs before a
+        // slot in them is lit, or beat 1 of the pattern flashes on a cell that
+        // still reads as a count.
+        setPhase(cls);
         if (slot !== lastSlot) {
-            paint(cls, slot);
+            paint(slot);
             lastSlot = slot;
         }
         raf = requestAnimationFrame(highlightFrame);
     }
 
-    function paint(cls, idx) {
+    function paint(idx) {
         var row = SB.$('strumRow');
         if (!row) return;
         Array.prototype.forEach.call(row.querySelectorAll('.strum-slot.on'), function (c) {
             c.classList.remove('on');
         });
-        var active = row.querySelector('.strum-slot[data-cls="' + cls + '"][data-idx="' + idx + '"]');
+        var active = row.querySelector('.strum-slot[data-idx="' + idx + '"]');
         if (active) active.classList.add('on');
     }
 
@@ -239,6 +285,10 @@
         Array.prototype.forEach.call(row.querySelectorAll('.strum-slot.on'), function (c) {
             c.classList.remove('on');
         });
+        // Stopped means "showing the pattern": the count-in only has meaning
+        // while something is counting, and leaving the row full of numbers
+        // would hide the one thing it exists to show.
+        setPhase('pattern');
         lastSlot = -1;
     }
 

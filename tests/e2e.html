@@ -985,13 +985,19 @@ async function main() {
             win().songbookTest.strumPatterns().some(p => p.id === o.value && p.time === '4/4')),
         Array.prototype.map.call(sSel().options, o => o.value).join(','));
 
-    // the row renders a count-in bar and a pattern bar with bar lines
-    ok('row has a count-in bar and a pattern bar',
-        sRow().querySelector('.strum-bar.countin') !== null &&
-        sRow().querySelector('.strum-bar.pattern') !== null);
+    // The row is ONE bar of cells. The count-in no longer has a bar of its
+    // own: it runs through these same cells (see renderRow in js/strum.js),
+    // which is what keeps the row narrow enough to fit a phone.
+    ok('row renders a single pattern bar',
+        sRow().querySelectorAll('.strum-bar').length === 1 &&
+        sRow().querySelector('.strum-bar.pattern') !== null,
+        sRow().querySelectorAll('.strum-bar').length);
+    ok('no separate count-in bar', sRow().querySelector('.strum-bar.countin') === null);
     ok('pattern bar has one slot per pattern char',
-        sRow().querySelectorAll('.strum-bar.pattern .strum-slot').length === 8,
-        sRow().querySelectorAll('.strum-bar.pattern .strum-slot').length);
+        sRow().querySelectorAll('.strum-slot').length === 8,
+        sRow().querySelectorAll('.strum-slot').length);
+    ok('row starts in the pattern phase', sRow().dataset.phase === 'pattern',
+        sRow().dataset.phase);
 
     // manual choice persists per song under the namespaced key
     win().songbookTest.setStrum('dddudu-4-4');
@@ -1019,11 +1025,13 @@ async function main() {
     ok('metronome running for strum test', mState().playing === true);
 
     let lockOk = true, lockDetail = '';
+    let sawCountin = false, sawPattern = false, countNumbers = '';
     const pat = sState().pattern;
     const countin = win().songbookTest.metronomeBeatsPerBar(pat.time) * pat.subdiv;
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 24; i++) {
         const pos = win().songbookTest.metronomePosition();
         const onCell = sRow().querySelector('.strum-slot.on');
+        const gotCls = sRow().dataset.phase;
         if (pos !== null && onCell) {
             const slotsElapsed = Math.floor(pos * pat.subdiv);
             const expectCls = slotsElapsed < countin ? 'countin' : 'pattern';
@@ -1032,22 +1040,46 @@ async function main() {
                 : (slotsElapsed - countin) % pat.slots.length;
             // allow a one-slot slack: pos is read a frame after the paint
             const gotIdx = parseInt(onCell.dataset.idx, 10);
-            const gotCls = onCell.dataset.cls;
-            const near = gotCls === expectCls &&
+            // The same slack has to apply to the phase, for the same reason:
+            // within a slot of the hand-over, a correct render can legitimately
+            // read as either side of it.
+            const atBoundary = Math.abs(slotsElapsed - countin) <= 1;
+            const near = (gotCls === expectCls || atBoundary) &&
                 (Math.abs(gotIdx - expectIdx) <= 1 ||
                  Math.abs(gotIdx - expectIdx) >= pat.slots.length - 1);
             if (!near) { lockOk = false; lockDetail = 'pos=' + pos.toFixed(3) +
                 ' expect ' + expectCls + '#' + expectIdx + ' got ' + gotCls + '#' + gotIdx; }
         }
+        if (gotCls === 'countin') {
+            sawCountin = true;
+            // What the cells actually read while counting: beats numbered
+            // 1..n, dots between. Captured here because the phase is gone a
+            // second later and cannot be asserted after the fact.
+            if (!countNumbers) countNumbers = sRow().textContent;
+        }
+        if (sawCountin && gotCls === 'pattern') sawPattern = true;
         await wait(60);
     }
     ok('highlight stays locked to the metronome clock', lockOk, lockDetail);
     ok('a slot is lit while the metronome runs', sRow().querySelector('.strum-slot.on') !== null);
 
+    // The count-in still happens — it just borrows the pattern's cells.
+    ok('counts in before the pattern', sawCountin);
+    ok('count-in cells show the beat numbers',
+        countNumbers.indexOf('1') > -1 && countNumbers.indexOf(String(
+            win().songbookTest.metronomeBeatsPerBar(pat.time))) > -1, countNumbers);
+    ok('hands over to the pattern on beat 1', sawPattern);
+
     $('metronomeBtn').click();
     await wait(80);
     ok('highlight cleared when the metronome stops',
         sRow().querySelector('.strum-slot.on') === null);
+    // Stopped, the row must be showing the pattern again rather than being
+    // left full of count-in numbers — the pattern is what it exists to show.
+    ok('row returns to the pattern when stopped', sRow().dataset.phase === 'pattern',
+        sRow().dataset.phase);
+    ok('row reads as the pattern again when stopped',
+        sRow().textContent.indexOf('\u2193') > -1, sRow().textContent);
 
     // notation toggle: arrows <-> D/U letters, persisted globally
     win().localStorage.removeItem('songbook:strumNotation');
