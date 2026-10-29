@@ -1015,6 +1015,18 @@ main {
     gap: 10px;
 }
 
+/* Every group is label + one controls box, whatever is inside it. Strum has
+ * three controls where the others have one, and without this wrapper that
+ * difference leaked into the layout: the groups could no longer be aligned as
+ * a set, because "the controls" was one element in five groups and three in
+ * the sixth. */
+.tool-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
 .stepper {
     display: inline-flex;
     align-items: stretch;
@@ -1105,12 +1117,10 @@ main {
 
 /* Both notations are equal choices, so this is never drawn as an "active"
  * state — the glyph itself (↓↑ or DU) already says which one is showing.
- * Sized to match .stepper so it sits level with the controls beside it. */
+ * It is a segment of the strum stepper rather than a button floating beside
+ * it: a lone pill between the select and the stepper read as a third separate
+ * control and was what made the strum group look unlike every other group. */
 .strum-notation-btn {
-    height: 36px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--surface);
     min-width: 44px;
     font-size: 0.9rem;
     font-weight: 700;
@@ -1152,16 +1162,19 @@ main {
     border-right: 2px solid var(--line);
 }
 
-.strum-bar.countin {
-    opacity: 0.6;
+/* Counting in reuses the pattern's own cells rather than a second bar of its
+ * own (see renderRow in js/strum.js), so there is nothing to lay out here —
+ * only a tint that says "these numbers are the lead-in, not the strum". */
+.strum-row.is-countin .strum-bar {
+    border-color: var(--accent);
 }
 
-.strum-bar-label {
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+.strum-row.is-countin .strum-slot {
     color: var(--muted);
-    text-align: center;
+}
+
+.strum-row.is-countin .strum-slot.beat {
+    color: var(--text);
 }
 
 .strum-cells {
@@ -1887,23 +1900,61 @@ body.tuner-open { overflow: hidden; }
 
     .song-title { font-size: 1.4rem; }
 
+    /* One control per row, label left, controls right.
+     *
+     * The two-column grid this replaces paired groups up by source order, so
+     * what sat next to what was an accident of the markup and changed as the
+     * optional groups (tempo, strum) appeared and disappeared — a control
+     * moved to a different place in the panel depending on the song. Worse,
+     * the columns were sized 1fr 1fr while the groups are nothing like equal
+     * width, so a wide one (strum: a select and a stepper) and a narrow one
+     * (transpose) shared a row and neither lined up with anything.
+     *
+     * A single column fixes both: every group is one row, in a fixed order,
+     * with the labels sharing one left edge and the controls one right edge,
+     * so a control keeps its position whether or not the song has a tempo. A
+     * phone has the vertical room for it — this panel scrolls away — and it
+     * buys back the horizontal room these controls actually need. */
     .song-tools {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
+        display: flex;
+        flex-direction: column;
+        /* The base rule's `align-items: center` centres the cross axis, which
+         * in a column is the horizontal one: each row would shrink-wrap its
+         * contents and float in the middle, so no two labels or steppers would
+         * line up — the thing this layout exists to fix. */
+        align-items: stretch;
+        gap: 8px;
         padding: 10px 12px;
     }
-    .tool-group { flex-direction: column; align-items: center; gap: 4px; }
-    .song-tools .tool-label { font-size: 0.65rem; }
-    .step-btn { min-width: 26px; padding: 0 6px; font-size: 0.9rem; }
+    .tool-group {
+        justify-content: space-between;
+        gap: 10px;
+        min-height: 36px;
+    }
+    .song-tools .tool-label { font-size: 0.65rem; flex: none; }
+    /* Right-aligned as a block so the steppers share an edge, but allowed to
+     * shrink: the strum row is the widest and must not push the panel into a
+     * horizontal scroll on a narrow phone. */
+    .tool-controls { justify-content: flex-end; flex: 1 1 auto; }
+    .step-btn { min-width: 30px; padding: 0 6px; font-size: 0.9rem; }
     /* Stated rather than inherited: .strum-notation-btn is more specific than
-     * .step-btn, so without this it would keep its desktop 44x36 while every
-     * control beside it shrinks. It stays a comfortable tap target (36px) —
-     * it is a standalone button, not one segment of a .stepper. */
-    .strum-notation-btn { min-width: 36px; height: 32px; padding: 0 6px; }
-    .step-value { min-width: 30px; font-size: 0.75rem; }
+     * .step-btn, so without this it would keep its desktop 44px while every
+     * control beside it shrinks. */
+    .strum-notation-btn { min-width: 34px; padding: 0 4px; }
+    .step-value { min-width: 34px; font-size: 0.75rem; }
     .chord-mode-btn { padding: 4px 8px; font-size: 0.75rem; }
     .step-divider { margin: 6px 0; }
+    /* The one control that can genuinely run out of room: a pattern name
+     * ("D DU UDU") beside a five-segment stepper. Let it take what is left of
+     * the row and ellipsize rather than widening the panel. */
+    .strum-select-wrap { min-width: 0; flex: 0 1 auto; }
+    .strum-select {
+        min-width: 0;
+        width: 100%;
+        padding: 0 8px;
+        font-size: 0.75rem;
+        text-overflow: ellipsis;
+    }
 
     .chord-item img, .chord-item .missing { height: calc(62px * var(--chord-size, 1)); }
 

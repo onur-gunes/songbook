@@ -49,6 +49,27 @@ def extract_js_patterns():
 
 
 class StrumLibraryTests(unittest.TestCase):
+    def test_count_in_fits_the_pattern_bar(self):
+        """A count-in bar is exactly as many slots as the pattern itself.
+
+        The app counts you in through the pattern's OWN cells rather than a
+        second bar beside it (renderRow/setPhase in js/strum.js): a separate
+        count-in bar doubled the row's width for something only meaningful
+        while it runs, which on a phone cost the pattern its place on screen.
+
+        That only works because one bar at the pattern's subdivision is the
+        same number of slots as the pattern. It follows from the invariant
+        above, but it is asserted separately because it is a different claim:
+        if a pattern ever spanned two bars, the count-in would silently stop
+        lining up with the cells it is painting.
+        """
+        for p in chordpro.STRUM_PATTERNS:
+            count_in = BEATS_PER_BAR[p['time']] * p['subdiv']
+            self.assertEqual(
+                count_in, len(p['slots']),
+                'id %r: a %s count-in is %d slots but the pattern has %d' %
+                (p['id'], p['time'], count_in, len(p['slots'])))
+
     def test_python_invariants(self):
         """Every pattern's slots line up with its metre and subdivision."""
         seen = set()
