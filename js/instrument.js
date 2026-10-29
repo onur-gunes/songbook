@@ -24,7 +24,10 @@
         SB.lsSet(SB.NS + ':instrument', SB.state.instrument);
         SB.applyInstrumentUi();
         SB.closeVoicingChooser();
-        if (SB.state.currentSong) SB.renderChordStrip(SB.state.currentSong);
+        if (SB.state.currentSong) {
+            SB.renderChordStrip(SB.state.currentSong);
+            if (SB.state.chordMode === 'grid') SB.renderSheet(SB.state.currentSong);
+        }
     }
 
 })(window.SB = window.SB || {});

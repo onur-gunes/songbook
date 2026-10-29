@@ -169,10 +169,12 @@
         scheduler();
         timer = window.setInterval(scheduler, TICK_MS);
         SB.updateMetronomeUi();
-        // The strum row's highlight rides this same clock. Starting its render
-        // loop here (rather than it polling forever) keeps it off when nothing
-        // is counting, while still reading the audio clock when it runs.
+        // The strum row's and the grid cursor's highlights ride this same
+        // clock. Starting their render loops here (rather than them polling
+        // forever) keeps them off when nothing is counting, while still
+        // reading the audio clock when they run.
         if (SB.strumOnMetronomeStart) SB.strumOnMetronomeStart();
+        if (SB.gridOnMetronomeStart) SB.gridOnMetronomeStart();
     }
 
     SB.stopMetronome = function () {
@@ -184,6 +186,7 @@
         // inside a gesture. Not scheduling is enough to be silent.
         SB.updateMetronomeUi();
         if (SB.strumOnMetronomeStop) SB.strumOnMetronomeStop();
+        if (SB.gridOnMetronomeStop) SB.gridOnMetronomeStop();
     }
 
     SB.toggleMetronome = function () {

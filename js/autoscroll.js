@@ -17,7 +17,7 @@
     try { SB.state.chordPin = window.localStorage.getItem(SB.NS + ':chordPin') !== '0'; } catch (e) { /* ignore */ }
     try {
         var _cm = window.localStorage.getItem(SB.NS + ':chordMode');
-        if (_cm === 'inline' || _cm === 'above') SB.state.chordMode = _cm;
+        if (_cm === 'inline' || _cm === 'above' || _cm === 'grid') SB.state.chordMode = _cm;
     } catch (e) { /* ignore */ }
 
     SB.applyChordSettings = function () {
@@ -44,6 +44,29 @@
         SB.state.chordSize = Math.min(1.5, Math.max(0.6, Math.round(v * 10) / 10));
         SB.applyChordSettings();
         try { window.localStorage.setItem(SB.NS + ':chordSize', String(SB.state.chordSize)); } catch (e) { /* ignore */ }
+        // Diagram size changes the column widths in a grid, so the layout has
+        // to be measured again rather than merely restyled.
+        if (SB.state.chordMode === 'grid' && SB.state.currentSong) SB.renderSheet(SB.state.currentSong);
+    }
+
+    /* The mode is a global, persisted preference, but a grid is per song. The
+     * button stays in the group (so the layout does not jump between songs)
+     * and is disabled with an explanation when the current song has none.
+     * renderSheet still falls back to the inline sheet in that case, so the
+     * user is never stranded in an empty view. */
+    SB.updateGridModeUi = function () {
+        var btn = document.querySelector('.chord-mode-btn[data-chord-mode="grid"]');
+        if (!btn) return;
+        var song = SB.state.currentSong;
+        var has = !!(song && song.grid && song.grid.length);
+        btn.disabled = !has;
+        var label = has
+            ? 'Grid chord chart'
+            : 'This song has no grid chart';
+        btn.setAttribute('aria-label', label);
+        btn.title = has
+            ? 'Show the play-along chord chart'
+            : 'This song has no grid chart';
     }
 
     SB.applyChordMode = function () {
@@ -53,6 +76,7 @@
             b.classList.toggle('active', on);
             b.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
+        SB.updateGridModeUi();
     }
 
     SB.applyNumbers = function () {
@@ -70,7 +94,7 @@
     }
 
     SB.setChordMode = function (mode) {
-        if (mode !== 'inline' && mode !== 'above') return;
+        if (mode !== 'inline' && mode !== 'above' && mode !== 'grid') return;
         if (mode === SB.state.chordMode) return;
         SB.state.chordMode = mode;
         try { window.localStorage.setItem(SB.NS + ':chordMode', SB.state.chordMode); } catch (e) { /* ignore */ }
@@ -138,7 +162,9 @@
         if (v === SB.state.textSize) { SB.applyTextSize(); return; }
         SB.state.textSize = v;
         SB.applyTextSize();
-        if (SB.state.chordMode === 'above' && SB.state.currentSong) SB.renderSheet(SB.state.currentSong);
+        if ((SB.state.chordMode === 'above' || SB.state.chordMode === 'grid') && SB.state.currentSong) {
+            SB.renderSheet(SB.state.currentSong);
+        }
         if (SB.state.active && SB.state.currentSong) {
             try { window.localStorage.setItem(SB.sizeKey(SB.state.active.id, SB.state.currentSong.id), String(SB.state.textSize)); } catch (e) { /* ignore */ }
         }
@@ -154,6 +180,14 @@
     }
     var ABOVE_SCROLL_FACTOR = 1.75;
     function scrollDurationMs() {
+        // A grid carries its own beat count and tempo, so its transport is
+        // derived from that rather than from the song's dur estimate. This is
+        // also why grid mode needs no third layout fudge factor: the layout
+        // and the clock agree on how long the chart is.
+        if (SB.state.chordMode === 'grid' && SB.gridDurationMs) {
+            var gd = SB.gridDurationMs();
+            if (gd > 0) return gd / SB.state.scrollSpeed;
+        }
         var d = ((SB.state.currentSong && SB.state.currentSong.dur ? SB.state.currentSong.dur : 4) * 60 * 1000) / SB.state.scrollSpeed;
         return SB.state.chordMode === 'above' ? d * ABOVE_SCROLL_FACTOR : d;
     }
@@ -161,8 +195,21 @@
     // Always full-sheet-relative, so it is independent of current position.
     SB.targetVel = function () {
         var b = SB.scrollBounds();
+        if (b <= 0) return 0;
+        // In grid mode the metronome is the transport: recompute the speed
+        // from the audio clock every frame so a dropped frame or a tempo
+        // change cannot leave the scroll behind the clicks. -1 is the
+        // count-in, where the chart should hold still.
+        if (SB.state.chordMode === 'grid' && SB.gridScrollRemainingMs) {
+            var rem = SB.gridScrollRemainingMs();
+            if (rem === -1) return 0;
+            if (rem !== null) {
+                var left = Math.max(0, b - SB.state.scrollState.pos);
+                return rem > 0 ? left / rem : b;
+            }
+        }
         var d = scrollDurationMs();
-        return (b > 0 && d > 0) ? b / d : 0;
+        return d > 0 ? b / d : 0;
     }
     SB.scrollBounds = function () {
         var doc = document.documentElement;
