@@ -549,6 +549,11 @@
             var packAvail = Math.max(ctx.beatW * 2, avail - (block.repeat ? REPEAT_W * 2 : 0));
             var systems = packBars(specs, packAvail);
             var section = SB.el('div', 'grid-section');
+            // One label per block, not one per system: a block that reflows
+            // onto a second line would otherwise print its name twice.
+            if (block.label) {
+                section.appendChild(SB.el('div', 'grid-section-label', block.label));
+            }
 
             systems.forEach(function (bars, si) {
                 var system = SB.el('div', 'grid-system');
@@ -569,12 +574,6 @@
                 buildLyricLayer(system, bars, baseX, block.repeat && last, matched);
                 section.appendChild(system);
             });
-            // One label per block, not one per system: a block that reflows
-            // onto a second line would otherwise print its name twice.
-            if (block.label) {
-                section.appendChild(SB.el('div', 'grid-section-label', block.label));
-            }
-
             frag.appendChild(section);
         });
 
