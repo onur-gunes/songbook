@@ -2,6 +2,12 @@
 {artist: John Denver}
 {level: Easy}
 {duration: 3.13}
+{time: 4/4}
+
+{start_of_grid: Chorus}
+| G | D | Em | C |
+| G | D | C | G |
+{end_of_grid}
 
 {comment: Verse 1}
 [G]Almost heaven, [Em]West Virginia

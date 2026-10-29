@@ -176,16 +176,23 @@ attached to `SB`.
       "bpm": 92,               // optional tempo, 20-300 (see "Tempo and metre")
       "time": "4/4",           // optional metre: 4/4 | 3/4 | 6/8 | 2/4
       "chords": ["Am", "G"],
-      "sheet": [ [ ["c", "[Am]"], ["x", " lyric"], ... ], [] ]   // lines of [kind, text]
+      "sheet": [ [ ["c", "[Am]"], ["x", " lyric"], ... ], [] ],  // lines of [kind, text]
+      "grid": [                // optional bar/beat chart (see "Bar/beat grid")
+        { "label": "Chorus", "repeat": false,
+          "bars": [ { "beats": [ {"chord": "Am", "beats": 4} ] }, ... ] }
+      ]
     }
   ]
 }
 ```
 
 `sheet` kinds: `c` chord token (`[Am]`), `x` text, `m` muted, `b` bold,
-`i` italic, `y` comment, `p` preformatted/tab. Personal data (favorites, notes,
-recent, theme, scroll speed, voicing picks) lives only in `localStorage`; the
-imported songbook JSON lives in `IndexedDB`.
+`i` italic, `y` comment, `p` preformatted/tab. `grid` is a separate top-level
+field, **parallel to `sheet`, not nested in it**: it is a different view of the
+same song (where beat 1 is and how many beats each chord gets), and is simply
+absent on songs that have no chart. Personal data (favorites, notes, recent,
+theme, scroll speed, voicing picks) lives only in `localStorage`; the imported
+songbook JSON lives in `IndexedDB`.
 
 ## Regenerate the bundled data
 
@@ -244,6 +251,7 @@ Song directives:
 | `{new: true}` | `new` | default `false` |
 | `{number: 12}` | `n` | defaults to file order |
 | `{chords: Am, C, G}` | `chords` | optional curated order; mismatch with the sheet warns |
+| `{start_of_grid: Label}` / `{sog: ...}` … `{end_of_grid}` / `{eog}` | `grid` | optional bar/beat chart (see "Bar/beat grid"); requires `time` |
 | `{trusted_note: ...}` | `y` | ignored unless `--allow-trusted-notes` is passed |
 
 Body syntax:
@@ -263,6 +271,8 @@ Body syntax:
   / `{eoc}` closes it.
 - `{start_of_tab}` / `{sot}` … `{end_of_tab}` / `{eot}` keeps raw lines as
   preformatted `p` tokens; no chord parsing inside.
+- `{start_of_grid: Label}` / `{sog}` … `{end_of_grid}` / `{eog}` is a bar/beat
+  chart, parsed into the top-level `grid` field (see "Bar/beat grid").
 - `# source comment` lines are ignored.
 
 `chords[]` is derived automatically from the chord tokens (unique, in first
@@ -347,6 +357,42 @@ bpm's: strum is **less** reliably documented than bpm, so a per-song pattern is
 explicitly an approximation (most songs change feel between sections; per-
 section patterns are a later feature). The field is a single id today but is
 shaped so it can grow to a list without a data migration.
+
+### Bar/beat grid
+
+A grid is an optional bar/beat chart for a song — the one thing a play-along
+chart needs that nothing in the lyric lines can recover: where beat 1 is, and
+how many beats each chord gets. It is authored as a block and parsed into the
+top-level `grid` field, deliberately parallel to `sheet` rather than nested in
+it (a different view of the same song, absent on songs that have none).
+
+```
+{start_of_grid: Intro/Chorus}
+| C | G | Am | G |
+|: F | G . . | C :|
+{end_of_grid}
+```
+
+- `|` is a bar line; a bar holds chord tokens.
+- A lone chord fills the bar (so `| C |` in 4/4 is C for four beats).
+- `.` extends the previous chord by one beat, so `G . .` in 4/4 is G for three
+  beats — standard Nashville/chart notation, no invented syntax.
+- `|:` opens a repeat and `:|` closes one; a repeat wraps the whole block (the
+  single `repeat` flag), so the marks belong at the block's edges, not mid-way.
+- The block label becomes the section name (`Intro/Chorus`, `Verse`, …).
+- A block may span several lines; each line opens and closes with a bar line.
+
+Chord tokens reuse the sheet's exact vocabulary — slash chords, `NC`, muted
+markers — so the same `ChordKit` playability check applies to grid chords too.
+
+A grid **requires `time`** (its bar maths is meaningless without a metre) and
+every bar must sum to the beats that metre implies (4 in 4/4, 3 in 3/4, 2 in
+6/8 and 2/4 — the felt pulse, same count the metronome accents). A bar that
+does not add up, an unbalanced repeat, or a grid with no `time` is a build
+**error** naming the song and bar, not a warning: a chart that does not add up
+is unusable. On the untrusted import boundary (`js/songbooks.js`) a malformed
+grid is instead dropped whole, so the song still renders. Rendering the grid is
+out of scope here; the field is produced and validated, not yet drawn.
 
 Run the parser/builder tests with `python3 tests/chordpro.py`, the strum
 library mirror guard with `python3 tests/strum.py`, and the dev/prod

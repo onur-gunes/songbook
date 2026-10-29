@@ -2,6 +2,12 @@
 {artist: Ben E. King}
 {level: Easy}
 {duration: 2.58}
+{time: 4/4}
+
+{start_of_grid: Verse/Chorus}
+| A | A | F#m | F#m |
+| D | E | A | A |
+{end_of_grid}
 
 {comment: Verse 1}
 [A]When the night has come

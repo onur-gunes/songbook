@@ -19,6 +19,11 @@
     var BPM_MIN = 20, BPM_MAX = 300;
     var TIME_SIGNATURES = ['4/4', '3/4', '6/8', '2/4'];
 
+    /* Felt beats per bar per metre, mirroring chordpro.BEATS_PER_BAR. A grid
+     * bar must sum to this many beats; 6/8 is two dotted-quarter pulses, not
+     * six eighths, matching how bpm and the strum library count 6/8. */
+    var BEATS_PER_BAR = { '4/4': 4, '3/4': 3, '6/8': 2, '2/4': 2 };
+
     /* Imported songbooks are untrusted JSON, so an out-of-range or non-numeric
      * tempo is dropped to null rather than clamped: clamping "0" to 20 would
      * invent a tempo the song never had and silently drive the metronome at a
@@ -43,9 +48,55 @@
         return (typeof value === 'string' && value) ? value : null;
     }
 
+    /* The grid is a bar/beat chart parallel to the sheet (see chordpro.py).
+     * This is the untrusted-import boundary, so the whole grid is dropped to
+     * null the moment anything is off — bars that do not sum to the metre, a
+     * missing `time`, an empty chord — rather than letting a half-valid grid
+     * reach the renderer. A build-time grid is already fully validated; this
+     * only has to defend against hand-edited or hostile imported JSON. `time`
+     * is the already-normalised metre (null if the song's metre was invalid).
+     * Returns a clean grid array, or null to omit the field entirely. */
+    function normalizeGrid(value, time) {
+        if (!Array.isArray(value) || !value.length) return null;
+        var beatsPerBar = BEATS_PER_BAR[time];
+        if (!beatsPerBar) return null;           // a grid is meaningless without a metre
+        var blocks = [];
+        for (var bi = 0; bi < value.length; bi++) {
+            var block = value[bi];
+            if (!block || typeof block !== 'object' || !Array.isArray(block.bars) || !block.bars.length) return null;
+            var bars = [];
+            for (var ri = 0; ri < block.bars.length; ri++) {
+                var bar = block.bars[ri];
+                if (!bar || typeof bar !== 'object' || !Array.isArray(bar.beats) || !bar.beats.length) return null;
+                var beats = [];
+                var total = 0;
+                for (var si = 0; si < bar.beats.length; si++) {
+                    var seg = bar.beats[si];
+                    if (!seg || typeof seg !== 'object') return null;
+                    var chord = seg.chord;
+                    var count = seg.beats;
+                    if (typeof chord !== 'string' || !chord) return null;
+                    if (typeof count !== 'number' || !isFinite(count) || count < 1 || count !== Math.floor(count)) return null;
+                    total += count;
+                    beats.push({ chord: chord, beats: count });
+                }
+                if (total !== beatsPerBar) return null;
+                bars.push({ beats: beats });
+            }
+            blocks.push({
+                label: (typeof block.label === 'string') ? block.label : '',
+                repeat: !!block.repeat,
+                bars: bars
+            });
+        }
+        return blocks;
+    }
+
     function normalizeSong(s, index) {
         if (!s || typeof s !== 'object') throw new Error('bad song entry');
-        return {
+        var time = normalizeTime(s.time);
+        var grid = normalizeGrid(s.grid, time);
+        var song = {
             id: String(s.id || ('song-' + (index + 1))),
             n: typeof s.n === 'number' ? s.n : (index + 1),
             title: String(s.title || 'Untitled'),
@@ -57,11 +108,15 @@
             capo: (typeof s.capo === 'number' && isFinite(s.capo)) ? s.capo : null,
             dur: typeof s.dur === 'number' ? s.dur : 4,
             bpm: normalizeBpm(s.bpm),
-            time: normalizeTime(s.time),
+            time: time,
             strum: normalizeStrum(s.strum),
             chords: Array.isArray(s.chords) ? s.chords.map(String) : [],
             sheet: Array.isArray(s.sheet) ? s.sheet : (s.sheet ? s.sheet : [])
         };
+        /* Kept absent on the ~330 songs with no grid, parallel to how bpm/time
+         * are simply omitted, so nothing downstream has to special-case null. */
+        if (grid) song.grid = grid;
+        return song;
     }
 
     SB.normalizeSongbook = function (raw) {

@@ -273,6 +273,117 @@ class ParseSongTests(unittest.TestCase):
         self.assertEqual(song['chords'], ['C', 'Am', 'F', 'G'])
 
 
+class ParseGridTests(unittest.TestCase):
+    HEAD = '{title: T}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+
+    def grid(self, body, time='4/4', warnings=None):
+        text = self.HEAD + ('{time: %s}\n' % time if time else '') + body + '\n[C]x'
+        song = chordpro.parse_song(text, warnings=warnings)
+        return song.get('grid')
+
+    def test_lone_chord_fills_bar_by_metre(self):
+        grid = self.grid('{start_of_grid: Intro}\n| C | G | Am | G |\n{end_of_grid}')
+        self.assertEqual(len(grid), 1)
+        block = grid[0]
+        self.assertEqual(block['label'], 'Intro')
+        self.assertFalse(block['repeat'])
+        self.assertEqual(block['bars'], [
+            {'beats': [{'chord': 'C', 'beats': 4}]},
+            {'beats': [{'chord': 'G', 'beats': 4}]},
+            {'beats': [{'chord': 'Am', 'beats': 4}]},
+            {'beats': [{'chord': 'G', 'beats': 4}]},
+        ])
+
+    def test_dots_extend_previous_chord(self):
+        grid = self.grid('{start_of_grid: V}\n| G . . | F . C . |\n{end_of_grid}')
+        self.assertEqual(grid[0]['bars'], [
+            {'beats': [{'chord': 'G', 'beats': 3}]},
+            {'beats': [{'chord': 'F', 'beats': 2}, {'chord': 'C', 'beats': 2}]},
+        ])
+
+    def test_grid_spans_multiple_lines(self):
+        grid = self.grid(
+            '{start_of_grid: V}\n| C | G | Am | G |\n| F | G . . | C |\n{end_of_grid}')
+        self.assertEqual([b['beats'][0]['chord'] for b in grid[0]['bars']],
+                         ['C', 'G', 'Am', 'G', 'F', 'G', 'C'])
+        self.assertEqual(grid[0]['bars'][5]['beats'], [{'chord': 'G', 'beats': 3}])
+
+    def test_repeat_marks_whole_block(self):
+        grid = self.grid('{start_of_grid: V}\n|: Am | G | C | C :|\n{end_of_grid}')
+        self.assertTrue(grid[0]['repeat'])
+        self.assertEqual(len(grid[0]['bars']), 4)
+
+    def test_repeat_can_span_lines(self):
+        grid = self.grid(
+            '{start_of_grid: V}\n|: C | G |\n| Am | F :|\n{end_of_grid}')
+        self.assertTrue(grid[0]['repeat'])
+        self.assertEqual(len(grid[0]['bars']), 4)
+
+    def test_six_eight_bar_is_two_beats(self):
+        # In 6/8 a bar is two felt beats. A lone `Am` fills it (2); `C .` is C
+        # for one beat plus one dot = C for 2 beats, still one entry.
+        grid = self.grid('{start_of_grid: V}\n| Am | C . |\n{end_of_grid}', time='6/8')
+        self.assertEqual(grid[0]['bars'], [
+            {'beats': [{'chord': 'Am', 'beats': 2}]},
+            {'beats': [{'chord': 'C', 'beats': 2}]},
+        ])
+
+    def test_slash_chords_and_nc_kept_verbatim(self):
+        grid = self.grid('{start_of_grid: V}\n| NC | C/G |\n{end_of_grid}')
+        self.assertEqual([s['beats'][0]['chord'] for s in grid[0]['bars']],
+                         ['NC', 'C/G'])
+
+    def test_multiple_blocks(self):
+        grid = self.grid(
+            '{start_of_grid: Verse}\n| C | G |\n{end_of_grid}\n'
+            '{start_of_grid: Chorus}\n| Am | F |\n{end_of_grid}')
+        self.assertEqual([b['label'] for b in grid], ['Verse', 'Chorus'])
+
+    def test_lone_chord_without_time_is_one_beat(self):
+        # With no metre a bare chord cannot be expanded to a full bar, so it
+        # stays one beat; validate_songbook then rejects the grid (a grid needs
+        # a time) rather than the parser guessing.
+        warnings = []
+        grid = self.grid('{start_of_grid: V}\n| C | G |\n{end_of_grid}',
+                         time=None, warnings=warnings)
+        self.assertEqual(grid[0]['bars'][0]['beats'], [{'chord': 'C', 'beats': 1}])
+
+    def test_malformed_block_is_dropped_with_warning(self):
+        warnings = []
+        grid = self.grid('{start_of_grid: V}\nC | G |\n{end_of_grid}',
+                         warnings=warnings)
+        self.assertIsNone(grid)
+        self.assertTrue(any('dropped grid block' in w for w in warnings))
+
+    def test_interior_repeat_is_dropped(self):
+        warnings = []
+        grid = self.grid('{start_of_grid: V}\n| C :|\n| G |\n{end_of_grid}',
+                         warnings=warnings)
+        self.assertIsNone(grid)
+        self.assertTrue(any('interior line break' in w for w in warnings))
+
+    def test_stray_dot_is_dropped(self):
+        warnings = []
+        grid = self.grid('{start_of_grid: V}\n| . C |\n{end_of_grid}',
+                         warnings=warnings)
+        self.assertIsNone(grid)
+        self.assertTrue(any('dropped grid block' in w for w in warnings))
+
+    def test_unterminated_block_warns_but_parses(self):
+        # No {end_of_grid}: everything to end of file is the block. Call
+        # parse_song directly so no lyric line trails into the open block.
+        warnings = []
+        song = chordpro.parse_song(
+            self.HEAD + '{time: 4/4}\n{start_of_grid: V}\n| C | G |',
+            warnings=warnings)
+        self.assertEqual(len(song['grid'][0]['bars']), 2)
+        self.assertTrue(any('missing {end_of_grid}' in w for w in warnings))
+
+    def test_no_grid_key_when_absent(self):
+        song = chordpro.parse_song(self.HEAD + '[C]x')
+        self.assertNotIn('grid', song)
+
+
 class BuildTests(unittest.TestCase):
     def test_fixture_book_round_trip(self):
         with open(os.path.join(FIXTURE, 'expected.json'), encoding='utf-8') as f:
@@ -403,6 +514,92 @@ class BuildTests(unittest.TestCase):
             self.assertTrue(any('invalid time signatures' in e for e in result['errors']))
             self.assertFalse(os.path.exists(result['output']))
             self.assertIn('wrote: not written', result['report'])
+
+    def test_grid_that_does_not_sum_fails_the_build(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            book_dir = os.path.join(tmp, 'bad-grid')
+            songbooks = os.path.join(tmp, 'songbooks')
+            os.makedirs(book_dir)
+            with open(os.path.join(book_dir, 'book.json'), 'w', encoding='utf-8') as f:
+                json.dump({'id': 'bad-grid', 'name': 'Bad Grid',
+                           'description': 'x', 'instrument': 'ukulele'}, f)
+            # Three quarter-note chords in a 4/4 bar is seven beats short of two
+            # full bars: a chart that does not add up must fail, not warn.
+            with open(os.path.join(book_dir, '01-song.cho'), 'w', encoding='utf-8') as f:
+                f.write('{title: Song}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+                        '{time: 4/4}\n'
+                        '{start_of_grid: V}\n| C . | G |\n{end_of_grid}\n[C]lyric\n')
+
+            result = build_songbook.build_book(
+                book_dir, out_dir=songbooks,
+                index_path=os.path.join(songbooks, 'index.json'),
+                report_path=os.path.join(tmp, 'report.txt'), chord_check=False)
+
+            self.assertTrue(any('invalid grid' in e for e in result['errors']))
+            self.assertTrue(any('song' in e and 'bar 1' in e and 'expected 4'
+                                in e for e in result['errors']))
+            self.assertFalse(os.path.exists(result['output']))
+            self.assertIn('wrote: not written', result['report'])
+
+    def test_grid_without_time_fails_the_build(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            book_dir = os.path.join(tmp, 'grid-no-time')
+            songbooks = os.path.join(tmp, 'songbooks')
+            os.makedirs(book_dir)
+            with open(os.path.join(book_dir, 'book.json'), 'w', encoding='utf-8') as f:
+                json.dump({'id': 'grid-no-time', 'name': 'Grid No Time',
+                           'description': 'x', 'instrument': 'ukulele'}, f)
+            with open(os.path.join(book_dir, '01-song.cho'), 'w', encoding='utf-8') as f:
+                f.write('{title: Song}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+                        '{start_of_grid: V}\n| C | G |\n{end_of_grid}\n[C]lyric\n')
+
+            result = build_songbook.build_book(
+                book_dir, out_dir=songbooks,
+                index_path=os.path.join(songbooks, 'index.json'),
+                report_path=os.path.join(tmp, 'report.txt'), chord_check=False)
+
+            self.assertTrue(any('invalid grid' in e and 'time signature' in e
+                                for e in result['errors']))
+            self.assertFalse(os.path.exists(result['output']))
+
+    def test_valid_grid_builds_and_reports_count(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            book_dir = os.path.join(tmp, 'grid-book')
+            songbooks = os.path.join(tmp, 'songbooks')
+            os.makedirs(book_dir)
+            with open(os.path.join(book_dir, 'book.json'), 'w', encoding='utf-8') as f:
+                json.dump({'id': 'grid-book', 'name': 'Grid Book',
+                           'description': 'x', 'instrument': 'ukulele'}, f)
+            with open(os.path.join(book_dir, '01-song.cho'), 'w', encoding='utf-8') as f:
+                f.write('{title: Song}\n{artist: A}\n{level: Easy}\n{duration: 1}\n'
+                        '{time: 4/4}\n'
+                        '{start_of_grid: Intro}\n|: C | G | Am | F :|\n{end_of_grid}\n'
+                        '[C]lyric\n')
+
+            result = build_songbook.build_book(
+                book_dir, out_dir=songbooks,
+                index_path=os.path.join(songbooks, 'index.json'),
+                report_path=os.path.join(tmp, 'report.txt'), chord_check=False)
+
+            self.assertEqual(result['errors'], [])
+            song = result['book']['songs'][0]
+            self.assertTrue(song['grid'][0]['repeat'])
+            self.assertEqual(len(song['grid'][0]['bars']), 4)
+            self.assertIn('grids: 1/1 songs with a grid', result['report'])
+
+    def test_validate_grid_direct(self):
+        ok = {'id': 's', 'time': '4/4',
+              'grid': [{'label': 'V', 'repeat': False,
+                        'bars': [{'beats': [{'chord': 'C', 'beats': 4}]}]}]}
+        self.assertEqual(build_songbook.validate_grid(ok), [])
+        self.assertEqual(build_songbook.grid_chord_names(ok), ['C'])
+
+        short = {'id': 's', 'time': '4/4',
+                 'grid': [{'label': 'V', 'repeat': False,
+                           'bars': [{'beats': [{'chord': 'C', 'beats': 3}]}]}]}
+        self.assertTrue(build_songbook.validate_grid(short))
+
+        self.assertEqual(build_songbook.validate_grid({'id': 's'}), [])  # no grid
 
     def test_tempo_sidecar_merges_and_reports(self):
         with tempfile.TemporaryDirectory() as tmp:

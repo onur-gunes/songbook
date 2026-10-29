@@ -12,6 +12,7 @@
    "level": "Easy",
    "new": false,
    "dur": 2.58,
+   "time": "4/4",
    "chords": [
     "A",
     "F#m",
@@ -314,11 +315,82 @@
      ]
     ]
    ],
+   "grid": [
+    {
+     "label": "Verse/Chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "A",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "A",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F#m",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F#m",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "A",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "A",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ],
    "key": "A",
    "capo": 0,
    "sheetKey": "A",
    "bpm": 118,
-   "time": "4/4",
    "strum": "downs-4-4"
   },
   {
@@ -329,6 +401,7 @@
    "level": "Easy",
    "new": false,
    "dur": 4.03,
+   "time": "4/4",
    "chords": [
     "C",
     "G",
@@ -640,11 +713,78 @@
      ]
     ]
    ],
+   "grid": [
+    {
+     "label": "Verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 2
+        },
+        {
+         "chord": "F",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ],
    "key": "C",
    "capo": 0,
    "sheetKey": "C",
    "bpm": 72,
-   "time": "4/4",
    "strum": "dddudu-4-4"
   },
   {
@@ -867,6 +1007,7 @@
    "level": "Easy",
    "new": false,
    "dur": 3.24,
+   "time": "4/4",
    "chords": [
     "Am",
     "G",
@@ -1156,11 +1297,50 @@
      ]
     ]
    ],
+   "grid": [
+    {
+     "label": "Verse/Chorus",
+     "repeat": true,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ],
    "key": "C",
    "capo": 0,
    "sheetKey": "C",
    "bpm": 102,
-   "time": "4/4",
    "strum": "dddudu-4-4"
   },
   {
@@ -2443,6 +2623,7 @@
    "level": "Medium",
    "new": false,
    "dur": 4.29,
+   "time": "6/8",
    "chords": [
     "Am",
     "C",
@@ -2936,11 +3117,82 @@
      ]
     ]
    ],
+   "grid": [
+    {
+     "label": "Verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    }
+   ],
    "key": "Am",
    "capo": 0,
    "sheetKey": "Am",
    "bpm": 72,
-   "time": "6/8",
    "strum": "du-6-8"
   },
   {
@@ -2951,6 +3203,7 @@
    "level": "Easy",
    "new": false,
    "dur": 3.13,
+   "time": "4/4",
    "chords": [
     "G",
     "Em",
@@ -3243,11 +3496,82 @@
      ]
     ]
    ],
+   "grid": [
+    {
+     "label": "Chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ],
    "key": "G",
    "capo": 0,
    "sheetKey": "G",
    "bpm": 82,
-   "time": "4/4",
    "strum": "dddudu-4-4"
   }
  ]

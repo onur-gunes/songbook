@@ -15,6 +15,7 @@
    "key": "Am",
    "sheetKey": "Am",
    "capo": 0,
+   "time": "4/4",
    "chords": [
     "Am",
     "F",
@@ -75,6 +76,50 @@
       "Nie mów nic, daj mi żyć"
      ]
     ]
+   ],
+   "grid": [
+    {
+     "label": "Intro/Chorus",
+     "repeat": true,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 2
+        },
+        {
+         "chord": "C",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
    ]
   },
   {
