@@ -967,6 +967,15 @@ async function main() {
     win().location.hash = '#/polska-gurom/arahja';
     await wait(250);
     ok('strum shown for a song with a time signature', sGroup().hidden === false, 'hidden=' + sGroup().hidden);
+    // The row is the feature: assert it is actually ON SCREEN, not merely
+    // populated. Querying its cells passes just as well when the row is
+    // display:none, which is how it shipped invisible — the selector and the
+    // notation toggle then look inert, because the only thing they change
+    // cannot be seen.
+    ok('strum row shown too', sRow().hidden === false, 'hidden=' + sRow().hidden);
+    ok('strum row is actually visible',
+        !!sRow().offsetParent && win().getComputedStyle(sRow()).display !== 'none',
+        'display=' + win().getComputedStyle(sRow()).display);
     ok('documented default selected automatically', sState().pattern && sState().pattern.id === 'downs-4-4',
         sState().pattern && sState().pattern.id);
     ok('selector reflects the default', sSel().value === 'downs-4-4', sSel().value);
@@ -1057,10 +1066,21 @@ async function main() {
         $('strumNotationBtn').getAttribute('aria-label').indexOf('Showing arrows') === 0,
         $('strumNotationBtn').getAttribute('aria-label'));
 
+    // What the user actually reads off the visible row, not just state.
+    const rowText = () => sRow().textContent;
+    const arrowsText = rowText();
+    ok('visible row reads as arrows',
+        arrowsText.indexOf('\u2193') > -1 && arrowsText.indexOf('D') === -1, arrowsText);
+
     $('strumNotationBtn').click();
     await wait(30);
     ok('toggled to letters', sState().notation === 'letters', sState().notation);
     ok('down slot shows a D letter', firstDown().textContent === 'D', firstDown().textContent);
+    // The visible row must change too — the whole point of the button.
+    ok('visible row changed to letters',
+        rowText() !== arrowsText &&
+        rowText().indexOf('D') > -1 && rowText().indexOf('\u2193') === -1, rowText());
+    ok('row still visible after toggling', !!sRow().offsetParent);
     ok('rest slot stays a dot in letters mode',
         sRow().querySelector('.strum-bar.pattern .strum-slot.rest').textContent === '\u00b7',
         sRow().querySelector('.strum-bar.pattern .strum-slot.rest').textContent);
