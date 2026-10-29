@@ -136,8 +136,14 @@ attached to `SB`.
   While the metronome runs the current slot is highlighted in lockstep — the
   highlight reads the metronome's own audio clock, not a second timer, so the
   two never diverge — and a one-bar count-in leads in, because a pattern you
-  can't start on beat 1 is not usable for playing along. Hidden for songs with
-  no `time`. **One pattern per song is an approximation**: strum is far less
+  can't start on beat 1 is not usable for playing along. The count-in runs
+  **through the pattern's own cells**, which briefly show the beat numbers
+  (`1 · 2 · 3 · 4 ·`) and then hand back to the arrows on beat 1, rather than
+  occupying a second bar beside it: one bar at a pattern's subdivision is
+  exactly as many slots as the pattern, so a separate count-in bar doubled the
+  row's width permanently for something only meaningful while it runs — which
+  on a phone is the difference between the pattern fitting on screen and not.
+  Hidden for songs with no `time`. **One pattern per song is an approximation**: strum is far less
   reliably documented than key or bpm and most songs change feel between verse
   and chorus; per-section patterns are a later feature. Visual only — the
   metronome is the audio.
