@@ -1,0 +1,3254 @@
+{
+ "id": "popular",
+ "name": "Popular Songs",
+ "description": "Well-known pop, rock and folk standards — every song with a key, tempo and strum.",
+ "instrument": "ukulele",
+ "songs": [
+  {
+   "id": "stand-by-me",
+   "n": 1,
+   "title": "Stand By Me",
+   "artist": "Ben E. King",
+   "level": "Easy",
+   "new": false,
+   "dur": 2.58,
+   "chords": [
+    "A",
+    "F#m",
+    "D",
+    "E"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "When the night has come"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And the "
+     ],
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "land is dark"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And the "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "moon is the "
+     ],
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "only light we'll "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "see"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "No I won't be afraid"
+     ]
+    ],
+    [
+     [
+      "x",
+      "No I "
+     ],
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "won't be afraid"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Just as "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "long as you "
+     ],
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "stand, stand by "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "me"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "So darling, darling, "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "stand by me"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Oh "
+     ],
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "stand by me"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Oh "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "stand, "
+     ],
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "stand by me, "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "stand by me"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "If the sky that we look upon"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Should "
+     ],
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "tumble and fall"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Or the "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "mountain should "
+     ],
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "crumble to the "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "sea"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "I won't cry, I won't cry"
+     ]
+    ],
+    [
+     [
+      "x",
+      "No I "
+     ],
+     [
+      "c",
+      "[F#m]"
+     ],
+     [
+      "x",
+      "won't shed a tear"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Just as "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "long as you "
+     ],
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "stand, stand by "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "me"
+     ]
+    ]
+   ],
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "A",
+   "bpm": 118,
+   "time": "4/4",
+   "strum": "downs-4-4"
+  },
+  {
+   "id": "let-it-be",
+   "n": 2,
+   "title": "Let It Be",
+   "artist": "The Beatles",
+   "level": "Easy",
+   "new": false,
+   "dur": 4.03,
+   "chords": [
+    "C",
+    "G",
+    "Am",
+    "F"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "When I find myself in "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "times of trouble"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Mother Mary "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "comes to me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Speaking words of "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "wisdom, let it "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "be "
+     ],
+     [
+      "c",
+      "[C]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "And in my hour of "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "darkness"
+     ]
+    ],
+    [
+     [
+      "x",
+      "She is "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "standing right in "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "front of me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Speaking words of "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "wisdom, let it "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "be "
+     ],
+     [
+      "c",
+      "[C]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Let it "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "be, let it "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "be"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Let it "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "be, let it "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "be"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Whisper words of "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "wisdom, let it "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "be "
+     ],
+     [
+      "c",
+      "[C]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 3"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "And when the broken "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "hearted people"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Living in the "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "world agree"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "There will be an "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "answer, let it "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "be "
+     ],
+     [
+      "c",
+      "[C]"
+     ]
+    ]
+   ],
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C",
+   "bpm": 72,
+   "time": "4/4",
+   "strum": "dddudu-4-4"
+  },
+  {
+   "id": "im-yours",
+   "n": 3,
+   "title": "I'm Yours",
+   "artist": "Jason Mraz",
+   "level": "Easy",
+   "new": false,
+   "dur": 4.03,
+   "chords": [
+    "C",
+    "G",
+    "Am",
+    "F"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Well you done done me and you bet I felt it"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "I tried to be chill but you're so hot that I melted"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "I fell right through the cracks"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Now I'm trying to get back"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Before the cool done run out I'll be giving it my bestest"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "And nothing's gonna stop me but divine intervention"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "I reckon it's again my turn"
+     ]
+    ],
+    [
+     [
+      "x",
+      "To "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "win some or learn some"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "But I "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "won't hesitate no more, no more"
+     ]
+    ],
+    [
+     [
+      "x",
+      "It "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "cannot wait, I'm "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "yours "
+     ],
+     [
+      "c",
+      "[F]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 3"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Open up your mind and see like me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Open up your plans and damn you're free"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Look into your heart and you'll find love love love "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "love"
+     ]
+    ]
+   ],
+   "key": "B",
+   "capo": 1,
+   "sheetKey": "C",
+   "bpm": 150,
+   "time": "4/4",
+   "strum": "dduudu-4-4"
+  },
+  {
+   "id": "riptide",
+   "n": 4,
+   "title": "Riptide",
+   "artist": "Vance Joy",
+   "level": "Easy",
+   "new": false,
+   "dur": 3.24,
+   "chords": [
+    "Am",
+    "G",
+    "C"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "I was scared of "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "dentists and the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "dark"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "I was scared of "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "pretty girls and "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "starting conversations"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Oh all my "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "friends are turning "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "green"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "You're the magician's "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "assistant in their "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "dream"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Pre-chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Ooh "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "ooh "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "ooh"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "And they "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "come unstuck"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Lady running "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "down to the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "riptide"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Taken away to the "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "dark side"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "I wanna be your "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "left hand man"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "I love you "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "when you're singing that "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "song and"
+     ]
+    ],
+    [
+     [
+      "x",
+      "I got a "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "lump in my "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "throat 'cause you're gonna "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "sing the words wrong"
+     ]
+    ]
+   ],
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C",
+   "bpm": 102,
+   "time": "4/4",
+   "strum": "dddudu-4-4"
+  },
+  {
+   "id": "wonderwall",
+   "n": 5,
+   "title": "Wonderwall",
+   "artist": "Oasis",
+   "level": "Medium",
+   "new": false,
+   "dur": 4.18,
+   "chords": [
+    "Em",
+    "G",
+    "D",
+    "A7",
+    "C"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Today is "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "gonna be the day"
+     ]
+    ],
+    [
+     [
+      "x",
+      "That they're "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "gonna throw it back to "
+     ],
+     [
+      "c",
+      "[A7]"
+     ],
+     [
+      "x",
+      "you"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "By now you "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "should've somehow"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Real"
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "ised what you gotta "
+     ],
+     [
+      "c",
+      "[A7]"
+     ],
+     [
+      "x",
+      "do"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "I don't believe that "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "anybody"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "Feels the way I "
+     ],
+     [
+      "c",
+      "[A7]"
+     ],
+     [
+      "x",
+      "do about you "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "now "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[A7]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Pre-chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "all the roads we "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "have to walk are "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "winding"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "all the lights that "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "lead us there are "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "blinding"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "There are many "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "things that I would"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "like to "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "say to "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "you but I don't know "
+     ],
+     [
+      "c",
+      "[A7]"
+     ],
+     [
+      "x",
+      "how"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Because "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "maybe "
+     ],
+     [
+      "c",
+      "[Em]"
+     ]
+    ],
+    [
+     [
+      "x",
+      "You're "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "gonna be the one that "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "saves me"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "after "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "all"
+     ]
+    ],
+    [
+     [
+      "x",
+      "You're my "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "wonder"
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "wall"
+     ]
+    ]
+   ],
+   "key": "F#m",
+   "capo": 2,
+   "sheetKey": "Em",
+   "bpm": 87,
+   "time": "4/4",
+   "strum": "ddudu-4-4"
+  },
+  {
+   "id": "knockin-on-heavens-door",
+   "n": 6,
+   "title": "Knockin' on Heaven's Door",
+   "artist": "Bob Dylan",
+   "level": "Easy",
+   "new": false,
+   "dur": 2.33,
+   "chords": [
+    "G",
+    "D",
+    "Am",
+    "C"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Mama take this "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "badge off of "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "I can't use it "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "anymore "
+     ],
+     [
+      "c",
+      "[C]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "It's getting dark too "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "dark to "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "see"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "I feel I'm knockin' on "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "heaven's door "
+     ],
+     [
+      "c",
+      "[C]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Knock knock knockin' on "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "heaven's door "
+     ],
+     [
+      "c",
+      "[Am]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Knock knock knockin' on "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "heaven's door "
+     ],
+     [
+      "c",
+      "[C]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Mama put my "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "guns in the "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "ground"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "I can't shoot them "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "anymore "
+     ],
+     [
+      "c",
+      "[C]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "That long black cloud is "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "comin' "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "down"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "I feel I'm knockin' on "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "heaven's door "
+     ],
+     [
+      "c",
+      "[C]"
+     ]
+    ]
+   ],
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G",
+   "bpm": 68,
+   "time": "4/4",
+   "strum": "dddudu-4-4"
+  },
+  {
+   "id": "three-little-birds",
+   "n": 7,
+   "title": "Three Little Birds",
+   "artist": "Bob Marley",
+   "level": "Easy",
+   "new": false,
+   "dur": 3.0,
+   "chords": [
+    "C",
+    "F",
+    "G"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Don't "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "worry about a thing"
+     ]
+    ],
+    [
+     [
+      "x",
+      "'Cause "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "every little thing gonna be al"
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "right"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Singin' don't worry about a thing"
+     ]
+    ],
+    [
+     [
+      "x",
+      "'Cause "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "every little thing gonna be al"
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "right"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Rise up this "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "mornin'"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Smiled with the "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "risin' sun"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Three little birds"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Pitch by my "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "doorstep"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Singin' sweet songs"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Of melodies "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "pure and true"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Sayin', this is my message to "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "you-ou-ou"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Singin' don't "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "worry about a thing"
+     ]
+    ],
+    [
+     [
+      "x",
+      "'Cause "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "every little thing gonna be al"
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "right"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Singin' don't worry about a thing"
+     ]
+    ],
+    [
+     [
+      "x",
+      "'Cause "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "every little thing gonna be al"
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "right"
+     ]
+    ]
+   ],
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C",
+   "bpm": 76,
+   "time": "4/4",
+   "strum": "downs-4-4"
+  },
+  {
+   "id": "hey-soul-sister",
+   "n": 8,
+   "title": "Hey, Soul Sister",
+   "artist": "Train",
+   "level": "Medium",
+   "new": false,
+   "dur": 3.36,
+   "chords": [
+    "C",
+    "G",
+    "Am",
+    "F"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Hey "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "soul sister "
+     ],
+     [
+      "c",
+      "[Am]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Ain't that Mister Mister on the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "radio, stereo"
+     ]
+    ],
+    [
+     [
+      "x",
+      "The "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "way you move ain't "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "fair you know"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Hey "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "soul sister "
+     ],
+     [
+      "c",
+      "[Am]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "I don't wanna miss a single thing you "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "do "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "to"
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "night"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Hey "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "hey "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "hey "
+     ],
+     [
+      "c",
+      "[F]"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Just in "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "time, I'm so glad you have a "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "one-track mind like "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "me"
+     ]
+    ],
+    [
+     [
+      "x",
+      "You gave my "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "life direction"
+     ]
+    ],
+    [
+     [
+      "x",
+      "A game show love con"
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "nection we can't de"
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "ny "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[F]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "I'm so obsessed, my "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "heart is bound to "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "beat"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Right out my untrimmed "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "chest"
+     ]
+    ],
+    [
+     [
+      "x",
+      "I believe in "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "you, like a "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "virgin, you're "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Madonna"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And I'm always gonna "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "wanna blow your mind"
+     ]
+    ]
+   ],
+   "key": "C",
+   "capo": 0,
+   "sheetKey": "C",
+   "bpm": 97,
+   "time": "4/4",
+   "strum": "dduudu-4-4"
+  },
+  {
+   "id": "the-house-of-the-rising-sun",
+   "n": 9,
+   "title": "The House of the Rising Sun",
+   "artist": "The Animals",
+   "level": "Medium",
+   "new": false,
+   "dur": 4.29,
+   "chords": [
+    "Am",
+    "C",
+    "D",
+    "F",
+    "E"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "x",
+      "There "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "is a "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "house in "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "New Or"
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "leans"
+     ]
+    ],
+    [
+     [
+      "x",
+      "They "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "call the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Rising "
+     ],
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "Sun "
+     ],
+     [
+      "c",
+      "[E]"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And it's "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "been the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "ruin of "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "many a poor "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "boy"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "God I "
+     ],
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "know I'm "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "one "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[F]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "x",
+      "My "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "mother "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "was a "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "tailor "
+     ],
+     [
+      "c",
+      "[F]"
+     ]
+    ],
+    [
+     [
+      "x",
+      "She "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "sewed my "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "new blue "
+     ],
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "jeans "
+     ],
+     [
+      "c",
+      "[E]"
+     ]
+    ],
+    [
+     [
+      "x",
+      "My "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "father "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "was a "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "gamblin' "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "man"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Down in "
+     ],
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "New Or"
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "leans "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[F]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 3"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Oh "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "mother "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "tell your "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "children "
+     ],
+     [
+      "c",
+      "[F]"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Not to "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "do what "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "I have "
+     ],
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "done "
+     ],
+     [
+      "c",
+      "[E]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Spend your "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "lives in "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "sin and "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "misery"
+     ]
+    ],
+    [
+     [
+      "x",
+      "In the "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "House of the "
+     ],
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "Rising "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Sun "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[F]"
+     ]
+    ]
+   ],
+   "key": "Am",
+   "capo": 0,
+   "sheetKey": "Am",
+   "bpm": 72,
+   "time": "6/8",
+   "strum": "du-6-8"
+  },
+  {
+   "id": "take-me-home-country-roads",
+   "n": 10,
+   "title": "Take Me Home, Country Roads",
+   "artist": "John Denver",
+   "level": "Easy",
+   "new": false,
+   "dur": 3.13,
+   "chords": [
+    "G",
+    "Em",
+    "D",
+    "C"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Almost heaven, "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "West Virginia"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "Blue Ridge Mountains, "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Shenandoah "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "River"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Life is old there, "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "older than the trees"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "Younger than the mountains, "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "growin' like a "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "breeze"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Country "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "roads, take me "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "home"
+     ]
+    ],
+    [
+     [
+      "x",
+      "To the "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "place I be"
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "long"
+     ]
+    ],
+    [
+     [
+      "x",
+      "West Vir"
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "ginia, mountain "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "mama"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Take me "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "home, country "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "roads"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "All my memories "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "gather round her"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "Miner's lady, "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "stranger to blue "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "water"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Dark and dusty, "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "painted on the sky"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "Misty taste of moonshine, "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "teardrop in my "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "eye"
+     ]
+    ]
+   ],
+   "key": "G",
+   "capo": 0,
+   "sheetKey": "G",
+   "bpm": 82,
+   "time": "4/4",
+   "strum": "dddudu-4-4"
+  }
+ ]
+}

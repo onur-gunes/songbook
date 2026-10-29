@@ -13,6 +13,13 @@
       "description": "Polskie klasyki - na górę z flagą, tam gdzie Polska!",
       "instrument": "ukulele",
       "file": "polska-gurom.json"
+    },
+    {
+      "id": "popular",
+      "name": "Popular Songs",
+      "description": "Well-known pop, rock and folk standards — every song with a key, tempo and strum.",
+      "instrument": "ukulele",
+      "file": "popular.json"
     }
   ]
 }
