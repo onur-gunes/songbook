@@ -1116,14 +1116,28 @@ main {
     font-weight: 700;
 }
 
+/* Pinned by default, stacked directly under the chord strip. The `top` offset
+ * is set from JS (see updateStickyOffset in js/strum.js) because the strip's
+ * height varies with the diagram size and it leaves the sticky stack when its
+ * own pin is off — a fixed value here would overlap or float. z-index sits
+ * just below the strip so the two never fight if their edges meet. */
 .strum-row {
+    position: sticky;
+    top: var(--topbar-h);
+    z-index: 49;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
     display: flex;
     gap: 14px;
     align-items: flex-end;
     overflow-x: auto;
-    padding: 2px 4px 12px;
+    padding: 8px 4px 10px;
     margin: -8px -4px 16px;
     -webkit-overflow-scrolling: touch;
+}
+
+.strum-row.is-static {
+    position: static;
 }
 
 .strum-bar {
@@ -1157,13 +1171,13 @@ main {
 
 .strum-slot {
     flex: none;
-    min-width: 20px;
-    height: 28px;
+    min-width: calc(20px * var(--strum-size, 1));
+    height: calc(28px * var(--strum-size, 1));
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-family: var(--mono);
-    font-size: 1.05rem;
+    font-size: calc(1.05rem * var(--strum-size, 1));
     font-weight: 700;
     color: var(--text);
     border-radius: 6px;
