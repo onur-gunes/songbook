@@ -1457,6 +1457,32 @@ async function main() {
     frame.style.width = '1100px';
     await wait(400);
 
+    // A complete song: the verse then the looping chorus. The chart carries
+    // verse lyrics under the Verse block and chorus lyrics under the Chorus.
+    win().location.hash = '#/popular/take-me-home-country-roads';
+    await wait(350);
+    win().songbookTest.setChordMode('grid');
+    await wait(120);
+    const thInfo = gridInfo();
+    ok('complete song has a two-block grid (verse + chorus)',
+        thInfo && thInfo.totalBeats === 64 && thInfo.beatsPerBar === 4 && thInfo.bpm === 82,
+        JSON.stringify(thInfo));
+    ok('complete song grid labels verse then chorus',
+        Array.from(doc().querySelectorAll('.sheet.chords-grid .grid-section-label'))
+            .map(e => e.textContent).join('|') === 'Verse|Chorus',
+        'see above');
+    ok('complete song chorus carries repeat signs',
+        !!doc().querySelector('.sheet.chords-grid .grid-repeat.start') &&
+        !!doc().querySelector('.sheet.chords-grid .grid-repeat.end'));
+    ok('complete song anchors one phrase per chord change',
+        doc().querySelectorAll('.sheet.chords-grid .grid-lyric').length === 17,
+        doc().querySelectorAll('.sheet.chords-grid .grid-lyric').length);
+    ok('complete song anchors verse lyrics to the first section',
+        thInfo && thInfo.lyricSection === 'Verse 1', thInfo && thInfo.lyricSection);
+    const thFirst = doc().querySelector('.sheet.chords-grid .grid-lyric');
+    ok('complete song first lyric is the verse pickup',
+        !!thFirst && thFirst.textContent === 'Almost heaven,', thFirst && thFirst.textContent);
+
     // No-grid fallback: the mode stays set, the button is disabled, and the
     // normal sheet renders instead of an empty view.
     win().location.hash = '#/krakow-ukulele/riptide';

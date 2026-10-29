@@ -3208,7 +3208,8 @@
     "G",
     "Em",
     "D",
-    "C"
+    "C",
+    "F"
    ],
    "sheet": [
     [
@@ -3494,12 +3495,440 @@
       "x",
       "eye"
      ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Country "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "roads, take me "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "home"
+     ]
+    ],
+    [
+     [
+      "x",
+      "To the "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "place I be"
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "long"
+     ]
+    ],
+    [
+     [
+      "x",
+      "West Vir"
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "ginia, mountain "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "mama"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Take me "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "home, country "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "roads"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Bridge"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "I hear her "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "voice in the "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "mornin' hour she calls me"
+     ]
+    ],
+    [
+     [
+      "x",
+      "The "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "radio re"
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "minds me of my "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "home far away"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "drivin' down the "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "road I get a feel"
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "in' that I"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "should have been home "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "yesterday... yester"
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "day"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Country "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "roads, take me "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "home"
+     ]
+    ],
+    [
+     [
+      "x",
+      "To the "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "place I be"
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "long"
+     ]
+    ],
+    [
+     [
+      "x",
+      "West Vir"
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "ginia, mountain "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "mama"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Take me "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "home, country "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "roads"
+     ]
+    ],
+    [],
+    [
+     [
+      "x",
+      "Take me "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "home... down country "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "roads"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Take me "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "home... down country "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "roads"
+     ]
     ]
    ],
    "grid": [
     {
-     "label": "Chorus",
+     "label": "Verse",
      "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 2
+        },
+        {
+         "chord": "G",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Chorus",
+     "repeat": true,
      "bars": [
       {
        "beats": [
