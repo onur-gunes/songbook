@@ -1028,6 +1028,18 @@ main {
     gap: 10px;
 }
 
+/* Every group is label + one controls box, whatever is inside it. Strum has
+ * three controls where the others have one, and without this wrapper that
+ * difference leaked into the layout: the groups could no longer be aligned as
+ * a set, because "the controls" was one element in five groups and three in
+ * the sixth. */
+.tool-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
 .stepper {
     display: inline-flex;
     align-items: stretch;
@@ -1118,12 +1130,10 @@ main {
 
 /* Both notations are equal choices, so this is never drawn as an "active"
  * state — the glyph itself (↓↑ or DU) already says which one is showing.
- * Sized to match .stepper so it sits level with the controls beside it. */
+ * It is a segment of the strum stepper rather than a button floating beside
+ * it: a lone pill between the select and the stepper read as a third separate
+ * control and was what made the strum group look unlike every other group. */
 .strum-notation-btn {
-    height: 36px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--surface);
     min-width: 44px;
     font-size: 0.9rem;
     font-weight: 700;
@@ -1165,16 +1175,19 @@ main {
     border-right: 2px solid var(--line);
 }
 
-.strum-bar.countin {
-    opacity: 0.6;
+/* Counting in reuses the pattern's own cells rather than a second bar of its
+ * own (see renderRow in js/strum.js), so there is nothing to lay out here —
+ * only a tint that says "these numbers are the lead-in, not the strum". */
+.strum-row.is-countin .strum-bar {
+    border-color: var(--accent);
 }
 
-.strum-bar-label {
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+.strum-row.is-countin .strum-slot {
     color: var(--muted);
-    text-align: center;
+}
+
+.strum-row.is-countin .strum-slot.beat {
+    color: var(--text);
 }
 
 .strum-cells {
@@ -1900,23 +1913,61 @@ body.tuner-open { overflow: hidden; }
 
     .song-title { font-size: 1.4rem; }
 
+    /* One control per row, label left, controls right.
+     *
+     * The two-column grid this replaces paired groups up by source order, so
+     * what sat next to what was an accident of the markup and changed as the
+     * optional groups (tempo, strum) appeared and disappeared — a control
+     * moved to a different place in the panel depending on the song. Worse,
+     * the columns were sized 1fr 1fr while the groups are nothing like equal
+     * width, so a wide one (strum: a select and a stepper) and a narrow one
+     * (transpose) shared a row and neither lined up with anything.
+     *
+     * A single column fixes both: every group is one row, in a fixed order,
+     * with the labels sharing one left edge and the controls one right edge,
+     * so a control keeps its position whether or not the song has a tempo. A
+     * phone has the vertical room for it — this panel scrolls away — and it
+     * buys back the horizontal room these controls actually need. */
     .song-tools {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
+        display: flex;
+        flex-direction: column;
+        /* The base rule's `align-items: center` centres the cross axis, which
+         * in a column is the horizontal one: each row would shrink-wrap its
+         * contents and float in the middle, so no two labels or steppers would
+         * line up — the thing this layout exists to fix. */
+        align-items: stretch;
+        gap: 8px;
         padding: 10px 12px;
     }
-    .tool-group { flex-direction: column; align-items: center; gap: 4px; }
-    .song-tools .tool-label { font-size: 0.65rem; }
-    .step-btn { min-width: 26px; padding: 0 6px; font-size: 0.9rem; }
+    .tool-group {
+        justify-content: space-between;
+        gap: 10px;
+        min-height: 36px;
+    }
+    .song-tools .tool-label { font-size: 0.65rem; flex: none; }
+    /* Right-aligned as a block so the steppers share an edge, but allowed to
+     * shrink: the strum row is the widest and must not push the panel into a
+     * horizontal scroll on a narrow phone. */
+    .tool-controls { justify-content: flex-end; flex: 1 1 auto; }
+    .step-btn { min-width: 30px; padding: 0 6px; font-size: 0.9rem; }
     /* Stated rather than inherited: .strum-notation-btn is more specific than
-     * .step-btn, so without this it would keep its desktop 44x36 while every
-     * control beside it shrinks. It stays a comfortable tap target (36px) —
-     * it is a standalone button, not one segment of a .stepper. */
-    .strum-notation-btn { min-width: 36px; height: 32px; padding: 0 6px; }
-    .step-value { min-width: 30px; font-size: 0.75rem; }
+     * .step-btn, so without this it would keep its desktop 44px while every
+     * control beside it shrinks. */
+    .strum-notation-btn { min-width: 34px; padding: 0 4px; }
+    .step-value { min-width: 34px; font-size: 0.75rem; }
     .chord-mode-btn { padding: 4px 8px; font-size: 0.75rem; }
     .step-divider { margin: 6px 0; }
+    /* The one control that can genuinely run out of room: a pattern name
+     * ("D DU UDU") beside a five-segment stepper. Let it take what is left of
+     * the row and ellipsize rather than widening the panel. */
+    .strum-select-wrap { min-width: 0; flex: 0 1 auto; }
+    .strum-select {
+        min-width: 0;
+        width: 100%;
+        padding: 0 8px;
+        font-size: 0.75rem;
+        text-overflow: ellipsis;
+    }
 
     .chord-item img, .chord-item .missing { height: calc(62px * var(--chord-size, 1)); }
 
@@ -2074,64 +2125,77 @@ body.tuner-open { overflow: hidden; }
         <div class="song-tools" role="toolbar" aria-label="Song tools">
             <div class="tool-group" role="group" aria-label="Transpose">
                 <span class="tool-label">Transpose</span>
-                <div class="stepper">
-                    <button id="trDown" class="step-btn" type="button" aria-label="Transpose down">−</button>
-                    <span id="trValue" class="step-value" aria-live="polite">0</span>
-                    <button id="trUp" class="step-btn" type="button" aria-label="Transpose up">+</button>
+                <div class="tool-controls">
+                    <div class="stepper">
+                        <button id="trDown" class="step-btn" type="button" aria-label="Transpose down">−</button>
+                        <span id="trValue" class="step-value" aria-live="polite">0</span>
+                        <button id="trUp" class="step-btn" type="button" aria-label="Transpose up">+</button>
+                    </div>
                 </div>
             </div>
             <div class="tool-group" role="group" aria-label="Text size">
                 <span class="tool-label">Text</span>
-                <div class="stepper">
-                    <button id="sizeDown" class="step-btn" type="button" aria-label="Smaller text">−</button>
-                    <span id="sizeValue" class="step-value" aria-live="polite">100%</span>
-                    <button id="sizeUp" class="step-btn" type="button" aria-label="Bigger text">+</button>
+                <div class="tool-controls">
+                    <div class="stepper">
+                        <button id="sizeDown" class="step-btn" type="button" aria-label="Smaller text">−</button>
+                        <span id="sizeValue" class="step-value" aria-live="polite">100%</span>
+                        <button id="sizeUp" class="step-btn" type="button" aria-label="Bigger text">+</button>
+                    </div>
                 </div>
             </div>
             <div class="tool-group" role="group" aria-label="Chord placement">
                 <span class="tool-label">Chords</span>
-                <div class="seg-group chord-mode-group" role="group" aria-label="How chords are displayed">
-                    <button class="chord-mode-btn active" data-chord-mode="inline" type="button" aria-pressed="true">In text</button>
-                    <button class="chord-mode-btn" data-chord-mode="above" type="button" aria-pressed="false">Above</button>
-                    <button id="numbersBtn" class="chord-mode-btn" type="button" aria-pressed="false" aria-label="Show scale degrees instead of chord names" title="Show scale degrees (I, IV, V) instead of chord names">I-V</button>
+                <div class="tool-controls">
+                    <div class="seg-group chord-mode-group" role="group" aria-label="How chords are displayed">
+                        <button class="chord-mode-btn active" data-chord-mode="inline" type="button" aria-pressed="true">In text</button>
+                        <button class="chord-mode-btn" data-chord-mode="above" type="button" aria-pressed="false">Above</button>
+                        <button id="numbersBtn" class="chord-mode-btn" type="button" aria-pressed="false" aria-label="Show scale degrees instead of chord names" title="Show scale degrees (I, IV, V) instead of chord names">I-V</button>
+                    </div>
                 </div>
             </div>
             <div id="metronomeGroup" class="tool-group" role="group" aria-label="Metronome" hidden>
                 <span class="tool-label">Tempo</span>
-                <div class="stepper">
-                    <button id="metronomeBtn" class="step-btn metronome-seg" type="button"
-                            aria-pressed="false" aria-label="Start the metronome" title="Start the metronome">▶</button>
-                    <span class="step-divider" role="separator"></span>
-                    <button id="bpmDown" class="step-btn" type="button" aria-label="Slower tempo">−</button>
-                    <span id="bpmValue" class="step-value" aria-live="polite">—</span>
-                    <button id="bpmUp" class="step-btn" type="button" aria-label="Faster tempo">+</button>
+                <div class="tool-controls">
+                    <div class="stepper">
+                        <button id="metronomeBtn" class="step-btn metronome-seg" type="button"
+                                aria-pressed="false" aria-label="Start the metronome" title="Start the metronome">▶</button>
+                        <span class="step-divider" role="separator"></span>
+                        <button id="bpmDown" class="step-btn" type="button" aria-label="Slower tempo">−</button>
+                        <span id="bpmValue" class="step-value" aria-live="polite">—</span>
+                        <button id="bpmUp" class="step-btn" type="button" aria-label="Faster tempo">+</button>
+                    </div>
                 </div>
             </div>
             <div id="strumGroup" class="tool-group" role="group" aria-label="Strum pattern" hidden>
                 <span class="tool-label">Strum</span>
-                <label class="strum-select-wrap">
-                    <span class="sr-only">Strum pattern</span>
-                    <select id="strumSelect" class="strum-select" aria-label="Strum pattern"></select>
-                </label>
-                <button id="strumNotationBtn" class="step-btn strum-notation-btn" type="button"
-                        aria-label="Showing arrows — click for D/U letters"
-                        title="Showing arrows — click for D/U letters">↓↑</button>
-                <div class="stepper">
-                    <button id="strumSizeDown" class="step-btn" type="button" aria-label="Smaller strum row">−</button>
-                    <span id="strumSizeValue" class="step-value" aria-live="polite">100%</span>
-                    <button id="strumSizeUp" class="step-btn" type="button" aria-label="Bigger strum row">+</button>
-                    <span class="step-divider" role="separator"></span>
-                    <button id="strumPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
+                <div class="tool-controls">
+                    <label class="strum-select-wrap">
+                        <span class="sr-only">Strum pattern</span>
+                        <select id="strumSelect" class="strum-select" aria-label="Strum pattern"></select>
+                    </label>
+                    <div class="stepper">
+                        <button id="strumNotationBtn" class="step-btn strum-notation-btn" type="button"
+                                aria-label="Showing arrows — click for D/U letters"
+                                title="Showing arrows — click for D/U letters">↓↑</button>
+                        <span class="step-divider" role="separator"></span>
+                        <button id="strumSizeDown" class="step-btn" type="button" aria-label="Smaller strum row">−</button>
+                        <span id="strumSizeValue" class="step-value" aria-live="polite">100%</span>
+                        <button id="strumSizeUp" class="step-btn" type="button" aria-label="Bigger strum row">+</button>
+                        <span class="step-divider" role="separator"></span>
+                        <button id="strumPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
+                    </div>
                 </div>
             </div>
             <div class="tool-group" role="group" aria-label="Chord diagram size">
                 <span class="tool-label">Diagram</span>
-                <div class="stepper">
-                    <button id="chordSizeDown" class="step-btn" type="button" aria-label="Smaller chord diagrams">−</button>
-                    <span id="chordSizeValue" class="step-value" aria-live="polite">100%</span>
-                    <button id="chordSizeUp" class="step-btn" type="button" aria-label="Bigger chord diagrams">+</button>
-                    <span class="step-divider" role="separator"></span>
-                    <button id="chordPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
+                <div class="tool-controls">
+                    <div class="stepper">
+                        <button id="chordSizeDown" class="step-btn" type="button" aria-label="Smaller chord diagrams">−</button>
+                        <span id="chordSizeValue" class="step-value" aria-live="polite">100%</span>
+                        <button id="chordSizeUp" class="step-btn" type="button" aria-label="Bigger chord diagrams">+</button>
+                        <span class="step-divider" role="separator"></span>
+                        <button id="chordPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -6363,7 +6427,12 @@ body.tuner-open { overflow: hidden; }
 
     /* The count-in is one full bar of clicks before the pattern starts: a strum
      * you cannot start on beat 1 is not usable for playing along. Expressed in
-     * subdivision slots so it shares the pattern's own grid. */
+     * subdivision slots so it shares the pattern's own grid.
+     *
+     * One bar at the pattern's own subdivision is exactly the pattern's own
+     * slot count (tests/strum.py asserts slots.length === beatsPerBar * subdiv
+     * for every pattern), which is what lets the count-in run through the
+     * pattern's cells instead of needing a bar of its own. */
     function countInSlots(pattern) {
         return SB.metronomeBeatsPerBar(pattern.time) * pattern.subdiv;
     }
@@ -6400,6 +6469,10 @@ body.tuner-open { overflow: hidden; }
 
     var raf = null;
     var lastSlot = -1;
+    /* 'countin' while the lead-in bar runs, 'pattern' once it hands over. The
+     * two phases share one set of cells (see renderRow), so this is what says
+     * which glyphs those cells are currently showing. */
+    var phase = null;
 
     function slotGlyph(ch) {
         if (ch === '-') return '\u00b7';   // middle dot for a rest, either way
@@ -6409,9 +6482,26 @@ body.tuner-open { overflow: hidden; }
         return '\u00b7';
     }
 
-    /* Builds the subdivision row: an optional count-in bar, then the pattern
-     * bar, with bar lines between and around them. Each slot is one cell so the
-     * highlight can toggle a single class without re-rendering. */
+    /* The count-in's label for a slot: the felt beat number on each beat
+     * ("1 2 3 4"), a dot on the subdivisions in between. Counting out loud is
+     * how a count-in is actually given, and the numbers also say how long it
+     * lasts — which a bar of identical rests never did. */
+    function countGlyph(pattern, i) {
+        if (i % pattern.subdiv !== 0) return '\u00b7';
+        return String(i / pattern.subdiv + 1);
+    }
+
+    /* Builds the subdivision row: one bar of cells for the pattern, with bar
+     * lines around it. Each slot is one cell so the highlight can toggle a
+     * single class without re-rendering.
+     *
+     * There is no separate count-in bar. A count-in bar doubled the row's width
+     * for something that is only meaningful for the two seconds it runs, and on
+     * a phone that is the difference between the pattern fitting on screen and
+     * not. One bar at the pattern's subdivision is exactly as many slots as the
+     * pattern has, so the count-in can run through these same cells — see
+     * setPhase. The row carries the phase, not the cells, because the cells are
+     * the same elements in both. */
     function renderRow() {
         var row = SB.$('strumRow');
         if (!row) return;
@@ -6419,28 +6509,44 @@ body.tuner-open { overflow: hidden; }
         var pattern = SB.state.strum.pattern;
         if (!pattern) return;
 
-        function bar(label, slots, cls) {
-            var b = SB.el('div', 'strum-bar' + (cls ? ' ' + cls : ''));
-            if (label) b.appendChild(SB.el('span', 'strum-bar-label', label));
-            var cells = SB.el('div', 'strum-cells');
-            for (var i = 0; i < slots.length; i++) {
-                var cell = SB.el('div', 'strum-slot', slotGlyph(slots[i]));
-                if (slots[i] === '-') cell.classList.add('rest');
-                // Mark the first slot of each felt beat so beat 1 and the pulse
-                // read clearly even when stopped.
-                if (i % pattern.subdiv === 0) cell.classList.add('beat');
-                cell.dataset.cls = cls;
-                cell.dataset.idx = String(i);
-                cells.appendChild(cell);
-            }
-            b.appendChild(cells);
-            return b;
+        var bar = SB.el('div', 'strum-bar pattern');
+        var cells = SB.el('div', 'strum-cells');
+        for (var i = 0; i < pattern.slots.length; i++) {
+            var cell = SB.el('div', 'strum-slot', slotGlyph(pattern.slots[i]));
+            if (pattern.slots[i] === '-') cell.classList.add('rest');
+            // Mark the first slot of each felt beat so beat 1 and the pulse
+            // read clearly even when stopped.
+            if (i % pattern.subdiv === 0) cell.classList.add('beat');
+            cell.dataset.idx = String(i);
+            cells.appendChild(cell);
         }
-
-        var countin = new Array(countInSlots(pattern) + 1).join('-'); // all rests
-        row.appendChild(bar('Count-in', countin, 'countin'));
-        row.appendChild(bar(null, pattern.slots, 'pattern'));
+        bar.appendChild(cells);
+        row.appendChild(bar);
+        phase = null;
+        setPhase('pattern');
         lastSlot = -1;
+    }
+
+    /* Swaps the cells between counting you in and showing the pattern. Only the
+     * glyphs and the row's phase change — the cells, their order and their
+     * data-idx stay put, so the highlight indexes the same grid either way and
+     * nothing reflows when the count-in hands over on beat 1. */
+    function setPhase(next) {
+        if (phase === next) return;
+        var row = SB.$('strumRow');
+        var pattern = SB.state.strum.pattern;
+        if (!row || !pattern) return;
+        phase = next;
+        var counting = next === 'countin';
+        row.dataset.phase = next;
+        row.classList.toggle('is-countin', counting);
+        Array.prototype.forEach.call(row.querySelectorAll('.strum-slot'), function (cell) {
+            var i = parseInt(cell.dataset.idx, 10);
+            cell.textContent = counting ? countGlyph(pattern, i) : slotGlyph(pattern.slots[i]);
+            cell.classList.toggle('rest', counting
+                ? i % pattern.subdiv !== 0
+                : pattern.slots[i] === '-');
+        });
     }
 
     function buildSelect() {
@@ -6482,20 +6588,24 @@ body.tuner-open { overflow: hidden; }
             cls = 'pattern';
         }
 
+        // Phase first: the cells have to be showing the right glyphs before a
+        // slot in them is lit, or beat 1 of the pattern flashes on a cell that
+        // still reads as a count.
+        setPhase(cls);
         if (slot !== lastSlot) {
-            paint(cls, slot);
+            paint(slot);
             lastSlot = slot;
         }
         raf = requestAnimationFrame(highlightFrame);
     }
 
-    function paint(cls, idx) {
+    function paint(idx) {
         var row = SB.$('strumRow');
         if (!row) return;
         Array.prototype.forEach.call(row.querySelectorAll('.strum-slot.on'), function (c) {
             c.classList.remove('on');
         });
-        var active = row.querySelector('.strum-slot[data-cls="' + cls + '"][data-idx="' + idx + '"]');
+        var active = row.querySelector('.strum-slot[data-idx="' + idx + '"]');
         if (active) active.classList.add('on');
     }
 
@@ -6505,6 +6615,10 @@ body.tuner-open { overflow: hidden; }
         Array.prototype.forEach.call(row.querySelectorAll('.strum-slot.on'), function (c) {
             c.classList.remove('on');
         });
+        // Stopped means "showing the pattern": the count-in only has meaning
+        // while something is counting, and leaving the row full of numbers
+        // would hide the one thing it exists to show.
+        setPhase('pattern');
         lastSlot = -1;
     }
 
