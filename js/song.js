@@ -28,10 +28,14 @@
 
     SB.openSong = function (id) {
         SB.closeVoicingChooser();
+        // Stop and reset the grid cursor on navigation, alongside the voicing
+        // chooser: the old chart is about to be replaced.
+        if (SB.gridReset) SB.gridReset();
         SB.stopMetronome();
         var song = SB.state.byId[id];
         if (!song) { location.hash = '#/' + (SB.state.active ? SB.state.active.id : ''); return; }
         SB.state.currentSong = song;
+        SB.updateGridModeUi();
         SB.addRecent(SB.state.active.id, id);
         SB.resetScroll(true);
         SB.state.scrollSpeed = SB.loadSpeedForSong(SB.state.active.id, id);
@@ -145,7 +149,8 @@
 
         var sheetResizeT = null;
         window.addEventListener('resize', function () {
-            if (SB.state.chordMode !== 'above' || !SB.state.currentSong) return;
+            var mode = SB.state.chordMode;
+            if ((mode !== 'above' && mode !== 'grid') || !SB.state.currentSong) return;
             clearTimeout(sheetResizeT);
             sheetResizeT = setTimeout(function () { SB.renderSheet(SB.state.currentSong); }, 150);
         }, { passive: true });

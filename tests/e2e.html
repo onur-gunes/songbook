@@ -1234,6 +1234,203 @@ async function main() {
     win().localStorage.removeItem('songbook:strum:polska-gurom\u0000arahja');
     win().localStorage.removeItem('songbook:bpm:polska-gurom\u0000arahja');
 
+    // 20c. play-along grid chart (issue #44)
+    const gridBtn = () => doc().querySelector('.chord-mode-btn[data-chord-mode="grid"]');
+    const gridSheet = () => doc().querySelector('.sheet.chords-grid');
+    const gridBeatEls = () => doc().querySelectorAll('.sheet.chords-grid .grid-beat');
+    const gridInfo = () => win().songbookTest.gridInfo();
+    const firstGridLabel = () => {
+        const el = doc().querySelector('.sheet.chords-grid .grid-chord');
+        return el ? el.textContent : '';
+    };
+
+    // The grid data lives in the Popular Songs book (the default Krakow book
+    // has none), so start there.
+    win().localStorage.removeItem('songbook:chordMode');
+    win().location.hash = '#/popular/stand-by-me';
+    await wait(350);
+    ok('grid button enabled for a song with a grid', !!gridBtn() && gridBtn().disabled === false);
+    ok('mode starts inline', win().songbookTest.getChordMode() === 'inline',
+        win().songbookTest.getChordMode());
+
+    gridBtn().click();
+    await wait(150);
+    ok('grid mode selected', win().songbookTest.getChordMode() === 'grid',
+        win().songbookTest.getChordMode());
+    ok('grid mode persisted', win().localStorage.getItem('songbook:chordMode') === 'grid',
+        win().localStorage.getItem('songbook:chordMode'));
+    ok('grid sheet rendered', !!gridSheet());
+
+    const gBars = doc().querySelectorAll('.sheet.chords-grid .grid-bar');
+    const gBeats = gridBeatEls();
+    const gDiagrams = doc().querySelectorAll('.sheet.chords-grid .grid-diagram');
+    ok('grid renders one bar per grid bar', gBars.length === 8, gBars.length);
+    ok('grid renders one slash per beat', gBeats.length === 32, gBeats.length);
+    ok('grid renders a diagram above each chord change', gDiagrams.length === 8, gDiagrams.length);
+    ok('grid draws bar lines',
+        win().getComputedStyle(gBars[0]).borderLeftWidth === '1px',
+        win().getComputedStyle(gBars[0]).borderLeftWidth);
+    ok('grid shows the section label beneath the system',
+        doc().querySelector('.sheet.chords-grid .grid-section-label').textContent === 'Verse/Chorus',
+        doc().querySelector('.sheet.chords-grid .grid-section-label').textContent);
+
+    const gInfo = gridInfo();
+    ok('grid info matches the song data',
+        gInfo && gInfo.totalBeats === 32 && gInfo.beatsPerBar === 4 && gInfo.bpm === 118,
+        JSON.stringify(gInfo));
+
+    // The cursor is a pure function of the metronome's beat position: one bar
+    // of count-in, then one index per beat, then null past the chart.
+    const beatAt = win().songbookTest.gridBeatAt;
+    ok('count-in maps before the first chart beat', beatAt(0) === -1 && beatAt(3.99) === -1);
+    ok('chart beat 0 starts after the count-in', beatAt(4) === 0 && beatAt(4.99) === 0);
+    ok('later beats map one per beat', beatAt(5) === 1 && beatAt(35.99) === 31);
+    ok('past the last beat maps to null', beatAt(36) === null);
+
+    // Diagrams must use the same stored voicing as the chord strip.
+    const gInstr = win().songbookTest.getInstrument();
+    let gVoicingOk = true, gVoicingDetail = '';
+    doc().querySelectorAll('.sheet.chords-grid .grid-change').forEach(ch => {
+        const name = ch.getAttribute('data-chord');
+        const v = win().songbookTest.chosenVoicing(name);
+        const img = ch.querySelector('img');
+        const want = v ? win().songbookTest.ChordKit.dataUri(gInstr, v) : null;
+        const got = img ? img.getAttribute('src') : null;
+        if (got !== want) {
+            gVoicingOk = false;
+            gVoicingDetail = name + ' expected ' + (want ? 'diagram' : 'none') + ' got ' + (got ? 'diagram' : 'none');
+        }
+    });
+    ok('grid diagrams use the chosen voicing', gVoicingOk, gVoicingDetail);
+
+    // A stored per-chord pick must reach the chart, not just the strip.
+    const aShapes = win().songbookTest.ChordKit.voicings('A', gInstr);
+    if (aShapes.length > 1) {
+        win().localStorage.setItem('songbook:pick:' + gInstr + ':A', aShapes[1].join(','));
+        win().songbookTest.setChordMode('inline');
+        await wait(80);
+        win().songbookTest.setChordMode('grid');
+        await wait(120);
+        const aImg = doc().querySelector('.sheet.chords-grid .grid-change[data-chord="A"] img');
+        ok('stored voicing pick reaches the grid',
+            !!aImg && aImg.getAttribute('src') === win().songbookTest.ChordKit.dataUri(gInstr, aShapes[1]));
+        win().localStorage.removeItem('songbook:pick:' + gInstr + ':A');
+        win().songbookTest.setChordMode('inline');
+        await wait(60);
+        win().songbookTest.setChordMode('grid');
+        await wait(120);
+    }
+
+    // Repeat signs are per block. Riptide is the grid song with repeat: true.
+    win().location.hash = '#/popular/riptide';
+    await wait(350);
+    ok('grid mode carries across songs', win().songbookTest.getChordMode() === 'grid',
+        win().songbookTest.getChordMode());
+    ok('grid re-renders for the new song', doc().querySelectorAll('.grid-bar').length === 4,
+        doc().querySelectorAll('.grid-bar').length);
+    ok('repeat start sign rendered', doc().querySelector('.sheet.chords-grid .grid-repeat.start') !== null);
+    ok('repeat end sign rendered', doc().querySelector('.sheet.chords-grid .grid-repeat.end') !== null);
+
+    // Transpose and I-V are shared with the other renderers.
+    const labelBefore = firstGridLabel();
+    $('trUp').click();
+    await wait(150);
+    const labelUp = firstGridLabel();
+    ok('transpose applies to the grid', labelUp !== labelBefore && labelUp !== '',
+        labelBefore + ' -> ' + labelUp);
+    $('trDown').click();
+    await wait(150);
+    ok('transpose back restores the grid label', firstGridLabel() === labelBefore,
+        firstGridLabel());
+
+    $('numbersBtn').click();
+    await wait(150);
+    const degreeLabel = firstGridLabel();
+    ok('degrees apply to the grid', /^[ivIV]/.test(degreeLabel), degreeLabel);
+    ok('degree labels are measured and drawn in the mono face',
+        win().getComputedStyle(doc().querySelector('.sheet.chords-grid .grid-chord'))
+            .fontFamily.indexOf('mono') > -1,
+        win().getComputedStyle(doc().querySelector('.sheet.chords-grid .grid-chord')).fontFamily);
+    $('numbersBtn').click();
+    await wait(150);
+    ok('degrees off restores chord names', firstGridLabel() === labelBefore, firstGridLabel());
+
+    // Cursor: driven by the metronome clock, not a second timer.
+    ok('grid duration comes from the beat grid',
+        win().songbookTest.gridDurationMs() > 0, win().songbookTest.gridDurationMs());
+    for (let i = 0; i < 200 && $('bpmValue').textContent !== '240'; i++) $('bpmUp').click();
+    ok('bpm set to 240 for the grid cursor test', $('bpmValue').textContent === '240',
+        $('bpmValue').textContent);
+    $('metronomeBtn').click();
+    await wait(1200);
+    ok('metronome running for the grid cursor test', mState().playing === true);
+
+    let gLockOk = true, gLockDetail = '';
+    for (let i = 0; i < 14; i++) {
+        const pos = win().songbookTest.metronomePosition();
+        const on = doc().querySelector('.sheet.chords-grid .grid-beat.on');
+        const expect = win().songbookTest.gridBeatAt(pos);
+        const got = on ? parseInt(on.dataset.beat, 10) : null;
+        if (pos !== null && expect !== null && expect !== -1) {
+            // One beat of slack: pos is read a frame after the class is set.
+            if (got === null || Math.abs(got - expect) > 1) {
+                gLockOk = false;
+                gLockDetail = 'pos=' + pos.toFixed(3) + ' expect=' + expect + ' got=' + got;
+            }
+        }
+        await wait(60);
+    }
+    ok('grid cursor stays locked to the metronome clock', gLockOk, gLockDetail);
+    ok('a beat is highlighted while the metronome runs',
+        doc().querySelector('.sheet.chords-grid .grid-beat.on') !== null);
+    ok('grid phase reports playing', gridInfo() && gridInfo().phase === 'playing',
+        gridInfo() && gridInfo().phase);
+
+    $('metronomeBtn').click();
+    await wait(100);
+    ok('grid cursor cleared when the metronome stops',
+        doc().querySelector('.sheet.chords-grid .grid-beat.on') === null);
+    ok('grid phase returns to idle', gridInfo() && gridInfo().phase === 'idle',
+        gridInfo() && gridInfo().phase);
+
+    // Reflow: the same chart packs into more systems on a phone width and the
+    // page itself must not gain a horizontal scrollbar.
+    const systemsBefore = doc().querySelectorAll('.sheet.chords-grid .grid-system').length;
+    frame.style.width = '380px';
+    await wait(400);
+    const systemsAfter = doc().querySelectorAll('.sheet.chords-grid .grid-system').length;
+    ok('grid reflows on a phone width', systemsAfter > systemsBefore,
+        systemsBefore + ' -> ' + systemsAfter);
+    ok('grid does not overflow the page on a phone width',
+        doc().documentElement.scrollWidth <= 381, doc().documentElement.scrollWidth);
+    frame.style.width = '1100px';
+    await wait(400);
+
+    // No-grid fallback: the mode stays set, the button is disabled, and the
+    // normal sheet renders instead of an empty view.
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(350);
+    ok('mode stays set on a song with no grid', win().songbookTest.getChordMode() === 'grid',
+        win().songbookTest.getChordMode());
+    ok('grid button disabled on a song with no grid', gridBtn().disabled === true);
+    ok('no grid chart rendered for a song with no grid', !gridSheet());
+    ok('normal sheet rendered instead',
+        doc().querySelectorAll('#sheet .line').length > 0 &&
+        $('sheet').textContent.trim().length > 0);
+    ok('song with no grid cannot strand the user in an empty view',
+        $('sheet').textContent.trim().length > 0, $('sheet').textContent.trim().length);
+
+    win().location.hash = '#/popular/riptide';
+    await wait(350);
+    ok('mode resumes on the next grid song',
+        !!gridSheet() && gridBtn().disabled === false);
+
+    // leave the suite with no sticky grid state
+    win().songbookTest.setChordMode('inline');
+    await wait(60);
+    win().localStorage.removeItem('songbook:chordMode');
+    win().localStorage.removeItem('songbook:bpm:popular\u0000riptide');
+
     // 21. no console/page errors overall
     ok('no page errors', errors.length === 0, errors.join('; '));
 

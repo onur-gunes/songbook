@@ -1297,6 +1297,147 @@ main {
     font-size: 0.88em;
 }
 
+/* Play-along grid chart. Mirrors .sheet.chords-above: the notation layer is
+   mono, the bar/beat geometry is measured in js/grid.js, and the beat cursor
+   is a class on the slash the metronome clock says is current. */
+.sheet.chords-grid .grid-section {
+    margin: 0 0 18px;
+}
+
+.sheet.chords-grid .grid-system {
+    display: flex;
+    align-items: stretch;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.sheet.chords-grid .grid-bar {
+    position: relative;
+    flex: none;
+    box-sizing: border-box;
+    border-left: 1px solid var(--line);
+}
+
+.sheet.chords-grid .grid-system.has-repeat-start .grid-bar:first-of-type {
+    border-left: 0;
+}
+
+.sheet.chords-grid .grid-bar:last-of-type {
+    border-right: 1px solid var(--line);
+}
+
+.sheet.chords-grid .grid-system.has-repeat-end .grid-bar:last-of-type {
+    border-right: 0;
+}
+
+.sheet.chords-grid .grid-change {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.sheet.chords-grid .grid-diagram {
+    display: block;
+    object-fit: contain;
+}
+
+[data-theme="dark"] .sheet.chords-grid .grid-diagram {
+    filter: invert(1) hue-rotate(180deg) contrast(0.95);
+}
+
+.sheet.chords-grid .grid-chord {
+    color: var(--accent);
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+/* Degree labels are numerals, so they use the same mono face as the sheet
+   chord spans; chordLabelWidth() measures this family too. */
+.sheet.chords-grid.show-degrees .grid-chord {
+    font-family: var(--mono);
+    letter-spacing: -0.02em;
+}
+
+.sheet.chords-grid .grid-missing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.65rem;
+    text-align: center;
+}
+
+.sheet.chords-grid .grid-beat {
+    position: absolute;
+    bottom: 0;
+    width: var(--grid-beat-h, 1.7em);
+    height: var(--grid-beat-h, 1.7em);
+    line-height: var(--grid-beat-h, 1.7em);
+    transform: translateX(-50%);
+    text-align: center;
+    border-radius: 50%;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.85em;
+}
+
+.sheet.chords-grid .grid-beat.on {
+    color: var(--surface);
+    background: var(--accent);
+}
+
+.sheet.chords-grid .grid-section-label {
+    padding: 4px 2px 0;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.sheet.chords-grid .grid-repeat {
+    position: relative;
+    flex: none;
+    box-sizing: border-box;
+    width: 12px;
+}
+
+.sheet.chords-grid .grid-repeat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--text);
+}
+
+.sheet.chords-grid .grid-repeat.start::before { left: 0; }
+.sheet.chords-grid .grid-repeat.end::before { right: 0; }
+
+.sheet.chords-grid .grid-repeat::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 3px;
+    height: 3px;
+    margin-top: -4px;
+    border-radius: 50%;
+    background: var(--text);
+    box-shadow: 0 5px 0 var(--text);
+}
+
+.sheet.chords-grid .grid-repeat.start::after { left: 3px; }
+.sheet.chords-grid .grid-repeat.end::after { right: 3px; }
+
 /* notes */
 
 .notes-block { margin-top: 26px; }

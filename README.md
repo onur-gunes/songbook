@@ -68,6 +68,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/instrument.js` | Ukulele/guitar selection |
 | `js/transpose.js` | Chord token parsing, semitone transposition, and the written-key scale degrees (`songTonic`, `tokenDegree`) shared by the sheet and the strip |
 | `js/sheet.js` | Both sheet renderers (inline chords and chords-above-lyrics) |
+| `js/grid.js` | Play-along grid chart: bars, beat slashes, diagrams and the metronome-driven beat cursor |
 | `js/chordstrip.js` | Sticky chord strip and the voicing chooser |
 | `js/list.js` | List view: search, filters, sort, songbook picker |
 | `js/import.js` | Importing a songbook JSON from disk |
@@ -391,8 +392,9 @@ every bar must sum to the beats that metre implies (4 in 4/4, 3 in 3/4, 2 in
 does not add up, an unbalanced repeat, or a grid with no `time` is a build
 **error** naming the song and bar, not a warning: a chart that does not add up
 is unusable. On the untrusted import boundary (`js/songbooks.js`) a malformed
-grid is instead dropped whole, so the song still renders. Rendering the grid is
-out of scope here; the field is produced and validated, not yet drawn.
+grid is instead dropped whole, so the song still renders. `js/grid.js` draws the
+field as the play-along chart (the Grid mode in the sheet controls); songs
+without a grid fall back to the normal sheet.
 
 Run the parser/builder tests with `python3 tests/chordpro.py`, the strum
 library mirror guard with `python3 tests/strum.py`, and the dev/prod
