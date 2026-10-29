@@ -1047,7 +1047,15 @@ async function main() {
     const firstDown = () => sRow().querySelector('.strum-bar.pattern .strum-slot:not(.rest)');
     ok('strum defaults to arrow notation', sState().notation === 'arrows', sState().notation);
     ok('down slot shows an arrow glyph', firstDown().textContent === '\u2193', firstDown().textContent);
-    ok('notation button reads arrows', $('strumNotationBtn').getAttribute('aria-pressed') === 'false');
+    // A two-way mode switch, not an on/off toggle: it carries no aria-pressed
+    // (that would announce arrows as an un-set state); the label states which
+    // notation is showing and what clicking will do.
+    ok('notation button has no aria-pressed',
+        !$('strumNotationBtn').hasAttribute('aria-pressed'));
+    ok('notation button glyph and label read arrows',
+        $('strumNotationBtn').textContent === '\u2193\u2191' &&
+        $('strumNotationBtn').getAttribute('aria-label').indexOf('Showing arrows') === 0,
+        $('strumNotationBtn').getAttribute('aria-label'));
 
     $('strumNotationBtn').click();
     await wait(30);
@@ -1056,7 +1064,10 @@ async function main() {
     ok('rest slot stays a dot in letters mode',
         sRow().querySelector('.strum-bar.pattern .strum-slot.rest').textContent === '\u00b7',
         sRow().querySelector('.strum-bar.pattern .strum-slot.rest').textContent);
-    ok('notation button reflects letters', $('strumNotationBtn').getAttribute('aria-pressed') === 'true');
+    ok('notation button glyph and label read letters',
+        $('strumNotationBtn').textContent === 'DU' &&
+        $('strumNotationBtn').getAttribute('aria-label').indexOf('Showing D/U letters') === 0,
+        $('strumNotationBtn').getAttribute('aria-label'));
     ok('notation persisted', win().localStorage.getItem('songbook:strumNotation') === 'letters',
         win().localStorage.getItem('songbook:strumNotation'));
 
@@ -1065,6 +1076,19 @@ async function main() {
     await wait(250);
     ok('notation preference carries across songs', sState().notation === 'letters', sState().notation);
     ok('other song row drawn in letters', firstDown().textContent === 'D', firstDown().textContent);
+
+    // The handler must survive re-binding. bindStrum() runs per song view, and
+    // applyStrumNotation() rebuilds the row's cells on every toggle, so a stale
+    // listener or a lost binding would show up as a button that renders but
+    // does nothing — click it twice and require both clicks to land.
+    $('strumNotationBtn').click();
+    await wait(30);
+    ok('second click returns to arrows', sState().notation === 'arrows', sState().notation);
+    ok('row redrawn as arrows', firstDown().textContent === '\u2193', firstDown().textContent);
+    $('strumNotationBtn').click();
+    await wait(30);
+    ok('third click toggles again', sState().notation === 'letters', sState().notation);
+    ok('row redrawn as letters', firstDown().textContent === 'D', firstDown().textContent);
 
     // toggle back so the run leaves no sticky global state
     win().songbookTest.toggleStrumNotation();

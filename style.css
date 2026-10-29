@@ -1103,6 +1103,9 @@ main {
     cursor: pointer;
 }
 
+/* Both notations are equal choices, so this is never drawn as an "active"
+ * state — the glyph itself (↓↑ or DU) already says which one is showing.
+ * Sized to match .stepper so it sits level with the controls beside it. */
 .strum-notation-btn {
     height: 36px;
     border: 1px solid var(--line);
@@ -1111,11 +1114,6 @@ main {
     min-width: 44px;
     font-size: 0.9rem;
     font-weight: 700;
-}
-
-.strum-notation-btn[aria-pressed="true"] {
-    color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
 .strum-row {
@@ -1884,6 +1882,11 @@ body.tuner-open { overflow: hidden; }
     .tool-group { flex-direction: column; align-items: center; gap: 4px; }
     .song-tools .tool-label { font-size: 0.65rem; }
     .step-btn { min-width: 26px; padding: 0 6px; font-size: 0.9rem; }
+    /* Stated rather than inherited: .strum-notation-btn is more specific than
+     * .step-btn, so without this it would keep its desktop 44x36 while every
+     * control beside it shrinks. It stays a comfortable tap target (36px) —
+     * it is a standalone button, not one segment of a .stepper. */
+    .strum-notation-btn { min-width: 36px; height: 32px; padding: 0 6px; }
     .step-value { min-width: 30px; font-size: 0.75rem; }
     .chord-mode-btn { padding: 4px 8px; font-size: 0.75rem; }
     .step-divider { margin: 6px 0; }

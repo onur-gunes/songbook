@@ -207,8 +207,12 @@ STRUM_PATTERNS = (
      'slots': 'D--D--'},
     {'id': 'du-6-8', 'name': 'D . U D . U', 'time': '6/8', 'subdiv': 3,
      'slots': 'D-UD-U'},
+    # Alternating eighths in 6/8 must restart on the second pulse: strict
+    # D-U alternation (DUDUDU) would land an UP-stroke on pulse 2, fighting
+    # the metronome's accent. A rest-free pattern strums down on every felt
+    # beat; tests/strum.py enforces it.
     {'id': 'eighths-6-8', 'name': 'All eighths', 'time': '6/8', 'subdiv': 3,
-     'slots': 'DUDUDU'},
+     'slots': 'DUDDUD'},
     # 2/4 — eighths (4 slots)
     {'id': 'downs-2-4', 'name': 'All downs', 'time': '2/4', 'subdiv': 2,
      'slots': 'D-D-'},

@@ -50,6 +50,12 @@ jobs:
       - name: Dev/prod environment split
         run: python3 tests/env.py
 
+      # Guards the chordpro.py <-> js/strum.js duplication. Nothing else in
+      # CI compares the two copies: a divergence would otherwise ship, since
+      # the reproducible-build check only covers generated artefacts.
+      - name: Strum library mirror + musical invariants
+        run: python3 tests/strum.py
+
       # --- browser suites ---
       - name: Chord engine unit tests
         run: python3 tests/run_html.py "$BASE_URL/tests/chordkit.html"

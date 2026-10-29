@@ -27,6 +27,32 @@
         if (!('serviceWorker' in navigator)) return;
         if (location.search.indexOf('nosw') !== -1) return;
         if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
+
+        /* The first load after a deploy can run new markup against old code.
+         * Navigations are network-first, so index.html comes from the network
+         * immediately, but every other asset is stale-while-revalidate and is
+         * still served by the OUTGOING worker out of its old cache. The page
+         * therefore boots with the new HTML and the previous release's
+         * js/*.js: controls that exist in the markup but whose handlers are
+         * not in the loaded script do nothing at all until a later visit.
+         *
+         * The new worker calls skipWaiting() in install, so it activates and
+         * claims this client a moment after the document has already run. That
+         * claim is the signal that the cache now matches the deploy the markup
+         * came from, so reload once to put markup and code back in step.
+         *
+         * Guarded twice. Only when the page started under a controller: a
+         * first-ever registration also fires controllerchange, and there is no
+         * mismatch to repair then. And only once per page, so a worker that
+         * claims repeatedly can never drive a reload loop. */
+        var hadController = !!navigator.serviceWorker.controller;
+        var reloading = false;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+            if (!hadController || reloading) return;
+            reloading = true;
+            location.reload();
+        });
+
         window.addEventListener('load', function () {
             navigator.serviceWorker.register('sw.js').catch(function () { /* offline-only nicety */ });
         });

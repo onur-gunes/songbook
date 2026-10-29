@@ -47,7 +47,9 @@
         // 6/8 — two dotted-quarter pulses, 3 slots per pulse (6 slots)
         { id: 'downs-6-8', name: 'D . . D . .', time: '6/8', subdiv: 3, slots: 'D--D--' },
         { id: 'du-6-8', name: 'D . U D . U', time: '6/8', subdiv: 3, slots: 'D-UD-U' },
-        { id: 'eighths-6-8', name: 'All eighths', time: '6/8', subdiv: 3, slots: 'DUDUDU' },
+        // DUDDUD, not DUDUDU: alternating eighths restart on the second pulse
+        // so a down-stroke lands on every felt beat. See chordpro.py.
+        { id: 'eighths-6-8', name: 'All eighths', time: '6/8', subdiv: 3, slots: 'DUDDUD' },
         // 2/4 — eighths (4 slots)
         { id: 'downs-2-4', name: 'All downs', time: '2/4', subdiv: 2, slots: 'D-D-' },
         { id: 'eighths-2-4', name: 'All eighths', time: '2/4', subdiv: 2, slots: 'DUDU' },
@@ -260,7 +262,10 @@
         if (btn) {
             var letters = SB.state.strum.notation === 'letters';
             btn.textContent = letters ? 'DU' : '\u2193\u2191';
-            btn.setAttribute('aria-pressed', letters ? 'true' : 'false');
+            /* Not aria-pressed: neither notation is an "on" state, so a
+             * pressed/unpressed toggle would announce arrows as un-set. This
+             * is a two-way switch between equal choices, so the button just
+             * names what it will do next and the label carries the state. */
             var label = letters
                 ? 'Showing D/U letters — click for arrows'
                 : 'Showing arrows — click for D/U letters';
