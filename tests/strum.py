@@ -32,7 +32,9 @@ STRUM_JS = os.path.join(ROOT, 'js', 'strum.js')
 
 # Felt beats per bar per metre, mirroring js/metronome.js BEATS_PER_BAR and
 # SB.metronomeBeatsPerBar. 6/8 is two dotted-quarter pulses, not six eighths.
-BEATS_PER_BAR = {'4/4': 4, '3/4': 3, '6/8': 2, '2/4': 2}
+# The canonical copy now lives in chordpro (used by the grid validator too);
+# reuse it here so there is one fewer hand-kept duplicate.
+BEATS_PER_BAR = chordpro.BEATS_PER_BAR
 
 
 def extract_js_patterns():

@@ -148,6 +148,82 @@ def load_tempo(book_dir):
 
 # ---------- validation ----------
 
+def validate_grid(song):
+    """Return a list of human-readable problems with a song's `grid`.
+
+    Checks the structural invariants the renderer and metronome rely on: every
+    bar sums to the beats the song's `time` implies, chord tokens are
+    non-empty, and a grid requires `time` to be set (its bar maths is
+    meaningless without a metre). Chord *playability* is checked separately,
+    via the shared ChordKit path, because it needs the instrument. Returns an
+    empty list when the song has no grid.
+    """
+    grid = song.get('grid')
+    if grid is None:
+        return []
+    sid = song.get('id') or '?'
+    problems = []
+    if not isinstance(grid, list) or not grid:
+        return ['%s: grid is not a non-empty list' % sid]
+    time_sig = song.get('time')
+    beats_per_bar = chordpro.BEATS_PER_BAR.get(time_sig)
+    if beats_per_bar is None:
+        # Without a valid metre there is nothing to sum bars against, so a grid
+        # on a song with no (or an invalid) `time` is unusable by construction.
+        return ['%s: grid requires a valid time signature (got %r)' % (sid, time_sig)]
+    for bi, block in enumerate(grid):
+        where = '%s grid[%d]' % (sid, bi)
+        if not isinstance(block, dict):
+            problems.append('%s: block is not an object' % where)
+            continue
+        label = block.get('label')
+        if label is not None:
+            where = '%s %r' % (where, label)
+        bars = block.get('bars')
+        if not isinstance(bars, list) or not bars:
+            problems.append('%s: block has no bars' % where)
+            continue
+        for ri, bar in enumerate(bars):
+            beats = bar.get('beats') if isinstance(bar, dict) else None
+            if not isinstance(beats, list) or not beats:
+                problems.append('%s bar %d: no chords' % (where, ri + 1))
+                continue
+            total = 0
+            for seg in beats:
+                if not isinstance(seg, dict):
+                    problems.append('%s bar %d: malformed beat' % (where, ri + 1))
+                    continue
+                chord = seg.get('chord')
+                count = seg.get('beats')
+                if not isinstance(chord, str) or not chord.strip():
+                    problems.append('%s bar %d: empty chord' % (where, ri + 1))
+                if not isinstance(count, int) or isinstance(count, bool) or count < 1:
+                    problems.append('%s bar %d: bad beat count %r' % (where, ri + 1, count))
+                else:
+                    total += count
+            if total != beats_per_bar:
+                problems.append('%s bar %d: %d beats, expected %d for %s'
+                                % (where, ri + 1, total, beats_per_bar, time_sig))
+    return problems
+
+
+def grid_chord_names(song):
+    """Every chord token used in a song's grid, in first-appearance order."""
+    names = []
+    for block in song.get('grid') or []:
+        if not isinstance(block, dict):
+            continue
+        for bar in block.get('bars') or []:
+            if not isinstance(bar, dict):
+                continue
+            for seg in bar.get('beats') or []:
+                if isinstance(seg, dict) and isinstance(seg.get('chord'), str):
+                    name = seg['chord']
+                    if name and name not in names:
+                        names.append(name)
+    return names
+
+
 def validate_songbook(book):
     """Return (errors, facts) for a built songbook dict."""
     errors = []
@@ -187,6 +263,13 @@ def validate_songbook(book):
         elif _strum_metre.get(val) != s.get('time'):
             invalid_strums.append('%s (%r: %s pattern, song time %r)'
                                   % (sid, val, _strum_metre.get(val), s.get('time')))
+
+    # Grid bars must sum to the metre, carry real chords and balanced repeats;
+    # an unusable grid is a build error, exactly like a bad tempo, because a
+    # chart that does not add up is worse than no chart.
+    grid_problems = []
+    for song in songs:
+        grid_problems.extend(validate_grid(song))
 
     bad_shape, bad_blank, bad_pre, bad_chords = [], [], [], []
     entities = []
@@ -249,6 +332,8 @@ def validate_songbook(book):
         errors.append('pre lines must be single-token: %s' % bad_pre)
     if bad_chords:
         errors.append('chord tokens missing brackets: %s' % bad_chords)
+    if grid_problems:
+        errors.append('invalid grid: %s' % grid_problems)
     if entities:
         errors.append('leftover html entities / broken unicode: %s' % entities)
 
@@ -265,6 +350,8 @@ def validate_songbook(book):
         'with_bpm': sum(1 for s in songs if 'bpm' in s),
         'with_time': sum(1 for s in songs if 'time' in s),
         'with_strum': sum(1 for s in songs if 'strum' in s),
+        'with_grid': sum(1 for s in songs if s.get('grid')),
+        'grid_problems': grid_problems,
         'bad_shape': bad_shape,
         'bad_blank': bad_blank,
         'bad_pre': bad_pre,
@@ -523,7 +610,11 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
 
     chords = []
     for song in songs:
-        for chord in song['chords']:
+        # Grid chords reuse the sheet's chord vocabulary, so a grid can only
+        # introduce a chord the lyrics never did (an intro/outro voicing). They
+        # must be playable too, so fold them into the one playability check
+        # rather than leaving an unplayable grid chord to surface at render.
+        for chord in list(song['chords']) + grid_chord_names(song):
             if chord not in chords:
                 chords.append(chord)
 
@@ -583,6 +674,8 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
         'invalid bpm: %s' % (facts['invalid_bpm'] or 'none'),
         'invalid time signatures: %s' % (facts['invalid_times'] or 'none'),
         'invalid strum patterns: %s' % (facts['invalid_strums'] or 'none'),
+        'grids: %d/%d songs with a grid' % (facts['with_grid'], len(songs)),
+        'invalid grids: %s' % (facts['grid_problems'] or 'none'),
         'sheet shape: %s' % ('ok' if not facts['bad_shape'] else facts['bad_shape']),
         'blank lines: %s' % ('ok' if not facts['bad_blank'] else facts['bad_blank']),
         'pre lines: %s' % ('ok' if not facts['bad_pre'] else facts['bad_pre']),

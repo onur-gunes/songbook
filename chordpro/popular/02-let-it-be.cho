@@ -2,6 +2,12 @@
 {artist: The Beatles}
 {level: Easy}
 {duration: 4.03}
+{time: 4/4}
+
+{start_of_grid: Verse}
+| C | G | Am | F |
+| C | G . F . | C |
+{end_of_grid}
 
 {comment: Verse 1}
 [C]When I find myself in [G]times of trouble

@@ -42,6 +42,13 @@ BPM_MIN = 20
 BPM_MAX = 300
 TIME_SIGNATURES = ('4/4', '3/4', '6/8', '2/4')
 
+# Felt beats per bar, the same count the metronome accents and the strum
+# library encodes (len(slots) / subdiv): one dotted-quarter pulse per half-bar
+# in 6/8, so 6/8 is two beats, not six. A grid bar must sum to this many beats.
+# Mirrored in js/metronome.js and js/songbooks.js (the import-boundary grid
+# check); tests/strum.py reuses this copy.
+BEATS_PER_BAR = {'4/4': 4, '3/4': 3, '6/8': 2, '2/4': 2}
+
 _DIRECTIVE_RE = re.compile(r'^\s*\{([^{}]*)\}\s*$')
 
 def slugify(text):
@@ -152,6 +159,139 @@ def parse_time(value):
         return None
     text = str(value).strip().replace(' ', '')
     return text if text in TIME_SIGNATURES else None
+
+
+# ---------- bar/beat grid ----------
+#
+# A grid block is a chart of bars, authored separately from the lyric lines:
+#
+#     {start_of_grid: Intro/Chorus/Interlude}
+#     | C | G | Am | G |
+#     |: F | G . . | C :|
+#     {end_of_grid}
+#
+# `|` is a bar line; a bar holds chord tokens. A lone chord fills the bar; a
+# `.` extends the previous chord by one felt beat, so `G . .` is G for three
+# beats (standard Nashville/chart notation). `|:` opens a repeat and `:|`
+# closes one. The block label becomes the section name.
+#
+# The parsed shape is deliberately parallel to `sheet`, not nested in it:
+#
+#     "grid": [
+#       {"label": "Intro/Chorus/Interlude", "repeat": false,
+#        "bars": [{"beats": [{"chord": "C", "beats": 4}]}, ...]}
+#     ]
+#
+# This module only parses; build_songbook.validate_songbook is what turns a
+# bar that does not sum to the metre (or a grid with no `time`) into a build
+# error, exactly as it does for an out-of-range bpm. Structural problems the
+# parser cannot represent (empty bars, a stray `.`, misplaced repeats) raise
+# ValueError here and are reported as a warning that drops the offending block.
+
+_BARLINE_RE = re.compile(r'(\|:|:\||\|)')
+
+
+def _grid_bar_beats(bar_text, beats_per_bar):
+    """Parse one bar's text into a list of {'chord', 'beats'} entries.
+
+    A lone chord with no dots fills the bar (`beats_per_bar`); otherwise each
+    chord takes one beat plus one for every trailing `.`. Raises ValueError on
+    an empty bar or a `.` with no chord to extend.
+    """
+    entries = []
+    for tok in bar_text.split():
+        if set(tok) == {'.'}:
+            if not entries:
+                raise ValueError("'.' with no preceding chord")
+            entries[-1]['beats'] += len(tok)
+        else:
+            entries.append({'chord': tok, 'beats': 1})
+    if not entries:
+        raise ValueError('empty bar')
+    # A single bare chord fills the bar. This is the only place beats depend on
+    # the metre, which is why the grid is parsed after `time` is known.
+    if beats_per_bar is not None and len(entries) == 1 and entries[0]['beats'] == 1:
+        entries[0]['beats'] = beats_per_bar
+    return entries
+
+
+def _grid_line_bars(label, line, beats_per_bar):
+    """Split one bar-line-delimited grid line into (seps, bar_texts).
+
+    Every line must open and close with a bar line; text outside the outermost
+    bar lines, or an empty interior bar, is a ValueError. `seps` are the bar
+    line tokens in order, `bar_texts` the raw text of each enclosed bar.
+    """
+    parts = _BARLINE_RE.split(line)
+    pre = parts[0].strip()
+    if pre:
+        raise ValueError('grid block %r: text before first bar line: %r' % (label, pre))
+    seps = parts[1::2]
+    contents = parts[2::2]
+    if not seps:
+        raise ValueError('grid block %r: a line has no bar lines' % label)
+    post = contents[-1].strip() if contents else ''
+    if post:
+        raise ValueError('grid block %r: text after last bar line: %r' % (label, post))
+    bar_texts = contents[:-1]
+    if not bar_texts:
+        raise ValueError('grid block %r: a line has no bars' % label)
+    return seps, bar_texts
+
+
+def parse_grid_block(label, body_lines, time_sig):
+    """Parse one {start_of_grid}…{end_of_grid} block into a grid block dict.
+
+    `time_sig` is the song's validated metre (or None); it is used only to
+    expand a lone bare chord to a full bar. Raises ValueError if the block has
+    no bars, a bar is malformed, or repeat marks are not a balanced pair at the
+    block's edges.
+
+    Each body line is parsed independently and its bars concatenated, so a
+    grid can span several lines (`| C | G |` / `| Am | G |`) without the line
+    break reading as an empty bar between the trailing and leading bar lines.
+    """
+    beats_per_bar = BEATS_PER_BAR.get(time_sig)
+    lines = [line.strip() for line in body_lines if line.strip()]
+    if not lines:
+        raise ValueError('grid block %r has no bars' % label)
+    # Flatten the block into one separator sequence interleaved with bars:
+    # [sep, bar, sep, bar, ..., sep]. Each line both opens and closes with a
+    # bar line, so the trailing bar line of one line and the leading bar line
+    # of the next are the *same* musical division written twice; the leading
+    # one is dropped so the block reads as a single continuous sequence.
+    # `seps` ends up interleaved with bars as [s0, bar0, s1, bar1, ..., sN]:
+    # N bars have N+1 bar lines around them. Each line both opens and closes
+    # with a bar line, so an interior line's opening bar line is the *same*
+    # division as the previous line's closing one, written twice; the duplicate
+    # is dropped so the block reads as one continuous sequence.
+    seps = []
+    bar_texts = []
+    for i, line in enumerate(lines):
+        line_seps, line_bars = _grid_line_bars(label, line, beats_per_bar)
+        if i > 0:
+            if line_seps[0] != '|' or seps[-1] != '|':
+                # A repeat mark straddling an interior line break is a repeat
+                # in the middle of the block, which the single `repeat` flag
+                # cannot represent.
+                raise ValueError('grid block %r: repeat mark on an interior '
+                                 'line break' % label)
+            line_seps = line_seps[1:]
+        seps.extend(line_seps)
+        bar_texts.extend(line_bars)
+    # Repeat marks are only valid as a balanced pair at the block's edges: a
+    # single `|:` at the very start and/or a single `:|` at the very end. A
+    # close with no matching open repeats from the block's start (standard
+    # notation), so a lone trailing `:|` is balanced on its own.
+    opens = [i for i, s in enumerate(seps) if s == '|:']
+    closes = [i for i, s in enumerate(seps) if s == ':|']
+    if any(i != 0 for i in opens) or len(opens) > 1:
+        raise ValueError('grid block %r: open-repeat must be a single mark at the start' % label)
+    if any(i != len(seps) - 1 for i in closes) or len(closes) > 1:
+        raise ValueError('grid block %r: close-repeat must be a single mark at the end' % label)
+    repeat = bool(opens or closes)
+    bars = [{'beats': _grid_bar_beats(bt, beats_per_bar)} for bt in bar_texts]
+    return {'label': label, 'repeat': repeat, 'bars': bars}
 
 
 # ---------- strum pattern library ----------
@@ -277,11 +417,22 @@ def parse_song(text, number=1, warnings=None, allow_trusted_notes=False):
     meta = {}
     sheet = []
     in_tab = False
+    # Grid blocks are collected raw here and parsed after `time` is known,
+    # since a lone bare chord's beat count depends on the metre. Each entry is
+    # (label, [body lines]).
+    raw_grids = []
+    grid_label = None
+    grid_lines = None
 
     for raw in text.splitlines():
         d = _directive(raw)
         if d is not None:
             key, value = d
+            if grid_lines is not None and key not in ('end_of_grid', 'eog'):
+                # A grid block is line-scoped like a tab; a stray directive
+                # inside it is almost certainly a missing {end_of_grid}.
+                _warn(warnings, 'directive {%s} inside grid block %r: did you '
+                                'forget {end_of_grid}?' % (key, grid_label))
             if key in METADATA_DIRECTIVES:
                 meta[METADATA_DIRECTIVES[key]] = value
             elif key in ('start_of_chorus', 'soc'):
@@ -292,6 +443,14 @@ def parse_song(text, number=1, warnings=None, allow_trusted_notes=False):
                 in_tab = True
             elif key in ('end_of_tab', 'eot'):
                 in_tab = False
+            elif key in ('start_of_grid', 'sog'):
+                grid_label = value
+                grid_lines = []
+            elif key in ('end_of_grid', 'eog'):
+                if grid_lines is not None:
+                    raw_grids.append((grid_label, grid_lines))
+                grid_label = None
+                grid_lines = None
             elif key in ('comment', 'c'):
                 if value:
                     sheet.append([['i', value]])
@@ -306,6 +465,12 @@ def parse_song(text, number=1, warnings=None, allow_trusted_notes=False):
             # intentionally ignored: the agent subset is small.
             continue
 
+        if grid_lines is not None:
+            # Inside a grid block: collect raw bar lines, skip source comments.
+            if not raw.lstrip().startswith('#'):
+                grid_lines.append(raw)
+            continue
+
         if raw.lstrip().startswith('#'):
             continue
 
@@ -318,6 +483,11 @@ def parse_song(text, number=1, warnings=None, allow_trusted_notes=False):
             continue
 
         sheet.append(parse_line(raw))
+
+    if grid_lines is not None:
+        # Unterminated block: parse what we have rather than drop it silently.
+        _warn(warnings, 'grid block %r is missing {end_of_grid}' % grid_label)
+        raw_grids.append((grid_label, grid_lines))
 
     while sheet and not sheet[0]:
         sheet.pop(0)
@@ -448,4 +618,19 @@ def parse_song(text, number=1, warnings=None, allow_trusted_notes=False):
                                                               unused or 'none'))
             song['chords'] = overridden
     song['sheet'] = sheet
+
+    # Grids are parsed last: a lone bare chord's beat count depends on the
+    # metre, so `time` must be resolved first. A block that cannot be parsed is
+    # dropped with a warning rather than emitting a half-valid grid — the per-
+    # bar beat totals are checked against `time` later, in validate_songbook.
+    if raw_grids:
+        valid_time = parse_time(meta.get('time', '').strip())
+        grid = []
+        for label, body_lines in raw_grids:
+            try:
+                grid.append(parse_grid_block(label, body_lines, valid_time))
+            except ValueError as exc:
+                _warn(warnings, 'dropped grid block: %s' % exc)
+        if grid:
+            song['grid'] = grid
     return song

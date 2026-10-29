@@ -2,6 +2,12 @@
 {artist: The Animals}
 {level: Medium}
 {duration: 4.29}
+{time: 6/8}
+
+{start_of_grid: Verse}
+| Am | C | D | F |
+| Am | E | Am | E |
+{end_of_grid}
 
 {comment: Verse 1}
 There [Am]is a [C]house in [D]New Or[F]leans
