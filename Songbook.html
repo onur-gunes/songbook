@@ -6480,11 +6480,18 @@ body.tuner-open { overflow: hidden; }
 
     /* ---------------- wiring ---------------- */
 
+    /* Shows or hides both halves of the feature together: the selector in the
+     * toolbar and the subdivision row under the chord strip. Both start hidden
+     * in the markup, so the row has to be unhidden here — without that the
+     * pattern is rendered into a display:none element and the whole feature is
+     * invisible, leaving the selector and the notation toggle apparently inert
+     * because the only thing they change cannot be seen. */
     SB.updateStrumUi = function () {
         var group = SB.$('strumGroup');
-        if (!group) return;
+        var row = SB.$('strumRow');
         var on = SB.state.strum.pattern !== null;
-        group.hidden = !on;
+        if (group) group.hidden = !on;
+        if (row) row.hidden = !on;
     }
 
     /* Reflects the notation preference on its button. Re-rendering the row (not
