@@ -1279,6 +1279,34 @@ async function main() {
         gInfo && gInfo.totalBeats === 32 && gInfo.beatsPerBar === 4 && gInfo.bpm === 118,
         JSON.stringify(gInfo));
 
+    // Lyrics are anchored to chord changes, not spread across beats: this
+    // block's change sequence matches the Chorus exactly, so five phrases
+    // start at the five changes.
+    const gridLyrics = () => doc().querySelectorAll('.sheet.chords-grid .grid-lyric');
+    ok('grid shows one lyric phrase per chord change', gridLyrics().length === 5, gridLyrics().length);
+    ok('grid picks the section whose changes match exactly',
+        gInfo && gInfo.lyricSection === 'Chorus', gInfo && gInfo.lyricSection);
+    ok('first lyric starts at the first chord change',
+        gridLyrics()[0] && gridLyrics()[0].textContent === 'So darling, darling, stand by me',
+        gridLyrics()[0] && gridLyrics()[0].textContent);
+    const gFirstBar = doc().querySelector('.sheet.chords-grid .grid-bar');
+    ok('lyrics sit below the bars',
+        !!gFirstBar && !!gridLyrics()[0] &&
+        gridLyrics()[0].getBoundingClientRect().top >= gFirstBar.getBoundingClientRect().bottom - 1,
+        gFirstBar && gridLyrics()[0] &&
+        (gridLyrics()[0].getBoundingClientRect().top - gFirstBar.getBoundingClientRect().bottom).toFixed(1));
+    const gFirstSystem = doc().querySelector('.sheet.chords-grid .grid-system');
+    ok('lyric layer reserves vertical space',
+        !!gFirstSystem && parseFloat(gFirstSystem.style.paddingBottom) > 0,
+        gFirstSystem && gFirstSystem.style.paddingBottom);
+    const gFirstChange = doc().querySelector('.sheet.chords-grid .grid-change');
+    ok('lyric aligns with its chord change',
+        !!gFirstChange && !!gridLyrics()[0] &&
+        Math.abs(gridLyrics()[0].getBoundingClientRect().left -
+                 gFirstChange.getBoundingClientRect().left) < 1,
+        gFirstChange && gridLyrics()[0] &&
+        (gridLyrics()[0].getBoundingClientRect().left - gFirstChange.getBoundingClientRect().left).toFixed(1));
+
     // The cursor is a pure function of the metronome's beat position: one bar
     // of count-in, then one index per beat, then null past the chart.
     const beatAt = win().songbookTest.gridBeatAt;
@@ -1321,6 +1349,16 @@ async function main() {
         await wait(120);
     }
 
+    // A grid that is a different arrangement must not invent lyrics.
+    win().location.hash = '#/popular/the-house-of-the-rising-sun';
+    await wait(350);
+    ok('grid still renders when the arrangement differs', !!gridSheet());
+    ok('no lyrics when the grid does not match the sheet',
+        doc().querySelectorAll('.sheet.chords-grid .grid-lyric').length === 0,
+        doc().querySelectorAll('.sheet.chords-grid .grid-lyric').length);
+    ok('grid info reports no lyric section', gridInfo() && gridInfo().lyricSection === null,
+        gridInfo() && gridInfo().lyricSection);
+
     // Repeat signs are per block. Riptide is the grid song with repeat: true.
     win().location.hash = '#/popular/riptide';
     await wait(350);
@@ -1330,6 +1368,19 @@ async function main() {
         doc().querySelectorAll('.grid-bar').length);
     ok('repeat start sign rendered', doc().querySelector('.sheet.chords-grid .grid-repeat.start') !== null);
     ok('repeat end sign rendered', doc().querySelector('.sheet.chords-grid .grid-repeat.end') !== null);
+    ok('looping grid shows one iteration of lyrics', gridLyrics().length === 3, gridLyrics().length);
+    ok('looping grid picks the first matching section',
+        gridInfo() && gridInfo().lyricSection === 'Verse 1', gridInfo() && gridInfo().lyricSection);
+    ok('riptide lyric starts at the first change',
+        gridLyrics()[0] && gridLyrics()[0].textContent === 'I was scared of',
+        gridLyrics()[0] && gridLyrics()[0].textContent);
+    const rFirstChange = doc().querySelector('.sheet.chords-grid .grid-change');
+    ok('lyric aligns past the repeat sign',
+        !!rFirstChange && !!gridLyrics()[0] &&
+        Math.abs(gridLyrics()[0].getBoundingClientRect().left -
+                 rFirstChange.getBoundingClientRect().left) < 1,
+        rFirstChange && gridLyrics()[0] &&
+        (gridLyrics()[0].getBoundingClientRect().left - rFirstChange.getBoundingClientRect().left).toFixed(1));
 
     // Transpose and I-V are shared with the other renderers.
     const labelBefore = firstGridLabel();

@@ -59,6 +59,133 @@
         };
     }
 
+    /* ---------------- lyric mapping ----------------
+     *
+     * The grid knows exactly where each chord changes; the sheet writes the
+     * same chords into the lyric line at the syllable where they change.
+     * Walking the two change sequences together therefore gives a reliable
+     * anchor for the lyric phrase under each bar, without inventing a
+     * word-level beat map.
+     *
+     * The match is deliberately conservative. A section must start with the
+     * block's whole change sequence (so a one-pass grid matches one pass of a
+     * longer section), and songs whose grid is a different arrangement show
+     * the chart without lyrics rather than the wrong words.
+     */
+    function tokenChord(tok) {
+        var s = String(tok == null ? '' : tok);
+        var m = s.match(/^\[([\s\S]*)\]$/);
+        var core = (m ? m[1] : s).replace(/^\/+|\/+$/g, '').trim();
+        // FC is the legacy encoding of F/C (see transposeChartName).
+        return core === 'FC' ? 'F/C' : core;
+    }
+
+    /* Sheet section headers are italic lines. Performance directions are
+     * italic too ("quietly", "down-down"), so only section words count. */
+    function isSectionHeader(text) {
+        var t = String(text == null ? '' : text).trim().toLowerCase();
+        if (!t) return false;
+        return /(^|[\s(])(intro|verse|chorus|bridge|pre-?chorus|outro|interlude|instrumental|solo|riff|refrain|hook|coda|tag)([\s):,]|$)/.test(t);
+    }
+
+    function sheetSections(song) {
+        var sections = [];
+        var cur = { name: '', lines: [] };
+        (song.sheet || []).forEach(function (line) {
+            var header = line.length === 1 && line[0][0] === 'i' && isSectionHeader(line[0][1]);
+            if (header) {
+                if (cur.lines.length || cur.name) sections.push(cur);
+                cur = { name: String(line[0][1]).trim(), lines: [] };
+            } else {
+                cur.lines.push(line);
+            }
+        });
+        if (cur.lines.length || cur.name) sections.push(cur);
+        return sections;
+    }
+
+    function lyricText(line, from, to) {
+        var text = '';
+        for (var i = from; i < to; i++) {
+            var kind = line[i][0];
+            // Chords, comments and preformatted tabs are not lyrics.
+            if (kind === 'c' || kind === 'y' || kind === 'p') continue;
+            text += line[i][1];
+        }
+        return text.replace(/\s+/g, ' ').trim();
+    }
+
+    /* Collapse the sheet's chord tokens into changes (a repeated token is the
+     * same chord still ringing), and attach to each change the lyric text that
+     * follows it until the next change. Text before the first token on a line
+     * is that line's pickup, so it belongs to the line's first change. */
+    function sectionChanges(section) {
+        var changes = [];
+        section.lines.forEach(function (line) {
+            var chordAt = [];
+            line.forEach(function (seg, i) { if (seg[0] === 'c') chordAt.push(i); });
+            chordAt.forEach(function (ci, k) {
+                var chord = tokenChord(line[ci][1]);
+                if (!chord) return;
+                var start = k === 0 ? 0 : ci;
+                var end = k + 1 < chordAt.length ? chordAt[k + 1] : line.length;
+                var phrase = lyricText(line, start, end);
+                var prev = changes[changes.length - 1];
+                if (prev && prev.chord === chord) {
+                    if (phrase) prev.phrase = (prev.phrase ? prev.phrase + ' ' : '') + phrase;
+                    return;
+                }
+                changes.push({ chord: chord, phrase: phrase });
+            });
+        });
+        return changes;
+    }
+
+    function blockChanges(block) {
+        var changes = [], prev = null;
+        (block.bars || []).forEach(function (bar) {
+            (bar.beats || []).forEach(function (seg) {
+                var chord = tokenChord(seg.chord);
+                if (chord !== prev) {
+                    changes.push(chord);
+                    prev = chord;
+                }
+            });
+        });
+        return changes;
+    }
+
+    function labelMatches(label, name) {
+        var n = String(name || '').toLowerCase();
+        if (!n) return false;
+        return String(label || '').toLowerCase().split(/[\/&,]/).some(function (p) {
+            p = p.trim();
+            return !!p && n.indexOf(p) !== -1;
+        });
+    }
+
+    function matchSection(song, block) {
+        var grid = blockChanges(block);
+        if (grid.length < 2) return null;
+        var best = null;
+        sheetSections(song).forEach(function (section) {
+            var changes = sectionChanges(section);
+            if (changes.length < grid.length) return;
+            for (var i = 0; i < grid.length; i++) {
+                if (changes[i].chord !== grid[i]) return;
+            }
+            var exact = changes.length === grid.length;
+            var label = labelMatches(block.label, section.name);
+            // Exact full-section match beats a prefix; a label match breaks
+            // ties between sections that share the same changes.
+            if (!best || (exact && !best.exact) ||
+                (exact === best.exact && label && !best.label)) {
+                best = { section: section, changes: changes, exact: exact, label: label };
+            }
+        });
+        return best;
+    }
+
     /* ---------------- cursor ---------------- */
 
     function clearActive() {
@@ -185,7 +312,9 @@
             beatsPerBar: activeGrid.beatsPerBar,
             bpm: SB.state.metronome.bpm || activeGrid.bpm,
             phase: activeGrid.phase,
-            activeBeat: lastBeat
+            activeBeat: lastBeat,
+            lyricSection: activeGrid.lyricSection,
+            lyricCount: activeGrid.lyricCount
         };
     };
 
@@ -241,7 +370,7 @@
         return s;
     }
 
-    function buildBarSpec(bar, song, ctx) {
+    function buildBarSpec(bar, song, ctx, changeState) {
         var segments = bar.beats.map(function (seg) {
             var tname = SB.transposeChartName(seg.chord, SB.state.transpose);
             var label = gridLabel(song, seg.chord);
@@ -250,6 +379,14 @@
             var voicing = isMuted(tname)
                 ? ChordKit.mutedVoicing(SB.state.instrument)
                 : SB.chosenVoicing(tname);
+            // A held chord gets a diagram in every bar it fills, but only the
+            // first bar is a change, so only that one carries a lyric.
+            var changeIndex = -1;
+            var chordKey = tokenChord(seg.chord);
+            if (chordKey !== changeState.prev) {
+                changeState.prev = chordKey;
+                changeIndex = ++changeState.index;
+            }
             return {
                 chord: seg.chord,
                 tname: tname,
@@ -257,7 +394,8 @@
                 beats: seg.beats,
                 width: Math.max(seg.beats * ctx.beatW, contentW + ctx.gap),
                 contentW: contentW,
-                voicing: voicing
+                voicing: voicing,
+                changeIndex: changeIndex
             };
         });
 
@@ -321,6 +459,58 @@
         return bar;
     }
 
+    /* One absolutely-positioned lyric line under a system. Each phrase starts
+     * at the exact x of its chord change and runs to the next change (or the
+     * end of the system), so the words stay with the bar they are sung over
+     * even when the phrase spans a held chord. */
+    function buildLyricLayer(system, bars, baseX, hasRepeatEnd, matched) {
+        if (!matched) return;
+        var positions = [], offset = baseX;
+        var repeatStart = system.classList.contains('has-repeat-start');
+        bars.forEach(function (spec, bi) {
+            // Change x is relative to the bar's padding box, which starts
+            // inside its 1px left border (removed on a repeat-start bar).
+            var borderLeft = (repeatStart && bi === 0) ? 0 : 1;
+            spec.segments.forEach(function (seg, i) {
+                if (seg.changeIndex >= 0) {
+                    positions.push({ index: seg.changeIndex, x: offset + borderLeft + spec.changeXs[i] });
+                }
+            });
+            offset += spec.width;
+        });
+        if (!positions.length) return;
+
+        var layer = SB.el('div', 'grid-lyrics');
+        layer.style.width = (offset + (hasRepeatEnd ? REPEAT_W : 0)) + 'px';
+        var any = false;
+        positions.forEach(function (pos, k) {
+            var change = matched.changes[pos.index];
+            if (!change || !change.phrase) return;
+            var nextX = k + 1 < positions.length ? positions[k + 1].x : offset;
+            var span = SB.el('span', 'grid-lyric', change.phrase);
+            span.style.left = pos.x + 'px';
+            span.style.width = Math.max(24, nextX - pos.x) + 'px';
+            layer.appendChild(span);
+            any = true;
+        });
+        if (any) system.appendChild(layer);
+    }
+
+    /* Wrapped phrase height depends on the width of the gap to the next
+     * change, so it has to be measured after the grid is in the document.
+     * The layer lives in the system's bottom padding. */
+    function sizeLyricLayers(wrap, em) {
+        Array.prototype.forEach.call(wrap.querySelectorAll('.grid-lyrics'), function (layer) {
+            var h = 0;
+            Array.prototype.forEach.call(layer.querySelectorAll('.grid-lyric'), function (el) {
+                h = Math.max(h, el.offsetHeight);
+            });
+            if (!h) h = Math.ceil(em * 1.3);
+            layer.style.height = h + 'px';
+            if (layer.parentNode) layer.parentNode.style.paddingBottom = h + 'px';
+        });
+    }
+
     function renderSheetGrid(song) {
         resetCursor();
 
@@ -345,10 +535,14 @@
         var beatsPerBar = SB.metronomeBeatsPerBar(song.time);
         var bpm = SB.state.metronome.bpm || song.bpm || null;
         var frag = document.createDocumentFragment();
+        var lyricSections = [];
 
         song.grid.forEach(function (block) {
+            var matched = matchSection(song, block);
+            if (matched) lyricSections.push(matched.section.name);
+            var changeState = { prev: null, index: -1 };
             var specs = block.bars.map(function (bar) {
-                return buildBarSpec(bar, song, ctx);
+                return buildBarSpec(bar, song, ctx, changeState);
             });
             // Repeat signs are flex items too, so reserve their width before
             // packing or a repeated block overflows its system by 24px.
@@ -359,9 +553,11 @@
             systems.forEach(function (bars, si) {
                 var system = SB.el('div', 'grid-system');
                 var first = si === 0, last = si === systems.length - 1;
+                var baseX = 0;
                 if (block.repeat && first) {
                     system.classList.add('has-repeat-start');
                     system.appendChild(repeatSign('start', ctx.barH));
+                    baseX = REPEAT_W;
                 }
                 bars.forEach(function (spec) {
                     system.appendChild(buildBarEl(spec, ctx));
@@ -370,6 +566,7 @@
                     system.classList.add('has-repeat-end');
                     system.appendChild(repeatSign('end', ctx.barH));
                 }
+                buildLyricLayer(system, bars, baseX, block.repeat && last, matched);
                 section.appendChild(system);
             });
             // One label per block, not one per system: a block that reflows
@@ -382,6 +579,7 @@
         });
 
         wrap.appendChild(frag);
+        sizeLyricLayers(wrap, em);
 
         var beatEls = Array.prototype.slice.call(wrap.querySelectorAll('.grid-beat'));
         beatEls.forEach(function (el, i) { el.dataset.beat = String(i); });
@@ -393,7 +591,9 @@
             bpm: bpm,
             beatEls: beatEls,
             wrap: wrap,
-            phase: 'idle'
+            phase: 'idle',
+            lyricSection: lyricSections.length ? lyricSections[0] : null,
+            lyricCount: wrap.querySelectorAll('.grid-lyric').length
         };
         wrap.dataset.gridPhase = 'idle';
 
