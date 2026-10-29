@@ -118,6 +118,12 @@
          * chordMode, not a per-song value. See js/strum.js. */
         strum: { pattern: null, notation: 'arrows' },
 
+        /* strum row display, matching chordSize/chordPin: size scales the
+         * slots, pin keeps the row on screen while the lyrics scroll. Both are
+         * global preferences remembered in localStorage. */
+        strumSize: 1,
+        strumPin: true,
+
         textSize: 1,
         chordSize: 1,
         chordPin: true,

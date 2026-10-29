@@ -33,6 +33,11 @@
             ? 'Pinned — click to let the chord strip scroll'
             : 'Not pinned — click to keep the chord strip at the top';
         SB.$('chordStrip').classList.toggle('is-static', !SB.state.chordPin);
+        /* The strum row pins directly beneath the strip, so its offset is a
+         * function of the strip's height and pin state. Re-apply after any
+         * change here, or the row would overlap the strip (bigger diagrams) or
+         * float below it (smaller, or the strip unpinned). */
+        if (SB.applyStrumSettings) SB.applyStrumSettings();
     }
 
     SB.setChordSize = function (v) {

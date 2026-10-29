@@ -67,6 +67,17 @@
         if (_sn === 'arrows' || _sn === 'letters') SB.state.strum.notation = _sn;
     } catch (e) { /* ignore */ }
 
+    /* Size and pin mirror chordSize/chordPin: same 0.6-1.5 range in 0.1 steps,
+     * same default-on pin, same namespaced keys. */
+    var SIZE_MIN = 0.6;
+    var SIZE_MAX = 1.5;
+    try {
+        var _ss = parseFloat(window.localStorage.getItem(SB.NS + ':strumSize'));
+        if (_ss >= SIZE_MIN && _ss <= SIZE_MAX) SB.state.strumSize = Math.round(_ss * 10) / 10;
+    } catch (e) { /* ignore */ }
+    try { SB.state.strumPin = window.localStorage.getItem(SB.NS + ':strumPin') !== '0'; }
+    catch (e) { /* ignore */ }
+
     SB.strumPatterns = function () { return PATTERNS.slice(); }
 
     SB.strumPatternsFor = function (time) {
@@ -258,6 +269,61 @@
         var on = SB.state.strum.pattern !== null;
         if (group) group.hidden = !on;
         if (row) row.hidden = !on;
+        SB.applyStrumSettings();
+    }
+
+    /* A pinned strum row has to sit directly under whatever is already pinned
+     * above it, and the chord strip's height is not a constant: it changes with
+     * the diagram size, and the strip leaves the sticky stack entirely when its
+     * own pin is off. So measure it rather than hard-coding an offset, and fall
+     * back to the top bar alone when the strip is unpinned or absent.
+     *
+     * Measured from the live layout on every apply, which is also why
+     * applyChordSettings calls through here: changing the diagram size or the
+     * strip's pin has to move the row that sits beneath it. */
+    function updateStickyOffset() {
+        var row = SB.$('strumRow');
+        if (!row) return;
+        var strip = SB.$('chordStrip');
+        var stripH = (strip && SB.state.chordPin && !strip.hidden)
+            ? Math.round(strip.getBoundingClientRect().height)
+            : 0;
+        row.style.top = 'calc(var(--topbar-h) + ' + stripH + 'px)';
+    }
+
+    SB.applyStrumSettings = function () {
+        document.documentElement.style.setProperty('--strum-size', SB.state.strumSize);
+        var val = SB.$('strumSizeValue');
+        if (val) val.textContent = Math.round(SB.state.strumSize * 100) + '%';
+
+        var p = SB.$('strumPinBtn');
+        if (p) {
+            p.setAttribute('aria-pressed', SB.state.strumPin ? 'true' : 'false');
+            p.textContent = SB.state.strumPin ? '📌' : '📍';
+            p.setAttribute('aria-label', SB.state.strumPin
+                ? 'Strum row pinned to the top — click to let it scroll with the lyrics'
+                : 'Strum row scrolls — click to keep it pinned to the top');
+            p.title = SB.state.strumPin
+                ? 'Pinned — click to let the strum row scroll'
+                : 'Not pinned — click to keep the strum row at the top';
+        }
+        var row = SB.$('strumRow');
+        if (row) row.classList.toggle('is-static', !SB.state.strumPin);
+        updateStickyOffset();
+    }
+
+    SB.setStrumSize = function (v) {
+        SB.state.strumSize = Math.min(SIZE_MAX, Math.max(SIZE_MIN, Math.round(v * 10) / 10));
+        SB.applyStrumSettings();
+        try { window.localStorage.setItem(SB.NS + ':strumSize', String(SB.state.strumSize)); }
+        catch (e) { /* ignore */ }
+    }
+
+    SB.toggleStrumPin = function () {
+        SB.state.strumPin = !SB.state.strumPin;
+        try { window.localStorage.setItem(SB.NS + ':strumPin', SB.state.strumPin ? '1' : '0'); }
+        catch (e) { /* ignore */ }
+        SB.applyStrumSettings();
     }
 
     /* Reflects the notation preference on its button. Re-rendering the row (not
@@ -325,7 +391,28 @@
         if (sel) sel.addEventListener('change', function () { SB.setStrum(sel.value); });
         var nbtn = SB.$('strumNotationBtn');
         if (nbtn) nbtn.addEventListener('click', SB.toggleStrumNotation);
+
+        var down = SB.$('strumSizeDown');
+        if (down) down.addEventListener('click', function () { SB.setStrumSize(SB.state.strumSize - 0.1); });
+        var up = SB.$('strumSizeUp');
+        if (up) up.addEventListener('click', function () { SB.setStrumSize(SB.state.strumSize + 0.1); });
+        var pin = SB.$('strumPinBtn');
+        if (pin) pin.addEventListener('click', SB.toggleStrumPin);
+
+        /* The strip above changes height without anything here firing: its
+         * chord diagrams are images that finish loading after the row is first
+         * positioned (measured 21px, then 121px once they arrive), it reflows
+         * on resize, and it rewraps when the song or transpose changes. Watch
+         * it rather than guessing when to re-measure, so a pinned row cannot
+         * end up overlapping the strip or floating below it. */
+        var strip = SB.$('chordStrip');
+        if (strip && window.ResizeObserver) {
+            new ResizeObserver(updateStickyOffset).observe(strip);
+        }
+        window.addEventListener('resize', updateStickyOffset);
+
         SB.applyStrumNotation();
+        SB.applyStrumSettings();
     }
 
 })(window.SB = window.SB || {});

@@ -1116,6 +1116,89 @@ async function main() {
     ok('toggled back to arrows', sState().notation === 'arrows', sState().notation);
     win().localStorage.removeItem('songbook:strumNotation');
 
+    // ---- strum row: size + pin, mirroring the chord diagram controls ----
+    win().localStorage.removeItem('songbook:strumSize');
+    win().localStorage.removeItem('songbook:strumPin');
+    win().location.hash = '#/polska-gurom/arahja';
+    await wait(300);
+
+    const slotH = () => parseFloat(win().getComputedStyle(sRow().querySelector('.strum-slot')).height);
+    const rowTop = () => parseFloat(win().getComputedStyle(sRow()).top);
+    const stripH = () => $('chordStrip').getBoundingClientRect().height;
+
+    const baseH = slotH();
+    ok('strum size starts at 100%', $('strumSizeValue').textContent === '100%',
+        $('strumSizeValue').textContent);
+
+    $('strumSizeUp').click();
+    await wait(50);
+    ok('bigger grows the slots', slotH() > baseH, baseH + ' -> ' + slotH());
+    ok('size label follows', $('strumSizeValue').textContent === '110%',
+        $('strumSizeValue').textContent);
+    ok('size persisted', win().localStorage.getItem('songbook:strumSize') === '1.1',
+        win().localStorage.getItem('songbook:strumSize'));
+
+    // clamped to the same 0.6-1.5 range as the chord diagrams
+    for (let i = 0; i < 12; i++) $('strumSizeUp').click();
+    await wait(50);
+    ok('size clamps at 150%', win().songbookTest.getStrumSize() === 1.5,
+        win().songbookTest.getStrumSize());
+    for (let i = 0; i < 20; i++) $('strumSizeDown').click();
+    await wait(50);
+    ok('size clamps at 60%', win().songbookTest.getStrumSize() === 0.6,
+        win().songbookTest.getStrumSize());
+    win().songbookTest.setStrumSize(1);
+    await wait(50);
+
+    // pinned by default and stacked UNDER the chord strip, not over it
+    ok('row is sticky by default', win().getComputedStyle(sRow()).position === 'sticky',
+        win().getComputedStyle(sRow()).position);
+    ok('pin button pressed by default', $('strumPinBtn').getAttribute('aria-pressed') === 'true');
+    ok('row sits below the pinned chord strip',
+        Math.abs(rowTop() - (56 + Math.round(stripH()))) <= 1,
+        'top=' + rowTop() + ' strip=' + Math.round(stripH()));
+
+    // the offset tracks the strip: bigger diagrams push the row down
+    const topBefore = rowTop();
+    $('chordSizeUp').click();
+    await wait(120);
+    ok('row follows the strip when diagrams grow', rowTop() > topBefore,
+        topBefore + ' -> ' + rowTop());
+    $('chordSizeDown').click();
+    await wait(120);
+
+    // unpinning the strip removes it from the sticky stack, so the row rises
+    $('chordPinBtn').click();
+    await wait(120);
+    ok('row rises when the chord strip is unpinned', Math.abs(rowTop() - 56) <= 1, rowTop());
+    $('chordPinBtn').click();
+    await wait(120);
+
+    // unpinning the row itself drops it out of the sticky stack
+    $('strumPinBtn').click();
+    await wait(50);
+    ok('unpinned row is static', win().getComputedStyle(sRow()).position === 'static',
+        win().getComputedStyle(sRow()).position);
+    ok('pin button reflects unpinned', $('strumPinBtn').getAttribute('aria-pressed') === 'false' &&
+        $('strumPinBtn').textContent === '\ud83d\udccd', $('strumPinBtn').textContent);
+    ok('pin persisted', win().localStorage.getItem('songbook:strumPin') === '0',
+        win().localStorage.getItem('songbook:strumPin'));
+
+    // both are global preferences: they survive a song change, like chordSize
+    win().location.hash = '#/polska-gurom/autobiografia';
+    await wait(300);
+    ok('pin preference carries across songs', win().songbookTest.getStrumPin() === false,
+        String(win().songbookTest.getStrumPin()));
+    ok('row still static on the next song', win().getComputedStyle(sRow()).position === 'static',
+        win().getComputedStyle(sRow()).position);
+
+    $('strumPinBtn').click();
+    await wait(50);
+    ok('repinned', win().getComputedStyle(sRow()).position === 'sticky',
+        win().getComputedStyle(sRow()).position);
+    win().localStorage.removeItem('songbook:strumSize');
+    win().localStorage.removeItem('songbook:strumPin');
+
     win().localStorage.removeItem('songbook:strum:polska-gurom\u0000arahja');
     win().localStorage.removeItem('songbook:bpm:polska-gurom\u0000arahja');
 

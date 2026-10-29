@@ -129,6 +129,10 @@ attached to `SB`.
   6/8, 2/4 — several per metre). A toggle switches the row between arrows and
   `D`/`U` letters (remembered across songs). It defaults to the song's
   documented `strum` where one exists; a manual choice is remembered per song.
+  Sized (60–150%) and pinned like the chord diagrams, so it stays on screen
+  while the lyrics scroll; pinned it stacks directly under the chord strip,
+  tracking that strip's height as the diagrams resize or it is itself
+  unpinned.
   While the metronome runs the current slot is highlighted in lockstep — the
   highlight reads the metronome's own audio clock, not a second timer, so the
   two never diverge — and a one-bar count-in leads in, because a pattern you

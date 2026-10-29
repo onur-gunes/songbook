@@ -138,7 +138,13 @@
         strumPatterns: SB.strumPatterns,
         strumPatternsFor: SB.strumPatternsFor,
         setStrum: SB.setStrum,
-        toggleStrumNotation: SB.toggleStrumNotation
+        toggleStrumNotation: SB.toggleStrumNotation,
+        // Read through functions: these are numbers/booleans, so unlike the
+        // strum object above they cannot be exported by reference.
+        getStrumSize: function () { return SB.state.strumSize; },
+        getStrumPin: function () { return SB.state.strumPin; },
+        setStrumSize: SB.setStrumSize,
+        toggleStrumPin: SB.toggleStrumPin
     };
 
 })(window.SB = window.SB || {});
