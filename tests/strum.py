@@ -62,6 +62,46 @@ class StrumLibraryTests(unittest.TestCase):
                              'id %r: %d slots, expected %d' %
                              (p['id'], len(p['slots']), expected))
 
+    def test_bar_starts_on_a_downstroke(self):
+        """Slot 0 is always a down-stroke.
+
+        Slot 0 is beat 1, the bar's strongest accent and where the count-in
+        hands over. Starting a bar on an up-stroke or a rest is never what a
+        generic pattern wants.
+        """
+        for p in chordpro.STRUM_PATTERNS:
+            self.assertEqual(p['slots'][0], 'D',
+                             'id %r starts on %r' % (p['id'], p['slots'][0]))
+
+    def test_continuous_patterns_strum_down_on_the_beat(self):
+        """In a rest-free pattern every felt beat is a down-stroke.
+
+        With no rests the hand never leaves the strings, so the stroke
+        direction is fixed by the subdivision: beats are downs, off-beats are
+        ups. Any other arrangement means the hand is travelling upward as the
+        metronome accents, which visually fights the click.
+
+        This is deliberately limited to rest-free patterns. Patterns WITH
+        rests are a different case: the island strum (dduudu-4-4,
+        'D-DU-UDU') intentionally leaves beat 3 silent, and that syncopation
+        is the whole point of it.
+
+        Caught eighths-6-8 shipping as 'DUDUDU', which under 6/8's two
+        dotted-quarter pulses put an up-stroke on pulse 2; 'DUDDUD' restarts
+        the alternation on each pulse.
+        """
+        for p in chordpro.STRUM_PATTERNS:
+            if '-' in p['slots']:
+                continue
+            for beat in range(BEATS_PER_BAR[p['time']]):
+                slot = beat * p['subdiv']
+                self.assertEqual(
+                    p['slots'][slot], 'D',
+                    "id %r (%s, slots %r): felt beat %d is slot %d = %r, "
+                    "expected a down-stroke" %
+                    (p['id'], p['time'], p['slots'], beat + 1, slot,
+                     p['slots'][slot]))
+
     def test_parse_strum_allowlist(self):
         self.assertEqual(chordpro.parse_strum('downs-4-4'), 'downs-4-4')
         self.assertIsNone(chordpro.parse_strum('not-a-pattern'))
