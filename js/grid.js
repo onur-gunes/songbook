@@ -421,7 +421,25 @@
         return s;
     }
 
-    function buildBarSpec(bar, song, ctx, changeState) {
+    /* The lyric phrase that starts at each change, measured in the lyric face.
+     * A change can carry one phrase per sheet line (a chord held across a line
+     * break belongs to both lines), so keep the widest. The bar widths are
+     * then derived from these, which lets the same layout work for songs with
+     * long and short lines instead of a fixed column width. */
+    function phraseWidths(matched, measurer) {
+        var byChange = {};
+        if (!matched) return byChange;
+        matched.changes.forEach(function (change, ci) {
+            change.parts.forEach(function (part) {
+                var text = String(part.text || '').replace(/\s+/g, ' ').trim();
+                if (!text) return;
+                byChange[ci] = Math.max(byChange[ci] || 0, measurer.width(text));
+            });
+        });
+        return byChange;
+    }
+
+    function buildBarSpec(bar, song, ctx, changeState, lyricW) {
         var segments = bar.beats.map(function (seg) {
             var tname = SB.transposeChartName(seg.chord, SB.state.transpose);
             var label = gridLabel(song, seg.chord);
@@ -438,12 +456,16 @@
                 changeState.prev = chordKey;
                 changeIndex = ++changeState.index;
             }
+            // Reserve at least the phrase's width so the next change (and its
+            // lyric) starts after the words, not in the middle of them.
+            var phraseW = changeIndex >= 0 && lyricW ? lyricW[changeIndex] || 0 : 0;
             return {
                 chord: seg.chord,
                 tname: tname,
                 label: label,
                 beats: seg.beats,
-                width: Math.max(seg.beats * ctx.beatW, contentW + ctx.gap) + CHANGE_PAD,
+                width: Math.max(seg.beats * ctx.beatW, contentW + ctx.gap,
+                    phraseW) + CHANGE_PAD,
                 contentW: contentW,
                 voicing: voicing,
                 changeIndex: changeIndex
@@ -713,9 +735,10 @@
         song.grid.forEach(function (block) {
             var matched = matchSection(song, block);
             if (matched) lyricSections.push(matched.section.name);
+            var lyricW = phraseWidths(matched, measurer);
             var changeState = { prev: null, index: -1 };
             var specs = block.bars.map(function (bar) {
-                return buildBarSpec(bar, song, ctx, changeState);
+                return buildBarSpec(bar, song, ctx, changeState, lyricW);
             });
             // Repeat signs are flex items too, so reserve their width before
             // packing or a repeated block overflows its system by 24px.

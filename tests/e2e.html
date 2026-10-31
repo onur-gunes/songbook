@@ -1306,6 +1306,16 @@ async function main() {
                  gFirstChange.getBoundingClientRect().left) < 1,
         gFirstChange && gridLyrics()[0] &&
         (gridLyrics()[0].getBoundingClientRect().left - gFirstChange.getBoundingClientRect().left).toFixed(1));
+    // The column is sized from the lyric phrase, not only the diagram: this
+    // line is longer than a plain beat column, so its bar must grow to hold it.
+    const gFirstPhrase = doc().querySelector('.sheet.chords-grid .grid-phrase');
+    ok('grid widens a chord column to fit its lyric phrase',
+        !!gFirstBar && !!gFirstPhrase &&
+        gFirstBar.getBoundingClientRect().width >=
+            gFirstPhrase.getBoundingClientRect().width + 9,
+        gFirstBar && gFirstPhrase &&
+        (gFirstBar.getBoundingClientRect().width -
+         gFirstPhrase.getBoundingClientRect().width).toFixed(1));
 
     // The cursor is a pure function of the metronome's beat position: one bar
     // of count-in, then one index per beat, then null past the chart.
