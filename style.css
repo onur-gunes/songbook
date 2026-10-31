@@ -1396,8 +1396,10 @@ main {
     background: var(--accent);
 }
 
-/* Lyric phrases sit in the system's bottom padding, each one starting at the
-   x of its chord change (see buildLyricLayer in js/grid.js). */
+/* Lyric rows sit in the system's bottom padding, one row per sheet line.
+   The row starts at the x of the line's first chord (see buildLyricLayer in
+   js/grid.js), but flows as normal text so a phrase never becomes a narrow
+   column. */
 .sheet.chords-grid .grid-lyrics {
     position: absolute;
     left: 0;
@@ -1406,8 +1408,7 @@ main {
 }
 
 .sheet.chords-grid .grid-lyric {
-    position: absolute;
-    top: 0;
+    display: block;
     box-sizing: border-box;
     padding: 5px 6px 6px 0;
     color: var(--text);

@@ -1409,8 +1409,10 @@ main {
     background: var(--accent);
 }
 
-/* Lyric phrases sit in the system's bottom padding, each one starting at the
-   x of its chord change (see buildLyricLayer in js/grid.js). */
+/* Lyric rows sit in the system's bottom padding, one row per sheet line.
+   The row starts at the x of the line's first chord (see buildLyricLayer in
+   js/grid.js), but flows as normal text so a phrase never becomes a narrow
+   column. */
 .sheet.chords-grid .grid-lyrics {
     position: absolute;
     left: 0;
@@ -1419,8 +1421,7 @@ main {
 }
 
 .sheet.chords-grid .grid-lyric {
-    position: absolute;
-    top: 0;
+    display: block;
     box-sizing: border-box;
     padding: 5px 6px 6px 0;
     color: var(--text);
@@ -5542,38 +5543,61 @@ body.tuner-open { overflow: hidden; }
         return sections;
     }
 
-    function lyricText(line, from, to) {
-        var text = '';
-        for (var i = from; i < to; i++) {
-            var kind = line[i][0];
-            // Chords, comments and preformatted tabs are not lyrics.
-            if (kind === 'c' || kind === 'y' || kind === 'p') continue;
-            text += line[i][1];
-        }
-        return text.replace(/\s+/g, ' ').trim();
+    /* Chords, comments and preformatted tabs are not lyrics. */
+    function isLyricKind(kind) {
+        return kind !== 'c' && kind !== 'y' && kind !== 'p';
+    }
+
+    /* A line's chord changes, each with the raw lyric text that follows it
+     * until the next change. Text before the first token is the line's
+     * pickup, so it belongs to the line's first change. */
+    function lineChanges(line) {
+        var chordAt = [];
+        line.forEach(function (seg, i) { if (seg[0] === 'c') chordAt.push(i); });
+        var changes = [];
+        chordAt.forEach(function (ci, k) {
+            var chord = tokenChord(line[ci][1]);
+            if (!chord) return;
+            var start = k === 0 ? 0 : ci;
+            var end = k + 1 < chordAt.length ? chordAt[k + 1] : line.length;
+            var text = '';
+            for (var i = start; i < end; i++) {
+                if (isLyricKind(line[i][0])) text += line[i][1];
+            }
+            var prev = changes[changes.length - 1];
+            // A chord repeated inside one line is the same chord still
+            // ringing, so its text stays on the same change.
+            if (prev && prev.chord === chord) {
+                prev.text += text;
+                return;
+            }
+            changes.push({ chord: chord, text: text });
+        });
+        return changes;
+    }
+
+    function sectionLines(section) {
+        var lines = [];
+        section.lines.forEach(function (line) {
+            var changes = lineChanges(line);
+            if (changes.length) lines.push({ changes: changes });
+        });
+        return lines;
     }
 
     /* Collapse the sheet's chord tokens into changes (a repeated token is the
-     * same chord still ringing), and attach to each change the lyric text that
-     * follows it until the next change. Text before the first token on a line
-     * is that line's pickup, so it belongs to the line's first change. */
-    function sectionChanges(section) {
+     * same chord still ringing). A change keeps every line piece that carries
+     * it, because a chord held across a line break belongs to both lines. */
+    function sectionChanges(lines) {
         var changes = [];
-        section.lines.forEach(function (line) {
-            var chordAt = [];
-            line.forEach(function (seg, i) { if (seg[0] === 'c') chordAt.push(i); });
-            chordAt.forEach(function (ci, k) {
-                var chord = tokenChord(line[ci][1]);
-                if (!chord) return;
-                var start = k === 0 ? 0 : ci;
-                var end = k + 1 < chordAt.length ? chordAt[k + 1] : line.length;
-                var phrase = lyricText(line, start, end);
+        lines.forEach(function (line, li) {
+            line.changes.forEach(function (ch) {
                 var prev = changes[changes.length - 1];
-                if (prev && prev.chord === chord) {
-                    if (phrase) prev.phrase = (prev.phrase ? prev.phrase + ' ' : '') + phrase;
+                if (prev && prev.chord === ch.chord) {
+                    prev.parts.push({ line: li, text: ch.text });
                     return;
                 }
-                changes.push({ chord: chord, phrase: phrase });
+                changes.push({ chord: ch.chord, parts: [{ line: li, text: ch.text }] });
             });
         });
         return changes;
@@ -5607,7 +5631,8 @@ body.tuner-open { overflow: hidden; }
         if (grid.length < 2) return null;
         var best = null;
         sheetSections(song).forEach(function (section) {
-            var changes = sectionChanges(section);
+            var lines = sectionLines(section);
+            var changes = sectionChanges(lines);
             if (changes.length < grid.length) return;
             for (var i = 0; i < grid.length; i++) {
                 if (changes[i].chord !== grid[i]) return;
@@ -5618,7 +5643,10 @@ body.tuner-open { overflow: hidden; }
             // ties between sections that share the same changes.
             if (!best || (exact && !best.exact) ||
                 (exact === best.exact && label && !best.label)) {
-                best = { section: section, changes: changes, exact: exact, label: label };
+                best = {
+                    section: section, changes: changes,
+                    exact: exact, label: label
+                };
             }
         });
         return best;
@@ -5897,11 +5925,14 @@ body.tuner-open { overflow: hidden; }
         return bar;
     }
 
-    /* One absolutely-positioned lyric line under a system. Each phrase starts
-     * at the exact x of its chord change and runs to the next change (or the
-     * end of the system), so the words stay with the bar they are sung over
-     * even when the phrase spans a held chord. */
-    function buildLyricLayer(system, bars, baseX, hasRepeatEnd, matched) {
+    /* Lyrics under a system are laid out one row per sheet line, not one
+     * column per chord change. Anchoring every phrase to the x of its change
+     * turned each bar into a narrow cell: words wrapped mid-phrase and the
+     * neighbouring phrases interleaved ("voice in mornin'" / "the hour she
+     * calls me"). A row keeps the words together and still starts under the
+     * line's first chord when there is room for it. A line that runs past the
+     * end of the system continues as a new row under the next one. */
+    function buildLyricLayer(system, bars, baseX, hasRepeatEnd, matched, em, avail) {
         if (!matched) return;
         var positions = [], offset = baseX;
         var repeatStart = system.classList.contains('has-repeat-start');
@@ -5918,31 +5949,52 @@ body.tuner-open { overflow: hidden; }
         });
         if (!positions.length) return;
 
-        var layer = SB.el('div', 'grid-lyrics');
-        layer.style.width = (offset + (hasRepeatEnd ? REPEAT_W : 0)) + 'px';
-        var any = false;
-        positions.forEach(function (pos, k) {
+        // Group this system's phrases by sheet line. The raw pieces are
+        // joined without added spaces, so a word split across a chord change
+        // ("West Vir" + "ginia") stays one word.
+        var groups = [], byLine = {};
+        positions.forEach(function (pos) {
             var change = matched.changes[pos.index];
-            if (!change || !change.phrase) return;
-            var nextX = k + 1 < positions.length ? positions[k + 1].x : offset;
-            var span = SB.el('span', 'grid-lyric', change.phrase);
-            span.style.left = pos.x + 'px';
-            span.style.width = Math.max(24, nextX - pos.x) + 'px';
+            if (!change) return;
+            change.parts.forEach(function (part) {
+                var g = byLine[part.line];
+                if (!g) {
+                    g = byLine[part.line] = { x: pos.x, text: '' };
+                    groups.push(g);
+                }
+                g.text += part.text;
+            });
+        });
+
+        // Rows may run past the last bar into the empty end of the system:
+        // the chart's width is the page, not the bars that happen to fit.
+        var layerW = Math.max(offset + (hasRepeatEnd ? REPEAT_W : 0), avail);
+        var layer = SB.el('div', 'grid-lyrics');
+        layer.style.width = layerW + 'px';
+        var any = false;
+        groups.forEach(function (g) {
+            var text = g.text.replace(/\s+/g, ' ').trim();
+            if (!text) return;
+            // A row that starts late in the system would be squeezed back
+            // into a column; give it the full width instead.
+            var x = g.x;
+            if (layerW - x < em * 18) x = 0;
+            var span = SB.el('span', 'grid-lyric', text);
+            span.style.marginLeft = x + 'px';
+            span.style.width = (layerW - x) + 'px';
             layer.appendChild(span);
             any = true;
         });
         if (any) system.appendChild(layer);
     }
 
-    /* Wrapped phrase height depends on the width of the gap to the next
-     * change, so it has to be measured after the grid is in the document.
-     * The layer lives in the system's bottom padding. */
+    /* The lyric layer is a stack of rows, so its height is the height of the
+     * stack, not the tallest row. The layer lives in the system's bottom
+     * padding. */
     function sizeLyricLayers(wrap, em) {
         Array.prototype.forEach.call(wrap.querySelectorAll('.grid-lyrics'), function (layer) {
-            var h = 0;
-            Array.prototype.forEach.call(layer.querySelectorAll('.grid-lyric'), function (el) {
-                h = Math.max(h, el.offsetHeight);
-            });
+            layer.style.height = '';
+            var h = layer.offsetHeight;
             if (!h) h = Math.ceil(em * 1.3);
             layer.style.height = h + 'px';
             if (layer.parentNode) layer.parentNode.style.paddingBottom = h + 'px';
@@ -6009,7 +6061,7 @@ body.tuner-open { overflow: hidden; }
                     system.classList.add('has-repeat-end');
                     system.appendChild(repeatSign('end', ctx.barH));
                 }
-                buildLyricLayer(system, bars, baseX, block.repeat && last, matched);
+                buildLyricLayer(system, bars, baseX, block.repeat && last, matched, em, avail);
                 section.appendChild(system);
             });
             frag.appendChild(section);

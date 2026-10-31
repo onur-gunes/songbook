@@ -396,12 +396,15 @@ grid is instead dropped whole, so the song still renders. `js/grid.js` draws the
 field as the play-along chart (the Grid mode in the sheet controls); songs
 without a grid fall back to the normal sheet.
 
-The chart also anchors lyric phrases at chord changes. It walks the block's
-change sequence against the sheet's chord tokens and, when a section starts
-with the same changes, places each phrase under the bar where its chord
-changes. A looping grid maps one iteration (the repeat signs mark the rest); a
-grid that is a different arrangement, or has no matching section, shows the
-chart without lyrics rather than guessing.
+The chart also shows the section's lyrics. It walks the block's change sequence
+against the sheet's chord tokens and, when a section starts with the same
+changes, prints each sheet line as one row under the system that holds its
+first chord. A row starts under that chord when there is room, but the words
+flow as normal text: anchoring every phrase to its own chord turned each bar
+into a narrow column and wrapped phrases into each other. A looping grid maps
+one iteration (the repeat signs mark the rest); a grid that is a different
+arrangement, or has no matching section, shows the chart without lyrics rather
+than guessing.
 
 Run the parser/builder tests with `python3 tests/chordpro.py`, the strum
 library mirror guard with `python3 tests/strum.py`, and the dev/prod
