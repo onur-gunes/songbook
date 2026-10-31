@@ -30,7 +30,12 @@ async function until(fn, timeout = 8000) {
 }
 
 async function main() {
-    await new Promise(r => frame.addEventListener('load', r));
+    // The iframe may already be loaded when this runs (a warm cache can beat
+    // the script), so do not wait for a load event that has already fired.
+    await new Promise(r => {
+        if (frame.contentDocument && frame.contentDocument.readyState === 'complete') r();
+        else frame.addEventListener('load', r);
+    });
     const ready = await until(() => rows().length === 198);
     if (!ready) { ok('app booted (198 rows)', false, 'rows=' + rows().length); throw new Error('app did not boot'); }
 
@@ -683,6 +688,18 @@ async function main() {
     const svgG = win().songbookTest.ChordKit.diagramSVG('guitar', win().songbookTest.ChordKit.voicings('Am', 'guitar')[0]);
     ok('ukulele engine draws 4 strings', (svgU.match(/class="st"/g) || []).length === 4, (svgU.match(/class="st"/g) || []).length);
     ok('guitar engine draws 6 strings', (svgG.match(/class="st"/g) || []).length === 6, (svgG.match(/class="st"/g) || []).length);
+    // Every shape uses the same four fret rows. A chord that needed a fifth
+    // row used to get a taller SVG, so object-fit drew it smaller and denser
+    // than its neighbours.
+    const shapeNames = ['G', 'Em', 'D', 'C', 'F', 'Am', 'A', 'E', 'Bm', 'Bb'];
+    const rowCounts = inst => shapeNames.map(n => {
+        const v = win().songbookTest.ChordKit.voicings(n, inst)[0];
+        return (win().songbookTest.ChordKit.diagramSVG(inst, v).match(/class="fw"/g) || []).length;
+    });
+    const ukeRows = rowCounts('ukulele');
+    const guitRows = rowCounts('guitar');
+    ok('every ukulele diagram draws four fret rows', ukeRows.every(n => n === 4), ukeRows.join(','));
+    ok('every guitar diagram draws four fret rows', guitRows.every(n => n === 4), guitRows.join(','));
     doc().querySelector('.instrument-btn[data-instrument="ukulele"]').click();
     await wait(150);
     ok('instrument back to ukulele', win().songbookTest.getInstrument() === 'ukulele');
@@ -1267,6 +1284,25 @@ async function main() {
     ok('grid renders one bar per grid bar', gBars.length === 8, gBars.length);
     ok('grid renders one slash per beat', gBeats.length === 32, gBeats.length);
     ok('grid renders a diagram above each chord change', gDiagrams.length === 8, gDiagrams.length);
+    // A chord diagram must look like the others: same grid lines and same
+    // rendered box, not a taller or smaller shape for one chord.
+    const gShape = img => {
+        const src = img.getAttribute('src') || '';
+        const svg = decodeURIComponent(src.split(',')[1] || '');
+        return (svg.match(/class="st"/g) || []).length + 's/' +
+            (svg.match(/class="fw"/g) || []).length + 'f';
+    };
+    const gShapes = [].map.call(gDiagrams, gShape);
+    const gBoxes = [].map.call(gDiagrams, img => {
+        const r = img.getBoundingClientRect();
+        return Math.round(r.width) + 'x' + Math.round(r.height);
+    });
+    ok('every grid diagram has the same string and fret lines',
+        gShapes.length > 0 && gShapes.every(s => s === gShapes[0]),
+        [...new Set(gShapes)].join(' '));
+    ok('every grid diagram renders at one size',
+        gBoxes.length > 0 && gBoxes.every(b => b === gBoxes[0]),
+        [...new Set(gBoxes)].join(' '));
     ok('grid draws bar lines',
         win().getComputedStyle(gBars[0]).borderLeftWidth === '1px',
         win().getComputedStyle(gBars[0]).borderLeftWidth);
@@ -1485,6 +1521,18 @@ async function main() {
     ok('complete song marks the fading final chorus with repeat signs',
         !!doc().querySelector('.sheet.chords-grid .grid-repeat.start') &&
         !!doc().querySelector('.sheet.chords-grid .grid-repeat.end'));
+    // A change inside a bar gets the drop line; one on a bar line relies on
+    // the bar line, so no change has two vertical lines side by side.
+    const guideChanges = [].slice.call(doc().querySelectorAll('.sheet.chords-grid .grid-change'));
+    const guideMid = guideChanges.filter(ch => ch.classList.contains('grid-change-mid'));
+    ok('a change inside a bar carries a drop line', guideMid.length > 0,
+        guideMid.length + ' of ' + guideChanges.length);
+    const guideDouble = guideChanges.filter(ch => {
+        const atStart = parseFloat(ch.style.left) <= 6;
+        return atStart === ch.classList.contains('grid-change-mid');
+    });
+    ok('a change is not marked by both a bar line and a drop line',
+        guideDouble.length === 0, guideDouble.length + ' doubled');
     // One row per sheet line: a line is kept whole and drawn under the system
     // that holds it, rather than split into fragments at a system break.
     ok('complete song lays out one lyric row per sheet line',

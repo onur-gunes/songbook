@@ -406,9 +406,12 @@ falls back to one continuous row beginning at the system's left edge rather
 than breaking the alignment badly. Bar widths come from the lyric phrases
 themselves: each change reserves at least the width of the words that start
 under it (with the diagram as a floor), so a long line gets a wider column
-instead of running into the next change. Every change carries a faint drop line
-through the beat row, so a second chord inside a bar is as visible as one at a
-bar line. A looping grid maps one iteration (the repeat signs mark the rest); a
+instead of running into the next change. Every diagram uses the same four fret
+rows and the same box, so a chord that needs an extra row is not drawn smaller
+or denser than its neighbours. A change inside a bar carries a faint drop line
+through the beat row; a change on a bar line uses the bar line itself, so no
+change is marked twice. A looping grid maps one iteration (the repeat signs mark
+the rest); a
 grid that is a different arrangement, or has no matching section, shows the
 chart without lyrics rather than guessing.
 

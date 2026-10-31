@@ -1355,10 +1355,10 @@ main {
     gap: 2px;
 }
 
-/* A faint drop line from each chord change through the beat row. It marks the
-   exact x where the change happens, including a second chord inside a bar,
-   which a bar line alone cannot show. */
-.sheet.chords-grid .grid-change::after {
+/* A faint drop line through the beat row for a change inside a bar, which the
+   bar lines cannot show. Changes on a bar line use the bar line itself, so a
+   change is never marked twice. */
+.sheet.chords-grid .grid-change-mid::after {
     content: '';
     position: absolute;
     left: 0;
@@ -3009,6 +3009,12 @@ body.tuner-open { overflow: hidden; }
 
     function strX(i, gap, padX) { return padX + i * gap; }
 
+    /* Every diagram shows the same four fret rows. The old height depended on
+     * the chord (an open Em needed a fifth row), so the SVG had a different
+     * aspect ratio per chord and object-fit scaled them to different sizes.
+     * A constant grid keeps the string and fret lines aligned and equal. */
+    var FRET_ROWS = 4;
+
     function diagramSVG(instrumentId, frets) {
         var inst = instrumentOf(instrumentId);
         var num = frets.length || inst.tuning.length;
@@ -3017,32 +3023,26 @@ body.tuner-open { overflow: hidden; }
         var gap = (W - 2 * padX) / (num - 1);
         var nz = frets.filter(function (f) { return f > 0; });
         var minF = nz.length ? Math.min.apply(null, nz) : 0;
-        var hasMark = frets.some(function (v) { return v <= 0; });
         var maxF = Math.max.apply(null, frets.filter(function (f) { return f > 0; })) || 0;
-        var lo = maxF <= 4 ? 0 : Math.max(minF - 1, 0);
+        var lo = maxF <= FRET_ROWS ? 0 : Math.max(minF - 1, 0);
         var showNut = lo === 0;
-        var hi = Math.max(maxF + 1, lo + 4);
+        // Keep four rows for every ordinary shape. A chord spanning more than
+        // four frets is rare; it expands rather than losing a dot.
+        var hi = Math.max(lo + FRET_ROWS, maxF);
         var rows = hi - lo;
-        var top = hasMark ? 26 : 16;
+        // Always reserve the row above the nut for open/muted marks, even
+        // when this chord has none, so all diagrams share one box.
+        var top = 26;
         var markY = top - 11;
         var H = top + rows * fg + 10;
         var yWire = function (f) { return top + (f - lo) * fg; };
         var yDot = function (f) { return top + (f - lo) * fg - fg / 2; };
         var xStr = function (i) { return strX(i, gap, padX); };
-        var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">';
-        var strTop = yWire(lo);
-        for (var i = 0; i < num; i++) {
-            s += '<line class="st" x1="' + xStr(i) + '" y1="' + strTop + '" x2="' + xStr(i) + '" y2="' + yWire(hi) + '"/>';
-        }
-        for (var f = showNut ? 1 : lo; f <= hi; f++) {
-            s += '<line class="fw" x1="' + (xStr(0) - 6) + '" y1="' + yWire(f) + '" x2="' + (xStr(num - 1) + 6) + '" y2="' + yWire(f) + '"/>';
-        }
-        if (showNut) {
-            s += '<line class="nut" x1="' + (xStr(0) - 6) + '" y1="' + yWire(0) + '" x2="' + (xStr(num - 1) + 6) + '" y2="' + yWire(0) + '"/>';
-        } else {
-            s += '<text class="pos" x="9" y="' + (yWire(lo) + fg / 2) + '">' + (lo + 1) + '</text>';
-        }
+        // Work out the barre before drawing so it can sit behind the grid.
+        // A barre drawn on top hid the fret line under it, which made those
+        // chords look like they had fewer lines than the others.
         var covered = {};
+        var barMarkup = '';
         (function () {
             var fretted = nz;
             if (!fretted.length) return;
@@ -3057,9 +3057,23 @@ body.tuner-open { overflow: hidden; }
             if (!okBar) return;
             if (idxs.length < 3 && (hi2 - lo2 + 1) === idxs.length) return;
             var x1 = xStr(lo2), x2 = xStr(hi2);
-            s += '<rect class="bar" x="' + (x1 - 7) + '" y="' + (yDot(mf) - 7) + '" width="' + (x2 - x1 + 14) + '" height="14" rx="7"/>';
+            barMarkup = '<rect class="bar" x="' + (x1 - 7) + '" y="' + (yDot(mf) - 7) + '" width="' + (x2 - x1 + 14) + '" height="14" rx="7"/>';
             idxs.forEach(function (ix) { covered[ix] = 1; });
         })();
+        var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">';
+        s += barMarkup;
+        var strTop = yWire(lo);
+        for (var i = 0; i < num; i++) {
+            s += '<line class="st" x1="' + xStr(i) + '" y1="' + strTop + '" x2="' + xStr(i) + '" y2="' + yWire(hi) + '"/>';
+        }
+        for (var f = showNut ? 1 : lo; f <= hi; f++) {
+            s += '<line class="fw" x1="' + (xStr(0) - 6) + '" y1="' + yWire(f) + '" x2="' + (xStr(num - 1) + 6) + '" y2="' + yWire(f) + '"/>';
+        }
+        if (showNut) {
+            s += '<line class="nut" x1="' + (xStr(0) - 6) + '" y1="' + yWire(0) + '" x2="' + (xStr(num - 1) + 6) + '" y2="' + yWire(0) + '"/>';
+        } else {
+            s += '<text class="pos" x="9" y="' + (yWire(lo) + fg / 2) + '">' + (lo + 1) + '</text>';
+        }
         frets.forEach(function (fr, idx) {
             if (covered[idx]) return;
             if (fr === 0) s += '<circle class="oc" cx="' + xStr(idx) + '" cy="' + markY + '" r="4.5"/>';
@@ -5495,9 +5509,11 @@ body.tuner-open { overflow: hidden; }
      * js/sheet.js). Nothing here is guessed from character counts.
      */
     var BEAT_MIN = 30;          // px, before the sheet's text-size scale
-    var DIAGRAM_H = 92;         // px at --chord-size: 1, same as the strip
-    var DIAGRAM_W_UKE = 88;     // reserved box, not the SVG's natural width
-    var DIAGRAM_W_GUITAR = 126;
+    // The reserved box matches the SVG's 104x120 (uke) / 160x120 (guitar)
+    // aspect, so every diagram fills it and no chord is scaled smaller.
+    var DIAGRAM_H = 100;        // px at --chord-size: 1, same as the strip
+    var DIAGRAM_W_UKE = 87;     // reserved box, not the SVG's natural width
+    var DIAGRAM_W_GUITAR = 133;
     var BAR_PAD = 6;            // px inside each bar line
     var CHANGE_PAD = 10;        // extra space after a chord change
     var REPEAT_W = 12;
@@ -5973,7 +5989,11 @@ body.tuner-open { overflow: hidden; }
         bar.style.height = ctx.barH + 'px';
 
         spec.segments.forEach(function (seg, i) {
-            var change = SB.el('div', 'grid-change');
+            // A change at the start of a bar is already marked by the bar line
+            // (or the repeat sign). Only a change inside a bar needs the extra
+            // drop line, otherwise every bar-start chord got two lines 6px
+            // apart while a mid-bar change got one.
+            var change = SB.el('div', 'grid-change' + (i > 0 ? ' grid-change-mid' : ''));
             change.style.left = spec.changeXs[i] + 'px';
             change.style.width = seg.contentW + 'px';
             change.style.height = (ctx.diagram.h + ctx.labelH) + 'px';

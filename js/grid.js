@@ -17,9 +17,11 @@
      * js/sheet.js). Nothing here is guessed from character counts.
      */
     var BEAT_MIN = 30;          // px, before the sheet's text-size scale
-    var DIAGRAM_H = 92;         // px at --chord-size: 1, same as the strip
-    var DIAGRAM_W_UKE = 88;     // reserved box, not the SVG's natural width
-    var DIAGRAM_W_GUITAR = 126;
+    // The reserved box matches the SVG's 104x120 (uke) / 160x120 (guitar)
+    // aspect, so every diagram fills it and no chord is scaled smaller.
+    var DIAGRAM_H = 100;        // px at --chord-size: 1, same as the strip
+    var DIAGRAM_W_UKE = 87;     // reserved box, not the SVG's natural width
+    var DIAGRAM_W_GUITAR = 133;
     var BAR_PAD = 6;            // px inside each bar line
     var CHANGE_PAD = 10;        // extra space after a chord change
     var REPEAT_W = 12;
@@ -495,7 +497,11 @@
         bar.style.height = ctx.barH + 'px';
 
         spec.segments.forEach(function (seg, i) {
-            var change = SB.el('div', 'grid-change');
+            // A change at the start of a bar is already marked by the bar line
+            // (or the repeat sign). Only a change inside a bar needs the extra
+            // drop line, otherwise every bar-start chord got two lines 6px
+            // apart while a mid-bar change got one.
+            var change = SB.el('div', 'grid-change' + (i > 0 ? ' grid-change-mid' : ''));
             change.style.left = spec.changeXs[i] + 'px';
             change.style.width = seg.contentW + 'px';
             change.style.height = (ctx.diagram.h + ctx.labelH) + 'px';
