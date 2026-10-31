@@ -6,14 +6,27 @@
 
 {start_of_grid: Verse 1}
 | G | Em | C | D |
+| G | Em | C | D |
 {end_of_grid}
 
 {start_of_grid: Chorus}
-| G | Em | C |
+| G | Em | C | D |
+| G | Em | C | D |
 {end_of_grid}
 
-{start_of_grid: Bridge}
-| Am | C | D | G |
+{start_of_grid: Verse 2}
+| G | Em | C | D |
+{end_of_grid}
+
+{start_of_grid: Chorus}
+| G | Em | C | D |
+| G | Em | C | D |
+{end_of_grid}
+
+{start_of_grid: Final Chorus}
+| G | Em | C | D |
+| G | Em | C | D |
+| G | Em | C | D |
 {end_of_grid}
 
 {comment: Verse 1}
@@ -22,13 +35,33 @@
 [C]Darling, don't be afraid
 [D]I have loved you for a thousand years
 
-{comment: Chorus}
 [G]I'll love you for a thousand more
+
+{comment: Chorus}
+[G]And all along I believed I would find you
+[Em]Time has brought your heart to me
+[C]I have loved you for a thousand years
+[D]I'll love you for a thousand more
+
+{comment: Verse 2}
+[G]One step closer
+[Em]One step closer
+
+{comment: Chorus}
+[G]And all along I believed I would find you
+[Em]Time has brought your heart to me
+[C]I have loved you for a thousand years
+[D]I'll love you for a thousand more
+
+{comment: Final Chorus}
+[G]One step closer
 [Em]One step closer
 [C]One step closer
 
-{comment: Bridge}
-[Am]And all along I believed I would find you
-[C]Time has brought your heart to me
-[D]I have loved you for a thousand years
-[G]I'll love you for a thousand more
+[G]And all along I believed I would find you
+[Em]Time has brought your heart to me
+[C]I have loved you for a thousand years
+[D]I'll love you for a thousand more
+
+[G]I have loved you for a thousand years
+[Em]I'll love you for a thousand more
