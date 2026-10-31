@@ -559,11 +559,11 @@
 
     /* Build one lyric row per chord change (not one row per sheet line). Each
      * change that has words gets its own line anchored at that change's x, so a
-     * chord always has one lyric line under it - never zero, never two. A word
-     * split by a change ("West Vir" + "ginia") is glued onto the row of the
-     * change where it begins, so neither row starts in the middle of a word.
-     * When a split word consumes a change's text, that change still gets an
-     * empty row at its own x so no chord is left without a line. */
+     * chord always has one lyric line under it - never zero, never two. The
+     * text that follows a change (up to the next change) sits on that change's
+     * row, so you can tell exactly which syllable each chord change lands on.
+     * Words split by a change ("West Vir" + "ginia") appear split across their
+     * rows - that's intentional: it marks the change point inside the word. */
     function buildPhraseRows(matched) {
         if (!matched) return [];
         var order = [], byLine = {};
@@ -579,30 +579,18 @@
         var rows = [];
         order.forEach(function (li) {
             var parts = byLine[li];
-            var cur = null, prevRaw = '';
             parts.forEach(function (p) {
                 var raw = String(p.part.text || '');
                 var text = raw.replace(/\s+/g, ' ').trim();
-                if (cur && prevRaw.length > 0 && !/\s$/.test(prevRaw) &&
-                    !/^\s/.test(raw) && text.length) {
-                    // A word split across a change stays whole on one row.
-                    cur.text = cur.text + text;
-                    cur.raw = cur.raw + raw;
-                    // This change's text was glued onto the previous row; it
-                    // still needs its own row at its own x (empty text).
-                    p.consumed = true;
-                } else if (text || !cur) {
-                    if (cur) rows.push(cur);
-                    cur = { line: li, change: p.change, text: text, raw: raw };
+                if (text || parts.length === 1) {
+                    rows.push({ line: li, change: p.change, text: text, raw: raw });
                 }
-                prevRaw = raw;
             });
-            if (cur) rows.push(cur);
         });
 
-        // Ensure every change gets a row, even if its text was glued onto a
-        // previous change's row (split word). Consumed changes get an empty
-        // row at their own x so no chord is left without a line.
+        // Ensure every change gets a row, even if it has no following text.
+        // Changes with no text get an empty row at their own x so no chord is
+        // left without a line.
         var hasRow = {};
         rows.forEach(function (row) { hasRow[row.change] = true; });
         matched.changes.forEach(function (change, ci) {
@@ -614,9 +602,9 @@
         return rows;
     }
 
-    /* Derive per-change lyric widths from the rows so columns are sized for the
-     * combined row text (not individual parts), and so split-word rows are wide
-     * enough to hold the glued word. */
+    /* Derive per-change lyric widths from the rows so columns are sized for
+     * each change's own text (not glued-together words), so columns stay
+     * narrow enough to read cleanly but wide enough for their own phrase. */
     function rowsToWidths(rows, measurer) {
         var byChange = {};
         rows.forEach(function (row) {
