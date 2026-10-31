@@ -3815,7 +3815,7 @@
     [
      [
       "c",
-      "[C]"
+      "[G]"
      ],
      [
       "x",
@@ -3994,7 +3994,7 @@
      ],
      [
       "x",
-      "Baby, I'm dancing in the dark"
+      "Baby I'm dancing in the dark"
      ]
     ],
     [
@@ -4232,38 +4232,6 @@
          "beats": 4
         }
        ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "G",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "Em",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "C",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "D",
-         "beats": 4
-        }
-       ]
       }
      ]
     },
@@ -4360,39 +4328,7 @@
       {
        "beats": [
         {
-         "chord": "C",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "D",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
          "chord": "G",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "Em",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "C",
          "beats": 4
         }
        ]
@@ -4411,38 +4347,6 @@
      "label": "Chorus",
      "repeat": false,
      "bars": [
-      {
-       "beats": [
-        {
-         "chord": "G",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "Em",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "C",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "D",
-         "beats": 4
-        }
-       ]
-      },
       {
        "beats": [
         {
@@ -4504,50 +4408,6 @@
          "beats": 4
         }
        ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "C",
-         "beats": 2
-        },
-        {
-         "chord": "D",
-         "beats": 2
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "G",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "Em",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "C",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "D",
-         "beats": 4
-        }
-       ]
       }
      ]
     },
@@ -4599,54 +4459,6 @@
        "beats": [
         {
          "chord": "Em",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "C",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "D",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "G",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "Em",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "C",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "D",
          "beats": 4
         }
        ]
@@ -4998,30 +4810,6 @@
          "beats": 4
         }
        ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "Em",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "C",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "D",
-         "beats": 4
-        }
-       ]
       }
      ]
     },
@@ -5029,38 +4817,6 @@
      "label": "Chorus",
      "repeat": false,
      "bars": [
-      {
-       "beats": [
-        {
-         "chord": "G",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "Em",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "C",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "D",
-         "beats": 4
-        }
-       ]
-      },
       {
        "beats": [
         {
@@ -5114,22 +4870,6 @@
          "beats": 4
         }
        ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "C",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "D",
-         "beats": 4
-        }
-       ]
       }
      ]
     },
@@ -5137,38 +4877,6 @@
      "label": "Chorus",
      "repeat": false,
      "bars": [
-      {
-       "beats": [
-        {
-         "chord": "G",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "Em",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "C",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "D",
-         "beats": 4
-        }
-       ]
-      },
       {
        "beats": [
         {
@@ -5234,14 +4942,6 @@
       {
        "beats": [
         {
-         "chord": "D",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
          "chord": "G",
          "beats": 4
         }
@@ -5283,22 +4983,6 @@
        "beats": [
         {
          "chord": "Em",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "C",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "D",
          "beats": 4
         }
        ]

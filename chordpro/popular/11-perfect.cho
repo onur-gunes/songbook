@@ -6,7 +6,6 @@
 
 {start_of_grid: Verse 1}
 | G | Em | C | D |
-| G | Em | C | D |
 {end_of_grid}
 
 {start_of_grid: Chorus}
@@ -15,24 +14,20 @@
 {end_of_grid}
 
 {start_of_grid: Verse 2}
-| G | Em | C | D |
-| G | Em | C | D |
+| G | Em | G | D |
 {end_of_grid}
 
 {start_of_grid: Chorus}
 | G | Em | C | D |
-| G | Em | C | D |
 {end_of_grid}
 
 {start_of_grid: Bridge}
-| C | G | Am | C . D . |
-| G | Em | C | D |
+| C | G | Am |
 {end_of_grid}
 
 {start_of_grid: Final Chorus}
 | G | Em | C | D |
-| G | Em | C | D |
-| G | Em | C | D |
+| G | Em |
 {end_of_grid}
 
 {comment: Verse 1}
@@ -62,7 +57,7 @@
 {comment: Verse 2}
 [G]Well I found a woman, stronger than anyone I know
 [Em]She shares my dreams, I hope that someday I'll share her home
-[C]I found a love, to carry more than just my secrets
+[G]I found a love, to carry more than just my secrets
 [D]To carry love, to carry children of our own
 
 [G]We are still kids, but we're so in love
@@ -84,7 +79,7 @@
 [C]But you heard it, darling, you look perfect [D]tonight
 
 {comment: Bridge}
-[C]Baby, I'm dancing in the dark
+[C]Baby I'm dancing in the dark
 [G]With you between my arms
 [Am]Barefoot on the grass
 [C]Listening to our favorite [D]song

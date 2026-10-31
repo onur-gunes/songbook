@@ -5,28 +5,25 @@
 {time: 4/4}
 
 {start_of_grid: Verse 1}
-| G | Em | C | D |
-| G | Em | C | D |
+| G | Em | C | D | G |
 {end_of_grid}
 
 {start_of_grid: Chorus}
-| G | Em | C | D |
 | G | Em | C | D |
 {end_of_grid}
 
 {start_of_grid: Verse 2}
-| G | Em | C | D |
+| G | Em |
 {end_of_grid}
 
 {start_of_grid: Chorus}
 | G | Em | C | D |
-| G | Em | C | D |
 {end_of_grid}
 
 {start_of_grid: Final Chorus}
-| G | Em | C | D |
-| G | Em | C | D |
-| G | Em | C | D |
+| G | Em | C | G |
+| Em | C | D | G |
+| Em |
 {end_of_grid}
 
 {comment: Verse 1}
