@@ -17,9 +17,11 @@
      * js/sheet.js). Nothing here is guessed from character counts.
      */
     var BEAT_MIN = 30;          // px, before the sheet's text-size scale
-    var DIAGRAM_H = 92;         // px at --chord-size: 1, same as the strip
-    var DIAGRAM_W_UKE = 88;     // reserved box, not the SVG's natural width
-    var DIAGRAM_W_GUITAR = 126;
+    // The reserved box matches the SVG's 104x120 (uke) / 160x120 (guitar)
+    // aspect, so every diagram fills it and no chord is scaled smaller.
+    var DIAGRAM_H = 100;        // px at --chord-size: 1, same as the strip
+    var DIAGRAM_W_UKE = 87;     // reserved box, not the SVG's natural width
+    var DIAGRAM_W_GUITAR = 133;
     var BAR_PAD = 6;            // px inside each bar line
     var CHANGE_PAD = 10;        // extra space after a chord change
     var REPEAT_W = 12;
@@ -457,8 +459,9 @@
                 changeIndex = ++changeState.index;
             }
             // Reserve at least the phrase's width so the next change (and its
-            // lyric) starts after the words, not in the middle of them.
-            var phraseW = changeIndex >= 0 && lyricW ? lyricW[changeIndex] || 0 : 0;
+            // lyric) starts after the words, not in the middle of them. Add the
+            // lyric's right padding so the column is a touch wider than its text.
+            var phraseW = changeIndex >= 0 && lyricW ? (lyricW[changeIndex] || 0) + LYRIC_PAD_RIGHT : 0;
             return {
                 chord: seg.chord,
                 tname: tname,
@@ -495,7 +498,11 @@
         bar.style.height = ctx.barH + 'px';
 
         spec.segments.forEach(function (seg, i) {
-            var change = SB.el('div', 'grid-change');
+            // A change at the start of a bar is already marked by the bar line
+            // (or the repeat sign). Only a change inside a bar needs the extra
+            // drop line, otherwise every bar-start chord got two lines 6px
+            // apart while a mid-bar change got one.
+            var change = SB.el('div', 'grid-change' + (i > 0 ? ' grid-change-mid' : ''));
             change.style.left = spec.changeXs[i] + 'px';
             change.style.width = seg.contentW + 'px';
             change.style.height = (ctx.diagram.h + ctx.labelH) + 'px';
@@ -550,145 +557,101 @@
         };
     }
 
-    /* Pick the system each sheet line is drawn under. A line is kept whole:
-     * splitting it across systems left one-word fragments behind. Prefer the
-     * first system where the line starts early enough to read as a line; if it
-     * starts too late there, carry it to the next system that holds it. */
-    function assignLines(matched, geometry, avail, em) {
-        if (!matched) return null;
-        var minW = em * 12;
-        var byLine = {};
+    /* Build one lyric row per chord change (not one row per sheet line). Each
+     * change that has words gets its own line anchored at that change's x, so a
+     * chord always has one lyric line under it - never zero, never two. A word
+     * split by a change ("West Vir" + "ginia") is glued onto the row of the
+     * change where it begins, so neither row starts in the middle of a word. */
+    function buildPhraseRows(matched) {
+        if (!matched) return [];
+        var order = [], byLine = {};
         matched.changes.forEach(function (change, ci) {
             change.parts.forEach(function (part) {
-                (byLine[part.line] = byLine[part.line] || []).push({
-                    change: ci, text: part.text
-                });
+                var li = part.line;
+                if (byLine[li] == null) { byLine[li] = []; order.push(li); }
+                byLine[li].push({ change: ci, part: part });
             });
         });
-        var assigned = {};
-        Object.keys(byLine).forEach(function (key) {
-            var parts = byLine[key];
-            var candidates = [];
-            geometry.forEach(function (geom, si) {
-                for (var i = 0; i < parts.length; i++) {
-                    var x = geom.byChange[parts[i].change];
-                    if (x != null) {
-                        candidates.push({ system: si, x: x });
-                        break;
-                    }
+        order.sort(function (a, b) { return a - b; });
+
+        var rows = [];
+        order.forEach(function (li) {
+            var parts = byLine[li];
+            var cur = null, prevRaw = '';
+            parts.forEach(function (p) {
+                var raw = String(p.part.text || '');
+                var text = raw.replace(/\s+/g, ' ').trim();
+                if (cur && prevRaw.length > 0 && !/\s$/.test(prevRaw) &&
+                    !/^\s/.test(raw) && text.length) {
+                    // A word split across a change stays whole on one row.
+                    cur.text = cur.text + text;
+                    cur.raw = cur.raw + raw;
+                } else if (text || !cur) {
+                    if (cur) rows.push(cur);
+                    cur = { line: li, change: p.change, text: text, raw: raw };
                 }
+                prevRaw = raw;
             });
-            if (!candidates.length) return;
-            var chosen = null;
-            for (var i = 0; i < candidates.length; i++) {
-                if (avail - candidates[i].x >= minW) {
-                    chosen = candidates[i];
-                    break;
-                }
-            }
-            if (!chosen) chosen = candidates[candidates.length - 1];
-            chosen.parts = parts;
-            assigned[key] = chosen;
+            if (cur) rows.push(cur);
         });
-        return assigned;
+        return rows;
     }
 
-    /* One row per sheet line under the system that holds it. A phrase keeps
-     * its chord's x when there is room, so "voice" sits under D and
-     * "mornin'" under G. If a phrase is too long to fit before the next
-     * anchor, the row falls back to continuous text rather than wrapping into
-     * a narrow column. */
-    function buildLyricLayer(system, geom, matched, assigned, si, avail, em, measurer) {
-        if (!matched || !assigned) return;
+    /* Derive per-change lyric widths from the rows so columns are sized for the
+     * combined row text (not individual parts), and so split-word rows are wide
+     * enough to hold the glued word. */
+    function rowsToWidths(rows, measurer) {
+        var byChange = {};
+        rows.forEach(function (row) {
+            var w = measurer.width(row.text);
+            byChange[row.change] = Math.max(byChange[row.change] || 0, w);
+        });
+        return byChange;
+    }
+
+    /* After bar specs and geometry exist, attach each row to the system that
+     * holds its change and anchor it at that change's x. */
+    function assignRowGeometry(rows, geometry) {
+        rows.forEach(function (row) {
+            geometry.forEach(function (geom, si) {
+                var x = geom.byChange[row.change];
+                if (x != null) { row.system = si; row.x = x; }
+            });
+        });
+    }
+
+    /* Lay one phrase row per chord change. The phrase starts at its change's x
+     * and is just wide enough for its text; the bar column has already been
+     * widened by rowsToWidths + CHANGE_PAD, so the row fits cleanly under its
+     * diagram instead of bleeding into the next bar. */
+    function buildLyricLayer(system, geom, rows, si, avail, measurer) {
+        var here = rows.filter(function (row) { return row.system === si; });
+        if (!here.length) return;
+        here.sort(function (a, b) {
+            return a.line === b.line ? a.x - b.x : a.line - b.line;
+        });
         var layerW = Math.max(geom.width +
             (system.classList.contains('has-repeat-end') ? REPEAT_W : 0), avail);
-        var lines = Object.keys(assigned).filter(function (key) {
-            return assigned[key].system === si;
-        }).map(Number).sort(function (a, b) { return a - b; });
-        if (!lines.length) return;
-
         var layer = SB.el('div', 'grid-lyrics');
         layer.style.width = layerW + 'px';
-        var any = false;
 
-        lines.forEach(function (li) {
-            var entry = assigned[li];
-            var spaceW = measurer.width(' ');
-            var rowStart = entry.x;
-            var availW = layerW - rowStart - LYRIC_PAD_RIGHT;
-            if (availW <= 0) return;
-
-            // Lay the phrases out from `from`, anchoring each to its chord
-            // when that chord is in this system. Returns the right edge.
-            function layout(from, flush) {
-                var segments = [], x = 0, prevText = '';
-                entry.parts.forEach(function (part) {
-                    var raw = String(part.text || '');
-                    var text = raw.replace(/\s+/g, ' ').trim();
-                    if (!text) return;
-                    var anchor = geom.byChange[part.change];
-                    var rel = anchor == null ? null : anchor - from;
-                    // A word split by a chord change ("re" + "minds") must
-                    // not gain a space or jump to an anchor inside the word.
-                    var joined = !!prevText && !/\s$/.test(prevText) &&
-                        !/^\s/.test(raw);
-                    var start, space = false;
-                    if (!segments.length) {
-                        start = flush ? 0 : Math.max(0, rel == null ? 0 : rel);
-                    } else if (joined) start = x;
-                    else {
-                        start = Math.max(x + spaceW, rel == null ? 0 : rel);
-                        space = true;
-                    }
-                    var w = measurer.width(text);
-                    segments.push({
-                        text: text, start: start, width: w, space: space
-                    });
-                    x = start + w;
-                    prevText = raw;
-                });
-                return { segments: segments, width: x };
+        here.forEach(function (row) {
+            var node = SB.el('span', 'grid-lyric', row.text);
+            node.style.marginLeft = row.x + 'px';
+            // The row is just as wide as its text (plus right padding), so it
+            // stays under its own chord column rather than stretching across
+            // the whole system.
+            var textW = measurer.width(row.text);
+            node.style.width = (textW + LYRIC_PAD_RIGHT) + 'px';
+            // A phrase that cannot reach the next change (only on a narrow
+            // screen) is better read as a continuous line from the left edge.
+            if (textW > layerW - row.x - LYRIC_PAD_RIGHT) {
+                node.style.marginLeft = '0px';
+                node.style.width = (layerW - LYRIC_PAD_RIGHT) + 'px';
             }
-
-            var fit = layout(rowStart, false);
-            if (!fit.segments.length) return;
-            // A line that starts at the last bar has no room left under its
-            // anchor. Keep it under the right system but begin at the left
-            // edge, so it reads as a line instead of a squeezed column.
-            if (fit.width > availW && rowStart > 0) {
-                rowStart = 0;
-                availW = layerW - LYRIC_PAD_RIGHT;
-                fit = layout(0, true);
-            }
-
-            var row = SB.el('span', 'grid-lyric');
-            row.style.marginLeft = rowStart + 'px';
-            row.style.width = (layerW - rowStart) + 'px';
-            if (fit.width <= availW) {
-                // The phrases fit with their anchors intact; keep them on one
-                // line so wrapping cannot undo the alignment.
-                row.classList.add('is-aligned');
-                var prevEnd = 0;
-                fit.segments.forEach(function (seg) {
-                    if (seg.space) {
-                        row.appendChild(document.createTextNode(' '));
-                        prevEnd += spaceW;
-                    }
-                    var sp = SB.el('span', 'grid-phrase', seg.text);
-                    sp.style.marginLeft = Math.max(0, seg.start - prevEnd) + 'px';
-                    row.appendChild(sp);
-                    prevEnd = seg.start + seg.width;
-                });
-            } else {
-                // Too long for this width (usually a phone): a continuous line
-                // that wraps is more useful than a broken alignment.
-                row.textContent = entry.parts.map(function (p) { return p.text; })
-                    .join('').replace(/\s+/g, ' ').trim();
-            }
-            layer.appendChild(row);
-            any = true;
+            layer.appendChild(node);
         });
-        if (any) system.appendChild(layer);
+        system.appendChild(layer);
     }
 
     /* The lyric layer is a stack of rows, so its height is the height of the
@@ -735,10 +698,12 @@
         song.grid.forEach(function (block) {
             var matched = matchSection(song, block);
             if (matched) lyricSections.push(matched.section.name);
-            var lyricW = phraseWidths(matched, measurer);
+            var rows = buildPhraseRows(matched);
+            var lyricW = rowsToWidths(rows, measurer);
             var changeState = { prev: null, index: -1 };
             var specs = block.bars.map(function (bar) {
-                return buildBarSpec(bar, song, ctx, changeState, lyricW);
+                var spec = buildBarSpec(bar, song, ctx, changeState, lyricW);
+                return spec;
             });
             // Repeat signs are flex items too, so reserve their width before
             // packing or a repeated block overflows its system by 24px.
@@ -747,7 +712,7 @@
             var geom = systems.map(function (bars, si) {
                 return systemGeometry(bars, (block.repeat && si === 0) ? REPEAT_W : 0);
             });
-            var assigned = assignLines(matched, geom, avail, em);
+            assignRowGeometry(rows, geom);
             var section = SB.el('div', 'grid-section');
             // One label per block, not one per system: a block that reflows
             // onto a second line would otherwise print its name twice.
@@ -769,7 +734,7 @@
                     system.classList.add('has-repeat-end');
                     system.appendChild(repeatSign('end', ctx.barH));
                 }
-                buildLyricLayer(system, geom[si], matched, assigned, si, avail, em, measurer);
+                buildLyricLayer(system, geom[si], rows, si, avail, measurer);
                 section.appendChild(system);
             });
             frag.appendChild(section);

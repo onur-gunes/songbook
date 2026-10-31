@@ -30,7 +30,12 @@ async function until(fn, timeout = 8000) {
 }
 
 async function main() {
-    await new Promise(r => frame.addEventListener('load', r));
+    // The iframe may already be loaded when this runs (a warm cache can beat
+    // the script), so do not wait for a load event that has already fired.
+    await new Promise(r => {
+        if (frame.contentDocument && frame.contentDocument.readyState === 'complete') r();
+        else frame.addEventListener('load', r);
+    });
     const ready = await until(() => rows().length === 198);
     if (!ready) { ok('app booted (198 rows)', false, 'rows=' + rows().length); throw new Error('app did not boot'); }
 
@@ -683,6 +688,18 @@ async function main() {
     const svgG = win().songbookTest.ChordKit.diagramSVG('guitar', win().songbookTest.ChordKit.voicings('Am', 'guitar')[0]);
     ok('ukulele engine draws 4 strings', (svgU.match(/class="st"/g) || []).length === 4, (svgU.match(/class="st"/g) || []).length);
     ok('guitar engine draws 6 strings', (svgG.match(/class="st"/g) || []).length === 6, (svgG.match(/class="st"/g) || []).length);
+    // Every shape uses the same four fret rows. A chord that needed a fifth
+    // row used to get a taller SVG, so object-fit drew it smaller and denser
+    // than its neighbours.
+    const shapeNames = ['G', 'Em', 'D', 'C', 'F', 'Am', 'A', 'E', 'Bm', 'Bb'];
+    const rowCounts = inst => shapeNames.map(n => {
+        const v = win().songbookTest.ChordKit.voicings(n, inst)[0];
+        return (win().songbookTest.ChordKit.diagramSVG(inst, v).match(/class="fw"/g) || []).length;
+    });
+    const ukeRows = rowCounts('ukulele');
+    const guitRows = rowCounts('guitar');
+    ok('every ukulele diagram draws four fret rows', ukeRows.every(n => n === 4), ukeRows.join(','));
+    ok('every guitar diagram draws four fret rows', guitRows.every(n => n === 4), guitRows.join(','));
     doc().querySelector('.instrument-btn[data-instrument="ukulele"]').click();
     await wait(150);
     ok('instrument back to ukulele', win().songbookTest.getInstrument() === 'ukulele');
@@ -1267,6 +1284,25 @@ async function main() {
     ok('grid renders one bar per grid bar', gBars.length === 8, gBars.length);
     ok('grid renders one slash per beat', gBeats.length === 32, gBeats.length);
     ok('grid renders a diagram above each chord change', gDiagrams.length === 8, gDiagrams.length);
+    // A chord diagram must look like the others: same grid lines and same
+    // rendered box, not a taller or smaller shape for one chord.
+    const gShape = img => {
+        const src = img.getAttribute('src') || '';
+        const svg = decodeURIComponent(src.split(',')[1] || '');
+        return (svg.match(/class="st"/g) || []).length + 's/' +
+            (svg.match(/class="fw"/g) || []).length + 'f';
+    };
+    const gShapes = [].map.call(gDiagrams, gShape);
+    const gBoxes = [].map.call(gDiagrams, img => {
+        const r = img.getBoundingClientRect();
+        return Math.round(r.width) + 'x' + Math.round(r.height);
+    });
+    ok('every grid diagram has the same string and fret lines',
+        gShapes.length > 0 && gShapes.every(s => s === gShapes[0]),
+        [...new Set(gShapes)].join(' '));
+    ok('every grid diagram renders at one size',
+        gBoxes.length > 0 && gBoxes.every(b => b === gBoxes[0]),
+        [...new Set(gBoxes)].join(' '));
     ok('grid draws bar lines',
         win().getComputedStyle(gBars[0]).borderLeftWidth === '1px',
         win().getComputedStyle(gBars[0]).borderLeftWidth);
@@ -1279,11 +1315,11 @@ async function main() {
         gInfo && gInfo.totalBeats === 32 && gInfo.beatsPerBar === 4 && gInfo.bpm === 118,
         JSON.stringify(gInfo));
 
-    // Lyrics are laid out one row per sheet line under the system that holds
-    // the line's changes, so words stay together instead of being squeezed
-    // into a beat-sized column at every chord change.
+    // Lyrics are laid out one row per chord change (one line per phrase), so
+    // no column is empty and a chord never gets two lines. Words are kept
+    // whole even when a change falls inside them ("West Vir"+"ginia").
     const gridLyrics = () => doc().querySelectorAll('.sheet.chords-grid .grid-lyric');
-    ok('grid shows one lyric row per sheet line', gridLyrics().length === 3, gridLyrics().length);
+    ok('grid shows one lyric row per chord change', gridLyrics().length === 5, gridLyrics().length);
     ok('grid picks the section whose changes match exactly',
         gInfo && gInfo.lyricSection === 'Chorus', gInfo && gInfo.lyricSection);
     ok('first lyric row starts at the first chord change',
@@ -1308,14 +1344,14 @@ async function main() {
         (gridLyrics()[0].getBoundingClientRect().left - gFirstChange.getBoundingClientRect().left).toFixed(1));
     // The column is sized from the lyric phrase, not only the diagram: this
     // line is longer than a plain beat column, so its bar must grow to hold it.
-    const gFirstPhrase = doc().querySelector('.sheet.chords-grid .grid-phrase');
+    const gFirstPhraseRow = doc().querySelector('.sheet.chords-grid .grid-lyric');
     ok('grid widens a chord column to fit its lyric phrase',
-        !!gFirstBar && !!gFirstPhrase &&
+        !!gFirstBar && !!gFirstPhraseRow &&
         gFirstBar.getBoundingClientRect().width >=
-            gFirstPhrase.getBoundingClientRect().width + 9,
-        gFirstBar && gFirstPhrase &&
+            gFirstPhraseRow.getBoundingClientRect().width + 9,
+        gFirstBar && gFirstPhraseRow &&
         (gFirstBar.getBoundingClientRect().width -
-         gFirstPhrase.getBoundingClientRect().width).toFixed(1));
+         gFirstPhraseRow.getBoundingClientRect().width).toFixed(1));
 
     // The cursor is a pure function of the metronome's beat position: one bar
     // of count-in, then one index per beat, then null past the chart.
@@ -1378,12 +1414,9 @@ async function main() {
         doc().querySelectorAll('.grid-bar').length);
     ok('repeat start sign rendered', doc().querySelector('.sheet.chords-grid .grid-repeat.start') !== null);
     ok('repeat end sign rendered', doc().querySelector('.sheet.chords-grid .grid-repeat.end') !== null);
-    ok('looping grid shows one iteration of lyrics', gridLyrics().length === 1, gridLyrics().length);
+    ok('looping grid shows one iteration of lyrics', gridLyrics().length === 3, gridLyrics().length);
     ok('looping grid picks the first matching section',
         gridInfo() && gridInfo().lyricSection === 'Verse 1', gridInfo() && gridInfo().lyricSection);
-    ok('riptide lyric keeps the whole line together',
-        gridLyrics()[0] && gridLyrics()[0].textContent === 'I was scared of dentists and the dark',
-        gridLyrics()[0] && gridLyrics()[0].textContent);
     const rFirstChange = doc().querySelector('.sheet.chords-grid .grid-change');
     ok('lyric aligns past the repeat sign',
         !!rFirstChange && !!gridLyrics()[0] &&
@@ -1485,31 +1518,45 @@ async function main() {
     ok('complete song marks the fading final chorus with repeat signs',
         !!doc().querySelector('.sheet.chords-grid .grid-repeat.start') &&
         !!doc().querySelector('.sheet.chords-grid .grid-repeat.end'));
-    // One row per sheet line: a line is kept whole and drawn under the system
-    // that holds it, rather than split into fragments at a system break.
-    ok('complete song lays out one lyric row per sheet line',
-        doc().querySelectorAll('.sheet.chords-grid .grid-lyric').length === 25,
+    // A change inside a bar gets the drop line; one on a bar line relies on
+    // the bar line, so no change has two vertical lines side by side.
+    const guideChanges = [].slice.call(doc().querySelectorAll('.sheet.chords-grid .grid-change'));
+    const guideMid = guideChanges.filter(ch => ch.classList.contains('grid-change-mid'));
+    ok('a change inside a bar carries a drop line', guideMid.length > 0,
+        guideMid.length + ' of ' + guideChanges.length);
+    const guideDouble = guideChanges.filter(ch => {
+        const atStart = parseFloat(ch.style.left) <= 6;
+        return atStart === ch.classList.contains('grid-change-mid');
+    });
+    ok('a change is not marked by both a bar line and a drop line',
+        guideDouble.length === 0, guideDouble.length + ' doubled');
+    // One lyric line per chord change: each change carries exactly its phrase,
+    // so a column is never empty and a chord never gets two lines.
+    ok('complete song lays out one lyric row per chord change',
+        doc().querySelectorAll('.sheet.chords-grid .grid-lyric').length === 52,
         doc().querySelectorAll('.sheet.chords-grid .grid-lyric').length);
     ok('complete song reports the first matched section',
         thInfo && thInfo.lyricSection === 'Verse 1', thInfo && thInfo.lyricSection);
     const thFirst = doc().querySelector('.sheet.chords-grid .grid-lyric');
-    ok('complete song first lyric is the first verse line',
-        !!thFirst && thFirst.textContent === 'Almost heaven, West Virginia',
+    ok('complete song first lyric is the first chord phrase',
+        !!thFirst && thFirst.textContent === 'Almost heaven,',
         thFirst && thFirst.textContent);
-    // Phrases inside a row keep their chord's x: "West Virginia" starts
-    // under the Em change, not at the row's left edge.
-    const thPhrases = thFirst ? thFirst.querySelectorAll('.grid-phrase') : [];
+    // Each phrase starts on its change's x: "West Virginia" sits under Em,
+    // not at the row's left edge.
+    const thRows = doc().querySelectorAll('.sheet.chords-grid .grid-lyric');
+    const thSecond = thRows[1];
     const thFirstSystem = doc().querySelector('.sheet.chords-grid .grid-system');
     const thChanges = thFirstSystem ? thFirstSystem.querySelectorAll('.grid-change') : [];
-    ok('complete song aligns phrases with their chord changes',
-        thPhrases.length === 2 && thChanges.length > 1 &&
-        Math.abs(thPhrases[1].getBoundingClientRect().left -
+    ok('complete song aligns each phrase with its chord change',
+        !!thSecond && !!thChanges[1] &&
+        Math.abs(thSecond.getBoundingClientRect().left -
                  thChanges[1].getBoundingClientRect().left) < 1,
-        thPhrases.length + ' phrases, ' +
-        (thPhrases[1] && thChanges[1]
-            ? (thPhrases[1].getBoundingClientRect().left -
-               thChanges[1].getBoundingClientRect().left).toFixed(1)
-            : 'n/a'));
+        thSecond && thChanges[1] &&
+        (thSecond.getBoundingClientRect().left -
+         thChanges[1].getBoundingClientRect().left).toFixed(1));
+    ok('second phrase is "West Virginia", whole across the Em change',
+        !!thSecond && thSecond.textContent === 'West Virginia',
+        thSecond && thSecond.textContent);
 
     // No-grid fallback: the mode stays set, the button is disabled, and the
     // normal sheet renders instead of an empty view.

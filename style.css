@@ -1342,10 +1342,10 @@ main {
     gap: 2px;
 }
 
-/* A faint drop line from each chord change through the beat row. It marks the
-   exact x where the change happens, including a second chord inside a bar,
-   which a bar line alone cannot show. */
-.sheet.chords-grid .grid-change::after {
+/* A faint drop line through the beat row for a change inside a bar, which the
+   bar lines cannot show. Changes on a bar line use the bar line itself, so a
+   change is never marked twice. */
+.sheet.chords-grid .grid-change-mid::after {
     content: '';
     position: absolute;
     left: 0;
