@@ -1531,10 +1531,10 @@ async function main() {
     ok('a change is not marked by both a bar line and a drop line',
         guideDouble.length === 0, guideDouble.length + ' doubled');
     // One lyric line per chord change: each change carries exactly its phrase,
-    // so a column is never empty and a chord never gets two lines. When a word
-    // is split across changes (e.g. "re"+"minds" = "reminds"), the glued text
-    // sits on the first change's row and the second change still gets an empty
-    // row at its own x.
+    // so a column is never empty and a chord never gets two lines. Words split
+    // across changes ("West Vir" at G, "ginia" at D) appear on their own rows
+    // at their own x, so you can tell exactly which syllable each chord change
+    // lands on. Changes with no following text get an empty row at their x.
     ok('complete song lays out one lyric row per chord change',
         doc().querySelectorAll('.sheet.chords-grid .grid-lyric').length === 57,
         doc().querySelectorAll('.sheet.chords-grid .grid-lyric').length);
