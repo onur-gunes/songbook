@@ -1397,9 +1397,10 @@ main {
 }
 
 /* Lyric rows sit in the system's bottom padding, one row per sheet line.
-   The row starts at the x of the line's first chord (see buildLyricLayer in
-   js/grid.js), but flows as normal text so a phrase never becomes a narrow
-   column. */
+   Each phrase in a row starts at the x of the chord change that introduced it
+   (see buildLyricLayer in js/grid.js); the row itself starts at the line's
+   first chord. Phrases keep their words together instead of wrapping into
+   narrow per-chord columns. */
 .sheet.chords-grid .grid-lyrics {
     position: absolute;
     left: 0;
@@ -1416,6 +1417,29 @@ main {
     line-height: 1.3;
     white-space: normal;
     overflow-wrap: anywhere;
+}
+
+/* Phrase-aligned rows stay on one line: wrapping would move the later
+   phrases away from the chords they were measured against. */
+.sheet.chords-grid .grid-lyric.is-aligned {
+    white-space: nowrap;
+}
+
+.sheet.chords-grid .grid-phrase {
+    white-space: inherit;
+}
+
+/* Hidden probe with the lyric face, used to measure phrase widths before the
+   rows are inserted (see makeMeasurer in js/grid.js). */
+.sheet.chords-grid .grid-measure {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    white-space: pre;
+    font-size: 0.88em;
+    line-height: 1.3;
+    pointer-events: none;
 }
 
 .sheet.chords-grid .grid-section-label {

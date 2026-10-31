@@ -1475,10 +1475,10 @@ async function main() {
     ok('complete song marks the fading final chorus with repeat signs',
         !!doc().querySelector('.sheet.chords-grid .grid-repeat.start') &&
         !!doc().querySelector('.sheet.chords-grid .grid-repeat.end'));
-    // One row per sheet line, plus a continuation row when a line crosses a
-    // system boundary (the bridge's third line does).
+    // One row per sheet line: a line is kept whole and drawn under the system
+    // that holds it, rather than split into fragments at a system break.
     ok('complete song lays out one lyric row per sheet line',
-        doc().querySelectorAll('.sheet.chords-grid .grid-lyric').length === 30,
+        doc().querySelectorAll('.sheet.chords-grid .grid-lyric').length === 25,
         doc().querySelectorAll('.sheet.chords-grid .grid-lyric').length);
     ok('complete song reports the first matched section',
         thInfo && thInfo.lyricSection === 'Verse 1', thInfo && thInfo.lyricSection);
@@ -1486,6 +1486,20 @@ async function main() {
     ok('complete song first lyric is the first verse line',
         !!thFirst && thFirst.textContent === 'Almost heaven, West Virginia',
         thFirst && thFirst.textContent);
+    // Phrases inside a row keep their chord's x: "West Virginia" starts
+    // under the Em change, not at the row's left edge.
+    const thPhrases = thFirst ? thFirst.querySelectorAll('.grid-phrase') : [];
+    const thFirstSystem = doc().querySelector('.sheet.chords-grid .grid-system');
+    const thChanges = thFirstSystem ? thFirstSystem.querySelectorAll('.grid-change') : [];
+    ok('complete song aligns phrases with their chord changes',
+        thPhrases.length === 2 && thChanges.length > 1 &&
+        Math.abs(thPhrases[1].getBoundingClientRect().left -
+                 thChanges[1].getBoundingClientRect().left) < 1,
+        thPhrases.length + ' phrases, ' +
+        (thPhrases[1] && thChanges[1]
+            ? (thPhrases[1].getBoundingClientRect().left -
+               thChanges[1].getBoundingClientRect().left).toFixed(1)
+            : 'n/a'));
 
     // No-grid fallback: the mode stays set, the button is disabled, and the
     // normal sheet renders instead of an empty view.
