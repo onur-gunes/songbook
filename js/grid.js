@@ -16,11 +16,12 @@
      * degree label is set in the mono face (see chordLabelWidth in
      * js/sheet.js). Nothing here is guessed from character counts.
      */
-    var BEAT_MIN = 24;          // px, before the sheet's text-size scale
-    var DIAGRAM_H = 78;         // px at --chord-size: 1, same as the strip
-    var DIAGRAM_W_UKE = 72;     // reserved box, not the SVG's natural width
-    var DIAGRAM_W_GUITAR = 108;
+    var BEAT_MIN = 30;          // px, before the sheet's text-size scale
+    var DIAGRAM_H = 92;         // px at --chord-size: 1, same as the strip
+    var DIAGRAM_W_UKE = 88;     // reserved box, not the SVG's natural width
+    var DIAGRAM_W_GUITAR = 126;
     var BAR_PAD = 6;            // px inside each bar line
+    var CHANGE_PAD = 10;        // extra space after a chord change
     var REPEAT_W = 12;
     var LYRIC_PAD_RIGHT = 6;    // matches .grid-lyric padding-right
 
@@ -442,7 +443,7 @@
                 tname: tname,
                 label: label,
                 beats: seg.beats,
-                width: Math.max(seg.beats * ctx.beatW, contentW + ctx.gap),
+                width: Math.max(seg.beats * ctx.beatW, contentW + ctx.gap) + CHANGE_PAD,
                 contentW: contentW,
                 voicing: voicing,
                 changeIndex: changeIndex
@@ -691,15 +692,16 @@
 
         var em = SB.sheetEmPx();
         var ctx = {
-            beatW: Math.max(BEAT_MIN, em * 1.7),
+            beatW: Math.max(BEAT_MIN, em * 2.0),
             labelH: Math.ceil(em * 1.35),
             beatH: Math.ceil(em * 1.7),
-            gap: Math.max(6, em * 0.45),
+            gap: Math.max(10, em * 0.6),
             diagram: diagramBox(SB.state.chordSize)
         };
         ctx.changeBottom = ctx.beatH + 4;
         ctx.barH = ctx.changeBottom + ctx.diagram.h + ctx.labelH + 4;
         wrap.style.setProperty('--grid-beat-h', ctx.beatH + 'px');
+        wrap.style.setProperty('--grid-guide-h', ctx.changeBottom + 'px');
 
         var avail = Math.max(ctx.beatW * 2, (wrap.clientWidth || window.innerWidth - 40) - 2);
         var beatsPerBar = SB.metronomeBeatsPerBar(song.time);

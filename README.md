@@ -403,9 +403,11 @@ phrase in the row starts at the x of the chord change that introduced it, so
 "voice" sits under D and "mornin'" under G while the words stay together as
 readable text. A line whose phrases would not fit in the remaining width
 falls back to one continuous row beginning at the system's left edge rather
-than breaking the alignment badly. A looping grid maps one iteration (the
-repeat signs mark the rest); a grid that is a different arrangement, or has no
-matching section, shows the chart without lyrics rather than guessing.
+than breaking the alignment badly. Every change carries a faint drop line
+through the beat row, so a second chord inside a bar is as visible as one at a
+bar line. A looping grid maps one iteration (the repeat signs mark the rest); a
+grid that is a different arrangement, or has no matching section, shows the
+chart without lyrics rather than guessing.
 
 Run the parser/builder tests with `python3 tests/chordpro.py`, the strum
 library mirror guard with `python3 tests/strum.py`, and the dev/prod
