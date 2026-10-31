@@ -1,72 +1,86 @@
 {
- "stand-by-me": {
-  "key": "A",
-  "sheetKey": "A",
-  "capo": 0,
-  "confidence": "high",
-  "source": "recording is in A major (I–vi–IV–V in A)"
- },
- "let-it-be": {
-  "key": "C",
-  "sheetKey": "C",
-  "capo": 0,
-  "confidence": "high",
-  "source": "recording is in C major"
- },
- "im-yours": {
-  "key": "B",
-  "sheetKey": "C",
-  "capo": 1,
-  "confidence": "high",
-  "source": "record is in B (chart in C, capo 1); common ukulele key is C"
- },
- "riptide": {
-  "key": "C",
-  "sheetKey": "C",
-  "capo": 0,
-  "confidence": "high",
-  "source": "Am–G–C vamp; recording is in C major"
- },
- "wonderwall": {
-  "key": "F#m",
-  "sheetKey": "Em",
-  "capo": 2,
-  "confidence": "high",
-  "source": "record sounds in F#m; standard chart is Em shapes with capo 2"
- },
- "knockin-on-heavens-door": {
-  "key": "G",
-  "sheetKey": "G",
-  "capo": 0,
-  "confidence": "high",
-  "source": "G–D–Am / G–D–C progression, G major"
- },
- "three-little-birds": {
-  "key": "C",
-  "sheetKey": "C",
-  "capo": 0,
-  "confidence": "high",
-  "source": "A major on record; C shapes are the common ukulele key"
- },
- "hey-soul-sister": {
-  "key": "C",
-  "sheetKey": "C",
-  "capo": 0,
-  "confidence": "high",
-  "source": "capo 2 on guitar sounds in D; ukulele chart played in C/no-capo shapes"
- },
- "the-house-of-the-rising-sun": {
-  "key": "Am",
-  "sheetKey": "Am",
-  "capo": 0,
-  "confidence": "high",
-  "source": "Animals arrangement in A minor (6/8)"
- },
- "take-me-home-country-roads": {
-  "key": "G",
-  "sheetKey": "G",
-  "capo": 0,
-  "confidence": "high",
-  "source": "recording is in A; G is the common no-capo ukulele key"
- }
+   "stand-by-me": {
+      "key": "A",
+      "sheetKey": "A",
+      "capo": 0,
+      "confidence": "high",
+      "source": "recording is in A major (I–vi–IV–V in A)"
+   },
+   "let-it-be": {
+      "key": "C",
+      "sheetKey": "C",
+      "capo": 0,
+      "confidence": "high",
+      "source": "recording is in C major"
+   },
+   "im-yours": {
+      "key": "B",
+      "sheetKey": "C",
+      "capo": 1,
+      "confidence": "high",
+      "source": "record is in B (chart in C, capo 1); common ukulele key is C"
+   },
+   "riptide": {
+      "key": "C",
+      "sheetKey": "C",
+      "capo": 0,
+      "confidence": "high",
+      "source": "Am–G–C vamp; recording is in C major"
+   },
+   "wonderwall": {
+      "key": "F#m",
+      "sheetKey": "Em",
+      "capo": 2,
+      "confidence": "high",
+      "source": "record sounds in F#m; standard chart is Em shapes with capo 2"
+   },
+   "knockin-on-heavens-door": {
+      "key": "G",
+      "sheetKey": "G",
+      "capo": 0,
+      "confidence": "high",
+      "source": "G–D–Am / G–D–C progression, G major"
+   },
+   "three-little-birds": {
+      "key": "C",
+      "sheetKey": "C",
+      "capo": 0,
+      "confidence": "high",
+      "source": "A major on record; C shapes are the common ukulele key"
+   },
+   "hey-soul-sister": {
+      "key": "C",
+      "sheetKey": "C",
+      "capo": 0,
+      "confidence": "high",
+      "source": "capo 2 on guitar sounds in D; ukulele chart played in C/no-capo shapes"
+   },
+   "the-house-of-the-rising-sun": {
+      "key": "Am",
+      "sheetKey": "Am",
+      "capo": 0,
+      "confidence": "high",
+      "source": "Animals arrangement in A minor (6/8)"
+   },
+   "take-me-home-country-roads": {
+      "key": "G",
+      "sheetKey": "G",
+      "capo": 0,
+      "confidence": "high",
+      "source": "recording is in A; G is the common no-capo ukulele key"
+   },
+   "perfect": {
+      "key": "G",
+      "sheetKey": "G",
+      "capo": 1,
+      "confidence": "high",
+      "source": "recording is in Ab; G shapes with capo 1 sound Ab"
+   },
+   "a-thousand-years": {
+      "key": "G",
+      "sheetKey": "G",
+      "capo": 3,
+      "confidence": "high",
+      "source": "recording is in Bb; G shapes with capo 3 sound Bb"
+   }
 }

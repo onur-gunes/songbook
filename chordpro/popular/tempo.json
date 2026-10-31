@@ -1,92 +1,110 @@
 {
- "stand-by-me": {
-  "bpm": 118,
-  "time": "4/4",
-  "strum": "downs-4-4",
-  "strum_confidence": "medium",
-  "strum_source": "classic bass-and-chord feel; downs on the pulse approximate the shuffle.",
-  "confidence": "high",
-  "source": "widely documented ~118 bpm"
- },
- "let-it-be": {
-  "bpm": 72,
-  "time": "4/4",
-  "strum": "dddudu-4-4",
-  "strum_confidence": "low",
-  "strum_source": "generic D D DU DU ballad pattern; approximation only.",
-  "confidence": "high",
-  "source": "widely documented ~72 bpm"
- },
- "im-yours": {
-  "bpm": 150,
-  "time": "4/4",
-  "strum": "dduudu-4-4",
-  "strum_confidence": "medium",
-  "strum_source": "reggae-pop upstroke feel; D DU UDU approximates the off-beat chop.",
-  "confidence": "high",
-  "source": "songbpm ~150 bpm"
- },
- "riptide": {
-  "bpm": 102,
-  "time": "4/4",
-  "strum": "dddudu-4-4",
-  "strum_confidence": "low",
-  "strum_source": "generic D D DU DU strum over the Am–G–C vamp; approximation only.",
-  "confidence": "high",
-  "source": "widely documented ~101-102 bpm"
- },
- "wonderwall": {
-  "bpm": 87,
-  "time": "4/4",
-  "strum": "ddudu-4-4",
-  "strum_confidence": "medium",
-  "strum_source": "the familiar D DU D DU rhythm-guitar strum; a reasonable per-song fit.",
-  "confidence": "high",
-  "source": "widely documented ~87 bpm"
- },
- "knockin-on-heavens-door": {
-  "bpm": 68,
-  "time": "4/4",
-  "strum": "dddudu-4-4",
-  "strum_confidence": "low",
-  "strum_source": "slow D D DU DU ballad strum; approximation only.",
-  "confidence": "high",
-  "source": "widely documented ~68 bpm"
- },
- "three-little-birds": {
-  "bpm": 76,
-  "time": "4/4",
-  "strum": "downs-4-4",
-  "strum_confidence": "medium",
-  "strum_source": "reggae upstroke chop in reality; downs on the pulse are a simplification.",
-  "confidence": "high",
-  "source": "widely documented ~75-76 bpm"
- },
- "hey-soul-sister": {
-  "bpm": 97,
-  "time": "4/4",
-  "strum": "dduudu-4-4",
-  "strum_confidence": "medium",
-  "strum_source": "signature ukulele D DU UDU chop; a good per-song fit.",
-  "confidence": "high",
-  "source": "widely documented ~97 bpm"
- },
- "the-house-of-the-rising-sun": {
-  "bpm": 72,
-  "time": "6/8",
-  "strum": "du-6-8",
-  "strum_confidence": "medium",
-  "strum_source": "arpeggiated 6/8 in the original; D . U per pulse approximates the rolling feel.",
-  "confidence": "high",
-  "source": "Animals arrangement, 6/8 at ~72 dotted-quarter bpm"
- },
- "take-me-home-country-roads": {
-  "bpm": 82,
-  "time": "4/4",
-  "strum": "dddudu-4-4",
-  "strum_confidence": "low",
-  "strum_source": "generic D D DU DU country-folk strum; approximation only.",
-  "confidence": "high",
-  "source": "widely documented ~82 bpm"
- }
+   "stand-by-me": {
+      "bpm": 118,
+      "time": "4/4",
+      "strum": "downs-4-4",
+      "strum_confidence": "medium",
+      "strum_source": "classic bass-and-chord feel; downs on the pulse approximate the shuffle.",
+      "confidence": "high",
+      "source": "widely documented ~118 bpm"
+   },
+   "let-it-be": {
+      "bpm": 72,
+      "time": "4/4",
+      "strum": "dddudu-4-4",
+      "strum_confidence": "low",
+      "strum_source": "generic D D DU DU ballad pattern; approximation only.",
+      "confidence": "high",
+      "source": "widely documented ~72 bpm"
+   },
+   "im-yours": {
+      "bpm": 150,
+      "time": "4/4",
+      "strum": "dduudu-4-4",
+      "strum_confidence": "medium",
+      "strum_source": "reggae-pop upstroke feel; D DU UDU approximates the off-beat chop.",
+      "confidence": "high",
+      "source": "songbpm ~150 bpm"
+   },
+   "riptide": {
+      "bpm": 102,
+      "time": "4/4",
+      "strum": "dddudu-4-4",
+      "strum_confidence": "low",
+      "strum_source": "generic D D DU DU strum over the Am–G–C vamp; approximation only.",
+      "confidence": "high",
+      "source": "widely documented ~101-102 bpm"
+   },
+   "wonderwall": {
+      "bpm": 87,
+      "time": "4/4",
+      "strum": "ddudu-4-4",
+      "strum_confidence": "medium",
+      "strum_source": "the familiar D DU D DU rhythm-guitar strum; a reasonable per-song fit.",
+      "confidence": "high",
+      "source": "widely documented ~87 bpm"
+   },
+   "knockin-on-heavens-door": {
+      "bpm": 68,
+      "time": "4/4",
+      "strum": "dddudu-4-4",
+      "strum_confidence": "low",
+      "strum_source": "slow D D DU DU ballad strum; approximation only.",
+      "confidence": "high",
+      "source": "widely documented ~68 bpm"
+   },
+   "three-little-birds": {
+      "bpm": 76,
+      "time": "4/4",
+      "strum": "downs-4-4",
+      "strum_confidence": "medium",
+      "strum_source": "reggae upstroke chop in reality; downs on the pulse are a simplification.",
+      "confidence": "high",
+      "source": "widely documented ~75-76 bpm"
+   },
+   "hey-soul-sister": {
+      "bpm": 97,
+      "time": "4/4",
+      "strum": "dduudu-4-4",
+      "strum_confidence": "medium",
+      "strum_source": "signature ukulele D DU UDU chop; a good per-song fit.",
+      "confidence": "high",
+      "source": "widely documented ~97 bpm"
+   },
+   "the-house-of-the-rising-sun": {
+      "bpm": 72,
+      "time": "6/8",
+      "strum": "du-6-8",
+      "strum_confidence": "medium",
+      "strum_source": "arpeggiated 6/8 in the original; D . U per pulse approximates the rolling feel.",
+      "confidence": "high",
+      "source": "Animals arrangement, 6/8 at ~72 dotted-quarter bpm"
+   },
+   "take-me-home-country-roads": {
+      "bpm": 82,
+      "time": "4/4",
+      "strum": "dddudu-4-4",
+      "strum_confidence": "low",
+      "strum_source": "generic D D DU DU country-folk strum; approximation only.",
+      "confidence": "high",
+      "source": "widely documented ~82 bpm"
+   },
+   "perfect": {
+      "bpm": 100,
+      "time": "4/4",
+      "strum": "dduudu-4-4",
+      "strum_confidence": "medium",
+      "strum_source": "gentle D DU UDU ballad strum; a reasonable per-song fit.",
+      "confidence": "high",
+      "source": "widely documented ~100 bpm"
+   },
+   "a-thousand-years": {
+      "bpm": 90,
+      "time": "4/4",
+      "strum": "dduudu-4-4",
+      "strum_confidence": "medium",
+      "strum_source": "gentle D DU UDU ballad strum; a reasonable per-song fit.",
+      "confidence": "high",
+      "source": "widely documented ~88-90 bpm"
+   }
 }

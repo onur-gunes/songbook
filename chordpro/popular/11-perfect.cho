@@ -1,0 +1,44 @@
+{title: Perfect}
+{artist: Ed Sheeran}
+{level: Easy}
+{duration: 4.23}
+{time: 4/4}
+
+{start_of_grid: Verse 1}
+| G | Em | C | D |
+{end_of_grid}
+
+{start_of_grid: Chorus}
+| G | Em | C | D |
+{end_of_grid}
+
+{start_of_grid: Bridge}
+| C | G | Am | C . D . |
+{end_of_grid}
+
+{start_of_grid: Final Chorus}
+| G | Em | C | D |
+{end_of_grid}
+
+{comment: Verse 1}
+[G]I found a love for me
+[Em]Darling, just dive right in
+[C]And follow my lead
+[D]Well I found a girl beautiful and sweet
+
+{comment: Chorus}
+[G]Baby I'm dancing in the dark
+[Em]With you between my arms
+[C]Barefoot on the grass
+[D]Listening to our favorite song
+
+{comment: Bridge}
+[C]Well I found a woman stronger than anyone I know
+[G]She shares my dreams
+[Am]I hope that someday I'll share her home
+
+{comment: Final Chorus}
+[G]Baby I'm dancing in the dark
+[Em]With you between my arms
+[C]Barefoot on the grass
+[D]Listening to our favorite song
