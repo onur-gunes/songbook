@@ -561,7 +561,9 @@
      * change that has words gets its own line anchored at that change's x, so a
      * chord always has one lyric line under it - never zero, never two. A word
      * split by a change ("West Vir" + "ginia") is glued onto the row of the
-     * change where it begins, so neither row starts in the middle of a word. */
+     * change where it begins, so neither row starts in the middle of a word.
+     * When a split word consumes a change's text, that change still gets an
+     * empty row at its own x so no chord is left without a line. */
     function buildPhraseRows(matched) {
         if (!matched) return [];
         var order = [], byLine = {};
@@ -586,6 +588,9 @@
                     // A word split across a change stays whole on one row.
                     cur.text = cur.text + text;
                     cur.raw = cur.raw + raw;
+                    // This change's text was glued onto the previous row; it
+                    // still needs its own row at its own x (empty text).
+                    p.consumed = true;
                 } else if (text || !cur) {
                     if (cur) rows.push(cur);
                     cur = { line: li, change: p.change, text: text, raw: raw };
@@ -594,6 +599,18 @@
             });
             if (cur) rows.push(cur);
         });
+
+        // Ensure every change gets a row, even if its text was glued onto a
+        // previous change's row (split word). Consumed changes get an empty
+        // row at their own x so no chord is left without a line.
+        var hasRow = {};
+        rows.forEach(function (row) { hasRow[row.change] = true; });
+        matched.changes.forEach(function (change, ci) {
+            if (!hasRow[ci]) {
+                rows.push({ line: -1, change: ci, text: '', raw: '', empty: true });
+            }
+        });
+
         return rows;
     }
 
@@ -638,6 +655,17 @@
         here.forEach(function (row) {
             var node = SB.el('span', 'grid-lyric', row.text);
             node.style.marginLeft = row.x + 'px';
+            if (row.empty) {
+                // Change consumed its text into a previous row (split word);
+                // keep an empty marker at its own x so the chord isn't skipped.
+                node.classList.add('grid-lyric-empty');
+                node.style.width = '0px';
+                node.style.height = '0px';
+                node.style.padding = '0';
+                node.style.marginLeft = row.x + 'px';
+                layer.appendChild(node);
+                return;
+            }
             // The row is just as wide as its text (plus right padding), so it
             // stays under its own chord column rather than stretching across
             // the whole system.
