@@ -30,12 +30,25 @@
     var activeGrid = null;      // { song, beatsPerBar, totalBeats, bpm, ... }
     var cursorRaf = null;
     var lastBeat = -1;
-    var lastSystem = null;
 
     /* ---------------- helpers ---------------- */
 
+    /* A song can carry an authored grid, or one can be built from the sheet:
+     * the lyric lines already mark every chord change, so a chart only needs
+     * the metre. Songs without a `time` keep the old "no grid" behaviour
+     * because there is no honest beat count to invent. */
+    function songHasChanges(song) {
+        return (song.sheet || []).some(function (line) {
+            return line.some(function (seg) {
+                return seg[0] === 'c' && tokenChord(seg[1]);
+            });
+        });
+    }
+
     function hasGrid(song) {
-        return !!(song && song.grid && song.grid.length);
+        if (!song) return false;
+        if (song.grid && song.grid.length) return true;
+        return !!song.time && songHasChanges(song);
     }
     SB.songHasGrid = hasGrid;
 
@@ -89,7 +102,7 @@
     function isSectionHeader(text) {
         var t = String(text == null ? '' : text).trim().toLowerCase();
         if (!t) return false;
-        return /(^|[\s(])(intro|verse|chorus|bridge|pre-?chorus|outro|interlude|instrumental|solo|riff|refrain|hook|coda|tag)([\s):,]|$)/.test(t);
+        return /(^|[\s(])(intro|verse|chorus|bridge|pre-?chorus|outro|interlude|instrumental|solo|riff|refrain|hook|coda|tag)([\s):,/]|$)/.test(t);
     }
 
     function sheetSections(song) {
@@ -141,31 +154,52 @@
         return changes;
     }
 
-    function sectionLines(section) {
-        var lines = [];
+    /* One section's lyric lines and chord changes. A change is the unit the
+     * layout anchors to; a line keeps its own pieces so a whole lyric line can
+     * be rebuilt as one readable row. */
+    function sectionModel(section) {
+        var model = { name: section.name, lines: [], changes: [] };
+        var lineIndex = 0;
         section.lines.forEach(function (line) {
-            var changes = lineChanges(line);
-            if (changes.length) lines.push({ changes: changes });
+            if (!line.length) return;
+            var raw = lineChanges(line);
+            var row = { index: lineIndex++, parts: [] };
+            if (!raw.length) {
+                // A lyric-only line (no chord change) still belongs in the
+                // chart; anchor it at the left edge under its system.
+                var text = lineLyricText(line).replace(/\s+/g, ' ').trim();
+                if (text) {
+                    row.parts.push({ change: null, text: text, raw: text });
+                    model.lines.push(row);
+                }
+                return;
+            }
+            raw.forEach(function (ch) {
+                var prev = model.changes[model.changes.length - 1];
+                var ci;
+                if (prev && prev.chord === ch.chord) {
+                    ci = prev.index;
+                    prev.parts.push({ line: row.index, text: ch.text });
+                } else {
+                    ci = model.changes.length;
+                    model.changes.push({
+                        index: ci, chord: ch.chord,
+                        parts: [{ line: row.index, text: ch.text }]
+                    });
+                }
+                row.parts.push({ change: ci, text: ch.text, raw: ch.text });
+            });
+            model.lines.push(row);
         });
-        return lines;
+        return model;
     }
 
-    /* Collapse the sheet's chord tokens into changes (a repeated token is the
-     * same chord still ringing). A change keeps every line piece that carries
-     * it, because a chord held across a line break belongs to both lines. */
-    function sectionChanges(lines) {
-        var changes = [];
-        lines.forEach(function (line, li) {
-            line.changes.forEach(function (ch) {
-                var prev = changes[changes.length - 1];
-                if (prev && prev.chord === ch.chord) {
-                    prev.parts.push({ line: li, text: ch.text });
-                    return;
-                }
-                changes.push({ chord: ch.chord, parts: [{ line: li, text: ch.text }] });
-            });
+    function lineLyricText(line) {
+        var text = '';
+        line.forEach(function (seg) {
+            if (isLyricKind(seg[0])) text += seg[1];
         });
-        return changes;
+        return text;
     }
 
     function blockChanges(block) {
@@ -182,40 +216,156 @@
         return changes;
     }
 
-    function labelMatches(label, name) {
-        var n = String(name || '').toLowerCase();
-        if (!n) return false;
-        return String(label || '').toLowerCase().split(/[\/&,]/).some(function (p) {
-            p = p.trim();
-            return !!p && n.indexOf(p) !== -1;
-        });
+    /* How strongly a block label describes a sheet section. The chord
+     * progression is the real match; the label only breaks ties. */
+    function labelScore(label, name) {
+        var a = String(label || '').toLowerCase().trim();
+        var b = String(name || '').toLowerCase().trim();
+        if (!a || !b) return 0;
+        if (a === b) return 3;
+        var parts = a.split(/[\/&,]/).map(function (p) { return p.trim(); }).filter(Boolean);
+        if (parts.indexOf(b) !== -1) return 2;
+        for (var i = 0; i < parts.length; i++) {
+            if (b.indexOf(parts[i]) !== -1) return 1;
+        }
+        return 0;
     }
 
-    function matchSection(song, block) {
-        var grid = blockChanges(block);
-        if (grid.length < 2) return null;
+    function progressionAt(changes, prog, at) {
+        if (at + prog.length > changes.length) return false;
+        for (var i = 0; i < prog.length; i++) {
+            if (changes[at + i].chord !== prog[i]) return false;
+        }
+        return true;
+    }
+
+    /* A progression template that starts the section, preferring an unused
+     * block (so two identical Choruses can use their own authored bars) and
+     * an exact full-section match. */
+    function matchTemplate(blocks, used, section, changes) {
+        if (!changes.length) return null;
         var best = null;
-        sheetSections(song).forEach(function (section) {
-            var lines = sectionLines(section);
-            var changes = sectionChanges(lines);
-            if (changes.length < grid.length) return;
-            for (var i = 0; i < grid.length; i++) {
-                if (changes[i].chord !== grid[i]) return;
-            }
-            var exact = changes.length === grid.length;
-            var label = labelMatches(block.label, section.name);
-            // Exact full-section match beats a prefix; a label match breaks
-            // ties between sections that share the same changes.
-            if (!best || (exact && !best.exact) ||
-                (exact === best.exact && label && !best.label)) {
-                best = {
-                    section: section, changes: changes,
-                    exact: exact, label: label
-                };
+        blocks.forEach(function (block, bi) {
+            var prog = blockChanges(block);
+            if (!prog.length || !progressionAt(changes, prog, 0)) return;
+            var exact = changes.length === prog.length;
+            var score = (exact ? 100 : 0) + labelScore(block.label, section.name) * 10 -
+                (used[bi] ? 1 : 0);
+            if (!best || score > best.score) {
+                best = { block: block, index: bi, prog: prog, score: score };
             }
         });
         return best;
     }
+
+    /* Repeat a progression until it covers the section (a verse that runs the
+     * same four-bar loop twice), collapsing held chords across the join
+     * exactly as the renderer does. Returns null when the section is a
+     * different arrangement, so the caller falls back to a chart built from
+     * the sheet rather than showing the wrong bars. */
+    /* The change sequence a list of bars plays, with a chord held across a bar
+     * line counted once (the same collapse the renderer uses). */
+    function barsToChanges(bars) {
+        var seq = [], prev = null;
+        bars.forEach(function (bar) {
+            (bar.beats || []).forEach(function (seg) {
+                var chord = tokenChord(seg.chord);
+                if (chord !== prev) { seq.push(chord); prev = chord; }
+            });
+        });
+        return seq;
+    }
+
+    /* Repeat a progression until it covers the section (a verse that runs the
+     * same four-bar loop twice), cutting the last repetition at a bar line when
+     * the song stops mid-loop ("down country roads" after the chorus). Returns
+     * null when the section is a different arrangement, so the caller falls
+     * back to a chart built from the sheet rather than showing wrong bars. */
+    function tileBars(block, prog, changes) {
+        var authored = block.bars || [];
+        if (!authored.length || !changes.length) return null;
+        var want = changes.map(function (c) { return c.chord; });
+        var reps = Math.ceil(changes.length / prog.length) + 1;
+        var bars = [];
+        for (var r = 0; r < reps; r++) {
+            authored.forEach(function (bar) { bars.push(bar); });
+            // The smallest prefix that plays exactly the section's changes wins,
+            // so a partial final loop keeps its repeat signs without inventing
+            // bars past the last lyric.
+            for (var k = 1; k <= bars.length; k++) {
+                var seq = barsToChanges(bars.slice(0, k));
+                if (seq.length !== want.length) continue;
+                var ok = true;
+                for (var i = 0; i < want.length; i++) {
+                    if (seq[i] !== want[i]) { ok = false; break; }
+                }
+                if (ok) return { bars: bars.slice(0, k), tiles: r + 1 };
+            }
+        }
+        return null;
+    }
+
+    /* One bar per chord change, with the metre's full count. This is the
+     * no-author fallback: the lyrics already say where the changes are, and
+     * one chord per bar is the clearest honest default. */
+    function autoBars(model, beatsPerBar) {
+        return model.changes.map(function (ch) {
+            return { beats: [{ chord: ch.chord, beats: beatsPerBar }] };
+        });
+    }
+
+    /* Build the complete chart from the sheet. Authored blocks are used as
+     * templates where their progression fits the section; every other section
+     * gets an automatic chart, so no song needs a hand-written grid. */
+    function gridBlocksFor(song) {
+        var beatsPerBar = SB.metronomeBeatsPerBar(song.time);
+        var authored = song.grid || [];
+        var used = {};
+        var out = [];
+
+        sheetSections(song).forEach(function (section) {
+            var model = sectionModel(section);
+            if (!model.changes.length && !model.lines.length) return;
+            var match = matchTemplate(authored, used, section, model.changes);
+            if (match) {
+                var tiled = tileBars(match.block, match.prog, model.changes);
+                if (tiled) {
+                    used[match.index] = true;
+                    out.push({
+                        label: section.name || match.block.label || '',
+                        bars: tiled.bars,
+                        repeat: !!match.block.repeat,
+                        model: model
+                    });
+                    return;
+                }
+            }
+            var bars = autoBars(model, beatsPerBar);
+            if (bars.length) {
+                out.push({
+                    label: section.name || '',
+                    bars: bars,
+                    repeat: false,
+                    model: model
+                });
+            }
+        });
+
+        // An instrumental song can still carry an authored chart even when the
+        // sheet has no sections to attach it to.
+        if (!out.length && authored.length) {
+            out = authored.map(function (block) {
+                return {
+                    label: block.label || '',
+                    bars: block.bars || [],
+                    repeat: !!block.repeat,
+                    model: null
+                };
+            });
+        }
+        return out;
+    }
+    SB.gridBlocksFor = gridBlocksFor;
 
     /* ---------------- cursor ---------------- */
 
@@ -232,7 +382,6 @@
     function resetCursor() {
         if (cursorRaf !== null) { cancelAnimationFrame(cursorRaf); cursorRaf = null; }
         clearActive();
-        lastSystem = null;
         if (activeGrid && activeGrid.wrap) {
             activeGrid.phase = 'idle';
             activeGrid.wrap.dataset.gridPhase = 'idle';
@@ -255,12 +404,23 @@
 
     SB.gridReset = resetCursor;
 
-    function scrollSystemIntoView(el) {
+    /* Keep the current beat visible. Scrolling the whole system was wrong for
+     * a system taller than the viewport: after the first nudge the cursor could
+     * walk off the bottom and never come back. Scroll to the beat itself, and
+     * pan a system that has overflowed horizontally (a long lyric phrase on a
+     * phone) so the highlight cannot sit off-screen. */
+    function scrollBeatIntoView(el) {
         if (!el) return;
         var system = el.closest ? el.closest('.grid-system') : null;
-        if (!system || system === lastSystem) return;
-        lastSystem = system;
-        var r = system.getBoundingClientRect();
+        if (system && system.scrollWidth > system.clientWidth) {
+            var sr = system.getBoundingClientRect();
+            var br = el.getBoundingClientRect();
+            if (br.left < sr.left || br.right > sr.right) {
+                system.scrollLeft += (br.left - sr.left) -
+                    (sr.width - br.width) / 2;
+            }
+        }
+        var r = el.getBoundingClientRect();
         var topbar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topbar-h')) || 0;
         var visibleTop = topbar + 8;
         var visibleBottom = window.innerHeight - 24;
@@ -279,7 +439,7 @@
         activeGrid.wrap.dataset.activeBeat = String(idx);
         // The continuous auto-scroll already follows the music. Nudging here
         // too would fight it, so only step in when the transport is manual.
-        if (!SB.state.scrollState.playing) scrollSystemIntoView(activeGrid.beatEls[idx]);
+        if (!SB.state.scrollState.playing) scrollBeatIntoView(activeGrid.beatEls[idx]);
     }
 
     /* One repaint loop, driven by the metronome's audio clock. rAF is only a
@@ -394,6 +554,107 @@
         return systems;
     }
 
+    /* Split bars that cannot fit on one system into roughly equal systems.
+     * Greedy packing filled the first system and left a lone bar on the last
+     * line, which read as a stray chord; balancing keeps the leftover bars
+     * together. */
+    function splitBars(bars, avail) {
+        var widths = bars.map(function (bar) { return bar.width; });
+        var total = widths.reduce(function (n, w) { return n + w; }, 0);
+        var want = Math.max(1, Math.ceil(total / avail));
+        if (want === 1) return [bars];
+        var target = total / want;
+        var out = [], cur = [], curW = 0, left = bars.length;
+        bars.forEach(function (bar) {
+            var groupsLeft = want - out.length;
+            if (cur.length && (curW + bar.width > avail ||
+                (curW + bar.width > target && left >= groupsLeft))) {
+                out.push(cur);
+                cur = [];
+                curW = 0;
+            }
+            cur.push(bar);
+            curW += bar.width;
+            left--;
+        });
+        if (cur.length) out.push(cur);
+        return out;
+    }
+
+    /* A lyric-driven chart puts one sheet line (and the bars for its changes)
+     * on each system. Greedy width packing alone scattered a line's words under
+     * a different system from its chords whenever a progression held a chord
+     * across two bars. Grouping by the lines' first changes keeps "moon is the
+     * only light" directly beneath the D/E/A bars it belongs to, which is the
+     * whole point of the chart. A line that shares a chord with the line above
+     * is stacked under the same system; a group that is still too wide for the
+     * screen is split, and the line stays under the first half. */
+    function groupSystems(specs, model, avail) {
+        var changeBar = {};
+        specs.forEach(function (spec, bi) {
+            spec.segments.forEach(function (seg) {
+                if (seg.changeIndex >= 0) changeBar[seg.changeIndex] = bi;
+            });
+        });
+
+        var groups = [], cursor = 0;
+        model.lines.forEach(function (line) {
+            var first = Infinity, last = -1;
+            line.parts.forEach(function (part) {
+                if (part.change == null) return;
+                if (part.change < first) first = part.change;
+                if (part.change > last) last = part.change;
+            });
+            if (last < 0 || last < cursor) {
+                // A lyric-only line, or one that only repeats a chord already
+                // rendered above: keep it under the same bars.
+                if (groups.length) groups[groups.length - 1].lines.push(line);
+                else groups.push({ first: cursor, last: cursor - 1, lines: [line] });
+                return;
+            }
+            var prev = groups[groups.length - 1];
+            if (prev && first < cursor) {
+                // The line opens on the chord that closed the line above (a
+                // held G ringing across the line break). It belongs under the
+                // same bars, and its new changes extend that system.
+                prev.lines.push(line);
+                prev.last = Math.max(prev.last, last);
+                cursor = prev.last + 1;
+                return;
+            }
+            groups.push({ first: cursor, last: last, lines: [line] });
+            cursor = last + 1;
+        });
+
+        var systems = [], cur = [], curW = 0;
+        function flush() {
+            if (cur.length) { systems.push(cur); cur = []; curW = 0; }
+        }
+        groups.forEach(function (group) {
+            var startBar = changeBar[group.first];
+            if (startBar == null) startBar = 0;
+            var nextBar = specs.length;
+            for (var ci = group.last + 1; ci < group.first + specs.length + 1; ci++) {
+                if (changeBar[ci] != null) { nextBar = changeBar[ci]; break; }
+            }
+            var bars = specs.slice(startBar, nextBar);
+            if (!bars.length) bars = specs.slice(startBar, startBar + 1);
+            var width = bars.reduce(function (n, bar) { return n + bar.width; }, 0);
+            if (width > avail) {
+                // The group alone is wider than the screen: split it evenly and
+                // let the lyric row sit under the first part.
+                flush();
+                splitBars(bars, avail).forEach(function (part) { systems.push(part); });
+                return;
+            }
+            if (cur.length && curW + width > avail) flush();
+            cur = cur.concat(bars);
+            curW += width;
+        });
+        flush();
+        return systems.length ? systems : packBars(specs, avail);
+    }
+
     /* Where each chord change sits inside one system, keyed by the block's
      * change index. The lyric layout needs these positions before it can
      * decide which system a sheet line belongs to. */
@@ -423,19 +684,21 @@
         return s;
     }
 
-    /* The lyric phrase that starts at each change, measured in the lyric face.
-     * A change can carry one phrase per sheet line (a chord held across a line
-     * break belongs to both lines), so keep the widest. The bar widths are
-     * then derived from these, which lets the same layout work for songs with
-     * long and short lines instead of a fixed column width. */
-    function phraseWidths(matched, measurer) {
+    /* The lyric text that starts at each change, measured in the lyric face.
+     * A change can carry text from more than one sheet line (a chord held
+     * across a line break belongs to both), so keep the widest. The bar widths
+     * derive from these, which lets a long phrase reserve its column while a
+     * short one stays narrow. */
+    function changeWidths(model, measurer) {
         var byChange = {};
-        if (!matched) return byChange;
-        matched.changes.forEach(function (change, ci) {
-            change.parts.forEach(function (part) {
+        if (!model) return byChange;
+        model.lines.forEach(function (line) {
+            line.parts.forEach(function (part) {
+                if (part.change == null) return;
                 var text = String(part.text || '').replace(/\s+/g, ' ').trim();
                 if (!text) return;
-                byChange[ci] = Math.max(byChange[ci] || 0, measurer.width(text));
+                byChange[part.change] = Math.max(byChange[part.change] || 0,
+                    measurer.width(text));
             });
         });
         return byChange;
@@ -557,116 +820,113 @@
         };
     }
 
-    /* Build one lyric row per chord change (not one row per sheet line). Each
-     * change that has words gets its own line anchored at that change's x, so a
-     * chord always has one lyric line under it - never zero, never two. The
-     * text that follows a change (up to the next change) sits on that change's
-     * row, so you can tell exactly which syllable each chord change lands on.
-     * Words split by a change ("West Vir" + "ginia") appear split across their
-     * rows - that's intentional: it marks the change point inside the word. */
-    function buildPhraseRows(matched) {
-        if (!matched) return [];
-        var order = [], byLine = {};
-        matched.changes.forEach(function (change, ci) {
-            change.parts.forEach(function (part) {
-                var li = part.line;
-                if (byLine[li] == null) { byLine[li] = []; order.push(li); }
-                byLine[li].push({ change: ci, part: part });
-            });
-        });
-        order.sort(function (a, b) { return a - b; });
-
-        var rows = [];
-        order.forEach(function (li) {
-            var parts = byLine[li];
-            parts.forEach(function (p) {
-                var raw = String(p.part.text || '');
-                var text = raw.replace(/\s+/g, ' ').trim();
-                if (text || parts.length === 1) {
-                    rows.push({ line: li, change: p.change, text: text, raw: raw });
+    /* Put each lyric line under the system that holds its first chord change.
+     * Lines with no chords continue under the previous system at the left
+     * edge, so no lyric line is dropped just because it has no chord. */
+    function assignLineGeometry(lines, geometry) {
+        var last = 0;
+        lines.forEach(function (line) {
+            var found = null;
+            for (var p = 0; p < line.parts.length && !found; p++) {
+                var change = line.parts[p].change;
+                if (change == null) continue;
+                for (var si = 0; si < geometry.length; si++) {
+                    var x = geometry[si].byChange[change];
+                    if (x != null) {
+                        found = { system: si, x: x };
+                        break;
+                    }
                 }
-            });
-        });
-
-        // Ensure every change gets a row, even if it has no following text.
-        // Changes with no text get an empty row at their own x so no chord is
-        // left without a line.
-        var hasRow = {};
-        rows.forEach(function (row) { hasRow[row.change] = true; });
-        matched.changes.forEach(function (change, ci) {
-            if (!hasRow[ci]) {
-                rows.push({ line: -1, change: ci, text: '', raw: '', empty: true });
+            }
+            if (found) {
+                line.system = found.system;
+                line.x = found.x;
+                last = found.system;
+            } else {
+                line.system = last;
+                line.x = 0;
             }
         });
-
-        return rows;
     }
 
-    /* Derive per-change lyric widths from the rows so columns are sized for
-     * each change's own text (not glued-together words), so columns stay
-     * narrow enough to read cleanly but wide enough for their own phrase. */
-    function rowsToWidths(rows, measurer) {
-        var byChange = {};
-        rows.forEach(function (row) {
-            var w = measurer.width(row.text);
-            byChange[row.change] = Math.max(byChange[row.change] || 0, w);
-        });
-        return byChange;
-    }
-
-    /* After bar specs and geometry exist, attach each row to the system that
-     * holds its change and anchor it at that change's x. */
-    function assignRowGeometry(rows, geometry) {
-        rows.forEach(function (row) {
-            geometry.forEach(function (geom, si) {
-                var x = geom.byChange[row.change];
-                if (x != null) { row.system = si; row.x = x; }
-            });
-        });
-    }
-
-    /* Lay one phrase row per chord change. The phrase starts at its change's x
-     * and is just wide enough for its text; the bar column has already been
-     * widened by rowsToWidths + CHANGE_PAD, so the row fits cleanly under its
-     * diagram instead of bleeding into the next bar. */
-    function buildLyricLayer(system, geom, rows, si, avail, measurer) {
-        var here = rows.filter(function (row) { return row.system === si; });
+    /* One row per sheet line. The row is rebuilt from the line's own pieces
+     * and each piece is nudged to its chord change's x, so "Country roads,
+     * take me home" stays on one line with "home" under D instead of breaking
+     * into one stacked fragment per chord. When the line cannot fit with its
+     * anchors intact (a phone, or a long line on a short system) it falls back
+     * to continuous wrapping text rather than a squeezed column. */
+    function buildLyricLayer(system, geom, lines, si, avail, measurer) {
+        var here = lines.filter(function (line) { return line.system === si; });
         if (!here.length) return;
-        here.sort(function (a, b) {
-            return a.line === b.line ? a.x - b.x : a.line - b.line;
-        });
+        here.sort(function (a, b) { return a.index - b.index; });
+
         var layerW = Math.max(geom.width +
             (system.classList.contains('has-repeat-end') ? REPEAT_W : 0), avail);
         var layer = SB.el('div', 'grid-lyrics');
         layer.style.width = layerW + 'px';
+        var spaceW = measurer.width(' ');
 
-        here.forEach(function (row) {
-            var node = SB.el('span', 'grid-lyric', row.text);
-            node.style.marginLeft = row.x + 'px';
-            if (row.empty) {
-                // Change consumed its text into a previous row (split word);
-                // keep an empty marker at its own x so the chord isn't skipped.
-                node.classList.add('grid-lyric-empty');
-                node.style.width = '0px';
-                node.style.height = '0px';
-                node.style.padding = '0';
-                node.style.marginLeft = row.x + 'px';
-                layer.appendChild(node);
-                return;
+        here.forEach(function (line) {
+            var rowStart = line.x || 0;
+            var availW = layerW - rowStart - LYRIC_PAD_RIGHT;
+            if (availW <= 0) { rowStart = 0; availW = layerW - LYRIC_PAD_RIGHT; }
+
+            var segments = [], x = 0, prevRaw = '', aligned = true;
+            line.parts.forEach(function (part) {
+                var raw = String(part.text || '');
+                var text = raw.replace(/\s+/g, ' ').trim();
+                if (!text) return;
+                var anchor = part.change == null ? null : geom.byChange[part.change];
+                var rel = anchor == null ? null : anchor - rowStart;
+                if (rel == null) aligned = false;
+                // A word split by a change ("West Vir" + "ginia") must not gain
+                // a space or jump to an anchor inside itself.
+                var joined = !!prevRaw && !/\s$/.test(prevRaw) && !/^\s/.test(raw);
+                var start, space = false;
+                if (!segments.length) {
+                    start = (rel == null || rel < 0) ? 0 : rel;
+                } else if (joined) {
+                    start = x;
+                } else {
+                    var natural = x + spaceW;
+                    start = (rel == null || rel < natural) ? natural : rel;
+                    space = true;
+                }
+                var width = measurer.width(text);
+                segments.push({ text: text, start: start, width: width, space: space });
+                x = start + width;
+                prevRaw = raw;
+            });
+            if (!segments.length) return;
+
+            var row = SB.el('span', 'grid-lyric');
+            row.style.marginLeft = rowStart + 'px';
+            row.style.width = (layerW - rowStart) + 'px';
+            if (aligned && x <= availW + 0.5) {
+                // Phrases fit with their anchors intact; keep them on one line
+                // so wrapping cannot undo the alignment.
+                row.classList.add('is-aligned');
+                var prevEnd = 0;
+                segments.forEach(function (seg) {
+                    if (seg.space) {
+                        row.appendChild(document.createTextNode(' '));
+                        prevEnd += spaceW;
+                    }
+                    var sp = SB.el('span', 'grid-phrase', seg.text);
+                    sp.style.marginLeft = Math.max(0, seg.start - prevEnd) + 'px';
+                    row.appendChild(sp);
+                    prevEnd = seg.start + seg.width;
+                });
+            } else {
+                // Too long for this width: a continuous line that wraps is
+                // more useful than broken alignment.
+                row.textContent = line.parts.map(function (part) {
+                    return String(part.text || '');
+                }).join('').replace(/\s+/g, ' ').trim();
             }
-            // The row is just as wide as its text (plus right padding), so it
-            // stays under its own chord column rather than stretching across
-            // the whole system.
-            var textW = measurer.width(row.text);
-            node.style.width = (textW + LYRIC_PAD_RIGHT) + 'px';
-            // A phrase that cannot reach the next change (only on a narrow
-            // screen) is better read as a continuous line from the left edge.
-            if (textW > layerW - row.x - LYRIC_PAD_RIGHT) {
-                node.style.marginLeft = '0px';
-                node.style.width = (layerW - LYRIC_PAD_RIGHT) + 'px';
-            }
-            layer.appendChild(node);
+            layer.appendChild(row);
         });
+
         system.appendChild(layer);
     }
 
@@ -710,25 +970,27 @@
         var frag = document.createDocumentFragment();
         var lyricSections = [];
         var measurer = makeMeasurer(wrap);
+        var blocks = gridBlocksFor(song);
 
-        song.grid.forEach(function (block) {
-            var matched = matchSection(song, block);
-            if (matched) lyricSections.push(matched.section.name);
-            var rows = buildPhraseRows(matched);
-            var lyricW = rowsToWidths(rows, measurer);
+        blocks.forEach(function (block) {
+            var model = block.model;
+            if (block.label) lyricSections.push(block.label);
+            var lyricW = model ? changeWidths(model, measurer) : {};
             var changeState = { prev: null, index: -1 };
-            var specs = block.bars.map(function (bar) {
-                var spec = buildBarSpec(bar, song, ctx, changeState, lyricW);
-                return spec;
+            var specs = (block.bars || []).map(function (bar) {
+                return buildBarSpec(bar, song, ctx, changeState, lyricW);
             });
             // Repeat signs are flex items too, so reserve their width before
             // packing or a repeated block overflows its system by 24px.
             var packAvail = Math.max(ctx.beatW * 2, avail - (block.repeat ? REPEAT_W * 2 : 0));
-            var systems = packBars(specs, packAvail);
+            // A chart with lyrics groups bars by lyric line, so every line sits
+            // under the bars for its own changes. An authored chart without a
+            // matching sheet section just packs by width.
+            var systems = model ? groupSystems(specs, model, packAvail) : packBars(specs, packAvail);
             var geom = systems.map(function (bars, si) {
                 return systemGeometry(bars, (block.repeat && si === 0) ? REPEAT_W : 0);
             });
-            assignRowGeometry(rows, geom);
+            if (model) assignLineGeometry(model.lines, geom);
             var section = SB.el('div', 'grid-section');
             // One label per block, not one per system: a block that reflows
             // onto a second line would otherwise print its name twice.
@@ -750,7 +1012,7 @@
                     system.classList.add('has-repeat-end');
                     system.appendChild(repeatSign('end', ctx.barH));
                 }
-                buildLyricLayer(system, geom[si], rows, si, avail, measurer);
+                if (model) buildLyricLayer(system, geom[si], model.lines, si, avail, measurer);
                 section.appendChild(system);
             });
             frag.appendChild(section);
