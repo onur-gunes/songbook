@@ -640,11 +640,13 @@
             var bars = specs.slice(startBar, nextBar);
             if (!bars.length) bars = specs.slice(startBar, startBar + 1);
             var width = bars.reduce(function (n, bar) { return n + bar.width; }, 0);
+            // Never split a lyric group across systems: splitting would drop
+            // the line's later chord-anchored phrases (only the first
+            // sub-system renders the line). If the group is wider than the
+            // screen, give it its own system and let it scroll horizontally.
             if (width > avail) {
-                // The group alone is wider than the screen: split it evenly and
-                // let the lyric row sit under the first part.
                 flush();
-                splitBars(bars, avail).forEach(function (part) { systems.push(part); });
+                systems.push(bars);
                 return;
             }
             if (cur.length && curW + width > avail) flush();
@@ -860,25 +862,22 @@
         if (!here.length) return;
         here.sort(function (a, b) { return a.index - b.index; });
 
-        var layerW = Math.max(geom.width +
-            (system.classList.contains('has-repeat-end') ? REPEAT_W : 0), avail);
+        var layerW = geom.width +
+            (system.classList.contains('has-repeat-end') ? REPEAT_W : 0);
         var layer = SB.el('div', 'grid-lyrics');
         layer.style.width = layerW + 'px';
         var spaceW = measurer.width(' ');
 
         here.forEach(function (line) {
             var rowStart = line.x || 0;
-            var availW = layerW - rowStart - LYRIC_PAD_RIGHT;
-            if (availW <= 0) { rowStart = 0; availW = layerW - LYRIC_PAD_RIGHT; }
 
-            var segments = [], x = 0, prevRaw = '', aligned = true;
+            var segments = [], x = 0, prevRaw = '';
             line.parts.forEach(function (part) {
                 var raw = String(part.text || '');
                 var text = raw.replace(/\s+/g, ' ').trim();
                 if (!text) return;
                 var anchor = part.change == null ? null : geom.byChange[part.change];
                 var rel = anchor == null ? null : anchor - rowStart;
-                if (rel == null) aligned = false;
                 // A word split by a change ("West Vir" + "ginia") must not gain
                 // a space or jump to an anchor inside itself.
                 var joined = !!prevRaw && !/\s$/.test(prevRaw) && !/^\s/.test(raw);
@@ -889,7 +888,11 @@
                     start = x;
                 } else {
                     var natural = x + spaceW;
-                    start = (rel == null || rel < natural) ? natural : rel;
+                    // Always anchor at the chord change when one exists; never
+                    // push a phrase right just because the previous phrase was
+                    // wide. On narrow screens phrases may overflow their bars,
+                    // but chord alignment is preserved.
+                    start = rel == null ? natural : rel;
                     space = true;
                 }
                 var width = measurer.width(text);
@@ -902,28 +905,18 @@
             var row = SB.el('span', 'grid-lyric');
             row.style.marginLeft = rowStart + 'px';
             row.style.width = (layerW - rowStart) + 'px';
-            if (aligned && x <= availW + 0.5) {
-                // Phrases fit with their anchors intact; keep them on one line
-                // so wrapping cannot undo the alignment.
-                row.classList.add('is-aligned');
-                var prevEnd = 0;
-                segments.forEach(function (seg) {
-                    if (seg.space) {
-                        row.appendChild(document.createTextNode(' '));
-                        prevEnd += spaceW;
-                    }
-                    var sp = SB.el('span', 'grid-phrase', seg.text);
-                    sp.style.marginLeft = Math.max(0, seg.start - prevEnd) + 'px';
-                    row.appendChild(sp);
-                    prevEnd = seg.start + seg.width;
-                });
-            } else {
-                // Too long for this width: a continuous line that wraps is
-                // more useful than broken alignment.
-                row.textContent = line.parts.map(function (part) {
-                    return String(part.text || '');
-                }).join('').replace(/\s+/g, ' ').trim();
-            }
+            row.classList.add('is-aligned');
+            var prevEnd = 0;
+            segments.forEach(function (seg) {
+                if (seg.space) {
+                    row.appendChild(document.createTextNode(' '));
+                    prevEnd += spaceW;
+                }
+                var sp = SB.el('span', 'grid-phrase', seg.text);
+                sp.style.marginLeft = Math.max(0, seg.start - prevEnd) + 'px';
+                row.appendChild(sp);
+                prevEnd = seg.start + seg.width;
+            });
             layer.appendChild(row);
         });
 
