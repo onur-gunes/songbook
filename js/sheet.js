@@ -95,7 +95,9 @@
      * mode stays set (so the next grid song opens in it) but the sheet falls
      * back to the normal inline view. */
     SB.renderSheet = function (song) {
-        var hasGrid = !!(song && song.grid && song.grid.length);
+        // A song may carry an authored grid, or one can be derived from its
+        // chord changes (see SB.songHasGrid in js/grid.js).
+        var hasGrid = SB.songHasGrid ? SB.songHasGrid(song) : !!(song && song.grid && song.grid.length);
         if (SB.state.chordMode === 'grid' && hasGrid && SB.renderSheetGrid) {
             SB.renderSheetGrid(song);
             return;

@@ -58,7 +58,8 @@
         var btn = document.querySelector('.chord-mode-btn[data-chord-mode="grid"]');
         if (!btn) return;
         var song = SB.state.currentSong;
-        var has = !!(song && song.grid && song.grid.length);
+        // Authored grid or one derived from the sheet's chord changes.
+        var has = SB.songHasGrid ? SB.songHasGrid(song) : !!(song && song.grid && song.grid.length);
         btn.disabled = !has;
         var label = has
             ? 'Grid chord chart'
