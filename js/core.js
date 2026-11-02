@@ -65,6 +65,14 @@
     SB.RECENT_KEY = SB.NS + ':recent';
     SB.RECENT_MAX = 15;
 
+    /* Runtime fallbacks for songs whose songbook entry has no tempo or metre.
+     * They make the metronome and strum controls usable on every song without
+     * changing the song data: the default is only shown until the user adjusts
+     * it, at which point the per-song override is stored as usual. Keep these
+     * in step with the README's tempo/metre section. */
+    SB.DEFAULT_BPM = 100;
+    SB.DEFAULT_TIME = '4/4';
+
     /* ---------------- shared state ----------------
      * Every value read or written by more than one section lives here, so
      * the sections can be split into separate files later without relying
@@ -106,16 +114,17 @@
         scrollState: { raf: null, last: 0, pos: 0, playing: false, started: false, finished: false, lastY: null },
         scrollSpeed: 1,
 
-        /* metronome — bpm is null until a song with tempo data is opened or
-         * the user sets one; beats is the meter's beats per bar, used to
-         * accent beat 1. See js/metronome.js. */
+        /* metronome — bpm starts null but loadMetronomeForSong always fills it
+         * with the song's tempo or DEFAULT_BPM, so the control is available on
+         * every song; beats is the meter's beats per bar, used to accent beat
+         * 1. See js/metronome.js. */
         metronome: { playing: false, bpm: null, beats: 4 },
 
         /* strum — the pattern chosen for the current song (a pattern object
-         * from the library, or null when the song has no time signature and so
-         * no selector), plus how the row is drawn: 'arrows' (↓ ↑ ·) or
-         * 'letters' (D U ·). The notation is a global display preference, like
-         * chordMode, not a per-song value. See js/strum.js. */
+         * from the library, using DEFAULT_TIME when the song has no metre),
+         * plus how the row is drawn: 'arrows' (↓ ↑ ·) or 'letters' (D U ·).
+         * The notation is a global display preference, like chordMode, not a
+         * per-song value. See js/strum.js. */
         strum: { pattern: null, notation: 'arrows' },
 
         /* strum row display, matching chordSize/chordPin: size scales the

@@ -131,6 +131,8 @@
         scrollBounds: SB.scrollBounds,
         targetVel: SB.targetVel,
         metronome: SB.state.metronome,
+        defaultBpm: SB.DEFAULT_BPM,
+        defaultTime: SB.DEFAULT_TIME,
         metronomeBeatsPerBar: SB.metronomeBeatsPerBar,
         metronomeLog: function () { return SB.metronomeLog.slice(); },
         metronomePosition: function () { return SB.metronomePosition(); },

@@ -121,9 +121,10 @@ attached to `SB`.
   speed, notes (localStorage), dark mode, keyboard shortcuts
   (`/` search, `Space` scroll, `←`/`→` songs, `Esc` back).
 - **Metronome** — clicks at the song's `bpm`, accenting beat 1 according to
-  `time`. Adjust the tempo and it is remembered for that song; the control is
-  hidden for songs with no tempo data. Scheduled against the audio clock
-  rather than a timer, so it does not drift.
+  `time`. Adjust the tempo and it is remembered for that song. Available on
+  every song: one with no tempo data starts at a neutral 100 bpm in 4/4, and
+  the first adjustment stores a per-song override. Scheduled against the audio
+  clock rather than a timer, so it does not drift.
 - **Strum pattern** — a row of arrows (`↓ ↑ ·`) under the chord strip, chosen
   from a library of common patterns filtered by the song's `time` (4/4, 3/4,
   6/8, 2/4 — several per metre). A toggle switches the row between arrows and
@@ -143,7 +144,9 @@ attached to `SB`.
   exactly as many slots as the pattern, so a separate count-in bar doubled the
   row's width permanently for something only meaningful while it runs — which
   on a phone is the difference between the pattern fitting on screen and not.
-  Hidden for songs with no `time`. **One pattern per song is an approximation**: strum is far less
+  Available on every song: one with no `time` uses 4/4, so the row and
+  selector still work and a manual choice can be stored per song.
+  **One pattern per song is an approximation**: strum is far less
   reliably documented than key or bpm and most songs change feel between verse
   and chorus; per-section patterns are a later feature. Visual only — the
   metronome is the audio.
@@ -312,6 +315,13 @@ metronome is worse than no metronome. Imported (untrusted) songbooks are
 normalised instead — a bad `bpm` or `time` becomes `null` and the song still
 renders.
 
+The app still makes the metronome usable when a song has neither value: it
+shows a neutral **100 bpm in 4/4** fallback rather than hiding the control.
+That fallback is a starting point for the user, not a claim about the song, and
+it is never written into the songbook or stored as an override until the user
+changes the tempo. The same rule applies to strum: a song with no `time` uses
+4/4 so its row and selector are available.
+
 Curated values live in the per-book `tempo.json` sidecar, merged by song id
 exactly like `original-keys.json`, and take precedence over an inline
 `{tempo:}` directive:
@@ -346,7 +356,9 @@ rejected — the row would not line up with the clicks). Give strum its own
 bpm's: strum is **less** reliably documented than bpm, so a per-song pattern is
 explicitly an approximation (most songs change feel between sections; per-
 section patterns are a later feature). The field is a single id today but is
-shaped so it can grow to a list without a data migration.
+shaped so it can grow to a list without a data migration. When a song has no
+`time`, the runtime uses 4/4 so the strum row is still available; a manual
+choice made there is remembered per song just like a documented default.
 
 Run the parser/builder tests with `python3 tests/chordpro.py`, the strum
 library mirror guard with `python3 tests/strum.py`, and the dev/prod

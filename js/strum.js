@@ -119,19 +119,28 @@
         catch (e) { /* ignore */ }
     }
 
+    /* The metre used for the row: the song's own, or the app default when the
+     * songbook has none. The default is what makes the feature available on
+     * every song; it is not written into the song data. */
+    function timeFor(song) {
+        return (song && song.time) || SB.DEFAULT_TIME;
+    }
+
     /* The documented default (the song's `strum`) is used unless the user has
      * made a manual choice here, exactly as bpm prefers the user override over
      * the song's value. A manual choice that no longer fits the metre (e.g. an
-     * imported book changed) falls back to the default rather than nothing. */
+     * imported book changed) falls back to the default rather than nothing.
+     * Songs with no metre use DEFAULT_TIME, so they always get a usable row. */
     function chooseFor(song) {
-        if (!song || !song.time) return null;
+        if (!song) return null;
+        var time = timeFor(song);
         if (SB.state.active) {
-            var saved = patternForSong(storedChoice(SB.state.active.id, song.id), song.time);
+            var saved = patternForSong(storedChoice(SB.state.active.id, song.id), time);
             if (saved) return saved;
         }
-        var def = patternForSong(song.strum, song.time);
+        var def = patternForSong(song.strum, time);
         if (def) return def;
-        var list = SB.strumPatternsFor(song.time);
+        var list = SB.strumPatternsFor(time);
         return list.length ? list[0] : null;
     }
 
@@ -224,7 +233,7 @@
         if (!sel) return;
         sel.textContent = '';
         var song = SB.state.currentSong;
-        var list = song ? SB.strumPatternsFor(song.time) : [];
+        var list = song ? SB.strumPatternsFor(timeFor(song)) : [];
         list.forEach(function (p) {
             var opt = SB.el('option', null, p.name);
             opt.value = p.id;
@@ -410,9 +419,9 @@
     }
 
     /* Called from SB.openSong. Picks the pattern (manual choice, else the
-     * documented default, else the first for the metre), renders the row and
-     * the selector, and hides the whole control for songs with no time
-     * signature — no metre, no pattern, no selector. */
+     * documented default, else the first for the metre, using DEFAULT_TIME
+     * when the song has no metre), renders the row and the selector, and shows
+     * the whole control on every song. */
     SB.loadStrumForSong = function (song) {
         SB.strumOnMetronomeStop();
         SB.state.strum.pattern = chooseFor(song);
@@ -424,7 +433,7 @@
     SB.setStrum = function (id) {
         var song = SB.state.currentSong;
         if (!song) return;
-        var pattern = patternForSong(id, song.time);
+        var pattern = patternForSong(id, timeFor(song));
         if (!pattern) return;
         SB.state.strum.pattern = pattern;
         if (SB.state.active) saveChoice(SB.state.active.id, song.id, pattern.id);

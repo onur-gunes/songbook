@@ -4309,6 +4309,14 @@ body.tuner-open { overflow: hidden; }
     SB.RECENT_KEY = SB.NS + ':recent';
     SB.RECENT_MAX = 15;
 
+    /* Runtime fallbacks for songs whose songbook entry has no tempo or metre.
+     * They make the metronome and strum controls usable on every song without
+     * changing the song data: the default is only shown until the user adjusts
+     * it, at which point the per-song override is stored as usual. Keep these
+     * in step with the README's tempo/metre section. */
+    SB.DEFAULT_BPM = 100;
+    SB.DEFAULT_TIME = '4/4';
+
     /* ---------------- shared state ----------------
      * Every value read or written by more than one section lives here, so
      * the sections can be split into separate files later without relying
@@ -4350,16 +4358,17 @@ body.tuner-open { overflow: hidden; }
         scrollState: { raf: null, last: 0, pos: 0, playing: false, started: false, finished: false, lastY: null },
         scrollSpeed: 1,
 
-        /* metronome — bpm is null until a song with tempo data is opened or
-         * the user sets one; beats is the meter's beats per bar, used to
-         * accent beat 1. See js/metronome.js. */
+        /* metronome — bpm starts null but loadMetronomeForSong always fills it
+         * with the song's tempo or DEFAULT_BPM, so the control is available on
+         * every song; beats is the meter's beats per bar, used to accent beat
+         * 1. See js/metronome.js. */
         metronome: { playing: false, bpm: null, beats: 4 },
 
         /* strum — the pattern chosen for the current song (a pattern object
-         * from the library, or null when the song has no time signature and so
-         * no selector), plus how the row is drawn: 'arrows' (↓ ↑ ·) or
-         * 'letters' (D U ·). The notation is a global display preference, like
-         * chordMode, not a per-song value. See js/strum.js. */
+         * from the library, using DEFAULT_TIME when the song has no metre),
+         * plus how the row is drawn: 'arrows' (↓ ↑ ·) or 'letters' (D U ·).
+         * The notation is a global display preference, like chordMode, not a
+         * per-song value. See js/strum.js. */
         strum: { pattern: null, notation: 'arrows' },
 
         /* strum row display, matching chordSize/chordPin: size scales the
@@ -6128,14 +6137,18 @@ body.tuner-open { overflow: hidden; }
         return v;
     }
 
-    /* Whether the song has any tempo at all: either from the songbook or
-     * from a previous user override. Without one there is nothing sensible
-     * to count, so the control is hidden entirely. */
+    /* The tempo the control should show: the user's per-song override, else
+     * the songbook's bpm, else the app default. The default keeps the
+     * metronome available on songs with no tempo data, and is not written to
+     * storage until the user actually steps the tempo. */
     function tempoFor(song) {
-        if (!song || !SB.state.active) return null;
-        var saved = SB.loadBpmForSong(SB.state.active.id, song.id);
-        if (saved !== null) return saved;
-        return clampBpm(song.bpm);
+        if (!song) return null;
+        if (SB.state.active) {
+            var saved = SB.loadBpmForSong(SB.state.active.id, song.id);
+            if (saved !== null) return saved;
+        }
+        var fromSong = clampBpm(song.bpm);
+        return fromSong !== null ? fromSong : SB.DEFAULT_BPM;
     }
 
     /* ---------------- audio ---------------- */
@@ -6255,11 +6268,10 @@ body.tuner-open { overflow: hidden; }
 
     /* ---------------- bpm ---------------- */
 
-    /* Steps the tempo relative to the current one. Does nothing when there is
-     * no tempo to step from: null coerces to 0 in arithmetic, so a bare
-     * bpm +/- 1 would clamp to BPM_MIN and invent a tempo for a song that
-     * has none, un-hiding the control. The UI hides the stepper in that
-     * state, but the guard belongs here rather than relying on that. */
+    /* Steps the tempo relative to the current one. The guard covers the brief
+     * no-song state (and any caller that reaches the stepper before a song is
+     * loaded): null coerces to 0 in arithmetic, which would otherwise clamp to
+     * BPM_MIN and invent a tempo out of nowhere. */
     SB.stepBpm = function (delta) {
         if (SB.state.metronome.bpm === null) return;
         SB.setBpm(SB.state.metronome.bpm + delta);
@@ -6290,13 +6302,13 @@ body.tuner-open { overflow: hidden; }
     }
 
     /* Called from SB.openSong. Picks up the song's tempo (or the user's
-     * override), sets the meter, and hides the whole control for songs with
-     * no tempo data at all. */
+     * override), falling back to DEFAULT_BPM when the song has no tempo data,
+     * and sets the meter (DEFAULT_TIME when the song has no metre) so the
+     * control is available on every song. */
     SB.loadMetronomeForSong = function (song) {
         SB.stopMetronome();
-        var bpm = tempoFor(song);
-        SB.state.metronome.bpm = bpm;
-        SB.state.metronome.beats = SB.metronomeBeatsPerBar(song && song.time);
+        SB.state.metronome.bpm = tempoFor(song);
+        SB.state.metronome.beats = SB.metronomeBeatsPerBar((song && song.time) || SB.DEFAULT_TIME);
         SB.updateMetronomeUi();
     }
 
@@ -6449,19 +6461,28 @@ body.tuner-open { overflow: hidden; }
         catch (e) { /* ignore */ }
     }
 
+    /* The metre used for the row: the song's own, or the app default when the
+     * songbook has none. The default is what makes the feature available on
+     * every song; it is not written into the song data. */
+    function timeFor(song) {
+        return (song && song.time) || SB.DEFAULT_TIME;
+    }
+
     /* The documented default (the song's `strum`) is used unless the user has
      * made a manual choice here, exactly as bpm prefers the user override over
      * the song's value. A manual choice that no longer fits the metre (e.g. an
-     * imported book changed) falls back to the default rather than nothing. */
+     * imported book changed) falls back to the default rather than nothing.
+     * Songs with no metre use DEFAULT_TIME, so they always get a usable row. */
     function chooseFor(song) {
-        if (!song || !song.time) return null;
+        if (!song) return null;
+        var time = timeFor(song);
         if (SB.state.active) {
-            var saved = patternForSong(storedChoice(SB.state.active.id, song.id), song.time);
+            var saved = patternForSong(storedChoice(SB.state.active.id, song.id), time);
             if (saved) return saved;
         }
-        var def = patternForSong(song.strum, song.time);
+        var def = patternForSong(song.strum, time);
         if (def) return def;
-        var list = SB.strumPatternsFor(song.time);
+        var list = SB.strumPatternsFor(time);
         return list.length ? list[0] : null;
     }
 
@@ -6554,7 +6575,7 @@ body.tuner-open { overflow: hidden; }
         if (!sel) return;
         sel.textContent = '';
         var song = SB.state.currentSong;
-        var list = song ? SB.strumPatternsFor(song.time) : [];
+        var list = song ? SB.strumPatternsFor(timeFor(song)) : [];
         list.forEach(function (p) {
             var opt = SB.el('option', null, p.name);
             opt.value = p.id;
@@ -6740,9 +6761,9 @@ body.tuner-open { overflow: hidden; }
     }
 
     /* Called from SB.openSong. Picks the pattern (manual choice, else the
-     * documented default, else the first for the metre), renders the row and
-     * the selector, and hides the whole control for songs with no time
-     * signature — no metre, no pattern, no selector. */
+     * documented default, else the first for the metre, using DEFAULT_TIME
+     * when the song has no metre), renders the row and the selector, and shows
+     * the whole control on every song. */
     SB.loadStrumForSong = function (song) {
         SB.strumOnMetronomeStop();
         SB.state.strum.pattern = chooseFor(song);
@@ -6754,7 +6775,7 @@ body.tuner-open { overflow: hidden; }
     SB.setStrum = function (id) {
         var song = SB.state.currentSong;
         if (!song) return;
-        var pattern = patternForSong(id, song.time);
+        var pattern = patternForSong(id, timeFor(song));
         if (!pattern) return;
         SB.state.strum.pattern = pattern;
         if (SB.state.active) saveChoice(SB.state.active.id, song.id, pattern.id);
@@ -7031,6 +7052,8 @@ body.tuner-open { overflow: hidden; }
         scrollBounds: SB.scrollBounds,
         targetVel: SB.targetVel,
         metronome: SB.state.metronome,
+        defaultBpm: SB.DEFAULT_BPM,
+        defaultTime: SB.DEFAULT_TIME,
         metronomeBeatsPerBar: SB.metronomeBeatsPerBar,
         metronomeLog: function () { return SB.metronomeLog.slice(); },
         metronomePosition: function () { return SB.metronomePosition(); },
