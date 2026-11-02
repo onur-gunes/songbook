@@ -5,7 +5,11 @@
 {time: 4/4}
 
 {start_of_grid: Verse 1}
-| G | Em | C | D | G |
+| G | Em | C | D |
+{end_of_grid}
+
+{start_of_grid: Pre-Chorus}
+| G |
 {end_of_grid}
 
 {start_of_grid: Chorus}
@@ -13,52 +17,69 @@
 {end_of_grid}
 
 {start_of_grid: Verse 2}
+| G | Em | C | D |
+{end_of_grid}
+
+{start_of_grid: Pre-Chorus}
 | G | Em |
 {end_of_grid}
 
 {start_of_grid: Chorus}
-| G | Em | C | D |
+| G | Em | C | D | G | Em | C | D |
+{end_of_grid}
+
+{start_of_grid: Pre-Chorus}
+| G |
 {end_of_grid}
 
 {start_of_grid: Final Chorus}
-| G | Em | C | G |
-| Em | C | D | G |
-| Em |
+| G | Em | C | D | G | Em | C | D |
 {end_of_grid}
 
 {comment: Verse 1}
-[G]One step closer
-[Em]I have died every day waiting for you
-[C]Darling, don't be afraid
-[D]I have loved you for a thousand years
+[G]Heart beats fast, [Em]colors and promises
+[C]How to be brave? How can I [D]love when I'm afraid to fall?
+[G]But watching you [Em]stand alone
+[C]All of my doubt [D]suddenly goes away somehow
 
-[G]I'll love you for a thousand more
+{comment: Pre-Chorus}
+[G]One step closer
 
 {comment: Chorus}
-[G]And all along I believed I would find you
-[Em]Time has brought your heart to me
-[C]I have loved you for a thousand years
-[D]I'll love you for a thousand more
+[G]I have died [Em]every day waiting for you
+[C]Darling, don't [D]be afraid
+[G]I have loved [Em]you for a thousand years
+[C]I'll love you [D]for a thousand more
 
 {comment: Verse 2}
+[G]Time stands still, [Em]beauty in all she is
+[C]I will be brave, [D]I will not let anything take away
+[G]What's standing [Em]in front of me
+[C]Every breath, [D]every hour has come to this
+
+{comment: Pre-Chorus}
 [G]One step closer
 [Em]One step closer
 
 {comment: Chorus}
-[G]And all along I believed I would find you
-[Em]Time has brought your heart to me
-[C]I have loved you for a thousand years
-[D]I'll love you for a thousand more
+[G]I have died [Em]every day waiting for you
+[C]Darling, don't [D]be afraid
+[G]I have loved [Em]you for a thousand years
+[C]I'll love you [D]for a thousand more
+[G]And all along, [Em]I believed I would find you
+[C]Time has [D]brought your heart to me
+[G]I have loved [Em]you for a thousand years
+[C]I'll love you [D]for a thousand more
+
+{comment: Pre-Chorus}
+[G]One step closer
 
 {comment: Final Chorus}
-[G]One step closer
-[Em]One step closer
-[C]One step closer
-
-[G]And all along I believed I would find you
-[Em]Time has brought your heart to me
-[C]I have loved you for a thousand years
-[D]I'll love you for a thousand more
-
-[G]I have loved you for a thousand years
-[Em]I'll love you for a thousand more
+[G]I have died [Em]every day waiting for you
+[C]Darling, don't [D]be afraid
+[G]I have loved [Em]you for a thousand years
+[C]I'll love you [D]for a thousand more
+[G]And all along, [Em]I believed I would find you
+[C]Time has [D]brought your heart to me
+[G]I have loved [Em]you for a thousand years
+[C]I'll love you [D]for a thousand more
