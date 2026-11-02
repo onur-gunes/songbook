@@ -50,8 +50,23 @@
             return v === null ? fallback : JSON.parse(v);
         } catch (e) { return fallback; }
     }
+    /* Personal-data lists are read at boot, before anything can validate them.
+     * A stored value of the wrong shape (an older version, a sync tool, or a
+     * hand-edited key) used to throw here and leave the app blank, so callers
+     * get an array or an empty one — never the raw object. */
+    SB.lsGetArray = function (key) {
+        var v = SB.lsGet(key, []);
+        return Array.isArray(v) ? v : [];
+    }
     SB.lsSet = function (key, value) {
         try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ignore */ }
+    }
+    /* Builds a hash from ids that may contain spaces, '%' or other characters
+     * that are not safe in a URL fragment. Every navigation goes through this
+     * so the router only ever has to decode well-formed input. */
+    SB.routeHash = function (sbId, songId) {
+        return '#/' + encodeURIComponent(sbId == null ? '' : sbId) +
+            (songId == null ? '' : '/' + encodeURIComponent(songId));
     }
     SB.el = function (tag, cls, text) {
         var n = document.createElement(tag);
@@ -93,8 +108,13 @@
         currentSong: null,
 
         /* personal data */
-        favorites: new Set(SB.lsGet(SB.FAV_KEY, [])),   // composite "sbId\0songId"
-        recent: SB.lsGet(SB.RECENT_KEY, []),            // [{sb,id}]
+        favorites: new Set(SB.lsGetArray(SB.FAV_KEY).filter(function (v) {
+            return typeof v === 'string';
+        })),                                            // composite "sbId\0songId"
+        recent: SB.lsGetArray(SB.RECENT_KEY).filter(function (r) {
+            return r && typeof r === 'object' &&
+                typeof r.sb === 'string' && typeof r.id === 'string';
+        }),                                             // [{sb,id}]
 
         /* instrument + transpose */
         instrument: SB.lsGet(SB.NS + ':instrument', null),

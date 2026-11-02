@@ -1068,6 +1068,12 @@ main {
 .step-btn:hover { background: var(--surface-2); }
 .step-btn:active { background: var(--chip); }
 
+.bpm-reset {
+    font-size: 0.95rem;
+    color: var(--muted);
+}
+.bpm-reset:hover { color: var(--text); }
+
 .step-value {
     min-width: 44px;
     text-align: center;
@@ -2163,6 +2169,9 @@ body.tuner-open { overflow: hidden; }
                         <button id="bpmDown" class="step-btn" type="button" aria-label="Slower tempo">−</button>
                         <span id="bpmValue" class="step-value" aria-live="polite">—</span>
                         <button id="bpmUp" class="step-btn" type="button" aria-label="Faster tempo">+</button>
+                        <button id="bpmReset" class="step-btn bpm-reset" type="button"
+                                aria-label="Reset tempo to the song's default"
+                                title="Reset to the song's tempo" hidden>↺</button>
                     </div>
                 </div>
             </div>
@@ -4294,8 +4303,23 @@ body.tuner-open { overflow: hidden; }
             return v === null ? fallback : JSON.parse(v);
         } catch (e) { return fallback; }
     }
+    /* Personal-data lists are read at boot, before anything can validate them.
+     * A stored value of the wrong shape (an older version, a sync tool, or a
+     * hand-edited key) used to throw here and leave the app blank, so callers
+     * get an array or an empty one — never the raw object. */
+    SB.lsGetArray = function (key) {
+        var v = SB.lsGet(key, []);
+        return Array.isArray(v) ? v : [];
+    }
     SB.lsSet = function (key, value) {
         try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ignore */ }
+    }
+    /* Builds a hash from ids that may contain spaces, '%' or other characters
+     * that are not safe in a URL fragment. Every navigation goes through this
+     * so the router only ever has to decode well-formed input. */
+    SB.routeHash = function (sbId, songId) {
+        return '#/' + encodeURIComponent(sbId == null ? '' : sbId) +
+            (songId == null ? '' : '/' + encodeURIComponent(songId));
     }
     SB.el = function (tag, cls, text) {
         var n = document.createElement(tag);
@@ -4337,8 +4361,13 @@ body.tuner-open { overflow: hidden; }
         currentSong: null,
 
         /* personal data */
-        favorites: new Set(SB.lsGet(SB.FAV_KEY, [])),   // composite "sbId\0songId"
-        recent: SB.lsGet(SB.RECENT_KEY, []),            // [{sb,id}]
+        favorites: new Set(SB.lsGetArray(SB.FAV_KEY).filter(function (v) {
+            return typeof v === 'string';
+        })),                                            // composite "sbId\0songId"
+        recent: SB.lsGetArray(SB.RECENT_KEY).filter(function (r) {
+            return r && typeof r === 'object' &&
+                typeof r.sb === 'string' && typeof r.id === 'string';
+        }),                                             // [{sb,id}]
 
         /* instrument + transpose */
         instrument: SB.lsGet(SB.NS + ':instrument', null),
@@ -4414,6 +4443,9 @@ body.tuner-open { overflow: hidden; }
     SB.applyBrand = function () {
         var logo = SB.$('logo');
         if (!logo) return;
+        /* Imported books may point at a remote image. Do not leak the reader's
+         * IP/referrer to that host just because they opened a songbook. */
+        logo.referrerPolicy = 'no-referrer';
         var light = (SB.state.active && SB.state.active.logo) || '';
         var dark = (SB.state.active && (SB.state.active.logoDark || SB.state.active.logo)) || '';
         var dark_on = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -4449,42 +4481,72 @@ body.tuner-open { overflow: hidden; }
 
     /* ---------------- IndexedDB (imported songbooks) ---------------- */
 
+    var dbPromise = null;
+
     function idbOpen() {
-        return new Promise(function (res, rej) {
+        // One cached connection for the page. Opening a fresh one per operation
+        // churned connections and never closed them.
+        if (dbPromise) return dbPromise;
+        dbPromise = new Promise(function (res, rej) {
             if (!window.indexedDB) { rej(new Error('no indexedDB')); return; }
             var req = window.indexedDB.open(SB.NS, 1);
             req.onupgradeneeded = function () {
                 var db = req.result;
                 if (!db.objectStoreNames.contains('songbooks')) db.createObjectStore('songbooks', { keyPath: 'id' });
             };
-            req.onsuccess = function () { res(req.result); };
-            req.onerror = function () { rej(req.error); };
+            req.onsuccess = function () {
+                var db = req.result;
+                // A newer version in another tab needs this one to let go.
+                db.onversionchange = function () {
+                    try { db.close(); } catch (e) { /* ignore */ }
+                    dbPromise = null;
+                };
+                res(db);
+            };
+            req.onerror = function () { dbPromise = null; rej(req.error); };
+            req.onblocked = function () { dbPromise = null; rej(new Error('IndexedDB open blocked')); };
         });
+        return dbPromise;
     }
+
+    function txError(tx) {
+        return tx.error || new Error('IndexedDB transaction failed');
+    }
+
     SB.idbAll = function () {
         return idbOpen().then(function (db) {
             return new Promise(function (res, rej) {
-                var t = db.transaction('songbooks', 'readonly').objectStore('songbooks').getAll();
-                t.onsuccess = function () { res(t.result || []); };
-                t.onerror = function () { rej(t.error); };
+                var rows = [];
+                var tx = db.transaction('songbooks', 'readonly');
+                var req = tx.objectStore('songbooks').getAll();
+                req.onsuccess = function () { rows = req.result || []; };
+                // Resolve only once the transaction commits, not when the
+                // request happens to return: callers treat this as durable.
+                tx.oncomplete = function () { res(rows); };
+                tx.onerror = function () { rej(txError(tx)); };
+                tx.onabort = function () { rej(txError(tx)); };
             });
         });
     }
     SB.idbPut = function (obj) {
         return idbOpen().then(function (db) {
             return new Promise(function (res, rej) {
-                var t = db.transaction('songbooks', 'readwrite').objectStore('songbooks').put(obj);
-                t.onsuccess = function () { res(); };
-                t.onerror = function () { rej(t.error); };
+                var tx = db.transaction('songbooks', 'readwrite');
+                tx.objectStore('songbooks').put(obj);
+                tx.oncomplete = function () { res(); };
+                tx.onerror = function () { rej(txError(tx)); };
+                tx.onabort = function () { rej(txError(tx)); };
             });
         });
     }
     SB.idbDelete = function (id) {
         return idbOpen().then(function (db) {
             return new Promise(function (res, rej) {
-                var t = db.transaction('songbooks', 'readwrite').objectStore('songbooks').delete(id);
-                t.onsuccess = function () { res(); };
-                t.onerror = function () { rej(t.error); };
+                var tx = db.transaction('songbooks', 'readwrite');
+                tx.objectStore('songbooks').delete(id);
+                tx.oncomplete = function () { res(); };
+                tx.onerror = function () { rej(txError(tx)); };
+                tx.onabort = function () { rej(txError(tx)); };
             });
         });
     }
@@ -4530,19 +4592,46 @@ body.tuner-open { overflow: hidden; }
 
     /* A strum is kept as a bare id string here; js/strum.js owns the pattern
      * library and resolves the id against it (and against the song's metre) at
-     * open time. Keeping it a string rather than resolving here avoids a load-
-     * order dependency on strum.js and leaves the field free to grow into a
-     * list of ids for per-section patterns later, which is why it is not
-     * coerced to a single scalar shape. */
+     * open time. Keeping it a string rather than resolving here avoids a
+     * load-order dependency on strum.js. Per-section patterns would be a
+     * separate field; this one is the song's single documented default. */
     function normalizeStrum(value) {
         return (typeof value === 'string' && value) ? value : null;
     }
 
+    /* The sheet is the only imported field with a nested shape. A missing or
+     * wrong-typed value used to reach the renderers and throw (or draw
+     * garbage), so coerce it here: keep lines of valid [kind, text] segments
+     * and drop anything else. An empty line is meaningful — a blank line in
+     * the sheet — so it is preserved. */
+    var SHEET_KINDS = { c: 1, x: 1, m: 1, b: 1, i: 1, y: 1, p: 1 };
+
+    function normalizeSegment(seg) {
+        if (!Array.isArray(seg) || seg.length < 2) return null;
+        var kind = seg[0];
+        if (typeof kind !== 'string' || !SHEET_KINDS[kind]) return null;
+        var val = seg[1];
+        if (val == null) return null;
+        return [kind, String(val)];
+    }
+
+    function normalizeSheet(value) {
+        if (!Array.isArray(value)) return [];
+        return value.map(function (line) {
+            if (!Array.isArray(line)) return null;
+            return line.map(normalizeSegment).filter(Boolean);
+        }).filter(function (line) { return line !== null; });
+    }
+
     function normalizeSong(s, index) {
         if (!s || typeof s !== 'object') throw new Error('bad song entry');
+        var rawId = s.id;
+        var id = (typeof rawId === 'string' || typeof rawId === 'number')
+            ? String(rawId).trim() : '';
+        if (!id) id = 'song-' + (index + 1);
         return {
-            id: String(s.id || ('song-' + (index + 1))),
-            n: typeof s.n === 'number' ? s.n : (index + 1),
+            id: id,
+            n: (typeof s.n === 'number' && isFinite(s.n)) ? s.n : (index + 1),
             title: String(s.title || 'Untitled'),
             artist: String(s.artist || ''),
             level: (s.level === 'Easy' || s.level === 'Medium' || s.level === 'Hard') ? s.level : 'Medium',
@@ -4550,12 +4639,14 @@ body.tuner-open { overflow: hidden; }
             key: s.key ? String(s.key) : '',
             sheetKey: s.sheetKey ? String(s.sheetKey) : '',
             capo: (typeof s.capo === 'number' && isFinite(s.capo)) ? s.capo : null,
-            dur: typeof s.dur === 'number' ? s.dur : 4,
+            dur: (typeof s.dur === 'number' && isFinite(s.dur) && s.dur > 0) ? s.dur : 4,
             bpm: normalizeBpm(s.bpm),
             time: normalizeTime(s.time),
             strum: normalizeStrum(s.strum),
-            chords: Array.isArray(s.chords) ? s.chords.map(String) : [],
-            sheet: Array.isArray(s.sheet) ? s.sheet : (s.sheet ? s.sheet : [])
+            chords: Array.isArray(s.chords) ? s.chords.filter(function (c) {
+                return typeof c === 'string' || typeof c === 'number';
+            }).map(String) : [],
+            sheet: normalizeSheet(s.sheet)
         };
     }
 
@@ -4680,7 +4771,7 @@ body.tuner-open { overflow: hidden; }
             var li = document.createElement('li');
             var b = SB.el('button', null, s.title);
             b.type = 'button';
-            b.addEventListener('click', function () { location.hash = '#/' + sb.id + '/' + s.id; });
+            b.addEventListener('click', function () { location.hash = SB.routeHash(sb.id, s.id); });
             li.appendChild(b);
             list.appendChild(li);
         });
@@ -4882,6 +4973,10 @@ body.tuner-open { overflow: hidden; }
     // thing they pass in.
     function appendLineSegments(lineDiv, line, chordLabelFn) {
         line.forEach(function (seg) {
+            // Normalisation (js/songbooks.js) already removes malformed
+            // segments; this guard keeps a hand-edited or stale stored sheet
+            // from throwing during render.
+            if (!Array.isArray(seg) || seg.length < 2) return;
             var kind = seg[0], val = seg[1];
             if (kind === 'c') {
                 lineDiv.appendChild(SB.el('span', 'seg-chord', chordLabelFn(val)));
@@ -4905,12 +5000,18 @@ body.tuner-open { overflow: hidden; }
         return m ? '[' + mapChordTokens(m[1]) + ']' : cv;
     }
 
+    function sheetLines(song) {
+        var sheet = song && song.sheet;
+        if (!Array.isArray(sheet)) return [];
+        return sheet.filter(function (line) { return Array.isArray(line); });
+    }
+
     SB.renderSheet = function (song) {
         if (SB.state.chordMode === 'above') { renderSheetAbove(song); return; }
         var wrap = SB.$('sheet');
         wrap.textContent = '';
         var frag = document.createDocumentFragment();
-        (song.sheet || []).forEach(function (line) {
+        sheetLines(song).forEach(function (line) {
             var lineDiv = SB.el('div', 'line');
             var isPre = line.some(function (seg) { return seg[0] === 'p'; });
             if (isPre) lineDiv.classList.add('is-pre');
@@ -5074,8 +5175,9 @@ body.tuner-open { overflow: hidden; }
     }
 
     function buildAboveLine(line, avail) {
-        var hasWord = false, L = '', parts = [], chords = [], prevEnd = 0, hadChord = false;
+        var L = '', parts = [], chords = [], prevEnd = 0, hadChord = false;
         line.forEach(function (seg) {
+            if (!Array.isArray(seg) || seg.length < 2) return;
             if (seg[0] === 'c') {
                 var label = chordLabel(seg[1]);
                 var col = hadChord ? Math.max(L.length, prevEnd + 1) : L.length;
@@ -5092,7 +5194,6 @@ body.tuner-open { overflow: hidden; }
             if (t.replace(/\s/g, '').length) hadChord = false;
             parts.push({ kind: seg[0], text: t, start: L.length });
             L += t;
-            if (/\S/.test(t)) hasWord = true;
         });
 
         var div = SB.el('div', 'line line-stacked');
@@ -5143,7 +5244,7 @@ body.tuner-open { overflow: hidden; }
         wrap.textContent = '';
         var frag = document.createDocumentFragment();
         var avail = Math.max(1, wrap.clientWidth - 0.5);
-        (song.sheet || []).forEach(function (line) {
+        sheetLines(song).forEach(function (line) {
             var lineDiv = SB.el('div', 'line');
             var isPre = line.some(function (s) { return s[0] === 'p'; });
             if (isPre) lineDiv.classList.add('is-pre');
@@ -5304,15 +5405,23 @@ body.tuner-open { overflow: hidden; }
     }
 
     var voicingEsc = null;
+    var chooserOpener = null;
 
     SB.closeVoicingChooser = function () {
         var ov = document.getElementById('voicingChooser');
         if (ov) ov.remove();
         if (voicingEsc) { document.removeEventListener('keydown', voicingEsc); voicingEsc = null; }
+        // Return focus to the diagram that opened the dialog, so keyboard
+        // users do not fall back to the top of the document.
+        if (chooserOpener && chooserOpener.isConnected) {
+            try { chooserOpener.focus({ preventScroll: true }); } catch (e) { chooserOpener.focus(); }
+        }
+        chooserOpener = null;
     }
 
     function showVoicingChooser(strip, item, chordName, label, img) {
         SB.closeVoicingChooser();
+        chooserOpener = item;
         var shapes = voicingsFor(chordName);
         if (!shapes.length) return;
         var cur = SB.chosenVoicing(chordName);
@@ -5356,9 +5465,17 @@ body.tuner-open { overflow: hidden; }
         box.appendChild(grid);
         ov.appendChild(box);
         ov.addEventListener('mousedown', function (e) { if (e.target === ov) SB.closeVoicingChooser(); });
-        voicingEsc = function (e) { if (e.key === 'Escape') SB.closeVoicingChooser(); };
+        voicingEsc = function (e) {
+            if (e.key !== 'Escape') return;
+            e.preventDefault();
+            SB.closeVoicingChooser();
+        };
         document.addEventListener('keydown', voicingEsc);
         document.body.appendChild(ov);
+        // Put focus inside the dialog: the chosen shape if there is one,
+        // otherwise the first option, so Enter/Space works immediately.
+        var focusTarget = grid.querySelector('button.sel') || grid.querySelector('button') || closeBtn;
+        try { focusTarget.focus({ preventScroll: true }); } catch (e) { focusTarget.focus(); }
     }
 
 })(window.SB = window.SB || {});
@@ -5434,7 +5551,7 @@ body.tuner-open { overflow: hidden; }
 
             var a = document.createElement('a');
             a.className = 'song-link';
-            a.href = '#/' + sbId + '/' + s.id;
+            a.href = SB.routeHash(sbId, s.id);
             a.appendChild(SB.el('span', 'row-num', String(s.n)));
             var main = SB.el('span', 'row-main');
             main.appendChild(SB.el('span', 'row-title', s.title));
@@ -5561,7 +5678,7 @@ body.tuner-open { overflow: hidden; }
             var songs = SB.filteredSongs();
             if (!songs.length || !SB.state.active) return;
             var pick = songs[Math.floor(Math.random() * songs.length)];
-            location.hash = '#/' + SB.state.active.id + '/' + pick.id;
+            location.hash = SB.routeHash(SB.state.active.id, pick.id);
         });
 
         SB.$('recentClear').addEventListener('click', function () {
@@ -5577,7 +5694,7 @@ body.tuner-open { overflow: hidden; }
         });
 
         SB.$('songbookSelect').addEventListener('change', function () {
-            location.hash = '#/' + this.value;
+            location.hash = SB.routeHash(this.value);
         });
         SB.$('importBtn').addEventListener('click', function () { SB.$('importFile').click(); });
         SB.$('importFile').addEventListener('change', function (e) {
@@ -5592,7 +5709,7 @@ body.tuner-open { overflow: hidden; }
             SB.idbDelete(id).then(function () {
                 SB.state.imported = SB.state.imported.filter(function (sb) { return sb.id !== id; });
                 SB.rebuildIndex();
-                location.hash = '#/' + (SB.defaultSongbook() ? SB.defaultSongbook().id : '');
+                location.hash = SB.routeHash(SB.defaultSongbook() ? SB.defaultSongbook().id : '');
             }).catch(function (err) { window.alert('Could not remove: ' + err.message); });
         });
     }
@@ -5630,7 +5747,7 @@ body.tuner-open { overflow: hidden; }
             SB.idbPut(sb).then(function () {
                 SB.state.imported.push(sb);
                 SB.rebuildIndex();
-                location.hash = '#/' + sb.id;
+                location.hash = SB.routeHash(sb.id);
             }).catch(function (err) { window.alert('Could not save import: ' + err.message); });
         };
         reader.onerror = function () { window.alert('Could not read file.'); };
@@ -5673,7 +5790,7 @@ body.tuner-open { overflow: hidden; }
         SB.closeVoicingChooser();
         SB.stopMetronome();
         var song = SB.state.byId[id];
-        if (!song) { location.hash = '#/' + (SB.state.active ? SB.state.active.id : ''); return; }
+        if (!song) { location.hash = SB.routeHash(SB.state.active ? SB.state.active.id : ''); return; }
         SB.state.currentSong = song;
         SB.addRecent(SB.state.active.id, id);
         SB.resetScroll(true);
@@ -5731,16 +5848,25 @@ body.tuner-open { overflow: hidden; }
 
         SB.$('prevBtn').addEventListener('click', function () {
             var ctx = navContext();
-            if (ctx.idx > 0) location.hash = '#/' + SB.state.active.id + '/' + ctx.list[ctx.idx - 1].id;
+            if (ctx.idx > 0) location.hash = SB.routeHash(SB.state.active.id, ctx.list[ctx.idx - 1].id);
         });
         SB.$('nextBtn').addEventListener('click', function () {
             var ctx = navContext();
-            if (ctx.idx !== -1 && ctx.idx < ctx.list.length - 1) location.hash = '#/' + SB.state.active.id + '/' + ctx.list[ctx.idx + 1].id;
+            if (ctx.idx !== -1 && ctx.idx < ctx.list.length - 1) location.hash = SB.routeHash(SB.state.active.id, ctx.list[ctx.idx + 1].id);
         });
 
         SB.$('notesSave').addEventListener('click', saveNotes);
         SB.$('notesBox').addEventListener('keydown', function (e) {
             if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); saveNotes(); }
+        });
+        // Notes used to be saved only on an explicit click, so closing the
+        // song or tab lost the last edit silently. Autosave after a pause,
+        // and flush on blur/page-hide.
+        SB.$('notesBox').addEventListener('input', scheduleNotesSave);
+        SB.$('notesBox').addEventListener('blur', flushNotesSave);
+        window.addEventListener('pagehide', flushNotesSave);
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'hidden') flushNotesSave();
         });
 
         SB.$('scrollBtn').addEventListener('click', SB.toggleAutoScroll);
@@ -5794,9 +5920,45 @@ body.tuner-open { overflow: hidden; }
         }, { passive: true });
     }
 
+    var notesPending = null;
+
+    function writeNotes(sbId, songId, value) {
+        try { window.localStorage.setItem(SB.noteKey(sbId, songId), value); } catch (e) { /* ignore */ }
+    }
+
+    /* Capture the ids and text at edit time: by the time the debounce fires
+     * the user may already be on another song, and notesBox would then hold
+     * that song's text. */
+    function scheduleNotesSave() {
+        if (!SB.state.currentSong || !SB.state.active) return;
+        var entry = {
+            sbId: SB.state.active.id,
+            songId: SB.state.currentSong.id,
+            value: SB.$('notesBox').value
+        };
+        if (notesPending) clearTimeout(notesPending.timer);
+        entry.timer = setTimeout(function () {
+            if (notesPending === entry) notesPending = null;
+            writeNotes(entry.sbId, entry.songId, entry.value);
+        }, 500);
+        notesPending = entry;
+    }
+
+    /* Writes any debounced edit for the song it belongs to, then the current
+     * textarea for the current song. Safe to call repeatedly. */
+    function flushNotesSave() {
+        if (notesPending) {
+            clearTimeout(notesPending.timer);
+            writeNotes(notesPending.sbId, notesPending.songId, notesPending.value);
+            notesPending = null;
+        }
+        if (!SB.state.currentSong || !SB.state.active) return;
+        writeNotes(SB.state.active.id, SB.state.currentSong.id, SB.$('notesBox').value);
+    }
+
     function saveNotes() {
         if (!SB.state.currentSong || !SB.state.active) return;
-        try { window.localStorage.setItem(SB.noteKey(SB.state.active.id, SB.state.currentSong.id), SB.$('notesBox').value); } catch (e) { /* ignore */ }
+        flushNotesSave();
         var st = SB.$('notesStatus');
         st.textContent = 'Saved';
         st.classList.add('show');
@@ -6115,6 +6277,9 @@ body.tuner-open { overflow: hidden; }
     var nextTime = 0;       // AudioContext time of the next click, seconds
     var beat = 0;           // 0-based index of the next click within the bar
     var startTime = 0;      // AudioContext time of beat 0 (the first click)
+    // Clicks already handed to the audio clock, so a live tempo change can
+    // cancel the ones still queued on the old grid. Bounded by pruning.
+    var scheduled = [];
 
     function AudioCtx() { return window.AudioContext || window.webkitAudioContext; }
 
@@ -6167,6 +6332,26 @@ body.tuner-open { overflow: hidden; }
         gain.connect(ctx.destination);
         osc.start(time);
         osc.stop(time + CLICK_S);
+        scheduled.push({ osc: osc, gain: gain, time: time });
+        // The queue only ever holds the lookahead window, but a long session
+        // must not grow it without bound.
+        while (scheduled.length && scheduled[0].time < ctx.currentTime - CLICK_S) {
+            scheduled.shift();
+        }
+    }
+
+    /* Cancels clicks that are queued but have not sounded yet. Used when the
+     * tempo changes mid-count and when the metronome stops, so the old grid
+     * cannot keep clicking after the state has moved on. */
+    function clearFutureClicks(now) {
+        for (var i = 0; i < scheduled.length; i++) {
+            var s = scheduled[i];
+            if (s.time > now) {
+                try { s.osc.stop(now); } catch (e) { /* already stopped */ }
+                try { s.gain.disconnect(); } catch (e) { /* already disconnected */ }
+            }
+        }
+        scheduled.length = 0;
     }
 
     /* Ring buffer of recently scheduled clicks. The whole point of the
@@ -6231,6 +6416,7 @@ body.tuner-open { overflow: hidden; }
 
         beat = 0;
         SB.metronomeLog.length = 0;
+        scheduled.length = 0;
         // Start just far enough ahead that the first click is scheduled
         // rather than fired late.
         nextTime = ctx.currentTime + 0.06;
@@ -6252,6 +6438,9 @@ body.tuner-open { overflow: hidden; }
 
     SB.stopMetronome = function () {
         if (timer) { window.clearInterval(timer); timer = null; }
+        // Drop anything still queued so stopping is silent immediately rather
+        // than playing out the lookahead window.
+        if (ctx) clearFutureClicks(ctx.currentTime);
         if (!SB.state.metronome.playing) return;
         SB.state.metronome.playing = false;
         // The context is deliberately left open: closing it would mean
@@ -6277,28 +6466,53 @@ body.tuner-open { overflow: hidden; }
         SB.setBpm(SB.state.metronome.bpm + delta);
     }
 
+    /* Changes the tempo and, while running, re-anchors the click grid so the
+     * next click is the next whole beat at the new spacing. Clicks already
+     * queued on the old grid are cancelled; otherwise the first ~100ms after
+     * a tempo change still sounds at the old tempo while the strum highlight
+     * has already moved to the new one. */
+    function applyTempo(bpm) {
+        if (bpm === SB.state.metronome.bpm) return;
+        if (SB.state.metronome.playing && ctx) {
+            var now = ctx.currentTime;
+            var oldSpb = 60 / SB.state.metronome.bpm;
+            var newSpb = 60 / bpm;
+            var beatsNow = Math.max(0, (now - startTime) / oldSpb);
+            clearFutureClicks(now);
+            // Keep the phase: the next click lands on the next whole beat,
+            // measured from the old grid, and subsequent clicks use newSpb.
+            startTime = now - beatsNow * newSpb;
+            var nextBeat = Math.ceil(beatsNow);
+            if ((nextBeat - beatsNow) * newSpb < 0.005) nextBeat += 1;
+            nextTime = startTime + nextBeat * newSpb;
+            beat = nextBeat % SB.state.metronome.beats;
+        }
+        SB.state.metronome.bpm = bpm;
+        if (SB.state.metronome.playing) scheduler();
+    }
+
     SB.setBpm = function (v) {
         if (typeof v !== 'number' || !isFinite(v)) return;
         var bpm = clampBpm(Math.min(BPM_MAX, Math.max(BPM_MIN, Math.round(v))));
         if (bpm === null || bpm === SB.state.metronome.bpm) { SB.updateMetronomeUi(); return; }
-        // Re-anchor the phase clock so a live tempo change does not make the
-        // strum highlight jump or drift: keep the current beat phase fixed and
-        // only change how fast it advances from here. Done before writing bpm
-        // so the old seconds-per-beat is still in SB.state.metronome.bpm.
-        if (SB.state.metronome.playing && ctx) {
-            var oldSpb = 60 / SB.state.metronome.bpm;
-            var beatsNow = (ctx.currentTime - startTime) / oldSpb;
-            startTime = ctx.currentTime - beatsNow * (60 / bpm);
-        }
-        SB.state.metronome.bpm = bpm;
+        applyTempo(bpm);
         SB.updateMetronomeUi();
         if (SB.state.active && SB.state.currentSong) {
             try { window.localStorage.setItem(SB.bpmKey(SB.state.active.id, SB.state.currentSong.id), String(bpm)); }
             catch (e) { /* ignore */ }
         }
-        // A tempo change mid-count takes effect from the next scheduled
-        // click: the scheduler reads bpm each pass, and anything already
-        // handed to the audio clock stays where it was put.
+    }
+
+    /* Drops the per-song override and returns to the song's documented tempo
+     * (or DEFAULT_BPM). Without this the only way back was to clear storage. */
+    SB.resetBpmForSong = function () {
+        var song = SB.state.currentSong;
+        if (!song || !SB.state.active) return;
+        try { window.localStorage.removeItem(SB.bpmKey(SB.state.active.id, song.id)); }
+        catch (e) { /* ignore */ }
+        var bpm = tempoFor(song);
+        if (bpm !== null) applyTempo(bpm);
+        SB.updateMetronomeUi();
     }
 
     /* Called from SB.openSong. Picks up the song's tempo (or the user's
@@ -6319,6 +6533,12 @@ body.tuner-open { overflow: hidden; }
         group.hidden = !on;
         if (!on) return;
         SB.$('bpmValue').textContent = SB.state.metronome.bpm;
+        var reset = SB.$('bpmReset');
+        if (reset) {
+            var overridden = !!(SB.state.active && SB.state.currentSong &&
+                SB.loadBpmForSong(SB.state.active.id, SB.state.currentSong.id) !== null);
+            reset.hidden = !overridden;
+        }
         var btn = SB.$('metronomeBtn');
         btn.textContent = SB.state.metronome.playing ? '⏸' : '▶';
         btn.classList.toggle('playing', SB.state.metronome.playing);
@@ -6334,6 +6554,8 @@ body.tuner-open { overflow: hidden; }
         btn.addEventListener('click', SB.toggleMetronome);
         SB.$('bpmDown').addEventListener('click', function () { SB.stepBpm(-1); });
         SB.$('bpmUp').addEventListener('click', function () { SB.stepBpm(1); });
+        var reset = SB.$('bpmReset');
+        if (reset) reset.addEventListener('click', SB.resetBpmForSong);
     }
 
 })(window.SB = window.SB || {});
@@ -6831,13 +7053,22 @@ body.tuner-open { overflow: hidden; }
 
     /* ---------------- routing ---------------- */
 
+    /* A hash can be edited by hand, restored from an old bookmark, or typed
+     * with a stray '%'. decodeURIComponent throws on those, which used to take
+     * the whole router down; fall back to the raw segment and let the lookup
+     * below decide whether it names anything. */
+    function decodePart(value) {
+        try { return decodeURIComponent(value); }
+        catch (e) { return value; }
+    }
+
     SB.route = function () {
         var h = location.hash || '';
         var m = h.match(/^#\/([^\/]+)(?:\/(.+))?$/);
         var sb = null, songId = null;
         if (m) {
-            sb = SB.state.bySb[decodeURIComponent(m[1])];
-            if (m[2]) songId = decodeURIComponent(m[2]);
+            sb = SB.state.bySb[decodePart(m[1])];
+            if (m[2]) songId = decodePart(m[2]);
         }
         // A bare "#/" means "back to the song list I'm browsing" — keep the
         // current songbook instead of snapping to the default starter one.
@@ -6880,6 +7111,13 @@ body.tuner-open { overflow: hidden; }
     SB.bindKeyboard = function () {
         document.addEventListener('keydown', function (e) {
             if (SB.$('tunerOverlay') && !SB.$('tunerOverlay').hidden) return;
+            // The voicing chooser is a modal: its own Escape closes it and its
+            // Space activates the focused option. Letting the global shortcuts
+            // run too used to navigate back and start auto-scroll at once.
+            if (document.getElementById('voicingChooser')) return;
+            // A target handler that already consumed the key (e.g. Space on a
+            // chord diagram) must not trigger the global action as well.
+            if (e.defaultPrevented) return;
             var t = e.target;
             var typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
 
@@ -6892,7 +7130,7 @@ body.tuner-open { overflow: hidden; }
                     return;
                 }
                 if (typing) { t.blur(); return; }
-                if (!SB.$('songView').hidden) { location.hash = '#/' + (SB.state.active ? SB.state.active.id : ''); return; }
+                if (!SB.$('songView').hidden) { location.hash = SB.routeHash(SB.state.active ? SB.state.active.id : ''); return; }
                 if (SB.state.state.q) {
                     SB.$('search').value = '';
                     SB.state.state.q = '';
@@ -6907,7 +7145,7 @@ body.tuner-open { overflow: hidden; }
                 return;
             }
             if (!SB.$('songView').hidden && !e.repeat) {
-                var onControl = t && t.closest && t.closest('button, a');
+                var onControl = t && t.closest && t.closest('button, a, [role="button"]');
                 if (e.key === ' ' && !onControl) { e.preventDefault(); SB.toggleAutoScroll(); }
                 else if (e.key === 'ArrowLeft' && !onControl) { SB.$('prevBtn').click(); }
                 else if (e.key === 'ArrowRight' && !onControl) { SB.$('nextBtn').click(); }
@@ -7056,6 +7294,9 @@ body.tuner-open { overflow: hidden; }
         defaultTime: SB.DEFAULT_TIME,
         metronomeBeatsPerBar: SB.metronomeBeatsPerBar,
         metronomeLog: function () { return SB.metronomeLog.slice(); },
+        clearMetronomeLog: function () { SB.metronomeLog.length = 0; },
+        setBpm: SB.setBpm,
+        resetBpm: SB.resetBpmForSong,
         metronomePosition: function () { return SB.metronomePosition(); },
         strum: SB.state.strum,
         strumPatterns: SB.strumPatterns,

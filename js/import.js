@@ -27,7 +27,7 @@
             SB.idbPut(sb).then(function () {
                 SB.state.imported.push(sb);
                 SB.rebuildIndex();
-                location.hash = '#/' + sb.id;
+                location.hash = SB.routeHash(sb.id);
             }).catch(function (err) { window.alert('Could not save import: ' + err.message); });
         };
         reader.onerror = function () { window.alert('Could not read file.'); };

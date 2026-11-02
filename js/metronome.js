@@ -44,6 +44,9 @@
     var nextTime = 0;       // AudioContext time of the next click, seconds
     var beat = 0;           // 0-based index of the next click within the bar
     var startTime = 0;      // AudioContext time of beat 0 (the first click)
+    // Clicks already handed to the audio clock, so a live tempo change can
+    // cancel the ones still queued on the old grid. Bounded by pruning.
+    var scheduled = [];
 
     function AudioCtx() { return window.AudioContext || window.webkitAudioContext; }
 
@@ -96,6 +99,26 @@
         gain.connect(ctx.destination);
         osc.start(time);
         osc.stop(time + CLICK_S);
+        scheduled.push({ osc: osc, gain: gain, time: time });
+        // The queue only ever holds the lookahead window, but a long session
+        // must not grow it without bound.
+        while (scheduled.length && scheduled[0].time < ctx.currentTime - CLICK_S) {
+            scheduled.shift();
+        }
+    }
+
+    /* Cancels clicks that are queued but have not sounded yet. Used when the
+     * tempo changes mid-count and when the metronome stops, so the old grid
+     * cannot keep clicking after the state has moved on. */
+    function clearFutureClicks(now) {
+        for (var i = 0; i < scheduled.length; i++) {
+            var s = scheduled[i];
+            if (s.time > now) {
+                try { s.osc.stop(now); } catch (e) { /* already stopped */ }
+                try { s.gain.disconnect(); } catch (e) { /* already disconnected */ }
+            }
+        }
+        scheduled.length = 0;
     }
 
     /* Ring buffer of recently scheduled clicks. The whole point of the
@@ -160,6 +183,7 @@
 
         beat = 0;
         SB.metronomeLog.length = 0;
+        scheduled.length = 0;
         // Start just far enough ahead that the first click is scheduled
         // rather than fired late.
         nextTime = ctx.currentTime + 0.06;
@@ -181,6 +205,9 @@
 
     SB.stopMetronome = function () {
         if (timer) { window.clearInterval(timer); timer = null; }
+        // Drop anything still queued so stopping is silent immediately rather
+        // than playing out the lookahead window.
+        if (ctx) clearFutureClicks(ctx.currentTime);
         if (!SB.state.metronome.playing) return;
         SB.state.metronome.playing = false;
         // The context is deliberately left open: closing it would mean
@@ -206,28 +233,53 @@
         SB.setBpm(SB.state.metronome.bpm + delta);
     }
 
+    /* Changes the tempo and, while running, re-anchors the click grid so the
+     * next click is the next whole beat at the new spacing. Clicks already
+     * queued on the old grid are cancelled; otherwise the first ~100ms after
+     * a tempo change still sounds at the old tempo while the strum highlight
+     * has already moved to the new one. */
+    function applyTempo(bpm) {
+        if (bpm === SB.state.metronome.bpm) return;
+        if (SB.state.metronome.playing && ctx) {
+            var now = ctx.currentTime;
+            var oldSpb = 60 / SB.state.metronome.bpm;
+            var newSpb = 60 / bpm;
+            var beatsNow = Math.max(0, (now - startTime) / oldSpb);
+            clearFutureClicks(now);
+            // Keep the phase: the next click lands on the next whole beat,
+            // measured from the old grid, and subsequent clicks use newSpb.
+            startTime = now - beatsNow * newSpb;
+            var nextBeat = Math.ceil(beatsNow);
+            if ((nextBeat - beatsNow) * newSpb < 0.005) nextBeat += 1;
+            nextTime = startTime + nextBeat * newSpb;
+            beat = nextBeat % SB.state.metronome.beats;
+        }
+        SB.state.metronome.bpm = bpm;
+        if (SB.state.metronome.playing) scheduler();
+    }
+
     SB.setBpm = function (v) {
         if (typeof v !== 'number' || !isFinite(v)) return;
         var bpm = clampBpm(Math.min(BPM_MAX, Math.max(BPM_MIN, Math.round(v))));
         if (bpm === null || bpm === SB.state.metronome.bpm) { SB.updateMetronomeUi(); return; }
-        // Re-anchor the phase clock so a live tempo change does not make the
-        // strum highlight jump or drift: keep the current beat phase fixed and
-        // only change how fast it advances from here. Done before writing bpm
-        // so the old seconds-per-beat is still in SB.state.metronome.bpm.
-        if (SB.state.metronome.playing && ctx) {
-            var oldSpb = 60 / SB.state.metronome.bpm;
-            var beatsNow = (ctx.currentTime - startTime) / oldSpb;
-            startTime = ctx.currentTime - beatsNow * (60 / bpm);
-        }
-        SB.state.metronome.bpm = bpm;
+        applyTempo(bpm);
         SB.updateMetronomeUi();
         if (SB.state.active && SB.state.currentSong) {
             try { window.localStorage.setItem(SB.bpmKey(SB.state.active.id, SB.state.currentSong.id), String(bpm)); }
             catch (e) { /* ignore */ }
         }
-        // A tempo change mid-count takes effect from the next scheduled
-        // click: the scheduler reads bpm each pass, and anything already
-        // handed to the audio clock stays where it was put.
+    }
+
+    /* Drops the per-song override and returns to the song's documented tempo
+     * (or DEFAULT_BPM). Without this the only way back was to clear storage. */
+    SB.resetBpmForSong = function () {
+        var song = SB.state.currentSong;
+        if (!song || !SB.state.active) return;
+        try { window.localStorage.removeItem(SB.bpmKey(SB.state.active.id, song.id)); }
+        catch (e) { /* ignore */ }
+        var bpm = tempoFor(song);
+        if (bpm !== null) applyTempo(bpm);
+        SB.updateMetronomeUi();
     }
 
     /* Called from SB.openSong. Picks up the song's tempo (or the user's
@@ -248,6 +300,12 @@
         group.hidden = !on;
         if (!on) return;
         SB.$('bpmValue').textContent = SB.state.metronome.bpm;
+        var reset = SB.$('bpmReset');
+        if (reset) {
+            var overridden = !!(SB.state.active && SB.state.currentSong &&
+                SB.loadBpmForSong(SB.state.active.id, SB.state.currentSong.id) !== null);
+            reset.hidden = !overridden;
+        }
         var btn = SB.$('metronomeBtn');
         btn.textContent = SB.state.metronome.playing ? '⏸' : '▶';
         btn.classList.toggle('playing', SB.state.metronome.playing);
@@ -263,6 +321,8 @@
         btn.addEventListener('click', SB.toggleMetronome);
         SB.$('bpmDown').addEventListener('click', function () { SB.stepBpm(-1); });
         SB.$('bpmUp').addEventListener('click', function () { SB.stepBpm(1); });
+        var reset = SB.$('bpmReset');
+        if (reset) reset.addEventListener('click', SB.resetBpmForSong);
     }
 
 })(window.SB = window.SB || {});

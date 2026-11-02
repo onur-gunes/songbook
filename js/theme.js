@@ -24,6 +24,9 @@
     SB.applyBrand = function () {
         var logo = SB.$('logo');
         if (!logo) return;
+        /* Imported books may point at a remote image. Do not leak the reader's
+         * IP/referrer to that host just because they opened a songbook. */
+        logo.referrerPolicy = 'no-referrer';
         var light = (SB.state.active && SB.state.active.logo) || '';
         var dark = (SB.state.active && (SB.state.active.logoDark || SB.state.active.logo)) || '';
         var dark_on = document.documentElement.getAttribute('data-theme') === 'dark';

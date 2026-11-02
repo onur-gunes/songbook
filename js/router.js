@@ -9,13 +9,22 @@
 
     /* ---------------- routing ---------------- */
 
+    /* A hash can be edited by hand, restored from an old bookmark, or typed
+     * with a stray '%'. decodeURIComponent throws on those, which used to take
+     * the whole router down; fall back to the raw segment and let the lookup
+     * below decide whether it names anything. */
+    function decodePart(value) {
+        try { return decodeURIComponent(value); }
+        catch (e) { return value; }
+    }
+
     SB.route = function () {
         var h = location.hash || '';
         var m = h.match(/^#\/([^\/]+)(?:\/(.+))?$/);
         var sb = null, songId = null;
         if (m) {
-            sb = SB.state.bySb[decodeURIComponent(m[1])];
-            if (m[2]) songId = decodeURIComponent(m[2]);
+            sb = SB.state.bySb[decodePart(m[1])];
+            if (m[2]) songId = decodePart(m[2]);
         }
         // A bare "#/" means "back to the song list I'm browsing" — keep the
         // current songbook instead of snapping to the default starter one.
