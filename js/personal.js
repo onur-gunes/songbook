@@ -40,7 +40,7 @@
             var li = document.createElement('li');
             var b = SB.el('button', null, s.title);
             b.type = 'button';
-            b.addEventListener('click', function () { location.hash = '#/' + sb.id + '/' + s.id; });
+            b.addEventListener('click', function () { location.hash = SB.routeHash(sb.id, s.id); });
             li.appendChild(b);
             list.appendChild(li);
         });

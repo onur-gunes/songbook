@@ -30,7 +30,7 @@
         SB.closeVoicingChooser();
         SB.stopMetronome();
         var song = SB.state.byId[id];
-        if (!song) { location.hash = '#/' + (SB.state.active ? SB.state.active.id : ''); return; }
+        if (!song) { location.hash = SB.routeHash(SB.state.active ? SB.state.active.id : ''); return; }
         SB.state.currentSong = song;
         SB.addRecent(SB.state.active.id, id);
         SB.resetScroll(true);
@@ -88,16 +88,25 @@
 
         SB.$('prevBtn').addEventListener('click', function () {
             var ctx = navContext();
-            if (ctx.idx > 0) location.hash = '#/' + SB.state.active.id + '/' + ctx.list[ctx.idx - 1].id;
+            if (ctx.idx > 0) location.hash = SB.routeHash(SB.state.active.id, ctx.list[ctx.idx - 1].id);
         });
         SB.$('nextBtn').addEventListener('click', function () {
             var ctx = navContext();
-            if (ctx.idx !== -1 && ctx.idx < ctx.list.length - 1) location.hash = '#/' + SB.state.active.id + '/' + ctx.list[ctx.idx + 1].id;
+            if (ctx.idx !== -1 && ctx.idx < ctx.list.length - 1) location.hash = SB.routeHash(SB.state.active.id, ctx.list[ctx.idx + 1].id);
         });
 
         SB.$('notesSave').addEventListener('click', saveNotes);
         SB.$('notesBox').addEventListener('keydown', function (e) {
             if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); saveNotes(); }
+        });
+        // Notes used to be saved only on an explicit click, so closing the
+        // song or tab lost the last edit silently. Autosave after a pause,
+        // and flush on blur/page-hide.
+        SB.$('notesBox').addEventListener('input', scheduleNotesSave);
+        SB.$('notesBox').addEventListener('blur', flushNotesSave);
+        window.addEventListener('pagehide', flushNotesSave);
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'hidden') flushNotesSave();
         });
 
         SB.$('scrollBtn').addEventListener('click', SB.toggleAutoScroll);
@@ -151,9 +160,45 @@
         }, { passive: true });
     }
 
+    var notesPending = null;
+
+    function writeNotes(sbId, songId, value) {
+        try { window.localStorage.setItem(SB.noteKey(sbId, songId), value); } catch (e) { /* ignore */ }
+    }
+
+    /* Capture the ids and text at edit time: by the time the debounce fires
+     * the user may already be on another song, and notesBox would then hold
+     * that song's text. */
+    function scheduleNotesSave() {
+        if (!SB.state.currentSong || !SB.state.active) return;
+        var entry = {
+            sbId: SB.state.active.id,
+            songId: SB.state.currentSong.id,
+            value: SB.$('notesBox').value
+        };
+        if (notesPending) clearTimeout(notesPending.timer);
+        entry.timer = setTimeout(function () {
+            if (notesPending === entry) notesPending = null;
+            writeNotes(entry.sbId, entry.songId, entry.value);
+        }, 500);
+        notesPending = entry;
+    }
+
+    /* Writes any debounced edit for the song it belongs to, then the current
+     * textarea for the current song. Safe to call repeatedly. */
+    function flushNotesSave() {
+        if (notesPending) {
+            clearTimeout(notesPending.timer);
+            writeNotes(notesPending.sbId, notesPending.songId, notesPending.value);
+            notesPending = null;
+        }
+        if (!SB.state.currentSong || !SB.state.active) return;
+        writeNotes(SB.state.active.id, SB.state.currentSong.id, SB.$('notesBox').value);
+    }
+
     function saveNotes() {
         if (!SB.state.currentSong || !SB.state.active) return;
-        try { window.localStorage.setItem(SB.noteKey(SB.state.active.id, SB.state.currentSong.id), SB.$('notesBox').value); } catch (e) { /* ignore */ }
+        flushNotesSave();
         var st = SB.$('notesStatus');
         st.textContent = 'Saved';
         st.classList.add('show');

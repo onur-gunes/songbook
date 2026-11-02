@@ -245,6 +245,19 @@ async function main() {
     ok('notes status shown', $('notesStatus').classList.contains('show'));
     ok('notes in localStorage', (win().localStorage.getItem('songbook:note:krakow-ukulele\u0000riptide') || '') === 'test note 123');
 
+    // typing alone is autosaved after the debounce
+    $('notesBox').value = 'autosaved note';
+    $('notesBox').dispatchEvent(new Event('input', { bubbles: true }));
+    await wait(700);
+    ok('notes autosave after a pause',
+        (win().localStorage.getItem('songbook:note:krakow-ukulele\u0000riptide') || '') === 'autosaved note');
+    // blur flushes without waiting for the debounce
+    $('notesBox').value = 'blurred note';
+    $('notesBox').dispatchEvent(new Event('input', { bubbles: true }));
+    $('notesBox').dispatchEvent(new Event('blur'));
+    ok('notes flush on blur',
+        (win().localStorage.getItem('songbook:note:krakow-ukulele\u0000riptide') || '') === 'blurred note');
+
     // 11. favorite from song view
     $('favBtn').click(); await wait(50);
     ok('fav button on', $('favBtn').classList.contains('on'));
@@ -841,7 +854,15 @@ async function main() {
     ok('adjusted default is persisted per song',
         win().localStorage.getItem(defaultBpmKey) === String(defaultBpm + 1),
         win().localStorage.getItem(defaultBpmKey));
-    win().localStorage.removeItem(defaultBpmKey);
+    ok('reset shown for an override', $('bpmReset').hidden === false);
+    $('bpmReset').click(); await wait(30);
+    ok('reset returns to the app default',
+        mState().bpm === defaultBpm && $('bpmValue').textContent === String(defaultBpm),
+        String(mState().bpm));
+    ok('reset clears the default override',
+        win().localStorage.getItem(defaultBpmKey) === null,
+        win().localStorage.getItem(defaultBpmKey));
+    ok('reset hidden without an override', $('bpmReset').hidden === true);
 
     // arahja carries bpm 176 / 4-4 in the songbook
     win().location.hash = '#/polska-gurom/arahja';
@@ -861,6 +882,18 @@ async function main() {
     ok('bpm -1 twice', $('bpmValue').textContent === '175', $('bpmValue').textContent);
     ok('bpm persisted', win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja') === '175',
         win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja'));
+
+    // a per-song override has a way back to the documented tempo
+    ok('reset shown for a song override', $('bpmReset').hidden === false);
+    $('bpmReset').click(); await wait(30);
+    ok('reset returns to the song tempo', $('bpmValue').textContent === '176', $('bpmValue').textContent);
+    ok('reset clears the song override',
+        win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja') === null,
+        win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja'));
+    ok('reset hidden after clearing', $('bpmReset').hidden === true);
+    // put the override back for the navigation assertions below
+    $('bpmDown').click(); await wait(30);
+    ok('override restored for navigation', $('bpmValue').textContent === '175', $('bpmValue').textContent);
 
     // the override survives navigation away and back, and does not leak
     // into another song that has its own tempo
@@ -919,6 +952,25 @@ async function main() {
     ok('keeps counting after a live tempo change',
         mState().playing === true && win().songbookTest.metronomeLog().length > nBefore,
         nBefore + ' -> ' + win().songbookTest.metronomeLog().length);
+
+    // A live tempo change must re-space the clicks, not just keep the timer
+    // alive. Clear the log so only post-change clicks are measured; every gap
+    // between them should be the new seconds-per-beat, never the old one.
+    win().songbookTest.clearMetronomeLog();
+    win().songbookTest.setBpm(120);
+    await wait(1800);
+    const postChange = win().songbookTest.metronomeLog();
+    ok('clicks continue after a tempo change', postChange.length >= 3, 'n=' + postChange.length);
+    if (postChange.length >= 3) {
+        const newGap = 60 / 120;
+        let worstGap = 0;
+        for (let i = 1; i < postChange.length; i++) {
+            worstGap = Math.max(worstGap,
+                Math.abs((postChange[i].time - postChange[i - 1].time) - newGap));
+        }
+        ok('post-change clicks use the new spacing', worstGap < 1e-6,
+            'worst gap error=' + worstGap.toExponential(2) + 's');
+    }
 
     $('metronomeBtn').click(); await wait(50);
     ok('metronome stops', mState().playing === false);
@@ -1261,6 +1313,39 @@ async function main() {
 
     win().localStorage.removeItem('songbook:strum:polska-gurom\u0000arahja');
     win().localStorage.removeItem('songbook:bpm:polska-gurom\u0000arahja');
+
+    // 20c. the voicing chooser owns Escape and Space while it is open
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(300);
+    const chordItem = doc().querySelector('#chordStrip .chord-item[role="button"]');
+    ok('a chord diagram is available for the keyboard test', !!chordItem);
+    if (chordItem) {
+        const press = (key) => doc().dispatchEvent(new KeyboardEvent('keydown', {
+            key: key, bubbles: true, cancelable: true
+        }));
+        chordItem.click();
+        await wait(40);
+        ok('click opens the voicing chooser', !!doc().getElementById('voicingChooser'));
+        press('Escape');
+        await wait(40);
+        ok('Escape closes the chooser', !doc().getElementById('voicingChooser'));
+        ok('Escape does not leave the song', win().location.hash.indexOf('/riptide') > -1,
+            win().location.hash);
+
+        const scrollBefore = win().songbookTest.scrollState.playing;
+        chordItem.focus();
+        chordItem.dispatchEvent(new KeyboardEvent('keydown', {
+            key: ' ', bubbles: true, cancelable: true
+        }));
+        await wait(40);
+        ok('Space opens the chooser', !!doc().getElementById('voicingChooser'));
+        ok('Space does not toggle auto-scroll',
+            win().songbookTest.scrollState.playing === scrollBefore,
+            String(scrollBefore) + ' -> ' + String(win().songbookTest.scrollState.playing));
+        press('Escape');
+        await wait(40);
+        ok('chooser closed after the Space test', !doc().getElementById('voicingChooser'));
+    }
 
     // 21. no console/page errors overall
     ok('no page errors', errors.length === 0, errors.join('; '));

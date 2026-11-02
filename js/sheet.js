@@ -52,6 +52,10 @@
     // thing they pass in.
     function appendLineSegments(lineDiv, line, chordLabelFn) {
         line.forEach(function (seg) {
+            // Normalisation (js/songbooks.js) already removes malformed
+            // segments; this guard keeps a hand-edited or stale stored sheet
+            // from throwing during render.
+            if (!Array.isArray(seg) || seg.length < 2) return;
             var kind = seg[0], val = seg[1];
             if (kind === 'c') {
                 lineDiv.appendChild(SB.el('span', 'seg-chord', chordLabelFn(val)));
@@ -75,12 +79,18 @@
         return m ? '[' + mapChordTokens(m[1]) + ']' : cv;
     }
 
+    function sheetLines(song) {
+        var sheet = song && song.sheet;
+        if (!Array.isArray(sheet)) return [];
+        return sheet.filter(function (line) { return Array.isArray(line); });
+    }
+
     SB.renderSheet = function (song) {
         if (SB.state.chordMode === 'above') { renderSheetAbove(song); return; }
         var wrap = SB.$('sheet');
         wrap.textContent = '';
         var frag = document.createDocumentFragment();
-        (song.sheet || []).forEach(function (line) {
+        sheetLines(song).forEach(function (line) {
             var lineDiv = SB.el('div', 'line');
             var isPre = line.some(function (seg) { return seg[0] === 'p'; });
             if (isPre) lineDiv.classList.add('is-pre');
@@ -244,8 +254,9 @@
     }
 
     function buildAboveLine(line, avail) {
-        var hasWord = false, L = '', parts = [], chords = [], prevEnd = 0, hadChord = false;
+        var L = '', parts = [], chords = [], prevEnd = 0, hadChord = false;
         line.forEach(function (seg) {
+            if (!Array.isArray(seg) || seg.length < 2) return;
             if (seg[0] === 'c') {
                 var label = chordLabel(seg[1]);
                 var col = hadChord ? Math.max(L.length, prevEnd + 1) : L.length;
@@ -262,7 +273,6 @@
             if (t.replace(/\s/g, '').length) hadChord = false;
             parts.push({ kind: seg[0], text: t, start: L.length });
             L += t;
-            if (/\S/.test(t)) hasWord = true;
         });
 
         var div = SB.el('div', 'line line-stacked');
@@ -313,7 +323,7 @@
         wrap.textContent = '';
         var frag = document.createDocumentFragment();
         var avail = Math.max(1, wrap.clientWidth - 0.5);
-        (song.sheet || []).forEach(function (line) {
+        sheetLines(song).forEach(function (line) {
             var lineDiv = SB.el('div', 'line');
             var isPre = line.some(function (s) { return s[0] === 'p'; });
             if (isPre) lineDiv.classList.add('is-pre');

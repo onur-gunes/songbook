@@ -35,19 +35,46 @@
 
     /* A strum is kept as a bare id string here; js/strum.js owns the pattern
      * library and resolves the id against it (and against the song's metre) at
-     * open time. Keeping it a string rather than resolving here avoids a load-
-     * order dependency on strum.js and leaves the field free to grow into a
-     * list of ids for per-section patterns later, which is why it is not
-     * coerced to a single scalar shape. */
+     * open time. Keeping it a string rather than resolving here avoids a
+     * load-order dependency on strum.js. Per-section patterns would be a
+     * separate field; this one is the song's single documented default. */
     function normalizeStrum(value) {
         return (typeof value === 'string' && value) ? value : null;
     }
 
+    /* The sheet is the only imported field with a nested shape. A missing or
+     * wrong-typed value used to reach the renderers and throw (or draw
+     * garbage), so coerce it here: keep lines of valid [kind, text] segments
+     * and drop anything else. An empty line is meaningful — a blank line in
+     * the sheet — so it is preserved. */
+    var SHEET_KINDS = { c: 1, x: 1, m: 1, b: 1, i: 1, y: 1, p: 1 };
+
+    function normalizeSegment(seg) {
+        if (!Array.isArray(seg) || seg.length < 2) return null;
+        var kind = seg[0];
+        if (typeof kind !== 'string' || !SHEET_KINDS[kind]) return null;
+        var val = seg[1];
+        if (val == null) return null;
+        return [kind, String(val)];
+    }
+
+    function normalizeSheet(value) {
+        if (!Array.isArray(value)) return [];
+        return value.map(function (line) {
+            if (!Array.isArray(line)) return null;
+            return line.map(normalizeSegment).filter(Boolean);
+        }).filter(function (line) { return line !== null; });
+    }
+
     function normalizeSong(s, index) {
         if (!s || typeof s !== 'object') throw new Error('bad song entry');
+        var rawId = s.id;
+        var id = (typeof rawId === 'string' || typeof rawId === 'number')
+            ? String(rawId).trim() : '';
+        if (!id) id = 'song-' + (index + 1);
         return {
-            id: String(s.id || ('song-' + (index + 1))),
-            n: typeof s.n === 'number' ? s.n : (index + 1),
+            id: id,
+            n: (typeof s.n === 'number' && isFinite(s.n)) ? s.n : (index + 1),
             title: String(s.title || 'Untitled'),
             artist: String(s.artist || ''),
             level: (s.level === 'Easy' || s.level === 'Medium' || s.level === 'Hard') ? s.level : 'Medium',
@@ -55,12 +82,14 @@
             key: s.key ? String(s.key) : '',
             sheetKey: s.sheetKey ? String(s.sheetKey) : '',
             capo: (typeof s.capo === 'number' && isFinite(s.capo)) ? s.capo : null,
-            dur: typeof s.dur === 'number' ? s.dur : 4,
+            dur: (typeof s.dur === 'number' && isFinite(s.dur) && s.dur > 0) ? s.dur : 4,
             bpm: normalizeBpm(s.bpm),
             time: normalizeTime(s.time),
             strum: normalizeStrum(s.strum),
-            chords: Array.isArray(s.chords) ? s.chords.map(String) : [],
-            sheet: Array.isArray(s.sheet) ? s.sheet : (s.sheet ? s.sheet : [])
+            chords: Array.isArray(s.chords) ? s.chords.filter(function (c) {
+                return typeof c === 'string' || typeof c === 'number';
+            }).map(String) : [],
+            sheet: normalizeSheet(s.sheet)
         };
     }
 

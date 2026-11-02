@@ -118,13 +118,16 @@ attached to `SB`.
   (lowest to highest fret) with a live preview; picks are remembered per chord.
 - Per-song text size Aa (70%–150%, live, stored per song; two-finger pinch works).
 - Auto-scroll timed to each song's duration (0.2×–3.0×), play/reset, per-song
-  speed, notes (localStorage), dark mode, keyboard shortcuts
+  speed, notes (autosaved to `localStorage`), dark mode, keyboard shortcuts
   (`/` search, `Space` scroll, `←`/`→` songs, `Esc` back).
 - **Metronome** — clicks at the song's `bpm`, accenting beat 1 according to
-  `time`. Adjust the tempo and it is remembered for that song. Available on
-  every song: one with no tempo data starts at a neutral 100 bpm in 4/4, and
-  the first adjustment stores a per-song override. Scheduled against the audio
-  clock rather than a timer, so it does not drift.
+  `time`. Adjust the tempo and it is remembered for that song; the ↺ button
+  next to the stepper drops that override and returns to the song's documented
+  tempo (or the 100 bpm default). Available on every song: one with no tempo
+  data starts at a neutral 100 bpm in 4/4, and the first adjustment stores a
+  per-song override. Scheduled against the audio clock rather than a timer, so
+  it does not drift; a live tempo change re-spaces the remaining clicks instead
+  of letting the old grid play out.
 - **Strum pattern** — a row of arrows (`↓ ↑ ·`) under the chord strip, chosen
   from a library of common patterns filtered by the song's `time` (4/4, 3/4,
   6/8, 2/4 — several per metre). A toggle switches the row between arrows and
@@ -186,9 +189,12 @@ attached to `SB`.
 ```
 
 `sheet` kinds: `c` chord token (`[Am]`), `x` text, `m` muted, `b` bold,
-`i` italic, `y` comment, `p` preformatted/tab. Personal data (favorites, notes,
-recent, theme, scroll speed, voicing picks) lives only in `localStorage`; the
-imported songbook JSON lives in `IndexedDB`.
+`i` italic, `y` comment, `p` preformatted/tab. Imported sheets are normalised:
+a missing or wrong-typed `sheet` becomes empty, and malformed lines/segments
+are dropped instead of reaching the renderer. Song ids may contain any
+characters; the app percent-encodes them in the hash. Personal data (favorites,
+notes, recent, theme, scroll speed, voicing picks) lives only in
+`localStorage`; the imported songbook JSON lives in `IndexedDB`.
 
 ## Regenerate the bundled data
 
@@ -319,8 +325,9 @@ The app still makes the metronome usable when a song has neither value: it
 shows a neutral **100 bpm in 4/4** fallback rather than hiding the control.
 That fallback is a starting point for the user, not a claim about the song, and
 it is never written into the songbook or stored as an override until the user
-changes the tempo. The same rule applies to strum: a song with no `time` uses
-4/4 so its row and selector are available.
+changes the tempo. The ↺ button appears once an override exists, so there is
+always a way back to the song's own value. The same rule applies to strum: a
+song with no `time` uses 4/4 so its row and selector are available.
 
 Curated values live in the per-book `tempo.json` sidecar, merged by song id
 exactly like `original-keys.json`, and take precedence over an inline
