@@ -66,14 +66,18 @@
         return v;
     }
 
-    /* Whether the song has any tempo at all: either from the songbook or
-     * from a previous user override. Without one there is nothing sensible
-     * to count, so the control is hidden entirely. */
+    /* The tempo the control should show: the user's per-song override, else
+     * the songbook's bpm, else the app default. The default keeps the
+     * metronome available on songs with no tempo data, and is not written to
+     * storage until the user actually steps the tempo. */
     function tempoFor(song) {
-        if (!song || !SB.state.active) return null;
-        var saved = SB.loadBpmForSong(SB.state.active.id, song.id);
-        if (saved !== null) return saved;
-        return clampBpm(song.bpm);
+        if (!song) return null;
+        if (SB.state.active) {
+            var saved = SB.loadBpmForSong(SB.state.active.id, song.id);
+            if (saved !== null) return saved;
+        }
+        var fromSong = clampBpm(song.bpm);
+        return fromSong !== null ? fromSong : SB.DEFAULT_BPM;
     }
 
     /* ---------------- audio ---------------- */
@@ -193,11 +197,10 @@
 
     /* ---------------- bpm ---------------- */
 
-    /* Steps the tempo relative to the current one. Does nothing when there is
-     * no tempo to step from: null coerces to 0 in arithmetic, so a bare
-     * bpm +/- 1 would clamp to BPM_MIN and invent a tempo for a song that
-     * has none, un-hiding the control. The UI hides the stepper in that
-     * state, but the guard belongs here rather than relying on that. */
+    /* Steps the tempo relative to the current one. The guard covers the brief
+     * no-song state (and any caller that reaches the stepper before a song is
+     * loaded): null coerces to 0 in arithmetic, which would otherwise clamp to
+     * BPM_MIN and invent a tempo out of nowhere. */
     SB.stepBpm = function (delta) {
         if (SB.state.metronome.bpm === null) return;
         SB.setBpm(SB.state.metronome.bpm + delta);
@@ -228,13 +231,13 @@
     }
 
     /* Called from SB.openSong. Picks up the song's tempo (or the user's
-     * override), sets the meter, and hides the whole control for songs with
-     * no tempo data at all. */
+     * override), falling back to DEFAULT_BPM when the song has no tempo data,
+     * and sets the meter (DEFAULT_TIME when the song has no metre) so the
+     * control is available on every song. */
     SB.loadMetronomeForSong = function (song) {
         SB.stopMetronome();
-        var bpm = tempoFor(song);
-        SB.state.metronome.bpm = bpm;
-        SB.state.metronome.beats = SB.metronomeBeatsPerBar(song && song.time);
+        SB.state.metronome.bpm = tempoFor(song);
+        SB.state.metronome.beats = SB.metronomeBeatsPerBar((song && song.time) || SB.DEFAULT_TIME);
         SB.updateMetronomeUi();
     }
 

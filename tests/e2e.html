@@ -819,20 +819,29 @@ async function main() {
     const mGroup = () => $('metronomeGroup');
     const mState = () => win().songbookTest.metronome;
 
-    // the control only exists for songs that have a tempo
+    // Every song gets the metronome. A song with no tempo data starts at the
+    // app default, and the default is not stored until the user adjusts it.
+    const defaultBpm = win().songbookTest.defaultBpm;
+    const defaultBpmKey = 'songbook:bpm:polska-gurom\u0000nie-ma-nas';
+    win().localStorage.removeItem(defaultBpmKey);
     win().location.hash = '#/polska-gurom/nie-ma-nas';
     await wait(250);
-    ok('metronome hidden without tempo data', mGroup().hidden === true, 'hidden=' + mGroup().hidden);
-    ok('no bpm without tempo data', mState().bpm === null, String(mState().bpm));
-    // the stepper must not invent a tempo for a song that has none: null
-    // coerces to 0 in arithmetic, which would clamp up to the 20 floor and
-    // un-hide the control
-    $('bpmUp').click(); $('bpmDown').click(); await wait(30);
-    ok('stepper does not invent a tempo', mState().bpm === null, String(mState().bpm));
-    ok('still hidden after stepping', mGroup().hidden === true, 'hidden=' + mGroup().hidden);
-    ok('no bpm key written without a tempo',
-        win().localStorage.getItem('songbook:bpm:polska-gurom\u0000nie-ma-nas') === null,
-        win().localStorage.getItem('songbook:bpm:polska-gurom\u0000nie-ma-nas'));
+    ok('metronome shown without tempo data', mGroup().hidden === false, 'hidden=' + mGroup().hidden);
+    ok('bpm falls back to the app default', mState().bpm === defaultBpm, String(mState().bpm));
+    ok('default bpm is shown', $('bpmValue').textContent === String(defaultBpm),
+        $('bpmValue').textContent);
+    ok('beats per bar fall back to the default metre', mState().beats === 4,
+        String(mState().beats));
+    ok('default bpm is not stored until adjusted',
+        win().localStorage.getItem(defaultBpmKey) === null,
+        win().localStorage.getItem(defaultBpmKey));
+    $('bpmUp').click(); await wait(30);
+    ok('stepper adjusts the default tempo', mState().bpm === defaultBpm + 1,
+        String(mState().bpm));
+    ok('adjusted default is persisted per song',
+        win().localStorage.getItem(defaultBpmKey) === String(defaultBpm + 1),
+        win().localStorage.getItem(defaultBpmKey));
+    win().localStorage.removeItem(defaultBpmKey);
 
     // arahja carries bpm 176 / 4-4 in the songbook
     win().location.hash = '#/polska-gurom/arahja';
@@ -933,7 +942,8 @@ async function main() {
     win().localStorage.removeItem('songbook:bpm:polska-gurom\u0000arahja');
     win().location.hash = '#/krakow-ukulele/riptide';
     await wait(250);
-    ok('metronome hidden on a book with no tempo data', mGroup().hidden === true, 'hidden=' + mGroup().hidden);
+    ok('metronome shown on a book with no tempo data', mGroup().hidden === false, 'hidden=' + mGroup().hidden);
+    ok('other book uses the default bpm', mState().bpm === defaultBpm, String(mState().bpm));
 
     // 20b. strum pattern selector (issue #41)
     const sGroup = () => $('strumGroup');
@@ -955,12 +965,30 @@ async function main() {
         ['4/4', '3/4', '6/8', '2/4'].every(t => win().songbookTest.strumPatternsFor(t).length >= 2),
         ['4/4', '3/4', '6/8', '2/4'].map(t => t + '=' + win().songbookTest.strumPatternsFor(t).length).join(' '));
 
-    // hidden for a song with no time signature
+    // Songs without a metre use the default metre and still get a usable row.
+    const defaultTime = win().songbookTest.defaultTime;
+    const defaultStrum = win().songbookTest.strumPatternsFor(defaultTime)[0];
+    win().localStorage.removeItem('songbook:strum:polska-gurom\u0000nie-ma-nas');
     win().location.hash = '#/polska-gurom/nie-ma-nas';
     await wait(250);
-    ok('strum hidden without a time signature', sGroup().hidden === true, 'hidden=' + sGroup().hidden);
-    ok('strum row hidden too', sRow().hidden === true, 'hidden=' + sRow().hidden);
-    ok('no strum pattern without time', sState().pattern === null, String(sState().pattern));
+    ok('strum shown without a time signature', sGroup().hidden === false, 'hidden=' + sGroup().hidden);
+    ok('strum row shown without a time signature', sRow().hidden === false, 'hidden=' + sRow().hidden);
+    ok('default metre supplies a pattern',
+        sState().pattern && sState().pattern.id === defaultStrum.id,
+        sState().pattern && sState().pattern.id);
+    ok('selector lists patterns for the default metre',
+        Array.prototype.every.call(sSel().options, o =>
+            win().songbookTest.strumPatterns().some(p => p.id === o.value && p.time === defaultTime)),
+        Array.prototype.map.call(sSel().options, o => o.value).join(','));
+    // The default is adjustable, and the choice is remembered like any other.
+    win().songbookTest.setStrum('eighths-4-4');
+    await wait(30);
+    ok('manual choice works on the default metre', sState().pattern.id === 'eighths-4-4',
+        sState().pattern.id);
+    ok('manual choice persisted for a no-time song',
+        win().localStorage.getItem('songbook:strum:polska-gurom\u0000nie-ma-nas') === 'eighths-4-4',
+        win().localStorage.getItem('songbook:strum:polska-gurom\u0000nie-ma-nas'));
+    win().localStorage.removeItem('songbook:strum:polska-gurom\u0000nie-ma-nas');
 
     // arahja carries time 4/4 and the documented default strum downs-4-4
     win().localStorage.removeItem('songbook:strum:polska-gurom\u0000arahja');
