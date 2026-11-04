@@ -193,6 +193,8 @@ STRUM_PATTERNS = (
      'slots': 'D-DUD-DU'},
     {'id': 'duudu-4-4', 'name': 'D U UDU', 'time': '4/4', 'subdiv': 2,
      'slots': 'D-U-UDU-'},
+    {'id': 'dddududu-4-4', 'name': 'D D D U D U D U', 'time': '4/4', 'subdiv': 2,
+     'slots': 'DDDUDUDU'},
     # 3/4 — eighths (6 slots)
     {'id': 'downs-3-4', 'name': 'All downs', 'time': '3/4', 'subdiv': 2,
      'slots': 'D-D-D-'},
