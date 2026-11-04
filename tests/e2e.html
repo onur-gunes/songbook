@@ -591,6 +591,39 @@ async function main() {
     await wait(250);
     doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
     win().localStorage.removeItem('songbook:chordMode');
+
+    // 12n. above mode keeps every chord, including one anchored at the very
+    // end of a line (common in intros like "Intro: [C]") and ones sitting on
+    // whitespace that a wrap breaks at.
+    win().location.hash = '#/krakow-ukulele/you-are-my-sunshine';
+    await wait(300);
+    const sheetChordLabels = () => Array.from(doc().querySelectorAll('#sheet .seg-chord'))
+        .map(c => c.textContent.replace(/^\[|\]$/g, ''));
+    doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
+    const inlineChords = sheetChordLabels();
+    doc().querySelector('.chord-mode-btn[data-chord-mode="above"]').click(); await wait(30);
+    const introUnit = Array.from(doc().querySelectorAll('#sheet .line-stacked'))
+        .find(l => l.querySelector('.ln-lyric') &&
+            l.querySelector('.ln-lyric').textContent.trim() === 'Intro:');
+    ok('above keeps the trailing intro chord', !!introUnit &&
+        Array.from(introUnit.querySelectorAll('.ln-chords .seg-chord'))
+            .map(c => c.textContent).join(',') === 'C',
+        introUnit ? introUnit.textContent : 'no intro unit');
+    ok('above keeps every chord in the song',
+        sheetChordLabels().join('|') === inlineChords.join('|'),
+        inlineChords.length + ' vs ' + sheetChordLabels().length);
+    const sunshineSheet = $('sheet');
+    sunshineSheet.style.width = '360px';
+    win().dispatchEvent(new (win().Event)('resize'));
+    await wait(250);
+    ok('above keeps every chord when wrapped',
+        sheetChordLabels().join('|') === inlineChords.join('|'),
+        inlineChords.length + ' vs ' + sheetChordLabels().length);
+    sunshineSheet.style.width = '';
+    win().dispatchEvent(new (win().Event)('resize'));
+    await wait(250);
+    doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
+    win().localStorage.removeItem('songbook:chordMode');
     win().location.hash = '#/krakow-ukulele';
     await wait(200);
     win().location.hash = '';
