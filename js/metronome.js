@@ -263,11 +263,13 @@
         var bpm = clampBpm(Math.min(BPM_MAX, Math.max(BPM_MIN, Math.round(v))));
         if (bpm === null || bpm === SB.state.metronome.bpm) { SB.updateMetronomeUi(); return; }
         applyTempo(bpm);
-        SB.updateMetronomeUi();
         if (SB.state.active && SB.state.currentSong) {
             try { window.localStorage.setItem(SB.bpmKey(SB.state.active.id, SB.state.currentSong.id), String(bpm)); }
             catch (e) { /* ignore */ }
         }
+        // Persist first: updateMetronomeUi decides whether the reset button is
+        // shown by reading the stored override, so it must see this one.
+        SB.updateMetronomeUi();
     }
 
     /* Drops the per-song override and returns to the song's documented tempo
