@@ -5064,6 +5064,23 @@ body.tuner-open { overflow: hidden; }
         return ctx.measureText(label).width;
     }
 
+    // Which visual line a chord belongs to. Ranges are half-open [start, end),
+    // so a chord anchored at the very end of the line — the common case in an
+    // intro like "Intro: [C]" or a verse ending on a chord change — has no
+    // range of its own and used to disappear. This also covers chords that sit
+    // on whitespace a wrap broke at: attach them to the last line that starts
+    // at or before the chord's column.
+    function rangeIndexForCol(ranges, col) {
+        var i;
+        for (i = 0; i < ranges.length; i++) {
+            if (col >= ranges[i][0] && col < ranges[i][1]) return i;
+        }
+        for (i = ranges.length - 1; i >= 0; i--) {
+            if (col >= ranges[i][0]) return i;
+        }
+        return 0;
+    }
+
     function buildAboveLine(line, avail) {
         var hasWord = false, L = '', parts = [], chords = [], prevEnd = 0, hadChord = false;
         line.forEach(function (seg) {
@@ -5089,14 +5106,15 @@ body.tuner-open { overflow: hidden; }
         var div = SB.el('div', 'line line-stacked');
         var ranges = splitLyric(parts, L, avail);
         if (!ranges.length) ranges = [[0, L.length]];
-        ranges.forEach(function (r) {
+        var chordRanges = chords.map(function (c) { return rangeIndexForCol(ranges, c.col); });
+        ranges.forEach(function (r, ri) {
             var unit = SB.el('div', 'ln-unit');
             unit.setAttribute('data-start', r[0]);
             var chor = SB.el('div', 'ln-chords');
             var minGap = sheetEmPx() * 0.5;
             var prevRight = null;
-            chords.forEach(function (c) {
-                if (c.col >= r[0] && c.col < r[1]) {
+            chords.forEach(function (c, ci) {
+                if (chordRanges[ci] === ri) {
                     var left = lyricPrefixWidth(parts, r[0], c.col);
                     // Keep a chord at its lyric column, but never let it run
                     // into the one before it: proportional lyric gaps can be
