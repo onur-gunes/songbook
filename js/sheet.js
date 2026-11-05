@@ -98,7 +98,7 @@
         // A song may carry an authored grid, or one can be derived from its
         // chord changes (see SB.songHasGrid in js/grid.js).
         var hasGrid = SB.songHasGrid ? SB.songHasGrid(song) : !!(song && song.grid && song.grid.length);
-        if (SB.state.chordMode === 'grid' && hasGrid && SB.renderSheetGrid) {
+        if (SB.isGridMode() && hasGrid && SB.renderSheetGrid) {
             SB.renderSheetGrid(song);
             return;
         }

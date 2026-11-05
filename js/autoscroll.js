@@ -17,7 +17,9 @@
     try { SB.state.chordPin = window.localStorage.getItem(SB.NS + ':chordPin') !== '0'; } catch (e) { /* ignore */ }
     try {
         var _cm = window.localStorage.getItem(SB.NS + ':chordMode');
-        if (_cm === 'inline' || _cm === 'above' || _cm === 'grid') SB.state.chordMode = _cm;
+        if (_cm === 'inline' || _cm === 'above' || _cm === 'grid' || _cm === 'animate') {
+            SB.state.chordMode = _cm;
+        }
     } catch (e) { /* ignore */ }
 
     SB.applyChordSettings = function () {
@@ -46,7 +48,7 @@
         try { window.localStorage.setItem(SB.NS + ':chordSize', String(SB.state.chordSize)); } catch (e) { /* ignore */ }
         // Diagram size changes the column widths in a grid, so the layout has
         // to be measured again rather than merely restyled.
-        if (SB.state.chordMode === 'grid' && SB.state.currentSong) SB.renderSheet(SB.state.currentSong);
+        if (SB.isGridMode() && SB.state.currentSong) SB.renderSheet(SB.state.currentSong);
     }
 
     /* The mode is a global, persisted preference, but a grid is per song. The
@@ -55,19 +57,37 @@
      * renderSheet still falls back to the inline sheet in that case, so the
      * user is never stranded in an empty view. */
     SB.updateGridModeUi = function () {
-        var btn = document.querySelector('.chord-mode-btn[data-chord-mode="grid"]');
-        if (!btn) return;
         var song = SB.state.currentSong;
         // Authored grid or one derived from the sheet's chord changes.
         var has = SB.songHasGrid ? SB.songHasGrid(song) : !!(song && song.grid && song.grid.length);
-        btn.disabled = !has;
-        var label = has
-            ? 'Grid chord chart'
-            : 'This song has no grid chart';
-        btn.setAttribute('aria-label', label);
-        btn.title = has
-            ? 'Show the play-along chord chart'
-            : 'This song has no grid chart';
+
+        var grid = document.querySelector('.chord-mode-btn[data-chord-mode="grid"]');
+        if (grid) {
+            grid.disabled = !has;
+            var gridLabel = has ? 'Grid chord chart' : 'This song has no grid chart';
+            grid.setAttribute('aria-label', gridLabel);
+            grid.title = has
+                ? 'Show the play-along chord chart'
+                : 'This song has no grid chart';
+        }
+
+        var anim = document.querySelector('.chord-mode-btn[data-chord-mode="animate"]');
+        if (anim) {
+            anim.disabled = !has;
+            var animLabel = has
+                ? 'Animated chord view — lyrics change in place'
+                : 'This song has no grid chart';
+            anim.setAttribute('aria-label', animLabel);
+            anim.title = has
+                ? 'Animated chord view: lyrics and diagrams change in place with the metronome'
+                : 'This song has no grid chart';
+        }
+
+        // The auto-scroll control is meaningless in the animated view, but a
+        // no-grid song falls back to the inline sheet even when that mode is
+        // still selected — so it must come back for that song.
+        var sc = SB.$('scrollControl');
+        if (sc) sc.hidden = has && SB.state.chordMode === 'animate';
     }
 
     SB.applyChordMode = function () {
@@ -77,6 +97,12 @@
             b.classList.toggle('active', on);
             b.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
+        // The animated view is driven by the metronome and never moves the
+        // page. Stop any page scroll that was already running rather than
+        // leaving it to idle invisibly behind the stage.
+        if (SB.state.chordMode === 'animate' && SB.state.scrollState.playing) {
+            SB.toggleAutoScroll();
+        }
         SB.updateGridModeUi();
     }
 
@@ -95,7 +121,7 @@
     }
 
     SB.setChordMode = function (mode) {
-        if (mode !== 'inline' && mode !== 'above' && mode !== 'grid') return;
+        if (mode !== 'inline' && mode !== 'above' && mode !== 'grid' && mode !== 'animate') return;
         if (mode === SB.state.chordMode) return;
         SB.state.chordMode = mode;
         try { window.localStorage.setItem(SB.NS + ':chordMode', SB.state.chordMode); } catch (e) { /* ignore */ }
@@ -163,7 +189,7 @@
         if (v === SB.state.textSize) { SB.applyTextSize(); return; }
         SB.state.textSize = v;
         SB.applyTextSize();
-        if ((SB.state.chordMode === 'above' || SB.state.chordMode === 'grid') && SB.state.currentSong) {
+        if ((SB.state.chordMode === 'above' || SB.isGridMode()) && SB.state.currentSong) {
             SB.renderSheet(SB.state.currentSong);
         }
         if (SB.state.active && SB.state.currentSong) {
@@ -195,6 +221,9 @@
     // Pixels per millisecond for the whole sheet at the current speed.
     // Always full-sheet-relative, so it is independent of current position.
     SB.targetVel = function () {
+        // The animated view changes content in place; moving the page would
+        // defeat the whole point (and hide the stage).
+        if (SB.state.chordMode === 'animate') return 0;
         var b = SB.scrollBounds();
         if (b <= 0) return 0;
         // In grid mode the metronome is the transport: recompute the speed
@@ -284,6 +313,10 @@
         updateScrollBtn();
     }
     SB.toggleAutoScroll = function () {
+        // The animated view has no page scroll to start, but pausing one that
+        // was already running is still useful (and applyChordMode does it
+        // when the mode switches).
+        if (SB.state.chordMode === 'animate' && !SB.state.scrollState.playing) return;
         if (SB.state.scrollState.playing) pauseScroll();
         else startScroll();
     }

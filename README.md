@@ -415,6 +415,15 @@ the rest); a
 grid that is a different arrangement, or has no matching section, shows the
 chart without lyrics rather than guessing.
 
+**Animate** is the same chart with the page held still. It mounts one system at
+a time in a fixed-height stage and swaps it in place when the metronome's beat
+cursor enters the next system's range, so the lyrics and diagrams change under
+the playhead instead of the page scrolling. The current chord label and diagram
+are highlighted along with the beat slash. The metronome is the transport, so
+the view needs a tempo; the auto-scroll control is hidden while it is active.
+One bar of count-in precedes the first chart beat, and stopping the metronome
+returns the stage to the opening system.
+
 Run the parser/builder tests with `python3 tests/chordpro.py`, the strum
 library mirror guard with `python3 tests/strum.py`, and the dev/prod
 environment guard with `python3 tests/env.py`.

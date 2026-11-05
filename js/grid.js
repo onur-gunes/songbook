@@ -369,9 +369,17 @@
 
     /* ---------------- cursor ---------------- */
 
+    function chordElAt(idx) {
+        return activeGrid && activeGrid.chordAt ? activeGrid.chordAt[idx] : null;
+    }
+
     function clearActive() {
-        if (lastBeat >= 0 && activeGrid && activeGrid.beatEls[lastBeat]) {
-            activeGrid.beatEls[lastBeat].classList.remove('on');
+        if (lastBeat >= 0 && activeGrid) {
+            if (activeGrid.beatEls[lastBeat]) {
+                activeGrid.beatEls[lastBeat].classList.remove('on');
+            }
+            var chord = chordElAt(lastBeat);
+            if (chord) chord.classList.remove('on');
         }
         lastBeat = -1;
         if (activeGrid && activeGrid.wrap) {
@@ -396,9 +404,11 @@
         activeGrid = null;
         var wrap = SB.$('sheet');
         if (wrap) {
-            wrap.classList.remove('chords-grid');
+            wrap.classList.remove('chords-grid', 'chords-animate');
             delete wrap.dataset.gridPhase;
             delete wrap.dataset.activeBeat;
+            delete wrap.dataset.animSystem;
+            delete wrap.dataset.animSection;
         }
     };
 
@@ -429,17 +439,56 @@
         window.scrollBy({ top: target, behavior: 'smooth' });
     }
 
+    /* The animated view keeps exactly one chart system on screen. Every system
+     * is built up front (so measurements are stable), then swapped into the
+     * stage when the playhead enters its beat range. Swapping the page rather
+     * than scrolling means the lyrics and diagrams change in place. */
+    function showAnimSystem(idx) {
+        if (!activeGrid || !activeGrid.anim || idx == null) return;
+        if (idx === activeGrid.animSystem) return;
+        var page = activeGrid.animSystems[idx];
+        if (!page || !activeGrid.animStage) return;
+
+        activeGrid.animStage.textContent = '';
+        activeGrid.animStage.appendChild(page.el);
+        activeGrid.animSystem = idx;
+        if (activeGrid.wrap) {
+            activeGrid.wrap.dataset.animSystem = String(idx);
+            activeGrid.wrap.dataset.animSection = page.label || '';
+        }
+        if (activeGrid.animStatus && activeGrid.animStatus.textContent !== (page.label || '')) {
+            activeGrid.animStatus.textContent = page.label || '';
+        }
+        // Restart the enter transition even when two systems swap inside the
+        // same animation frame.
+        activeGrid.animStage.classList.remove('is-entering');
+        if (activeGrid.animStage.offsetWidth || activeGrid.animStage.offsetHeight) {
+            activeGrid.animStage.classList.add('is-entering');
+        }
+    }
+
     function setActive(idx) {
         if (!activeGrid || !activeGrid.beatEls[idx]) return;
+        var prevChord = lastBeat >= 0 ? chordElAt(lastBeat) : null;
         if (lastBeat >= 0 && activeGrid.beatEls[lastBeat]) {
             activeGrid.beatEls[lastBeat].classList.remove('on');
         }
+        if (prevChord) prevChord.classList.remove('on');
+
+        // Mount the system that owns this beat before highlighting it.
+        if (activeGrid.anim) showAnimSystem(activeGrid.beatSystem[idx]);
+
         activeGrid.beatEls[idx].classList.add('on');
+        var chord = chordElAt(idx);
+        if (chord) chord.classList.add('on');
         lastBeat = idx;
         activeGrid.wrap.dataset.activeBeat = String(idx);
         // The continuous auto-scroll already follows the music. Nudging here
         // too would fight it, so only step in when the transport is manual.
-        if (!SB.state.scrollState.playing) scrollBeatIntoView(activeGrid.beatEls[idx]);
+        // The animated view never moves the page at all.
+        if (!SB.state.scrollState.playing && !activeGrid.anim) {
+            scrollBeatIntoView(activeGrid.beatEls[idx]);
+        }
     }
 
     /* One repaint loop, driven by the metronome's audio clock. rAF is only a
@@ -448,12 +497,15 @@
      * away from the clicks (the same rule the strum row follows). */
     function cursorFrame() {
         cursorRaf = null;
-        if (!activeGrid || SB.state.chordMode !== 'grid') return;
+        if (!activeGrid || !SB.isGridMode()) return;
         var pos = SB.metronomePosition();
         if (pos === null) { clearActive(); return; }
 
         var chartBeats = pos - activeGrid.beatsPerBar; // one bar of count-in
         if (chartBeats < 0) {
+            // The animated stage waits on the opening system during the
+            // count-in, then starts advancing without ever moving the page.
+            if (activeGrid.anim) showAnimSystem(0);
             clearActive();
             if (activeGrid.phase !== 'countin') {
                 activeGrid.phase = 'countin';
@@ -480,11 +532,16 @@
     }
 
     SB.gridOnMetronomeStart = function () {
-        if (!activeGrid || SB.state.chordMode !== 'grid') return;
+        if (!activeGrid || !SB.isGridMode()) return;
         if (cursorRaf === null) cursorRaf = requestAnimationFrame(cursorFrame);
     };
 
-    SB.gridOnMetronomeStop = resetCursor;
+    SB.gridOnMetronomeStop = function () {
+        resetCursor();
+        // A stopped animated chart returns to the opening system, ready for
+        // the next count-in, instead of freezing on a later section.
+        if (activeGrid && activeGrid.anim) showAnimSystem(0);
+    };
 
     /* Pure beat mapping, exposed for the suite. -1 is the count-in, null is
      * past the end of the chart. */
@@ -496,6 +553,15 @@
         return Math.floor(chart);
     };
 
+    /* Which staged system a metronome position belongs to, exposed for the
+     * suite. null outside the animated view or before/after the chart. */
+    SB.gridSystemAt = function (pos) {
+        if (!activeGrid || !activeGrid.anim) return null;
+        var beat = SB.gridBeatAt(pos);
+        if (beat === null || beat < 0) return null;
+        return activeGrid.beatSystem[beat];
+    };
+
     SB.gridInfo = function () {
         if (!activeGrid) return null;
         return {
@@ -505,7 +571,12 @@
             phase: activeGrid.phase,
             activeBeat: lastBeat,
             lyricSection: activeGrid.lyricSection,
-            lyricCount: activeGrid.lyricCount
+            lyricCount: activeGrid.lyricCount,
+            mode: activeGrid.anim ? 'animate' : 'grid',
+            systems: activeGrid.anim ? activeGrid.animSystems.length : null,
+            activeSystem: activeGrid.anim ? activeGrid.animSystem : null,
+            activeSection: activeGrid.anim && activeGrid.animSystems[activeGrid.animSystem]
+                ? activeGrid.animSystems[activeGrid.animSystem].label : null
         };
     };
 
@@ -526,7 +597,9 @@
      * -1 means "count-in, do not move yet"; null means there is no live
      * metronome clock, so auto-scroll falls back to its duration estimate. */
     SB.gridScrollRemainingMs = function () {
-        if (!activeGrid || SB.state.chordMode !== 'grid') return null;
+        // The animated view replaces content in place, so there is no page
+        // distance left to consume.
+        if (!activeGrid || activeGrid.anim || SB.state.chordMode !== 'grid') return null;
         var bpm = SB.state.metronome.bpm || activeGrid.bpm;
         if (!bpm) return null;
         var pos = SB.metronomePosition();
@@ -943,6 +1016,8 @@
         wrap.textContent = '';
         wrap.classList.remove('chords-above');
         wrap.classList.add('chords-grid');
+        var animate = SB.state.chordMode === 'animate';
+        wrap.classList.toggle('chords-animate', animate);
 
         var em = SB.sheetEmPx();
         var ctx = {
@@ -965,6 +1040,25 @@
         var measurer = makeMeasurer(wrap);
         var blocks = gridBlocksFor(song);
 
+        /* The animated view swaps whole systems into one stage. Build every
+         * system now so its width, lyric anchoring and beat range are final;
+         * only the stage's child changes while the song plays. */
+        var animStage = null, animStatus = null;
+        if (animate) {
+            var stageWrap = SB.el('div', 'grid-animate');
+            animStage = SB.el('div', 'grid-animate-stage');
+            animStage.setAttribute('role', 'group');
+            animStage.setAttribute('aria-label', 'Animated chord view');
+            animStatus = SB.el('div', 'grid-animate-status sr-only');
+            animStatus.setAttribute('aria-live', 'polite');
+            wrap.appendChild(stageWrap);
+            stageWrap.appendChild(animStage);
+            stageWrap.appendChild(animStatus);
+        }
+
+        var beatEls = [], beatSystem = [], chordAt = [], animSystems = [];
+        var lyricCount = 0;
+
         blocks.forEach(function (block) {
             var model = block.model;
             if (block.label) lyricSections.push(block.label);
@@ -984,10 +1078,12 @@
                 return systemGeometry(bars, (block.repeat && si === 0) ? REPEAT_W : 0);
             });
             if (model) assignLineGeometry(model.lines, geom);
-            var section = SB.el('div', 'grid-section');
-            // One label per block, not one per system: a block that reflows
-            // onto a second line would otherwise print its name twice.
-            if (block.label) {
+            var section = animate ? null : SB.el('div', 'grid-section');
+            // One label per block in the static chart, not one per system: a
+            // block that reflows onto a second line would otherwise print its
+            // name twice. The animated stage labels each page because it only
+            // ever shows one system.
+            if (!animate && block.label) {
                 section.appendChild(SB.el('div', 'grid-section-label', block.label));
             }
 
@@ -1006,17 +1102,66 @@
                     system.appendChild(repeatSign('end', ctx.barH));
                 }
                 if (model) buildLyricLayer(system, geom[si], model.lines, si, avail, measurer);
-                section.appendChild(system);
+
+                // Number the beats across the whole form. The cursor only
+                // ever asks for one index, so each system keeps a range of
+                // them even though the animated view mounts one at a time.
+                var firstBeat = beatEls.length;
+                var systemIndex = animSystems.length;
+                Array.prototype.forEach.call(system.querySelectorAll('.grid-beat'), function (el, i) {
+                    var idx = firstBeat + i;
+                    el.dataset.beat = String(idx);
+                    beatEls[idx] = el;
+                    beatSystem[idx] = systemIndex;
+                });
+                // Every segment draws a diagram, so the current chord is the
+                // change element whose segment covers the active beat. Walk
+                // the specs in bar/beat order to map those ranges.
+                var changeEls = system.querySelectorAll('.grid-change');
+                var ci = 0, beat = firstBeat;
+                bars.forEach(function (spec) {
+                    spec.segments.forEach(function (seg) {
+                        var changeEl = changeEls[ci++];
+                        for (var k = 0; k < seg.beats; k++) chordAt[beat + k] = changeEl;
+                        beat += seg.beats;
+                    });
+                });
+
+                if (animate) {
+                    var page = SB.el('div', 'grid-animate-page');
+                    if (block.label) {
+                        page.appendChild(SB.el('div', 'grid-section-label', block.label));
+                    }
+                    page.appendChild(system);
+                    animSystems.push({ el: page, label: block.label || '' });
+                } else {
+                    section.appendChild(system);
+                }
             });
-            frag.appendChild(section);
+            if (!animate) frag.appendChild(section);
         });
 
         measurer.done();
-        wrap.appendChild(frag);
-        sizeLyricLayers(wrap, em);
 
-        var beatEls = Array.prototype.slice.call(wrap.querySelectorAll('.grid-beat'));
-        beatEls.forEach(function (el, i) { el.dataset.beat = String(i); });
+        if (animate) {
+            /* Size lyric layers and find the tallest page. Giving the stage a
+             * stable height means swapping a one-line page for a two-line one
+             * cannot nudge the rest of the page (and so cannot look like a
+             * scroll). */
+            var maxPageH = 0;
+            animSystems.forEach(function (page) {
+                animStage.appendChild(page.el);
+                sizeLyricLayers(page.el, em);
+                maxPageH = Math.max(maxPageH, page.el.offsetHeight);
+                lyricCount += page.el.querySelectorAll('.grid-lyric').length;
+                animStage.removeChild(page.el);
+            });
+            if (maxPageH) animStage.style.minHeight = Math.ceil(maxPageH) + 'px';
+        } else {
+            wrap.appendChild(frag);
+            sizeLyricLayers(wrap, em);
+            lyricCount = wrap.querySelectorAll('.grid-lyric').length;
+        }
 
         activeGrid = {
             song: song,
@@ -1024,12 +1169,20 @@
             totalBeats: beatEls.length,
             bpm: bpm,
             beatEls: beatEls,
+            beatSystem: beatSystem,
+            chordAt: chordAt,
             wrap: wrap,
             phase: 'idle',
             lyricSection: lyricSections.length ? lyricSections[0] : null,
-            lyricCount: wrap.querySelectorAll('.grid-lyric').length
+            lyricCount: lyricCount,
+            anim: animate,
+            animSystems: animate ? animSystems : null,
+            animStage: animStage,
+            animStatus: animStatus,
+            animSystem: null
         };
         wrap.dataset.gridPhase = 'idle';
+        if (animate) showAnimSystem(0);
 
         if (SB.state.metronome.playing) SB.gridOnMetronomeStart();
     }

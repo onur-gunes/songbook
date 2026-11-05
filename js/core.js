@@ -61,6 +61,13 @@
     }
     SB.compositeId = function (sbId, songId) { return sbId + SB.SEP + songId; }
 
+    /* Both the static chart ('grid') and the in-place animated view
+     * ('animate') draw from the same beat grid, so every "is this a chart
+     * song?" branch goes through here rather than enumerating the modes. */
+    SB.isGridMode = function () {
+        return SB.state.chordMode === 'grid' || SB.state.chordMode === 'animate';
+    };
+
     SB.FAV_KEY = SB.NS + ':favorites';
     SB.RECENT_KEY = SB.NS + ':recent';
     SB.RECENT_MAX = 15;
