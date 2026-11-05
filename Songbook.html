@@ -1386,6 +1386,22 @@ main {
     white-space: nowrap;
 }
 
+/* The playhead's chord: the label becomes a badge and the diagram gets a
+   ring, so the current chord is readable at a glance without moving it. */
+.sheet.chords-grid .grid-change.on .grid-chord {
+    padding: 0 4px;
+    margin-left: -4px;
+    border-radius: 5px;
+    color: var(--surface);
+    background: var(--accent);
+}
+
+.sheet.chords-grid .grid-change.on .grid-diagram {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
 /* Degree labels are numerals, so they use the same mono face as the sheet
    chord spans; chordLabelWidth() measures this family too. */
 .sheet.chords-grid.show-degrees .grid-chord {
@@ -1512,6 +1528,45 @@ main {
 
 .sheet.chords-grid .grid-repeat.start::after { left: 3px; }
 .sheet.chords-grid .grid-repeat.end::after { right: 3px; }
+
+/* Animated play-along view. Every system is measured up front but only the
+   system under the playhead is mounted, so the lyrics and diagrams change in
+   place and the page itself never scrolls. The stage keeps the height of the
+   tallest system to stop the rest of the page jumping between pages. */
+.sheet.chords-animate .grid-animate {
+    position: relative;
+}
+
+.sheet.chords-animate .grid-animate-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* Top-aligned: every page has the same bar row, and only the lyric stack
+       below it changes height. Centring would move the bars up and down as
+       the song moved between one-line and two-line pages. */
+    justify-content: flex-start;
+    overflow: hidden;
+    min-height: 180px;
+}
+
+.sheet.chords-animate .grid-animate-page {
+    width: 100%;
+}
+
+.sheet.chords-animate .grid-animate-stage.is-entering > .grid-animate-page {
+    animation: grid-animate-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes grid-animate-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.995); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sheet.chords-animate .grid-animate-stage.is-entering > .grid-animate-page {
+        animation: none;
+    }
+}
 
 /* notes */
 
@@ -2159,6 +2214,10 @@ body.tuner-open { overflow: hidden; }
     .strum-notation-btn { min-width: 34px; padding: 0 4px; }
     .step-value { min-width: 34px; font-size: 0.75rem; }
     .chord-mode-btn { padding: 4px 8px; font-size: 0.75rem; }
+    /* The five chord-view buttons live inside a .seg-group, whose desktop rule
+     * (0 14px) is more specific than the line above. Without this the group is
+     * wider than the phone panel and pushes the page sideways. */
+    .seg-group .chord-mode-btn { padding: 0 7px; font-size: 0.72rem; }
     .step-divider { margin: 6px 0; }
     /* The one control that can genuinely run out of room: a pattern name
      * ("D DU UDU") beside a five-segment stepper. Let it take what is left of
@@ -2354,6 +2413,8 @@ body.tuner-open { overflow: hidden; }
                         <button class="chord-mode-btn" data-chord-mode="above" type="button" aria-pressed="false">Above</button>
                         <button class="chord-mode-btn" data-chord-mode="grid" type="button" aria-pressed="false" disabled
                                 aria-label="Grid chord chart" title="This song has no grid chart">Grid</button>
+                        <button class="chord-mode-btn" data-chord-mode="animate" type="button" aria-pressed="false" disabled
+                                aria-label="Animated chord view" title="This song has no grid chart">Animate</button>
                         <button id="numbersBtn" class="chord-mode-btn" type="button" aria-pressed="false" aria-label="Show scale degrees instead of chord names" title="Show scale degrees (I, IV, V) instead of chord names">I-V</button>
                     </div>
                 </div>
@@ -4524,6 +4585,13 @@ body.tuner-open { overflow: hidden; }
     }
     SB.compositeId = function (sbId, songId) { return sbId + SB.SEP + songId; }
 
+    /* Both the static chart ('grid') and the in-place animated view
+     * ('animate') draw from the same beat grid, so every "is this a chart
+     * song?" branch goes through here rather than enumerating the modes. */
+    SB.isGridMode = function () {
+        return SB.state.chordMode === 'grid' || SB.state.chordMode === 'animate';
+    };
+
     SB.FAV_KEY = SB.NS + ':favorites';
     SB.RECENT_KEY = SB.NS + ':recent';
     SB.RECENT_MAX = 15;
@@ -4983,7 +5051,7 @@ body.tuner-open { overflow: hidden; }
         SB.closeVoicingChooser();
         if (SB.state.currentSong) {
             SB.renderChordStrip(SB.state.currentSong);
-            if (SB.state.chordMode === 'grid') SB.renderSheet(SB.state.currentSong);
+            if (SB.isGridMode()) SB.renderSheet(SB.state.currentSong);
         }
     }
 
@@ -5196,7 +5264,7 @@ body.tuner-open { overflow: hidden; }
         // A song may carry an authored grid, or one can be derived from its
         // chord changes (see SB.songHasGrid in js/grid.js).
         var hasGrid = SB.songHasGrid ? SB.songHasGrid(song) : !!(song && song.grid && song.grid.length);
-        if (SB.state.chordMode === 'grid' && hasGrid && SB.renderSheetGrid) {
+        if (SB.isGridMode() && hasGrid && SB.renderSheetGrid) {
             SB.renderSheetGrid(song);
             return;
         }
@@ -5863,9 +5931,17 @@ body.tuner-open { overflow: hidden; }
 
     /* ---------------- cursor ---------------- */
 
+    function chordElAt(idx) {
+        return activeGrid && activeGrid.chordAt ? activeGrid.chordAt[idx] : null;
+    }
+
     function clearActive() {
-        if (lastBeat >= 0 && activeGrid && activeGrid.beatEls[lastBeat]) {
-            activeGrid.beatEls[lastBeat].classList.remove('on');
+        if (lastBeat >= 0 && activeGrid) {
+            if (activeGrid.beatEls[lastBeat]) {
+                activeGrid.beatEls[lastBeat].classList.remove('on');
+            }
+            var chord = chordElAt(lastBeat);
+            if (chord) chord.classList.remove('on');
         }
         lastBeat = -1;
         if (activeGrid && activeGrid.wrap) {
@@ -5890,9 +5966,11 @@ body.tuner-open { overflow: hidden; }
         activeGrid = null;
         var wrap = SB.$('sheet');
         if (wrap) {
-            wrap.classList.remove('chords-grid');
+            wrap.classList.remove('chords-grid', 'chords-animate');
             delete wrap.dataset.gridPhase;
             delete wrap.dataset.activeBeat;
+            delete wrap.dataset.animSystem;
+            delete wrap.dataset.animSection;
         }
     };
 
@@ -5923,17 +6001,56 @@ body.tuner-open { overflow: hidden; }
         window.scrollBy({ top: target, behavior: 'smooth' });
     }
 
+    /* The animated view keeps exactly one chart system on screen. Every system
+     * is built up front (so measurements are stable), then swapped into the
+     * stage when the playhead enters its beat range. Swapping the page rather
+     * than scrolling means the lyrics and diagrams change in place. */
+    function showAnimSystem(idx) {
+        if (!activeGrid || !activeGrid.anim || idx == null) return;
+        if (idx === activeGrid.animSystem) return;
+        var page = activeGrid.animSystems[idx];
+        if (!page || !activeGrid.animStage) return;
+
+        activeGrid.animStage.textContent = '';
+        activeGrid.animStage.appendChild(page.el);
+        activeGrid.animSystem = idx;
+        if (activeGrid.wrap) {
+            activeGrid.wrap.dataset.animSystem = String(idx);
+            activeGrid.wrap.dataset.animSection = page.label || '';
+        }
+        if (activeGrid.animStatus && activeGrid.animStatus.textContent !== (page.label || '')) {
+            activeGrid.animStatus.textContent = page.label || '';
+        }
+        // Restart the enter transition even when two systems swap inside the
+        // same animation frame.
+        activeGrid.animStage.classList.remove('is-entering');
+        if (activeGrid.animStage.offsetWidth || activeGrid.animStage.offsetHeight) {
+            activeGrid.animStage.classList.add('is-entering');
+        }
+    }
+
     function setActive(idx) {
         if (!activeGrid || !activeGrid.beatEls[idx]) return;
+        var prevChord = lastBeat >= 0 ? chordElAt(lastBeat) : null;
         if (lastBeat >= 0 && activeGrid.beatEls[lastBeat]) {
             activeGrid.beatEls[lastBeat].classList.remove('on');
         }
+        if (prevChord) prevChord.classList.remove('on');
+
+        // Mount the system that owns this beat before highlighting it.
+        if (activeGrid.anim) showAnimSystem(activeGrid.beatSystem[idx]);
+
         activeGrid.beatEls[idx].classList.add('on');
+        var chord = chordElAt(idx);
+        if (chord) chord.classList.add('on');
         lastBeat = idx;
         activeGrid.wrap.dataset.activeBeat = String(idx);
         // The continuous auto-scroll already follows the music. Nudging here
         // too would fight it, so only step in when the transport is manual.
-        if (!SB.state.scrollState.playing) scrollBeatIntoView(activeGrid.beatEls[idx]);
+        // The animated view never moves the page at all.
+        if (!SB.state.scrollState.playing && !activeGrid.anim) {
+            scrollBeatIntoView(activeGrid.beatEls[idx]);
+        }
     }
 
     /* One repaint loop, driven by the metronome's audio clock. rAF is only a
@@ -5942,12 +6059,15 @@ body.tuner-open { overflow: hidden; }
      * away from the clicks (the same rule the strum row follows). */
     function cursorFrame() {
         cursorRaf = null;
-        if (!activeGrid || SB.state.chordMode !== 'grid') return;
+        if (!activeGrid || !SB.isGridMode()) return;
         var pos = SB.metronomePosition();
         if (pos === null) { clearActive(); return; }
 
         var chartBeats = pos - activeGrid.beatsPerBar; // one bar of count-in
         if (chartBeats < 0) {
+            // The animated stage waits on the opening system during the
+            // count-in, then starts advancing without ever moving the page.
+            if (activeGrid.anim) showAnimSystem(0);
             clearActive();
             if (activeGrid.phase !== 'countin') {
                 activeGrid.phase = 'countin';
@@ -5974,11 +6094,16 @@ body.tuner-open { overflow: hidden; }
     }
 
     SB.gridOnMetronomeStart = function () {
-        if (!activeGrid || SB.state.chordMode !== 'grid') return;
+        if (!activeGrid || !SB.isGridMode()) return;
         if (cursorRaf === null) cursorRaf = requestAnimationFrame(cursorFrame);
     };
 
-    SB.gridOnMetronomeStop = resetCursor;
+    SB.gridOnMetronomeStop = function () {
+        resetCursor();
+        // A stopped animated chart returns to the opening system, ready for
+        // the next count-in, instead of freezing on a later section.
+        if (activeGrid && activeGrid.anim) showAnimSystem(0);
+    };
 
     /* Pure beat mapping, exposed for the suite. -1 is the count-in, null is
      * past the end of the chart. */
@@ -5990,6 +6115,15 @@ body.tuner-open { overflow: hidden; }
         return Math.floor(chart);
     };
 
+    /* Which staged system a metronome position belongs to, exposed for the
+     * suite. null outside the animated view or before/after the chart. */
+    SB.gridSystemAt = function (pos) {
+        if (!activeGrid || !activeGrid.anim) return null;
+        var beat = SB.gridBeatAt(pos);
+        if (beat === null || beat < 0) return null;
+        return activeGrid.beatSystem[beat];
+    };
+
     SB.gridInfo = function () {
         if (!activeGrid) return null;
         return {
@@ -5999,7 +6133,12 @@ body.tuner-open { overflow: hidden; }
             phase: activeGrid.phase,
             activeBeat: lastBeat,
             lyricSection: activeGrid.lyricSection,
-            lyricCount: activeGrid.lyricCount
+            lyricCount: activeGrid.lyricCount,
+            mode: activeGrid.anim ? 'animate' : 'grid',
+            systems: activeGrid.anim ? activeGrid.animSystems.length : null,
+            activeSystem: activeGrid.anim ? activeGrid.animSystem : null,
+            activeSection: activeGrid.anim && activeGrid.animSystems[activeGrid.animSystem]
+                ? activeGrid.animSystems[activeGrid.animSystem].label : null
         };
     };
 
@@ -6020,7 +6159,9 @@ body.tuner-open { overflow: hidden; }
      * -1 means "count-in, do not move yet"; null means there is no live
      * metronome clock, so auto-scroll falls back to its duration estimate. */
     SB.gridScrollRemainingMs = function () {
-        if (!activeGrid || SB.state.chordMode !== 'grid') return null;
+        // The animated view replaces content in place, so there is no page
+        // distance left to consume.
+        if (!activeGrid || activeGrid.anim || SB.state.chordMode !== 'grid') return null;
         var bpm = SB.state.metronome.bpm || activeGrid.bpm;
         if (!bpm) return null;
         var pos = SB.metronomePosition();
@@ -6437,6 +6578,8 @@ body.tuner-open { overflow: hidden; }
         wrap.textContent = '';
         wrap.classList.remove('chords-above');
         wrap.classList.add('chords-grid');
+        var animate = SB.state.chordMode === 'animate';
+        wrap.classList.toggle('chords-animate', animate);
 
         var em = SB.sheetEmPx();
         var ctx = {
@@ -6459,6 +6602,25 @@ body.tuner-open { overflow: hidden; }
         var measurer = makeMeasurer(wrap);
         var blocks = gridBlocksFor(song);
 
+        /* The animated view swaps whole systems into one stage. Build every
+         * system now so its width, lyric anchoring and beat range are final;
+         * only the stage's child changes while the song plays. */
+        var animStage = null, animStatus = null;
+        if (animate) {
+            var stageWrap = SB.el('div', 'grid-animate');
+            animStage = SB.el('div', 'grid-animate-stage');
+            animStage.setAttribute('role', 'group');
+            animStage.setAttribute('aria-label', 'Animated chord view');
+            animStatus = SB.el('div', 'grid-animate-status sr-only');
+            animStatus.setAttribute('aria-live', 'polite');
+            wrap.appendChild(stageWrap);
+            stageWrap.appendChild(animStage);
+            stageWrap.appendChild(animStatus);
+        }
+
+        var beatEls = [], beatSystem = [], chordAt = [], animSystems = [];
+        var lyricCount = 0;
+
         blocks.forEach(function (block) {
             var model = block.model;
             if (block.label) lyricSections.push(block.label);
@@ -6478,10 +6640,12 @@ body.tuner-open { overflow: hidden; }
                 return systemGeometry(bars, (block.repeat && si === 0) ? REPEAT_W : 0);
             });
             if (model) assignLineGeometry(model.lines, geom);
-            var section = SB.el('div', 'grid-section');
-            // One label per block, not one per system: a block that reflows
-            // onto a second line would otherwise print its name twice.
-            if (block.label) {
+            var section = animate ? null : SB.el('div', 'grid-section');
+            // One label per block in the static chart, not one per system: a
+            // block that reflows onto a second line would otherwise print its
+            // name twice. The animated stage labels each page because it only
+            // ever shows one system.
+            if (!animate && block.label) {
                 section.appendChild(SB.el('div', 'grid-section-label', block.label));
             }
 
@@ -6500,17 +6664,66 @@ body.tuner-open { overflow: hidden; }
                     system.appendChild(repeatSign('end', ctx.barH));
                 }
                 if (model) buildLyricLayer(system, geom[si], model.lines, si, avail, measurer);
-                section.appendChild(system);
+
+                // Number the beats across the whole form. The cursor only
+                // ever asks for one index, so each system keeps a range of
+                // them even though the animated view mounts one at a time.
+                var firstBeat = beatEls.length;
+                var systemIndex = animSystems.length;
+                Array.prototype.forEach.call(system.querySelectorAll('.grid-beat'), function (el, i) {
+                    var idx = firstBeat + i;
+                    el.dataset.beat = String(idx);
+                    beatEls[idx] = el;
+                    beatSystem[idx] = systemIndex;
+                });
+                // Every segment draws a diagram, so the current chord is the
+                // change element whose segment covers the active beat. Walk
+                // the specs in bar/beat order to map those ranges.
+                var changeEls = system.querySelectorAll('.grid-change');
+                var ci = 0, beat = firstBeat;
+                bars.forEach(function (spec) {
+                    spec.segments.forEach(function (seg) {
+                        var changeEl = changeEls[ci++];
+                        for (var k = 0; k < seg.beats; k++) chordAt[beat + k] = changeEl;
+                        beat += seg.beats;
+                    });
+                });
+
+                if (animate) {
+                    var page = SB.el('div', 'grid-animate-page');
+                    if (block.label) {
+                        page.appendChild(SB.el('div', 'grid-section-label', block.label));
+                    }
+                    page.appendChild(system);
+                    animSystems.push({ el: page, label: block.label || '' });
+                } else {
+                    section.appendChild(system);
+                }
             });
-            frag.appendChild(section);
+            if (!animate) frag.appendChild(section);
         });
 
         measurer.done();
-        wrap.appendChild(frag);
-        sizeLyricLayers(wrap, em);
 
-        var beatEls = Array.prototype.slice.call(wrap.querySelectorAll('.grid-beat'));
-        beatEls.forEach(function (el, i) { el.dataset.beat = String(i); });
+        if (animate) {
+            /* Size lyric layers and find the tallest page. Giving the stage a
+             * stable height means swapping a one-line page for a two-line one
+             * cannot nudge the rest of the page (and so cannot look like a
+             * scroll). */
+            var maxPageH = 0;
+            animSystems.forEach(function (page) {
+                animStage.appendChild(page.el);
+                sizeLyricLayers(page.el, em);
+                maxPageH = Math.max(maxPageH, page.el.offsetHeight);
+                lyricCount += page.el.querySelectorAll('.grid-lyric').length;
+                animStage.removeChild(page.el);
+            });
+            if (maxPageH) animStage.style.minHeight = Math.ceil(maxPageH) + 'px';
+        } else {
+            wrap.appendChild(frag);
+            sizeLyricLayers(wrap, em);
+            lyricCount = wrap.querySelectorAll('.grid-lyric').length;
+        }
 
         activeGrid = {
             song: song,
@@ -6518,12 +6731,20 @@ body.tuner-open { overflow: hidden; }
             totalBeats: beatEls.length,
             bpm: bpm,
             beatEls: beatEls,
+            beatSystem: beatSystem,
+            chordAt: chordAt,
             wrap: wrap,
             phase: 'idle',
             lyricSection: lyricSections.length ? lyricSections[0] : null,
-            lyricCount: wrap.querySelectorAll('.grid-lyric').length
+            lyricCount: lyricCount,
+            anim: animate,
+            animSystems: animate ? animSystems : null,
+            animStage: animStage,
+            animStatus: animStatus,
+            animSystem: null
         };
         wrap.dataset.gridPhase = 'idle';
+        if (animate) showAnimSystem(0);
 
         if (SB.state.metronome.playing) SB.gridOnMetronomeStart();
     }
@@ -6683,7 +6904,7 @@ body.tuner-open { overflow: hidden; }
                 SB.closeVoicingChooser();
                 // The grid draws the same stored pick; without this it would
                 // keep showing the old shape until the next render.
-                if (SB.state.chordMode === 'grid' && SB.state.currentSong) {
+                if (SB.isGridMode() && SB.state.currentSong) {
                     SB.renderSheet(SB.state.currentSong);
                 }
             });
@@ -7129,7 +7350,7 @@ body.tuner-open { overflow: hidden; }
         var sheetResizeT = null;
         window.addEventListener('resize', function () {
             var mode = SB.state.chordMode;
-            if ((mode !== 'above' && mode !== 'grid') || !SB.state.currentSong) return;
+            if ((mode !== 'above' && !SB.isGridMode()) || !SB.state.currentSong) return;
             clearTimeout(sheetResizeT);
             sheetResizeT = setTimeout(function () { SB.renderSheet(SB.state.currentSong); }, 150);
         }, { passive: true });
@@ -7168,7 +7389,9 @@ body.tuner-open { overflow: hidden; }
     try { SB.state.chordPin = window.localStorage.getItem(SB.NS + ':chordPin') !== '0'; } catch (e) { /* ignore */ }
     try {
         var _cm = window.localStorage.getItem(SB.NS + ':chordMode');
-        if (_cm === 'inline' || _cm === 'above' || _cm === 'grid') SB.state.chordMode = _cm;
+        if (_cm === 'inline' || _cm === 'above' || _cm === 'grid' || _cm === 'animate') {
+            SB.state.chordMode = _cm;
+        }
     } catch (e) { /* ignore */ }
 
     SB.applyChordSettings = function () {
@@ -7197,7 +7420,7 @@ body.tuner-open { overflow: hidden; }
         try { window.localStorage.setItem(SB.NS + ':chordSize', String(SB.state.chordSize)); } catch (e) { /* ignore */ }
         // Diagram size changes the column widths in a grid, so the layout has
         // to be measured again rather than merely restyled.
-        if (SB.state.chordMode === 'grid' && SB.state.currentSong) SB.renderSheet(SB.state.currentSong);
+        if (SB.isGridMode() && SB.state.currentSong) SB.renderSheet(SB.state.currentSong);
     }
 
     /* The mode is a global, persisted preference, but a grid is per song. The
@@ -7206,19 +7429,37 @@ body.tuner-open { overflow: hidden; }
      * renderSheet still falls back to the inline sheet in that case, so the
      * user is never stranded in an empty view. */
     SB.updateGridModeUi = function () {
-        var btn = document.querySelector('.chord-mode-btn[data-chord-mode="grid"]');
-        if (!btn) return;
         var song = SB.state.currentSong;
         // Authored grid or one derived from the sheet's chord changes.
         var has = SB.songHasGrid ? SB.songHasGrid(song) : !!(song && song.grid && song.grid.length);
-        btn.disabled = !has;
-        var label = has
-            ? 'Grid chord chart'
-            : 'This song has no grid chart';
-        btn.setAttribute('aria-label', label);
-        btn.title = has
-            ? 'Show the play-along chord chart'
-            : 'This song has no grid chart';
+
+        var grid = document.querySelector('.chord-mode-btn[data-chord-mode="grid"]');
+        if (grid) {
+            grid.disabled = !has;
+            var gridLabel = has ? 'Grid chord chart' : 'This song has no grid chart';
+            grid.setAttribute('aria-label', gridLabel);
+            grid.title = has
+                ? 'Show the play-along chord chart'
+                : 'This song has no grid chart';
+        }
+
+        var anim = document.querySelector('.chord-mode-btn[data-chord-mode="animate"]');
+        if (anim) {
+            anim.disabled = !has;
+            var animLabel = has
+                ? 'Animated chord view — lyrics change in place'
+                : 'This song has no grid chart';
+            anim.setAttribute('aria-label', animLabel);
+            anim.title = has
+                ? 'Animated chord view: lyrics and diagrams change in place with the metronome'
+                : 'This song has no grid chart';
+        }
+
+        // The auto-scroll control is meaningless in the animated view, but a
+        // no-grid song falls back to the inline sheet even when that mode is
+        // still selected — so it must come back for that song.
+        var sc = SB.$('scrollControl');
+        if (sc) sc.hidden = has && SB.state.chordMode === 'animate';
     }
 
     SB.applyChordMode = function () {
@@ -7228,6 +7469,12 @@ body.tuner-open { overflow: hidden; }
             b.classList.toggle('active', on);
             b.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
+        // The animated view is driven by the metronome and never moves the
+        // page. Stop any page scroll that was already running rather than
+        // leaving it to idle invisibly behind the stage.
+        if (SB.state.chordMode === 'animate' && SB.state.scrollState.playing) {
+            SB.toggleAutoScroll();
+        }
         SB.updateGridModeUi();
     }
 
@@ -7246,7 +7493,7 @@ body.tuner-open { overflow: hidden; }
     }
 
     SB.setChordMode = function (mode) {
-        if (mode !== 'inline' && mode !== 'above' && mode !== 'grid') return;
+        if (mode !== 'inline' && mode !== 'above' && mode !== 'grid' && mode !== 'animate') return;
         if (mode === SB.state.chordMode) return;
         SB.state.chordMode = mode;
         try { window.localStorage.setItem(SB.NS + ':chordMode', SB.state.chordMode); } catch (e) { /* ignore */ }
@@ -7314,7 +7561,7 @@ body.tuner-open { overflow: hidden; }
         if (v === SB.state.textSize) { SB.applyTextSize(); return; }
         SB.state.textSize = v;
         SB.applyTextSize();
-        if ((SB.state.chordMode === 'above' || SB.state.chordMode === 'grid') && SB.state.currentSong) {
+        if ((SB.state.chordMode === 'above' || SB.isGridMode()) && SB.state.currentSong) {
             SB.renderSheet(SB.state.currentSong);
         }
         if (SB.state.active && SB.state.currentSong) {
@@ -7346,6 +7593,9 @@ body.tuner-open { overflow: hidden; }
     // Pixels per millisecond for the whole sheet at the current speed.
     // Always full-sheet-relative, so it is independent of current position.
     SB.targetVel = function () {
+        // The animated view changes content in place; moving the page would
+        // defeat the whole point (and hide the stage).
+        if (SB.state.chordMode === 'animate') return 0;
         var b = SB.scrollBounds();
         if (b <= 0) return 0;
         // In grid mode the metronome is the transport: recompute the speed
@@ -7435,6 +7685,10 @@ body.tuner-open { overflow: hidden; }
         updateScrollBtn();
     }
     SB.toggleAutoScroll = function () {
+        // The animated view has no page scroll to start, but pausing one that
+        // was already running is still useful (and applyChordMode does it
+        // when the mode switches).
+        if (SB.state.chordMode === 'animate' && !SB.state.scrollState.playing) return;
         if (SB.state.scrollState.playing) pauseScroll();
         else startScroll();
     }
@@ -8428,11 +8682,13 @@ body.tuner-open { overflow: hidden; }
         setInstrument: SB.setInstrument,
         getInstrument: function () { return SB.state.instrument; },
         getChordMode: function () { return SB.state.chordMode; },
+        isGridMode: SB.isGridMode,
         setChordMode: SB.setChordMode,
         chordLabelWidth: SB.chordLabelWidth,
         chosenVoicing: SB.chosenVoicing,
         gridInfo: SB.gridInfo,
         gridBeatAt: SB.gridBeatAt,
+        gridSystemAt: SB.gridSystemAt,
         gridDurationMs: SB.gridDurationMs,
         gridScrollRemainingMs: SB.gridScrollRemainingMs,
         songHasGrid: SB.songHasGrid,

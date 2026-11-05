@@ -1486,6 +1486,79 @@ async function main() {
     ok('grid phase returns to idle', gridInfo() && gridInfo().phase === 'idle',
         gridInfo() && gridInfo().phase);
 
+    // 20d. animated chord view (issue #66)
+    const animSheet = () => doc().querySelector('.sheet.chords-animate');
+    const animPages = () => doc().querySelectorAll('.sheet.chords-animate .grid-animate-page');
+    const animSystem = () => doc().querySelector('.sheet').dataset.animSystem;
+    win().songbookTest.setChordMode('animate');
+    await wait(180);
+    ok('animate mode selected', win().songbookTest.getChordMode() === 'animate',
+        win().songbookTest.getChordMode());
+    ok('animate mode persisted', win().localStorage.getItem('songbook:chordMode') === 'animate',
+        win().localStorage.getItem('songbook:chordMode'));
+    ok('animate sheet rendered', !!animSheet());
+    ok('animate mounts exactly one system at a time', animPages().length === 1,
+        animPages().length);
+    ok('animate keeps every system measured', gridInfo() && gridInfo().mode === 'animate' &&
+        gridInfo().systems > 1, JSON.stringify(gridInfo()));
+    ok('animate starts on the opening system',
+        gridInfo().activeSystem === 0 && animSystem() === '0',
+        gridInfo().activeSystem + ' / ' + animSystem());
+    ok('animate opens on the first sheet section',
+        doc().querySelector('.sheet.chords-animate .grid-section-label').textContent === 'Verse 1',
+        doc().querySelector('.sheet.chords-animate .grid-section-label').textContent);
+    ok('animate hides the page auto-scroll control', $('scrollControl').hidden === true);
+
+    const sysAt = win().songbookTest.gridSystemAt;
+    const animTotal = gridInfo().totalBeats;
+    ok('animate maps the count-in outside any system',
+        sysAt(0) === null && sysAt(3.99) === null);
+    ok('animate maps the first chart beat to the opening system', sysAt(4) === 0);
+    ok('animate maps later beats to later systems',
+        sysAt(4 + Math.floor(animTotal / 2)) > 0,
+        sysAt(4 + Math.floor(animTotal / 2)));
+
+    // Run the clock until the playhead crosses into the next system: the
+    // mounted page and its lyrics must change while the page stays put.
+    for (let i = 0; i < 200 && $('bpmValue').textContent !== '300'; i++) $('bpmUp').click();
+    const animPageBefore = animPages()[0].textContent;
+    const animYBefore = win().scrollY;
+    $('metronomeBtn').click();
+    const advanced = await until(() => gridInfo() && gridInfo().activeSystem > 0, 7000);
+    ok('animate advances the active system with the clock', advanced,
+        gridInfo() && JSON.stringify({ beat: gridInfo().activeBeat, system: gridInfo().activeSystem }));
+    if (advanced) {
+        const cur = gridInfo().activeSystem;
+        ok('animate mounts the system under the playhead',
+            animPages().length === 1 && animSystem() === String(cur),
+            animPages().length + ' page(s), mounted=' + animSystem() + ' want=' + cur);
+        ok('animate swaps the lyrics in place',
+            animPages()[0].textContent !== animPageBefore,
+            animPages()[0].textContent.slice(0, 40));
+        ok('animate labels the mounted page\'s section',
+            doc().querySelector('.sheet.chords-animate .grid-section-label').textContent ===
+                doc().querySelector('.sheet').dataset.animSection,
+            doc().querySelector('.sheet.chords-animate .grid-section-label').textContent);
+    }
+    ok('animate highlights the current beat',
+        !!doc().querySelector('.sheet.chords-animate .grid-beat.on'));
+    ok('animate highlights the current chord',
+        !!doc().querySelector('.sheet.chords-animate .grid-change.on'));
+    ok('animate never scrolls the page',
+        Math.abs(win().scrollY - animYBefore) < 1,
+        animYBefore + ' -> ' + win().scrollY);
+
+    $('metronomeBtn').click();
+    await wait(150);
+    ok('animate returns to the opening system when stopped',
+        gridInfo().activeSystem === 0 && animSystem() === '0',
+        gridInfo().activeSystem + ' / ' + animSystem());
+
+    win().songbookTest.setChordMode('grid');
+    await wait(150);
+    ok('leaving animate restores the auto-scroll control', $('scrollControl').hidden === false);
+    ok('mode switches back to the static grid', !animSheet() && !!gridSheet());
+
     // Reflow: the same chart packs into more systems on a phone width and the
     // page itself must not gain a horizontal scrollbar.
     const systemsBefore = doc().querySelectorAll('.sheet.chords-grid .grid-system').length;
@@ -1564,6 +1637,17 @@ async function main() {
         $('sheet').textContent.trim().length > 0);
     ok('song with no grid cannot strand the user in an empty view',
         $('sheet').textContent.trim().length > 0, $('sheet').textContent.trim().length);
+
+    // The animated mode is also just a preference: a song without a chart
+    // falls back to the normal sheet and gets its auto-scroll control back.
+    win().songbookTest.setChordMode('animate');
+    await wait(150);
+    ok('animate mode cannot strand a no-grid song',
+        !animSheet() && $('sheet').textContent.trim().length > 0);
+    ok('animate fallback restores the auto-scroll control',
+        $('scrollControl').hidden === false);
+    win().songbookTest.setChordMode('grid');
+    await wait(150);
 
     win().location.hash = '#/popular/riptide';
     await wait(350);

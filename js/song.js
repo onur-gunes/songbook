@@ -150,7 +150,7 @@
         var sheetResizeT = null;
         window.addEventListener('resize', function () {
             var mode = SB.state.chordMode;
-            if ((mode !== 'above' && mode !== 'grid') || !SB.state.currentSong) return;
+            if ((mode !== 'above' && !SB.isGridMode()) || !SB.state.currentSong) return;
             clearTimeout(sheetResizeT);
             sheetResizeT = setTimeout(function () { SB.renderSheet(SB.state.currentSong); }, 150);
         }, { passive: true });

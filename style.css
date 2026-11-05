@@ -1373,6 +1373,22 @@ main {
     white-space: nowrap;
 }
 
+/* The playhead's chord: the label becomes a badge and the diagram gets a
+   ring, so the current chord is readable at a glance without moving it. */
+.sheet.chords-grid .grid-change.on .grid-chord {
+    padding: 0 4px;
+    margin-left: -4px;
+    border-radius: 5px;
+    color: var(--surface);
+    background: var(--accent);
+}
+
+.sheet.chords-grid .grid-change.on .grid-diagram {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
 /* Degree labels are numerals, so they use the same mono face as the sheet
    chord spans; chordLabelWidth() measures this family too. */
 .sheet.chords-grid.show-degrees .grid-chord {
@@ -1499,6 +1515,45 @@ main {
 
 .sheet.chords-grid .grid-repeat.start::after { left: 3px; }
 .sheet.chords-grid .grid-repeat.end::after { right: 3px; }
+
+/* Animated play-along view. Every system is measured up front but only the
+   system under the playhead is mounted, so the lyrics and diagrams change in
+   place and the page itself never scrolls. The stage keeps the height of the
+   tallest system to stop the rest of the page jumping between pages. */
+.sheet.chords-animate .grid-animate {
+    position: relative;
+}
+
+.sheet.chords-animate .grid-animate-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* Top-aligned: every page has the same bar row, and only the lyric stack
+       below it changes height. Centring would move the bars up and down as
+       the song moved between one-line and two-line pages. */
+    justify-content: flex-start;
+    overflow: hidden;
+    min-height: 180px;
+}
+
+.sheet.chords-animate .grid-animate-page {
+    width: 100%;
+}
+
+.sheet.chords-animate .grid-animate-stage.is-entering > .grid-animate-page {
+    animation: grid-animate-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes grid-animate-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.995); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sheet.chords-animate .grid-animate-stage.is-entering > .grid-animate-page {
+        animation: none;
+    }
+}
 
 /* notes */
 
@@ -2146,6 +2201,10 @@ body.tuner-open { overflow: hidden; }
     .strum-notation-btn { min-width: 34px; padding: 0 4px; }
     .step-value { min-width: 34px; font-size: 0.75rem; }
     .chord-mode-btn { padding: 4px 8px; font-size: 0.75rem; }
+    /* The five chord-view buttons live inside a .seg-group, whose desktop rule
+     * (0 14px) is more specific than the line above. Without this the group is
+     * wider than the phone panel and pushes the page sideways. */
+    .seg-group .chord-mode-btn { padding: 0 7px; font-size: 0.72rem; }
     .step-divider { margin: 6px 0; }
     /* The one control that can genuinely run out of room: a pattern name
      * ("D DU UDU") beside a five-segment stepper. Let it take what is left of

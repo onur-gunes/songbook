@@ -147,7 +147,7 @@
                 SB.closeVoicingChooser();
                 // The grid draws the same stored pick; without this it would
                 // keep showing the old shape until the next render.
-                if (SB.state.chordMode === 'grid' && SB.state.currentSong) {
+                if (SB.isGridMode() && SB.state.currentSong) {
                     SB.renderSheet(SB.state.currentSong);
                 }
             });

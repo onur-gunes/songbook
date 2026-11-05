@@ -26,7 +26,7 @@
         SB.closeVoicingChooser();
         if (SB.state.currentSong) {
             SB.renderChordStrip(SB.state.currentSong);
-            if (SB.state.chordMode === 'grid') SB.renderSheet(SB.state.currentSong);
+            if (SB.isGridMode()) SB.renderSheet(SB.state.currentSong);
         }
     }
 
