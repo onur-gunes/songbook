@@ -106,5 +106,23 @@
       "strum_source": "gentle D DU UDU ballad strum; a reasonable per-song fit.",
       "confidence": "high",
       "source": "widely documented ~88-90 bpm"
+   },
+   "zombie": {
+      "bpm": 167,
+      "time": "4/4",
+      "strum": "downs-4-4",
+      "strum_confidence": "medium",
+      "strum_source": "driving quarter-note downstrokes approximate the eighth-note guitar pulse; the original is palm-muted eighths at ~167 bpm.",
+      "confidence": "high",
+      "source": "songbpm ~167 bpm (half-time feel around 84)"
+   },
+   "the-loneliest": {
+      "bpm": 130,
+      "time": "4/4",
+      "strum": "dduudu-4-4",
+      "strum_confidence": "medium",
+      "strum_source": "steady D DU UDU pop-rock strum; a reasonable per-song fit, though the recorded guitar uses a more syncopated pattern.",
+      "confidence": "high",
+      "source": "songbpm ~130 bpm (half-time feel around 65)"
    }
 }

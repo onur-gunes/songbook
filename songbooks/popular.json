@@ -6147,6 +6147,2522 @@
    "sheetKey": "G",
    "bpm": 90,
    "strum": "dduudu-4-4"
+  },
+  {
+   "id": "zombie",
+   "n": 13,
+   "title": "Zombie",
+   "artist": "The Cranberries",
+   "level": "Easy",
+   "new": false,
+   "dur": 5.06,
+   "time": "4/4",
+   "chords": [
+    "Em",
+    "C",
+    "G",
+    "D"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Intro"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " Another head hangs lowly"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " Child is slowly "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " taken"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " And the violence caused such silence"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " Who are we mistaken"
+     ]
+    ],
+    [],
+    [
+     [
+      "x",
+      "But you see it's "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " not me, it's not my "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " family"
+     ]
+    ],
+    [
+     [
+      "x",
+      "In your "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " head, in your head they are "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " fighting"
+     ]
+    ],
+    [
+     [
+      "x",
+      "With their tanks and their "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " bombs, and their "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " guns"
+     ]
+    ],
+    [
+     [
+      "x",
+      "In your "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " head, in your head they are "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " crying"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "In your "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " head, in your "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " head"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Zombie, zombie, "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " zombie, hey, hey"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " What's in your "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " head, in your head"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Zombie, zombie, "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " zombie, hey, hey, hey, oh"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Instrumental"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " Another mother's breaking"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " Heart is taking "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " over"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " When the violence causes silence"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " We must be mistaken"
+     ]
+    ],
+    [],
+    [
+     [
+      "x",
+      "It's the same old "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " theme since nineteen-"
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "sixteen"
+     ]
+    ],
+    [
+     [
+      "x",
+      "In your "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " head, in your head they're still "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " fighting"
+     ]
+    ],
+    [
+     [
+      "x",
+      "With their tanks and their "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " bombs, and their "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " guns"
+     ]
+    ],
+    [
+     [
+      "x",
+      "In your "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " head, in your head they are "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " dying"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "In your "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " head, in your "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " head"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Zombie, zombie, "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " zombie, hey, hey"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " What's in your "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " head, in your head"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Zombie, zombie, "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " zombie, hey, hey, hey, oh"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Instrumental"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Solo"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Outro"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Em]"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Intro",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Instrumental",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Solo",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Outro",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "key": "Em",
+   "capo": 0,
+   "sheetKey": "Em",
+   "bpm": 167,
+   "strum": "downs-4-4"
+  },
+  {
+   "id": "the-loneliest",
+   "n": 14,
+   "title": "The Loneliest",
+   "artist": "Måneskin",
+   "level": "Medium",
+   "new": false,
+   "dur": 4.07,
+   "time": "4/4",
+   "chords": [
+    "C",
+    "Em",
+    "Am",
+    "G",
+    "Dm",
+    "E",
+    "F"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Intro"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " You'll be the saddest part of me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " A part of me that will never be"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " Mine, it's obvious"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " Tonight is gonna be the loneliest"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " There's a few lines that I have wrote"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " In case of death, that's what I "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " want"
+     ]
+    ],
+    [
+     [
+      "x",
+      "That's what I want, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " oh"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " So don't be sad when I'll be gone"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " There's just one thing, I hope you "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " know"
+     ]
+    ],
+    [
+     [
+      "x",
+      "I loved you "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " so"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Pre-Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "'Cause "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " I don't even care about the time, I've got left here"
+     ]
+    ],
+    [
+     [
+      "x",
+      "The "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " only thing I know now is that I want to spend it"
+     ]
+    ],
+    [
+     [
+      "x",
+      "With "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      " you, with you"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Nobody else here"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " Tonight is gonna be the loneliest"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " You'll be the saddest part of me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      " A part of me that will never be"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " Mine, it's obvious"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      " Tonight is gonna be the loneliest"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " You're still the oxygen I breathe"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      " I see your face when I close my "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " eyes"
+     ]
+    ],
+    [
+     [
+      "x",
+      "It's torturous"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " Tonight is gonna be the loneliest"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " I'm sorry but I gotta go"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " If you'll ever miss me, give this "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " song"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Another "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " go"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Pre-Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " I just keep on thinking how you made me feel better"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " all the crazy little things that we did together"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      " In the end, in the end"
+     ]
+    ],
+    [
+     [
+      "x",
+      "It doesn't matter"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " If tonight is gonna be the loneliest"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " You'll be the saddest part of me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      " A part of me that will never be"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " Mine, it's obvious"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      " Tonight is gonna be the loneliest"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " You're still the oxygen I breathe"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      " I see your face when I close my "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " eyes"
+     ]
+    ],
+    [
+     [
+      "x",
+      "It's torturous"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " Tonight is gonna be the loneliest"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Instrumental"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[F]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[F]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Refrain"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " You'll be the saddest part of me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      " A part of me that will never be"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " Mine, it's obvious"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " Tonight is gonna be the loneliest"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Final Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " You'll be the saddest part of me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      " A part of me that will never be"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " Mine, it's obvious"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " Tonight is gonna be the loneliest"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " You're still the oxygen I breathe"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      " I see your face when I close my "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      " eyes"
+     ]
+    ],
+    [
+     [
+      "x",
+      "It's torturous"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      " Tonight is gonna be the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      " loneliest"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Intro",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Pre-Chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Dm",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Instrumental",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Refrain",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Final Chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "key": "D",
+   "capo": 2,
+   "sheetKey": "C",
+   "bpm": 130,
+   "strum": "dduudu-4-4"
   }
  ]
 }

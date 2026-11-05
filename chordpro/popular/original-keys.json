@@ -82,5 +82,19 @@
       "capo": 3,
       "confidence": "high",
       "source": "recording is in Bb; G shapes with capo 3 sound Bb"
+   },
+   "zombie": {
+      "key": "Em",
+      "sheetKey": "Em",
+      "capo": 0,
+      "confidence": "high",
+      "source": "recording is in E minor; standard open Em-C-G-D chart, no capo"
+   },
+   "the-loneliest": {
+      "key": "D",
+      "sheetKey": "C",
+      "capo": 2,
+      "confidence": "high",
+      "source": "recording is in D major; chart transposed to C for easy ukulele shapes (capo 2 sounds the original key)"
    }
 }
