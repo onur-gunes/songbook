@@ -29,7 +29,20 @@
         // A bare "#/" means "back to the song list I'm browsing" — keep the
         // current songbook instead of snapping to the default starter one.
         if (!sb) sb = (SB.state.active && SB.state.bySb[SB.state.active.id]) || SB.defaultSongbook();
-        if (!sb) return;
+        if (!sb) {
+            /* With no books at all there is nothing to route to, but the list
+             * view is still usable: show the empty state instead of leaving
+             * both views hidden. This is also the path after the last book is
+             * removed. */
+            SB.setActive(null);
+            SB.resetScroll(true);
+            SB.stopMetronome();
+            SB.state.currentSong = null;
+            SB.$('songView').hidden = true;
+            SB.$('listView').hidden = false;
+            SB.renderEmptyState();
+            return;
+        }
 
         SB.setActive(sb);
 

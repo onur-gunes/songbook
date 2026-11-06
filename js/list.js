@@ -54,7 +54,34 @@
         return out;
     }
 
+    /* The list view has two independent "nothing here" cases: no songbooks at
+     * all (first run, or after removing the last import) and a search/filter
+     * with no matches inside a book. Only the former owns the import call to
+     * action and hides the list toolbar; the latter still needs the toolbar so
+     * the user can clear the search. */
+    SB.renderEmptyState = function () {
+        var empty = SB.allSongbooks().length === 0;
+        var box = SB.$('emptyState');
+        if (box) box.hidden = !empty;
+        var toolbar = SB.$('listControls');
+        if (toolbar) toolbar.hidden = empty;
+        if (!empty) return;
+        var list = SB.$('songList');
+        if (list) list.textContent = '';
+        var result = SB.$('resultCount');
+        if (result) result.textContent = '';
+        var noMatches = SB.$('noMatches');
+        if (noMatches) noMatches.hidden = true;
+    }
+
     SB.renderList = function () {
+        if (!SB.state.active) {
+            SB.$('songList').textContent = '';
+            SB.$('resultCount').textContent = '';
+            SB.$('noMatches').hidden = true;
+            SB.renderEmptyState();
+            return;
+        }
         var songs = SB.filteredSongs();
         var total = SB.activeSongs().length;
         var ul = SB.$('songList');
@@ -92,7 +119,7 @@
         });
         ul.appendChild(frag);
 
-        SB.$('emptyState').hidden = songs.length > 0;
+        SB.$('noMatches').hidden = songs.length > 0;
         SB.$('resultCount').textContent = songs.length === total
             ? total + ' songs'
             : songs.length + ' of ' + total + ' songs';
@@ -213,6 +240,7 @@
             location.hash = SB.routeHash(this.value);
         });
         SB.$('importBtn').addEventListener('click', function () { SB.$('importFile').click(); });
+        SB.$('emptyImportBtn').addEventListener('click', function () { SB.$('importFile').click(); });
         SB.$('importFile').addEventListener('change', function (e) {
             var file = e.target.files && e.target.files[0];
             if (file) SB.importSongbook(file);

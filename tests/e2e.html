@@ -68,7 +68,7 @@ async function main() {
     $('search').value = 'zzzzz';
     $('search').dispatchEvent(new (win().Event)('input'));
     await wait(50);
-    ok('no match -> empty state', !$('emptyState').hidden && rows().length === 0);
+    ok('no match -> empty state', !$('noMatches').hidden && rows().length === 0);
     $('searchClear').click();
     await wait(50);
     ok('clear search -> 198 rows', rows().length === 198, rows().length);

@@ -678,6 +678,37 @@ main {
     padding: 40px 0;
 }
 
+.empty-state-books {
+    margin: 8px 0 18px;
+    padding: 44px 24px;
+    background: var(--surface);
+    border: 1px dashed var(--line);
+    border-radius: 18px;
+}
+
+.empty-state-title {
+    margin: 0 0 8px;
+    color: var(--text);
+    font-size: 1.2rem;
+}
+
+.empty-state-lead {
+    max-width: 40ch;
+    margin: 0 auto 18px;
+}
+
+.empty-state-import {
+    padding: 11px 24px;
+    font-size: 0.95rem;
+}
+
+.empty-state-docs {
+    margin: 16px 0 0;
+    font-size: 0.85rem;
+}
+
+.empty-state-docs a { color: var(--accent); }
+
 /* ===== song view ===== */
 
 .song-nav {
@@ -2310,7 +2341,7 @@ body.tuner-open { overflow: hidden; }
             </button>
         </div>
 
-        <div class="controls">
+        <div id="listControls" class="controls">
             <div class="search-wrap">
                 <input id="search" type="search" autocomplete="off" spellcheck="false"
                        placeholder="Search songs or artists..." aria-label="Search songs or artists">
@@ -2342,6 +2373,15 @@ body.tuner-open { overflow: hidden; }
             </div>
         </div>
 
+        <div id="emptyState" class="empty-state empty-state-books" hidden>
+            <h2 class="empty-state-title">No songbooks yet</h2>
+            <p class="empty-state-lead">Import a songbook JSON file to start building your library.</p>
+            <button id="emptyImportBtn" class="pill-btn accent empty-state-import" type="button">Import a songbook…</button>
+            <p class="empty-state-docs">New to the format? Read the
+                <a href="https://github.com/onur-gunes/songbook#songbook-json-format"
+                   target="_blank" rel="noopener noreferrer">songbook format docs</a>.</p>
+        </div>
+
         <div id="recentBlock" class="recent-block" hidden>
             <div class="section-head">
                 <h2 class="section-title">Recently played</h2>
@@ -2352,7 +2392,7 @@ body.tuner-open { overflow: hidden; }
 
         <p id="resultCount" class="result-count"></p>
         <ul id="songList" class="song-list"></ul>
-        <p id="emptyState" class="empty-state" hidden>No songs match.</p>
+        <p id="noMatches" class="empty-state" hidden>No songs match.</p>
     </section>
 
     <!-- ============ SONG VIEW ============ -->
@@ -5014,13 +5054,21 @@ body.tuner-open { overflow: hidden; }
     }
 
     SB.loadBundled = function () {
-        if (window.__SONGBOOKS__ && window.__SONGBOOKS__.length) {
+        /* An injected empty list is authoritative, not an invitation to fetch:
+         * the single-file build and the test harness both use this hook to say
+         * "this app has no bundled books", which is now a valid state. */
+        if (Array.isArray(window.__SONGBOOKS__)) {
             return Promise.resolve(window.__SONGBOOKS__.map(SB.normalizeSongbook));
         }
         return fetch('songbooks/index.json', { cache: 'no-cache' }).then(function (r) {
+            /* An absent manifest means a content-free app, not a broken one.
+             * Anything else non-OK (and malformed JSON below) is still a real
+             * error: a 500, or a corrupt manifest, must not be swallowed. */
+            if (r.status === 404) return null;
             if (!r.ok) throw new Error('songbooks/index.json ' + r.status);
             return r.json();
         }).then(function (manifest) {
+            if (!manifest) return [];
             var entries = (manifest && manifest.songbooks) || [];
             return Promise.all(entries.map(function (e) {
                 return fetch('songbooks/' + e.file, { cache: 'no-cache' }).then(function (r) {
@@ -5040,6 +5088,7 @@ body.tuner-open { overflow: hidden; }
         SB.state.bySb = {};
         SB.allSongbooks().forEach(function (sb) { SB.state.bySb[sb.id] = sb; });
         buildSongbookSelect();
+        SB.renderEmptyState();
     }
 
     SB.setActive = function (sb) {
@@ -5047,10 +5096,12 @@ body.tuner-open { overflow: hidden; }
         SB.state.byId = {};
         if (sb) sb.songs.forEach(function (s) { SB.state.byId[s.id] = s; });
         var sel = SB.$('songbookSelect');
-        if (sel && sb) sel.value = sb.id;
+        if (sel) sel.value = sb ? sb.id : '';
         var rm = SB.$('removeSongsBtn');
         if (rm) rm.hidden = !(sb && sb.imported);
-        SB.applyBrand();
+        var ex = SB.$('exportSongsBtn');
+        if (ex) ex.hidden = !sb;
+        if (SB.applyBrand) SB.applyBrand();
     }
 
     function buildSongbookSelect() {
@@ -7123,7 +7174,34 @@ body.tuner-open { overflow: hidden; }
         return out;
     }
 
+    /* The list view has two independent "nothing here" cases: no songbooks at
+     * all (first run, or after removing the last import) and a search/filter
+     * with no matches inside a book. Only the former owns the import call to
+     * action and hides the list toolbar; the latter still needs the toolbar so
+     * the user can clear the search. */
+    SB.renderEmptyState = function () {
+        var empty = SB.allSongbooks().length === 0;
+        var box = SB.$('emptyState');
+        if (box) box.hidden = !empty;
+        var toolbar = SB.$('listControls');
+        if (toolbar) toolbar.hidden = empty;
+        if (!empty) return;
+        var list = SB.$('songList');
+        if (list) list.textContent = '';
+        var result = SB.$('resultCount');
+        if (result) result.textContent = '';
+        var noMatches = SB.$('noMatches');
+        if (noMatches) noMatches.hidden = true;
+    }
+
     SB.renderList = function () {
+        if (!SB.state.active) {
+            SB.$('songList').textContent = '';
+            SB.$('resultCount').textContent = '';
+            SB.$('noMatches').hidden = true;
+            SB.renderEmptyState();
+            return;
+        }
         var songs = SB.filteredSongs();
         var total = SB.activeSongs().length;
         var ul = SB.$('songList');
@@ -7161,7 +7239,7 @@ body.tuner-open { overflow: hidden; }
         });
         ul.appendChild(frag);
 
-        SB.$('emptyState').hidden = songs.length > 0;
+        SB.$('noMatches').hidden = songs.length > 0;
         SB.$('resultCount').textContent = songs.length === total
             ? total + ' songs'
             : songs.length + ' of ' + total + ' songs';
@@ -7282,6 +7360,7 @@ body.tuner-open { overflow: hidden; }
             location.hash = SB.routeHash(this.value);
         });
         SB.$('importBtn').addEventListener('click', function () { SB.$('importFile').click(); });
+        SB.$('emptyImportBtn').addEventListener('click', function () { SB.$('importFile').click(); });
         SB.$('importFile').addEventListener('change', function (e) {
             var file = e.target.files && e.target.files[0];
             if (file) SB.importSongbook(file);
@@ -8790,7 +8869,20 @@ body.tuner-open { overflow: hidden; }
         // A bare "#/" means "back to the song list I'm browsing" — keep the
         // current songbook instead of snapping to the default starter one.
         if (!sb) sb = (SB.state.active && SB.state.bySb[SB.state.active.id]) || SB.defaultSongbook();
-        if (!sb) return;
+        if (!sb) {
+            /* With no books at all there is nothing to route to, but the list
+             * view is still usable: show the empty state instead of leaving
+             * both views hidden. This is also the path after the last book is
+             * removed. */
+            SB.setActive(null);
+            SB.resetScroll(true);
+            SB.stopMetronome();
+            SB.state.currentSong = null;
+            SB.$('songView').hidden = true;
+            SB.$('listView').hidden = false;
+            SB.renderEmptyState();
+            return;
+        }
 
         SB.setActive(sb);
 
@@ -8967,7 +9059,10 @@ body.tuner-open { overflow: hidden; }
                 try { var sb = SB.normalizeSongbook(raw); sb.imported = true; return sb; }
                 catch (e) { return null; }
             }).filter(Boolean);
-            if (!SB.state.bundled.length && !SB.state.imported.length) { showFatal('No songbooks available.'); return; }
+            /* Zero songbooks is a supported first-run state, not a fatal one:
+             * keep booting, bind every control, and let the list view show the
+             * empty state with its Import call to action. */
+            if (!SB.state.bundled.length && !SB.state.imported.length) SB.renderEmptyState();
             if (!SB.state.instrument) SB.state.instrument = (SB.defaultSongbook() && SB.defaultSongbook().instrument) || 'ukulele';
             SB.applyInstrumentUi();
             SB.rebuildIndex();
