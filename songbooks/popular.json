@@ -8663,6 +8663,2332 @@
    "sheetKey": "C",
    "bpm": 130,
    "strum": "dduudu-4-4"
+  },
+  {
+   "id": "bitter-sweet-symphony",
+   "n": 15,
+   "title": "Bitter Sweet Symphony",
+   "artist": "The Verve",
+   "level": "Medium",
+   "new": false,
+   "dur": 6.0,
+   "time": "4/4",
+   "chords": [
+    "E",
+    "Bm",
+    "D",
+    "A"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Intro"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[A]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[A]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "'Cause it's a "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "bitter sweet "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "symphony that's "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "life"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "Trying to "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "make ends meet, you're a "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "slave to the money "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "then you die"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "I'll take you "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "down the only "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "road I've ever "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "been down"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "You know the "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "one that takes you to the "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "places where all the "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "veins meet, yeah"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "No change, I can "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "change, I can "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "change, I can "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "change"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "But I'm here in my "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "mould, I am "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "here in my "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "mould"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "But I'm a million different "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "people from "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "one day to the "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "next"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "I can't change my "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "mould, no no "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "no no "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "no no"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "(Have you ever been "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "down?) "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[A]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "Well I've never "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "prayed, but to"
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "night I'm on my "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "knees, yeah"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "I need to hear some "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "sounds that recog"
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "nize the pain in "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "me, yeah"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "I let the melody "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "shine, let it "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "cleanse my mind, I "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "feel free now"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "But the airwaves are "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "clean and there's "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "nobody singing to "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "me now"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "No change, I can "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "change, I can "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "change, I can "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "change"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "But I'm here in my "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "mould, I am "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "here in my "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "mould"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "And I'm a million different "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "people from "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "one day to the "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "next"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "I can't change my "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "mould, no no "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "no no "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "no"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "(Have you ever been "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "down?) "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[A]"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "I can't change it you "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "know, I can't "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "change it "
+     ],
+     [
+      "c",
+      "[A]"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 3"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "'Cause it's a "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "bitter sweet "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "symphony, that's "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "life"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "Trying to make ends "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "meet, trying to "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "find some money, "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "then you die"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "I'll take you "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "down the only "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "road I've ever "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "been down"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "You know the "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "one that takes you to the "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "places where all the "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "veins meet, yeah"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Final Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "You know I can "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "change, I can "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "change, I can "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "change"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "But I'm here in my "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "mould, I am "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "here in my "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "mould"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "And I'm a million different "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "people from "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "one day to the "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "next"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "I can't change my "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "mould, no no "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "no no "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "no"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "I can't change my "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "mould, no no "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "no no "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "no"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "I can't change my "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "mould, no no "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "no no "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "no"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Outro"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "(It's just sex and "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "violence, "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "melody and "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "silence)"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "(I'll take you "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "down the only "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "road I've ever "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "been down)"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "(It's just sex and "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "violence, "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "melody and "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "silence)"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "(I'll take you "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "down the only "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "road I've ever "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "been down)"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "Been down"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "Ever been down"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "Have you ever been "
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "down?"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "Have you ever been "
+     ],
+     [
+      "c",
+      "[Bm]"
+     ],
+     [
+      "x",
+      "down? "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      " "
+     ],
+     [
+      "c",
+      "[A]"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Intro",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Verse 1",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Verse 2",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Verse 3",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Final Chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Outro",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E",
+         "beats": 2
+        },
+        {
+         "chord": "Bm",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        },
+        {
+         "chord": "A",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "key": "A",
+   "capo": 0,
+   "sheetKey": "A",
+   "bpm": 85,
+   "strum": "eighths-4-4"
   }
  ]
 }
