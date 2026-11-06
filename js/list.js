@@ -218,6 +218,9 @@
             if (file) SB.importSongbook(file);
             e.target.value = '';
         });
+        SB.$('exportSongsBtn').addEventListener('click', function () {
+            if (SB.state.active) SB.exportSongbook(SB.state.active);
+        });
         SB.$('removeSongsBtn').addEventListener('click', function () {
             if (!SB.state.active || !SB.state.active.imported) return;
             if (!window.confirm('Remove imported songbook "' + SB.state.active.name + '"? Your notes and favorites for it are kept.')) return;

@@ -122,6 +122,8 @@
         favorites: SB.state.favorites,
         activeSongs: SB.activeSongs,
         allSongbooks: SB.allSongbooks,
+        normalizeSongbook: SB.normalizeSongbook,
+        songbookJSON: SB.songbookJSON,
         getActive: function () { return SB.state.active; },
         getSong: function (id) { return SB.state.byId[id]; },
         setInstrument: SB.setInstrument,

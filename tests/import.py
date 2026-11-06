@@ -132,6 +132,43 @@ def main():
         ok('after remove+reload: import does not return',
            cdp.eval("songbookTest.allSongbooks().length") == bundled_count)
 
+        # An exported songbook is a valid import. The bundled ids still exist
+        # in this profile, so the copy gets a fresh id; its contents, including
+        # the beat grid, must survive the export -> import round-trip.
+        exported = cdp.eval(
+            "(function () {"
+            "  var sb = songbookTest.allSongbooks().filter(function (b) { return b.id === 'popular'; })[0];"
+            "  var copy = JSON.parse(songbookTest.songbookJSON(sb));"
+            "  copy.id = 'popular-copy';"
+            "  copy.name = 'Popular Copy';"
+            "  return JSON.stringify(copy);"
+            "})()")
+        import_copy_js = """
+        (function () {
+          var inp = document.getElementById('importFile');
+          var dt = new DataTransfer();
+          dt.items.add(new File([%s], 'popular.json', { type: 'application/json' }));
+          inp.files = dt.files;
+          inp.dispatchEvent(new Event('change', { bubbles: true }));
+          return true;
+        })()
+        """ % json.dumps(exported)
+        cdp.eval(import_copy_js, await_promise=False)
+        cdp.wait_js("songbookTest.getActive().id === 'popular-copy'", timeout=10)
+        ok('exported book imports with all its songs',
+           cdp.eval('songbookTest.getActive().songs.length') == 15,
+           cdp.eval('songbookTest.getActive().songs.length'))
+        ok('export button visible for imported songbook',
+           cdp.eval("document.getElementById('exportSongsBtn').hidden") is False)
+
+        cdp.eval("location.hash = '#/popular-copy/take-me-home-country-roads'")
+        cdp.wait_js("document.getElementById('songView').hidden === false", timeout=10)
+        cdp.eval("document.querySelector('.chord-mode-btn[data-chord-mode=\"grid\"]').click()")
+        cdp.wait_js('!!songbookTest.gridInfo()', timeout=10)
+        ok('exported book keeps its grid (208 beats)',
+           cdp.eval('songbookTest.gridInfo().totalBeats') == 208,
+           cdp.eval('songbookTest.gridInfo().totalBeats'))
+
         n_fail = 0
         for name, passed, detail in results:
             print(('PASS ' if passed else 'FAIL ') + name + (' | ' + str(detail) if detail != '' else ''))
