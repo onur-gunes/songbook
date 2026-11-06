@@ -1,0 +1,74 @@
+{title: Take Me Home, Country Roads}
+{artist: John Denver}
+{level: Easy}
+{duration: 3.13}
+{time: 4/4}
+
+{start_of_grid: Verse 1}
+| G | Em | D | C |
+| G | Em | D | C . G . |
+{end_of_grid}
+
+{start_of_grid: Chorus}
+| G | D | Em | C |
+| G | D | C | G |
+{end_of_grid}
+
+{start_of_grid: Verse 2}
+| G | Em | D | C |
+| G | Em | D | C . G . |
+{end_of_grid}
+
+{start_of_grid: Chorus}
+| G | D | Em | C |
+| G | D | C | G |
+{end_of_grid}
+
+{start_of_grid: Bridge}
+| Em | D . G . | C . G . | D |
+| Em | F . C . | G | D |
+{end_of_grid}
+
+{start_of_grid: Final Chorus}
+|: G | D | Em | C |
+| G | D | C | G |
+| D | G | D | G :|
+{end_of_grid}
+
+{comment: Verse 1}
+[G]Almost heaven, [Em]West Virginia
+[D]Blue Ridge Mountains, [C]Shenandoah [G]River
+[G]Life is old there, [Em]older than the trees
+[D]Younger than the mountains, [C]growin' like a [G]breeze
+
+{comment: Chorus}
+Country [G]roads, take me [D]home
+To the [Em]place I be[C]long
+West Vir[G]ginia, mountain [D]mama
+Take me [C]home, country [G]roads
+
+{comment: Verse 2}
+[G]All my memories [Em]gather round her
+[D]Miner's lady, [C]stranger to blue [G]water
+[G]Dark and dusty, [Em]painted on the sky
+[D]Misty taste of moonshine, [C]teardrop in my [G]eye
+
+{comment: Chorus}
+Country [G]roads, take me [D]home
+To the [Em]place I be[C]long
+West Vir[G]ginia, mountain [D]mama
+Take me [C]home, country [G]roads
+
+{comment: Bridge}
+[Em]I hear her [D]voice in the [G]mornin' hour she calls me
+The [C]radio re[G]minds me of my [D]home far away
+And [Em]drivin' down the [F]road I get a feel[C]in' that I
+[G]should have been home [D]yesterday... yester[D]day
+
+{comment: Final Chorus}
+Country [G]roads, take me [D]home
+To the [Em]place I be[C]long
+West Vir[G]ginia, mountain [D]mama
+Take me [C]home, country [G]roads
+[D]home... down country [G]roads
+[D]home... down country [G]roads

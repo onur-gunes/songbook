@@ -3,6 +3,11 @@
 {level: Easy}
 {duration: 3.38}
 {key: Am}
+{time: 4/4}
+
+{start_of_grid: Intro/Chorus}
+|: Am | F . C . | G | Am :|
+{end_of_grid}
 
 [Am]Nanana, [F]nananan
 [C]Nanana, [G]nananan

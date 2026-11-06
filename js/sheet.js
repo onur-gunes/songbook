@@ -85,8 +85,7 @@
         return sheet.filter(function (line) { return Array.isArray(line); });
     }
 
-    SB.renderSheet = function (song) {
-        if (SB.state.chordMode === 'above') { renderSheetAbove(song); return; }
+    function renderSheetInline(song) {
         var wrap = SB.$('sheet');
         wrap.textContent = '';
         var frag = document.createDocumentFragment();
@@ -98,6 +97,24 @@
             frag.appendChild(lineDiv);
         });
         wrap.appendChild(frag);
+    }
+
+    /* Grid mode is a third renderer (js/grid.js). It only applies when the
+     * song actually carries grid data; a book-wide mode preference must never
+     * leave a song with no grid staring at an empty sheet. In that case the
+     * mode stays set (so the next grid song opens in it) but the sheet falls
+     * back to the normal inline view. */
+    SB.renderSheet = function (song) {
+        // A song may carry an authored grid, or one can be derived from its
+        // chord changes (see SB.songHasGrid in js/grid.js).
+        var hasGrid = SB.songHasGrid ? SB.songHasGrid(song) : !!(song && song.grid && song.grid.length);
+        if (SB.isGridMode() && hasGrid && SB.renderSheetGrid) {
+            SB.renderSheetGrid(song);
+            return;
+        }
+        if (SB.gridDeactivate) SB.gridDeactivate();
+        if (SB.state.chordMode === 'above') { renderSheetAbove(song); return; }
+        renderSheetInline(song);
     }
 
     /* ---- classic chord-sheet rendering (chords above the lyrics) ---- */
@@ -237,6 +254,7 @@
     function sheetEmPx() {
         return parseFloat(getComputedStyle(SB.$('sheet')).fontSize) || 14.4;
     }
+    SB.sheetEmPx = sheetEmPx;
 
     // Width of a chord label as drawn (bold, same size as the sheet). Used to
     // keep consecutive chords from overlapping when the lyric column is narrow.
@@ -252,6 +270,9 @@
         ctx.font = sheetFontFor('b', mono);
         return ctx.measureText(label).width;
     }
+    // The grid renderer reserves a column at least as wide as the label, so it
+    // must use the same measurement (including the mono family in degree mode).
+    SB.chordLabelWidth = chordLabelWidth;
 
     // Which visual line a chord belongs to. Ranges are half-open [start, end),
     // so a chord anchored at the very end of the line — the common case in an

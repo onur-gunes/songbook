@@ -68,9 +68,11 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/instrument.js` | Ukulele/guitar selection |
 | `js/transpose.js` | Chord token parsing, semitone transposition, and the written-key scale degrees (`songTonic`, `tokenDegree`) shared by the sheet and the strip |
 | `js/sheet.js` | Both sheet renderers (inline chords and chords-above-lyrics) |
+| `js/grid.js` | Play-along grid chart: bars, beat slashes, diagrams and the metronome-driven beat cursor |
 | `js/chordstrip.js` | Sticky chord strip and the voicing chooser |
 | `js/list.js` | List view: search, filters, sort, songbook picker |
 | `js/import.js` | Importing a songbook JSON from disk |
+| `js/export.js` | Exporting any songbook (bundled or imported) back to a JSON file |
 | `js/song.js` | Song view and its controls |
 | `js/autoscroll.js` | Auto-scroll, text/chord sizing, pinch zoom |
 | `js/metronome.js` | Metronome: lookahead click scheduler and per-song BPM |
@@ -87,7 +89,8 @@ attached to `SB`.
 
 - **Multiple songbooks** — a picker switches between the bundled list and any
   imported lists. Import a `.json` songbook from disk; it is saved in
-  **IndexedDB** and restored on reload (remove anytime).
+  **IndexedDB** and restored on reload (remove anytime). Export any songbook,
+  bundled or imported, back out as the same `.json` shape.
 - **Global instrument toggle** — Ukulele or Guitar. Chord diagrams and the
   voicing chooser are generated for the selected instrument; the choice is
   remembered.
@@ -182,19 +185,26 @@ attached to `SB`.
       "bpm": 92,               // optional tempo, 20-300 (see "Tempo and metre")
       "time": "4/4",           // optional metre: 4/4 | 3/4 | 6/8 | 2/4
       "chords": ["Am", "G"],
-      "sheet": [ [ ["c", "[Am]"], ["x", " lyric"], ... ], [] ]   // lines of [kind, text]
+      "sheet": [ [ ["c", "[Am]"], ["x", " lyric"], ... ], [] ],  // lines of [kind, text]
+      "grid": [                // optional bar/beat chart (see "Bar/beat grid")
+        { "label": "Chorus", "repeat": false,
+          "bars": [ { "beats": [ {"chord": "Am", "beats": 4} ] }, ... ] }
+      ]
     }
   ]
 }
 ```
 
 `sheet` kinds: `c` chord token (`[Am]`), `x` text, `m` muted, `b` bold,
-`i` italic, `y` comment, `p` preformatted/tab. Imported sheets are normalised:
-a missing or wrong-typed `sheet` becomes empty, and malformed lines/segments
-are dropped instead of reaching the renderer. Song ids may contain any
-characters; the app percent-encodes them in the hash. Personal data (favorites,
-notes, recent, theme, scroll speed, voicing picks) lives only in
-`localStorage`; the imported songbook JSON lives in `IndexedDB`.
+`i` italic, `y` comment, `p` preformatted/tab. `grid` is a separate top-level
+field, **parallel to `sheet`, not nested in it**: it is a different view of the
+same song (where beat 1 is and how many beats each chord gets), and is simply
+absent on songs that have no chart. Imported sheets are normalised: a missing or
+wrong-typed `sheet` becomes empty, and malformed lines/segments are dropped
+instead of reaching the renderer. Song ids may contain any characters; the app
+percent-encodes them in the hash. Personal data (favorites, notes, recent,
+theme, scroll speed, voicing picks) lives only in `localStorage`; the imported
+songbook JSON lives in `IndexedDB`.
 
 ## Regenerate the bundled data
 
@@ -253,6 +263,7 @@ Song directives:
 | `{new: true}` | `new` | default `false` |
 | `{number: 12}` | `n` | defaults to file order |
 | `{chords: Am, C, G}` | `chords` | optional curated order; mismatch with the sheet warns |
+| `{start_of_grid: Label}` / `{sog: ...}` … `{end_of_grid}` / `{eog}` | `grid` | optional bar/beat chart (see "Bar/beat grid"); requires `time` |
 | `{trusted_note: ...}` | `y` | ignored unless `--allow-trusted-notes` is passed |
 
 Body syntax:
@@ -272,6 +283,8 @@ Body syntax:
   / `{eoc}` closes it.
 - `{start_of_tab}` / `{sot}` … `{end_of_tab}` / `{eot}` keeps raw lines as
   preformatted `p` tokens; no chord parsing inside.
+- `{start_of_grid: Label}` / `{sog}` … `{end_of_grid}` / `{eog}` is a bar/beat
+  chart, parsed into the top-level `grid` field (see "Bar/beat grid").
 - `# source comment` lines are ignored.
 
 `chords[]` is derived automatically from the chord tokens (unique, in first
@@ -366,6 +379,71 @@ section patterns are a later feature). The field is a single id today but is
 shaped so it can grow to a list without a data migration. When a song has no
 `time`, the runtime uses 4/4 so the strum row is still available; a manual
 choice made there is remembered per song just like a documented default.
+
+### Bar/beat grid
+
+A grid is an optional bar/beat chart for a song — the one thing a play-along
+chart needs that nothing in the lyric lines can recover: where beat 1 is, and
+how many beats each chord gets. It is authored as a block and parsed into the
+top-level `grid` field, deliberately parallel to `sheet` rather than nested in
+it (a different view of the same song, absent on songs that have none).
+
+```
+{start_of_grid: Intro/Chorus}
+| C | G | Am | G |
+|: F | G . . | C :|
+{end_of_grid}
+```
+
+- `|` is a bar line; a bar holds chord tokens.
+- A lone chord fills the bar (so `| C |` in 4/4 is C for four beats).
+- `.` extends the previous chord by one beat, so `G . .` in 4/4 is G for three
+  beats — standard Nashville/chart notation, no invented syntax.
+- `|:` opens a repeat and `:|` closes one; a repeat wraps the whole block (the
+  single `repeat` flag), so the marks belong at the block's edges, not mid-way.
+- The block label becomes the section name (`Intro/Chorus`, `Verse`, …).
+- A block may span several lines; each line opens and closes with a bar line.
+
+Chord tokens reuse the sheet's exact vocabulary — slash chords, `NC`, muted
+markers — so the same `ChordKit` playability check applies to grid chords too.
+
+A grid **requires `time`** (its bar maths is meaningless without a metre) and
+every bar must sum to the beats that metre implies (4 in 4/4, 3 in 3/4, 2 in
+6/8 and 2/4 — the felt pulse, same count the metronome accents). A bar that
+does not add up, an unbalanced repeat, or a grid with no `time` is a build
+**error** naming the song and bar, not a warning: a chart that does not add up
+is unusable. On the untrusted import boundary (`js/songbooks.js`) a malformed
+grid is instead dropped whole, so the song still renders. `js/grid.js` draws the
+field as the play-along chart (the Grid mode in the sheet controls); songs
+without a grid fall back to the normal sheet.
+
+The chart also shows the section's lyrics. It walks the block's change sequence
+against the sheet's chord tokens and, when a section starts with the same
+changes, prints each sheet line as one row under the system that holds it. Each
+phrase in the row starts at the x of the chord change that introduced it, so
+"voice" sits under D and "mornin'" under G while the words stay together as
+readable text. A line whose phrases would not fit in the remaining width
+falls back to one continuous row beginning at the system's left edge rather
+than breaking the alignment badly. Bar widths come from the lyric phrases
+themselves: each change reserves at least the width of the words that start
+under it (with the diagram as a floor), so a long line gets a wider column
+instead of running into the next change. Every diagram uses the same four fret
+rows and the same box, so a chord that needs an extra row is not drawn smaller
+or denser than its neighbours. A change inside a bar carries a faint drop line
+through the beat row; a change on a bar line uses the bar line itself, so no
+change is marked twice. A looping grid maps one iteration (the repeat signs mark
+the rest); a
+grid that is a different arrangement, or has no matching section, shows the
+chart without lyrics rather than guessing.
+
+**Animate** is the same chart with the page held still. It mounts one system at
+a time in a fixed-height stage and swaps it in place when the metronome's beat
+cursor enters the next system's range, so the lyrics and diagrams change under
+the playhead instead of the page scrolling. The current chord label and diagram
+are highlighted along with the beat slash. The metronome is the transport, so
+the view needs a tempo; the auto-scroll control is hidden while it is active.
+One bar of count-in precedes the first chart beat, and stopping the metronome
+returns the stage to the opening system.
 
 Run the parser/builder tests with `python3 tests/chordpro.py`, the strum
 library mirror guard with `python3 tests/strum.py`, and the dev/prod

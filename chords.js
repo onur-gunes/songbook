@@ -501,6 +501,12 @@
 
     function strX(i, gap, padX) { return padX + i * gap; }
 
+    /* Every diagram shows the same four fret rows. The old height depended on
+     * the chord (an open Em needed a fifth row), so the SVG had a different
+     * aspect ratio per chord and object-fit scaled them to different sizes.
+     * A constant grid keeps the string and fret lines aligned and equal. */
+    var FRET_ROWS = 4;
+
     function diagramSVG(instrumentId, frets) {
         var inst = instrumentOf(instrumentId);
         var num = frets.length || inst.tuning.length;
@@ -509,32 +515,26 @@
         var gap = (W - 2 * padX) / (num - 1);
         var nz = frets.filter(function (f) { return f > 0; });
         var minF = nz.length ? Math.min.apply(null, nz) : 0;
-        var hasMark = frets.some(function (v) { return v <= 0; });
         var maxF = Math.max.apply(null, frets.filter(function (f) { return f > 0; })) || 0;
-        var lo = maxF <= 4 ? 0 : Math.max(minF - 1, 0);
+        var lo = maxF <= FRET_ROWS ? 0 : Math.max(minF - 1, 0);
         var showNut = lo === 0;
-        var hi = Math.max(maxF + 1, lo + 4);
+        // Keep four rows for every ordinary shape. A chord spanning more than
+        // four frets is rare; it expands rather than losing a dot.
+        var hi = Math.max(lo + FRET_ROWS, maxF);
         var rows = hi - lo;
-        var top = hasMark ? 26 : 16;
+        // Always reserve the row above the nut for open/muted marks, even
+        // when this chord has none, so all diagrams share one box.
+        var top = 26;
         var markY = top - 11;
         var H = top + rows * fg + 10;
         var yWire = function (f) { return top + (f - lo) * fg; };
         var yDot = function (f) { return top + (f - lo) * fg - fg / 2; };
         var xStr = function (i) { return strX(i, gap, padX); };
-        var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">';
-        var strTop = yWire(lo);
-        for (var i = 0; i < num; i++) {
-            s += '<line class="st" x1="' + xStr(i) + '" y1="' + strTop + '" x2="' + xStr(i) + '" y2="' + yWire(hi) + '"/>';
-        }
-        for (var f = showNut ? 1 : lo; f <= hi; f++) {
-            s += '<line class="fw" x1="' + (xStr(0) - 6) + '" y1="' + yWire(f) + '" x2="' + (xStr(num - 1) + 6) + '" y2="' + yWire(f) + '"/>';
-        }
-        if (showNut) {
-            s += '<line class="nut" x1="' + (xStr(0) - 6) + '" y1="' + yWire(0) + '" x2="' + (xStr(num - 1) + 6) + '" y2="' + yWire(0) + '"/>';
-        } else {
-            s += '<text class="pos" x="9" y="' + (yWire(lo) + fg / 2) + '">' + (lo + 1) + '</text>';
-        }
+        // Work out the barre before drawing so it can sit behind the grid.
+        // A barre drawn on top hid the fret line under it, which made those
+        // chords look like they had fewer lines than the others.
         var covered = {};
+        var barMarkup = '';
         (function () {
             var fretted = nz;
             if (!fretted.length) return;
@@ -549,9 +549,23 @@
             if (!okBar) return;
             if (idxs.length < 3 && (hi2 - lo2 + 1) === idxs.length) return;
             var x1 = xStr(lo2), x2 = xStr(hi2);
-            s += '<rect class="bar" x="' + (x1 - 7) + '" y="' + (yDot(mf) - 7) + '" width="' + (x2 - x1 + 14) + '" height="14" rx="7"/>';
+            barMarkup = '<rect class="bar" x="' + (x1 - 7) + '" y="' + (yDot(mf) - 7) + '" width="' + (x2 - x1 + 14) + '" height="14" rx="7"/>';
             idxs.forEach(function (ix) { covered[ix] = 1; });
         })();
+        var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">';
+        s += barMarkup;
+        var strTop = yWire(lo);
+        for (var i = 0; i < num; i++) {
+            s += '<line class="st" x1="' + xStr(i) + '" y1="' + strTop + '" x2="' + xStr(i) + '" y2="' + yWire(hi) + '"/>';
+        }
+        for (var f = showNut ? 1 : lo; f <= hi; f++) {
+            s += '<line class="fw" x1="' + (xStr(0) - 6) + '" y1="' + yWire(f) + '" x2="' + (xStr(num - 1) + 6) + '" y2="' + yWire(f) + '"/>';
+        }
+        if (showNut) {
+            s += '<line class="nut" x1="' + (xStr(0) - 6) + '" y1="' + yWire(0) + '" x2="' + (xStr(num - 1) + 6) + '" y2="' + yWire(0) + '"/>';
+        } else {
+            s += '<text class="pos" x="9" y="' + (yWire(lo) + fg / 2) + '">' + (lo + 1) + '</text>';
+        }
         frets.forEach(function (fr, idx) {
             if (covered[idx]) return;
             if (fr === 0) s += '<circle class="oc" cx="' + xStr(idx) + '" cy="' + markY + '" r="4.5"/>';

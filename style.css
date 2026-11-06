@@ -1303,6 +1303,264 @@ main {
     font-size: 0.88em;
 }
 
+/* Play-along grid chart. Mirrors .sheet.chords-above: the notation layer is
+   mono, the bar/beat geometry is measured in js/grid.js, and the beat cursor
+   is a class on the slash the metronome clock says is current. */
+.sheet.chords-grid .grid-section {
+    margin: 0 0 18px;
+}
+
+.sheet.chords-grid .grid-system {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.sheet.chords-grid .grid-bar {
+    position: relative;
+    flex: none;
+    box-sizing: border-box;
+    border-left: 1px solid var(--line);
+}
+
+.sheet.chords-grid .grid-system.has-repeat-start .grid-bar:first-of-type {
+    border-left: 0;
+}
+
+.sheet.chords-grid .grid-bar:last-of-type {
+    border-right: 1px solid var(--line);
+}
+
+.sheet.chords-grid .grid-system.has-repeat-end .grid-bar:last-of-type {
+    border-right: 0;
+}
+
+.sheet.chords-grid .grid-change {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+/* A faint drop line through the beat row for a change inside a bar, which the
+   bar lines cannot show. Changes on a bar line use the bar line itself, so a
+   change is never marked twice. */
+.sheet.chords-grid .grid-change-mid::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 100%;
+    width: 1px;
+    height: var(--grid-guide-h, 28px);
+    background: var(--accent);
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+.sheet.chords-grid .grid-diagram {
+    display: block;
+    object-fit: contain;
+}
+
+[data-theme="dark"] .sheet.chords-grid .grid-diagram {
+    filter: invert(1) hue-rotate(180deg) contrast(0.95);
+}
+
+.sheet.chords-grid .grid-chord {
+    color: var(--accent);
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+/* The playhead's chord: the label becomes a badge and the diagram gets a
+   ring, so the current chord is readable at a glance without moving it. */
+.sheet.chords-grid .grid-change.on .grid-chord {
+    padding: 0 4px;
+    margin-left: -4px;
+    border-radius: 5px;
+    color: var(--surface);
+    background: var(--accent);
+}
+
+.sheet.chords-grid .grid-change.on .grid-diagram {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Degree labels are numerals, so they use the same mono face as the sheet
+   chord spans; chordLabelWidth() measures this family too. */
+.sheet.chords-grid.show-degrees .grid-chord {
+    font-family: var(--mono);
+    letter-spacing: -0.02em;
+}
+
+.sheet.chords-grid .grid-missing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.65rem;
+    text-align: center;
+}
+
+.sheet.chords-grid .grid-beat {
+    position: absolute;
+    bottom: 0;
+    width: var(--grid-beat-h, 1.7em);
+    height: var(--grid-beat-h, 1.7em);
+    line-height: var(--grid-beat-h, 1.7em);
+    transform: translateX(-50%);
+    text-align: center;
+    border-radius: 50%;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.85em;
+}
+
+.sheet.chords-grid .grid-beat.on {
+    color: var(--surface);
+    background: var(--accent);
+}
+
+/* Lyric rows sit in the system's bottom padding, one row per sheet line.
+   Each phrase in a row starts at the x of the chord change that introduced it
+   (see buildLyricLayer in js/grid.js); the row itself starts at the line's
+   first chord. Phrases keep their words together instead of wrapping into
+   narrow per-chord columns. */
+.sheet.chords-grid .grid-lyrics {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.sheet.chords-grid .grid-lyric {
+    display: block;
+    box-sizing: border-box;
+    padding: 5px 6px 6px 0;
+    color: var(--text);
+    font-size: 0.88em;
+    line-height: 1.3;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* Phrase-aligned rows stay on one line: wrapping would move the later
+   phrases away from the chords they were measured against. */
+.sheet.chords-grid .grid-lyric.is-aligned {
+    white-space: nowrap;
+}
+
+.sheet.chords-grid .grid-phrase {
+    white-space: inherit;
+}
+
+/* Hidden probe with the lyric face, used to measure phrase widths before the
+   rows are inserted (see makeMeasurer in js/grid.js). */
+.sheet.chords-grid .grid-measure {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    white-space: pre;
+    font-size: 0.88em;
+    line-height: 1.3;
+    pointer-events: none;
+}
+
+.sheet.chords-grid .grid-section-label {
+    padding: 4px 2px 0;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.sheet.chords-grid .grid-repeat {
+    position: relative;
+    flex: none;
+    box-sizing: border-box;
+    width: 12px;
+}
+
+.sheet.chords-grid .grid-repeat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--text);
+}
+
+.sheet.chords-grid .grid-repeat.start::before { left: 0; }
+.sheet.chords-grid .grid-repeat.end::before { right: 0; }
+
+.sheet.chords-grid .grid-repeat::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 3px;
+    height: 3px;
+    margin-top: -4px;
+    border-radius: 50%;
+    background: var(--text);
+    box-shadow: 0 5px 0 var(--text);
+}
+
+.sheet.chords-grid .grid-repeat.start::after { left: 3px; }
+.sheet.chords-grid .grid-repeat.end::after { right: 3px; }
+
+/* Animated play-along view. Every system is measured up front but only the
+   system under the playhead is mounted, so the lyrics and diagrams change in
+   place and the page itself never scrolls. The stage keeps the height of the
+   tallest system to stop the rest of the page jumping between pages. */
+.sheet.chords-animate .grid-animate {
+    position: relative;
+}
+
+.sheet.chords-animate .grid-animate-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* Top-aligned: every page has the same bar row, and only the lyric stack
+       below it changes height. Centring would move the bars up and down as
+       the song moved between one-line and two-line pages. */
+    justify-content: flex-start;
+    overflow: hidden;
+    min-height: 180px;
+}
+
+.sheet.chords-animate .grid-animate-page {
+    width: 100%;
+}
+
+.sheet.chords-animate .grid-animate-stage.is-entering > .grid-animate-page {
+    animation: grid-animate-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes grid-animate-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.995); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sheet.chords-animate .grid-animate-stage.is-entering > .grid-animate-page {
+        animation: none;
+    }
+}
+
 /* notes */
 
 .notes-block { margin-top: 26px; }
@@ -1949,6 +2207,10 @@ body.tuner-open { overflow: hidden; }
     .strum-notation-btn { min-width: 34px; padding: 0 4px; }
     .step-value { min-width: 34px; font-size: 0.75rem; }
     .chord-mode-btn { padding: 4px 8px; font-size: 0.75rem; }
+    /* The five chord-view buttons live inside a .seg-group, whose desktop rule
+     * (0 14px) is more specific than the line above. Without this the group is
+     * wider than the phone panel and pushes the page sideways. */
+    .seg-group .chord-mode-btn { padding: 0 7px; font-size: 0.72rem; }
     .step-divider { margin: 6px 0; }
     /* The one control that can genuinely run out of room: a pattern name
      * ("D DU UDU") beside a five-segment stepper. Let it take what is left of

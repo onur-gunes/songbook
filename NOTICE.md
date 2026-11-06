@@ -29,6 +29,19 @@ melodies may be in the public domain, but specific arrangements, chord charts
 and transcriptions can still be protected. The same personal-use restriction
 applies.
 
+## Popular songs
+
+The `popular` songbook collects well-known pop, rock and folk standards for
+learning and playing along. Unlike the public-domain-leaning Polish classics,
+this material is **current, charting and commercially published**: the lyrics,
+melodies, chord progressions and arrangements are owned by their respective
+songwriters, artists and publishers. Nothing here is licensed or relicensed by
+this project. The chord charts are our own approximations, included solely for
+**personal, non-commercial practice** under the restriction above — they may not
+be sold, relicensed or redistributed as a collection. If you maintain this book,
+keep it to genuine personal use and respond to any takedown request promptly
+(see below).
+
 ## Imported songbooks
 
 Songbooks you import are your responsibility. Do not import or redistribute
