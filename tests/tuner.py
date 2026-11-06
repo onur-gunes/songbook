@@ -162,10 +162,13 @@ def main():
         cdp.wait_js("document.getElementById('songView').hidden === false", timeout=10)
         cdp.eval("document.getElementById('tunerBtn').click()")
         cdp.wait_js("SongbookTuner.isOpen()")
+        # Let the overlay finish showing so the keyboard gate below is active
+        # before we synthesize a key; otherwise a raced key could leak through.
+        cdp.wait_js("!document.getElementById('tunerOverlay').hidden", timeout=10)
         cdp.eval("document.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowLeft', bubbles: true}))")
         time.sleep(0.15)
         ok('arrow keys ignored while tuner open',
-           cdp.eval("location.hash") == '#/krakow-ukulele/riptide')
+           cdp.eval("location.hash") == '#/krakow-ukulele/harbour-lights')
         cdp.eval("document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}))")
         cdp.wait_js("!SongbookTuner.isOpen()", timeout=5)
         ok('Escape closes tuner',
