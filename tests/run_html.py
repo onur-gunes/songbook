@@ -10,6 +10,7 @@ import sys
 import time
 
 from cdp import launch_chrome, new_tab, CDP
+from fixture import inject_fixtures
 
 URL = sys.argv[1]
 PORT = 9338
@@ -26,6 +27,10 @@ def main():
         target = new_tab(PORT, 'about:blank')
         cdp = CDP(target['webSocketDebuggerUrl'])
         cdp.enable()
+        # Inject the test fixtures as bundled content before navigation so the
+        # app (and its same-origin test iframe) boot against known original
+        # content instead of the removed bundled books.
+        inject_fixtures(cdp)
         cdp.send('Page.navigate', {'url': URL})
         deadline = time.time() + 300
         while time.time() < deadline:

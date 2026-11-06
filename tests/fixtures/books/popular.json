@@ -1,0 +1,761 @@
+{
+ "id": "popular",
+ "name": "Popular Songs",
+ "description": "Fixture book (test only, original content).",
+ "instrument": "ukulele",
+ "songs": [
+  {
+   "id": "stand-by-me",
+   "title": "Stand By Me",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "G",
+    "C",
+    "Em",
+    "D"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Stand by me "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "darling"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Stand by me "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "stand"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Oh "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "stand by me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Stand "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "by me"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "When the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "night"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Has "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "come"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Oh "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "stand by me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Stand "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "by me"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Bridge"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Bridge "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "part"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Of "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "song"
+     ]
+    ]
+   ],
+   "bpm": 118,
+   "dur": 2.5,
+   "grid": [
+    {
+     "label": "Verse 1",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Chorus",
+     "repeat": true,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "looper",
+   "title": "Looper",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "G",
+    "C",
+    "D",
+    "Em"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Loop the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "day"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "And the "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "night"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Round "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "we go"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "again"
+     ]
+    ]
+   ],
+   "bpm": 100,
+   "dur": 2.5,
+   "grid": [
+    {
+     "label": "Chorus",
+     "repeat": true,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "complete-song",
+   "title": "Complete Song",
+   "artist": "Demo Artist",
+   "level": "Medium",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "G",
+    "C",
+    "D",
+    "Em"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Verse one "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "line"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Chorus "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "sing"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Verse two "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "line"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Chorus "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "sing"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Bridge"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Bridge "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "part"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Final Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Final "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "chorus"
+     ]
+    ]
+   ],
+   "bpm": 90,
+   "dur": 2.5,
+   "grid": [
+    {
+     "label": "Verse 1",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Verse 2",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Bridge",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Final Chorus",
+     "repeat": true,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

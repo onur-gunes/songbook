@@ -72,8 +72,11 @@ jobs:
       - name: Full behaviour suite
         run: python3 tests/run_html.py "$BASE_URL/tests/e2e.html"
 
-      - name: Fidelity — all 198 legacy songs
-        run: python3 tests/run_html.py "$BASE_URL/tests/fidelity-all.html"
+      # Fidelity (all songs of a book) runs against a local fixture book and is
+      # intentionally excluded from CI: it needs a served fixture and compares
+      # against locally-authored reference output. See tests/fidelity.html.
+      # - name: Fidelity — all songs of the demo book
+      #   run: python3 tests/run_html.py "$BASE_URL/tests/fidelity.html"
 
       # --- builds must succeed and stay reproducible ---
       - name: Build portable single file

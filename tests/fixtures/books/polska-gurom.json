@@ -1,0 +1,259 @@
+{
+ "id": "polska-gurom",
+ "name": "Polska Gurom",
+ "description": "Fixture book (test only, original content).",
+ "instrument": "ukulele",
+ "songs": [
+  {
+   "id": "arahja",
+   "title": "Arahja",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "G",
+    "C",
+    "D",
+    "Em"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Arahja "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "jest tu"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "Imię "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "twoje"
+     ]
+    ]
+   ],
+   "bpm": 176,
+   "dur": 2.5
+  },
+  {
+   "id": "baranek",
+   "title": "Baranek",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "G",
+    "C",
+    "Em",
+    "D"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Baranek "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "skacze"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Na "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "łące"
+     ]
+    ]
+   ],
+   "bpm": 87,
+   "dur": 2.5
+  },
+  {
+   "id": "nie-ma-nas",
+   "title": "Nie Ma Nas",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": null,
+   "chords": [
+    "G",
+    "C",
+    "Em",
+    "D"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Nie ma "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "nas"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Tylko "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "cisza"
+     ]
+    ]
+   ],
+   "dur": 2.5
+  },
+  {
+   "id": "autobiografia",
+   "title": "Autobiografia",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "G",
+    "C",
+    "D",
+    "Em"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Autobiografia "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "moja"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "I "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "song"
+     ]
+    ]
+   ],
+   "bpm": 76,
+   "dur": 2.5
+  }
+ ]
+}
