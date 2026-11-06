@@ -1,0 +1,28 @@
+{title: Harbour Lights}
+{artist: Songbook Demo}
+{level: Easy}
+{duration: 2.6}
+{key: C}
+{time: 4/4}
+{tempo: 96}
+{strum: dduudu-4-4}
+
+{start_of_grid: Intro}
+| C | G | Am | F |
+{end_of_grid}
+
+{comment: Verse 1}
+[C]Paper boats are [G]sleeping by the [Am]wall
+[F]Lanterns paint the [C]water gold and [G]small
+[C]Every little [G]window has a [Am]story it can [F]tell
+[C]Harbour lights are [G]ringing like a [C]bell
+
+{start_of_grid: Chorus}
+|: C | G | Am | F :|
+{end_of_grid}
+
+{comment: Chorus}
+[C]Hold the night a [G]little longer
+[Am]Let the quiet [F]carry on
+[C]Harbour lights are [G]growing stronger
+[Am]One more verse be[F]fore the [C]dawn

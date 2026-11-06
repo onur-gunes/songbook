@@ -1,0 +1,907 @@
+{
+ "id": "demo",
+ "name": "Songbook Demo",
+ "description": "Three original songs that demonstrate chords, tempo, metre, strumming and the bar/beat grid.",
+ "instrument": "ukulele",
+ "songs": [
+  {
+   "id": "harbour-lights",
+   "n": 1,
+   "title": "Harbour Lights",
+   "artist": "Songbook Demo",
+   "level": "Easy",
+   "new": false,
+   "dur": 2.6,
+   "key": "C",
+   "sheetKey": "C",
+   "capo": 0,
+   "bpm": 96,
+   "time": "4/4",
+   "strum": "dduudu-4-4",
+   "chords": [
+    "C",
+    "G",
+    "Am",
+    "F"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Paper boats are "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "sleeping by the "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "wall"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Lanterns paint the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "water gold and "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "small"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Every little "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "window has a "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "story it can "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "tell"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Harbour lights are "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "ringing like a "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "bell"
+     ]
+    ],
+    [],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Hold the night a "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "little longer"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Let the quiet "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "carry on"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Harbour lights are "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "growing stronger"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "One more verse be"
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "fore the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "dawn"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Intro",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Chorus",
+     "repeat": true,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "three-quarter-time",
+   "n": 2,
+   "title": "Three Quarter Time",
+   "artist": "Songbook Demo",
+   "level": "Easy",
+   "new": false,
+   "dur": 2.2,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "bpm": 108,
+   "time": "3/4",
+   "strum": "waltz-3-4",
+   "chords": [
+    "G",
+    "C",
+    "D",
+    "Em"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Count the evening "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "slowly, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "one and two and "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "three"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Every quiet "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "corner "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "keeps a "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "waltz for "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Take the hand of "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "morning, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "turn beneath the "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "sky"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Leave the heavy "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "hours "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "dancing "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "by and "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "by"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Three quarter "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "time, "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "three quarter "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "time"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "All of the "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "world in a "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "small happy "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "rhyme"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Three quarter "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "time, "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "three quarter "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "time"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Carry me "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "home when the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "bells have gone "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "quiet"
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "river-of-stars",
+   "n": 3,
+   "title": "River of Stars",
+   "artist": "Songbook Demo",
+   "level": "Medium",
+   "new": false,
+   "dur": 3.1,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "bpm": 60,
+   "time": "6/8",
+   "strum": "du-6-8",
+   "chords": [
+    "G",
+    "D",
+    "Em",
+    "C"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "River of stars, carry me "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "home"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Past every field and the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "roads I have known"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Moon in the reeds and the "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "wind in the pine"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Sing me to sleep on the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "river of "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "time"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Row, row, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "follow the "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "light"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "One small boat in the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "wide open "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "night"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "River of stars, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "carry me "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "home"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Every wave "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "singing the "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "way I have "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "known"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Verse",
+     "repeat": true,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,12 +1,13 @@
 # Songbook (offline PWA)
 
-An instrument-agnostic, offline-first songbook. Ships with the **Krakow Ukulele
-Songbook** (198 songs) and lets you import your own song lists as JSON. A global
-Ukulele/Guitar toggle re-renders every chord diagram for the chosen instrument.
+An instrument-agnostic, offline-first songbook. The repository ships the engine
+and one small **original demo songbook**; your own songbooks are external JSON
+files you import and keep on disk. A global Ukulele/Guitar toggle re-renders
+every chord diagram for the chosen instrument.
 
 - **Web app** (served): multi-file app with a service worker → installable PWA.
-- **Portable build**: `Songbook.html` — the whole app (songs, engine, images)
-  inlined in one file that runs from `file://`.
+- **Portable build**: `Songbook.html` — the whole app (engine, images, demo
+  songs) inlined in one file that runs from `file://`.
 
 ## Open it
 
@@ -31,20 +32,24 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 | `chords.js` | **ChordKit** — the shared chord engine: parse chords, search voicings for ukulele and guitar, render SVG diagrams, expose data URIs |
 | `tuner.js` | Microphone tuner: YIN + FFT pitch detection, octave guards, smoothing, ukulele/guitar presets, A4 calibration |
 | `js/` | The app itself, split by concern — search, filters, sort, favorites, notes, transpose, auto-scroll, songbook switching, import, hash routing, service-worker registration (see [App modules](#app-modules)) |
-| `songbooks/index.json` | Manifest of bundled songbooks |
-| `songbooks/krakow-ukulele.json` | Bundled dataset (generated — don't hand-edit) |
-| `songbooks/polska-gurom.json` | Bundled dataset (generated from `chordpro/polska-gurom/` — don't hand-edit) |
-| `songbooks/original-keys.json` | Curated original-recording keys (id → key), merged in by `migrate.py` |
+| `songbooks/index.json` | Manifest of the books bundled into a build (the demo book, by default) |
+| `songbooks/demo.json` | The original demo dataset (generated from `chordpro/demo/` — don't hand-edit) |
+| `songbooks/original-keys.json` | Curated key/capo metadata from the retired bundled book (ids and keys only, no lyrics); `migrate.py` can merge it into a local legacy archive |
 | `manifest.webmanifest`, `sw.js` | PWA manifest + app-shell service worker |
 | `images/` | Logos (light/dark), favicon/PWA icons, QR code |
-| `legacy/` | The 198 original song pages (archived source) |
-| `chordpro/` | ChordPro source books (`<book-id>/book.json` + one file per song) |
-| `migrate.py` | Rebuilds `songbooks/krakow-ukulele.json` from `legacy/` + validation |
+| `chordpro/` | ChordPro authoring sources (`<book-id>/book.json` + one file per song). Local books are git-ignored; `chordpro/demo/` is the shipped example |
+| `migrate.py` | Legacy migration tool: rebuilds a Krakow JSON book from a local copy of the old `legacy/` pages (not shipped) |
 | `chordpro.py` | Parses the ChordPro authoring subset into the app's sheet format |
 | `build_songbook.py` | Builds `songbooks/<id>.json` from a `chordpro/<id>/` book |
 | `build_single.py` | Bundles everything into `Songbook.html` |
 | `build_pages.py` | Assembles `_site/` for GitHub Pages |
 | `tests/` | CDP + headless-Chrome test suites |
+
+The app ships no third-party song data. The only bundled book is `demo`, written
+for this project; it exists so a first run is not empty and so Grid, metronome
+and strum controls have something to demonstrate. `.gitignore` blocks
+`songbooks/*.json` (except the manifest, demo and key metadata) and
+`chordpro/*/` (except the demo), so a local book cannot be committed by accident.
 
 ## App modules
 
@@ -87,7 +92,7 @@ attached to `SB`.
 
 ## Features
 
-- **Multiple songbooks** — a picker switches between the bundled list and any
+- **Multiple songbooks** — a picker switches between the demo book and any
   imported lists. Import one or more `.json` songbooks from disk; they are
   saved in **IndexedDB** and restored on reload (remove anytime). Re-importing
   an id replaces your imported copy; a bundled id stays read-only. Export any
@@ -96,7 +101,7 @@ attached to `SB`.
   voicing chooser are generated for the selected instrument; the choice is
   remembered.
 - Live search (title + artist), difficulty filters — multi-select, results OR'd
-  (84 Easy / 91 Medium / 23 Hard), 🔥 New (18), ⭐ Favorites (localStorage),
+  across Easy / Medium / Hard, 🔥 New, ⭐ Favorites (localStorage),
   sort Title/Artist — list defaults to alphabetical by name,
   🎲 Random from the current filter, recently-played list (with clear),
   ☰/▤ compact view toggle, persisted.
@@ -168,26 +173,66 @@ attached to `SB`.
 
 ## Songbook JSON format
 
+A songbook is a plain JSON file. This is the **public import interface**: it is
+the shape `Export` writes and the shape `SB.normalizeSongbook` accepts, so a
+file produced by one build can be imported by another. Only `id`, `name` and
+`songs` are required; unknown fields are dropped, and malformed values inside
+`songs` are normalised rather than crashing the app.
+
+Top-level fields:
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | string | Required. Unique, letters/numbers/dashes only; used in the URL (`#/my-list`) |
+| `name` | string | Required. Shown in the songbook picker |
+| `description` | string | Optional |
+| `instrument` | `"ukulele"` \| `"guitar"` | Optional initial instrument suggestion |
+| `logo`, `logoDark` | string | Optional image path/data URI for the songbook brand |
+| `songs` | array | Required |
+
+Song fields:
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | string | Unique within the book; defaults to `song-<n>` |
+| `title` | string | Defaults to `Untitled` |
+| `artist` | string | Optional |
+| `level` | `"Easy"` \| `"Medium"` \| `"Hard"` | Defaults to `Medium` |
+| `new` | boolean | Shows the 🔥 New filter |
+| `key` | string | Original recording key, shown in the song view |
+| `sheetKey` | string | Key the chords are written in; defaults to `key` |
+| `capo` | integer | Capo fret; `null`/absent means none |
+| `dur` | number | Minutes, drives auto-scroll (default `4`) |
+| `bpm` | integer | Optional tempo, 20–300 (see [Tempo and metre](#tempo-and-metre)) |
+| `time` | string | Optional metre: `4/4`, `3/4`, `6/8` or `2/4` |
+| `strum` | string | Optional pattern id from the strum library, matching `time` (see [Strum pattern](#strum-pattern)) |
+| `chords` | string[] | Unique chord tokens; derived by the builder if omitted |
+| `sheet` | array | Lyric/chord lines (below) |
+| `grid` | array | Optional bar/beat chart, parallel to `sheet` (see [Bar/beat grid](#barbeat-grid)) |
+
 ```jsonc
 {
-  "id": "my-list",            // unique, used in the URL (#/my-list)
+  "id": "my-list",
   "name": "My List",
   "description": "...",
-  "instrument": "ukulele",    // default instrument suggestion
+  "instrument": "ukulele",
   "songs": [
     {
       "id": "song-1",
       "title": "...",
       "artist": "...",
-      "level": "Easy",         // Easy | Medium | Hard
+      "level": "Easy",
       "new": false,
-      "key": "Am",             // original recording key (optional, shown in the song view)
-      "dur": 4,                // minutes, drives auto-scroll
-      "bpm": 92,               // optional tempo, 20-300 (see "Tempo and metre")
-      "time": "4/4",           // optional metre: 4/4 | 3/4 | 6/8 | 2/4
+      "key": "Am",
+      "sheetKey": "Am",
+      "capo": 0,
+      "dur": 4,
+      "bpm": 92,
+      "time": "4/4",
+      "strum": "dduudu-4-4",
       "chords": ["Am", "G"],
-      "sheet": [ [ ["c", "[Am]"], ["x", " lyric"], ... ], [] ],  // lines of [kind, text]
-      "grid": [                // optional bar/beat chart (see "Bar/beat grid")
+      "sheet": [ [ ["c", "[Am]"], ["x", " lyric"], ... ], [] ],
+      "grid": [
         { "label": "Chorus", "repeat": false,
           "bars": [ { "beats": [ {"chord": "Am", "beats": 4} ] }, ... ] }
       ]
@@ -200,36 +245,37 @@ attached to `SB`.
 `i` italic, `y` comment, `p` preformatted/tab. `grid` is a separate top-level
 field, **parallel to `sheet`, not nested in it**: it is a different view of the
 same song (where beat 1 is and how many beats each chord gets), and is simply
-absent on songs that have no chart. Imported sheets are normalised: a missing or
-wrong-typed `sheet` becomes empty, and malformed lines/segments are dropped
-instead of reaching the renderer. Song ids may contain any characters; the app
-percent-encodes them in the hash. Personal data (favorites, notes, recent,
-theme, scroll speed, voicing picks) lives only in `localStorage`; the imported
-songbook JSON lives in `IndexedDB`.
+absent on songs that have no chart. A `grid` requires a valid `time`, and every
+bar must sum to that metre's felt beats; an imported grid that breaks either
+rule is dropped whole rather than half-rendered. Imported sheets are normalised
+the same way: a missing or wrong-typed `sheet` becomes empty, and malformed
+lines/segments are dropped instead of reaching the renderer. Song ids may
+contain any characters; the app percent-encodes them in the hash.
 
-## Regenerate the bundled data
+Personal data (favorites, notes, recent, theme, scroll speed, voicing picks)
+lives only in `localStorage`; imported songbook JSON lives in `IndexedDB`.
+
+## Rebuild the demo book
 
 ```sh
-python3 migrate.py                      # Krakow Ukulele Songbook
-python3 build_songbook.py chordpro/polska-gurom --allow-trusted-notes   # POLSKA GUROM
+python3 build_songbook.py chordpro/demo
 ```
 
-`migrate.py` reads `legacy/*.html`, merges original keys from
-`songbooks/original-keys.json`, writes `songbooks/krakow-ukulele.json`, and
-prints a validation report (198 songs, unique ids/numbers, levels 84/91/23,
-chord refs, no empty content, no broken unicode). Deterministic and
-byte-faithful to the original dataset.
+The command writes `songbooks/demo.json`, upserts its entry in
+`songbooks/index.json`, and prints a validation report. The demo is the only
+book in the tree; everything else under `chordpro/` and `songbooks/*.json` is
+local authoring input and is git-ignored.
 
-The Polish book is authored in `chordpro/polska-gurom/` and rebuilt with
-`build_songbook.py`; its curated keys live in that book's
-`original-keys.json` sidecar. `tests/chordpro.py` asserts that regenerating it
-reproduces the committed `songbooks/polska-gurom.json` byte for byte.
+The retired Krakow archive can still be rebuilt locally with `migrate.py` if
+you keep your own copy of the old `legacy/` pages: it merges
+`songbooks/original-keys.json` and validates the result. Neither the archive nor
+the migrated JSON ships with the repository.
 
 ## Create a songbook from ChordPro
 
 New songbooks can be authored as ChordPro and converted to the same JSON shape
-the app renders. This is an input path for agent-generated books: `migrate.py`,
-`legacy/` and `songbooks/krakow-ukulele.json` are not involved.
+the app renders. This is the supported authoring path; you do not need the
+legacy migration tools or any bundled dataset.
 
 ```
 chordpro/<book-id>/
@@ -243,8 +289,7 @@ chordpro/<book-id>/
 `book.json` carries `{id, name, description, instrument}` and optionally
 `logo` / `logoDark`. `instrument` must be `ukulele` or `guitar`. Song files are
 numbered in filename order unless a `{number: 12}` directive overrides it. If
-present, `original-keys.json` is merged by song id, mirroring how
-`migrate.py` uses `songbooks/original-keys.json` for the legacy book.
+present, `original-keys.json` is merged by song id.
 
 Song directives:
 
@@ -301,12 +346,17 @@ python3 build_songbook.py chordpro/my-book
 python3 build_songbook.py chordpro/
 ```
 
-To try the authoring format, copy the test fixture as a starting point:
+To try the authoring format, copy the demo book as a starting point (then edit
+its `book.json` and song files):
 
 ```sh
-cp -R tests/fixtures/chordpro/demo chordpro/my-book
+cp -R chordpro/demo chordpro/my-book
 python3 build_songbook.py chordpro/my-book
 ```
+
+The new book and its `songbooks/my-book.json` output are git-ignored. Edit
+`book.json`'s `id` and `name` before building; the builder upserts the entry in
+`songbooks/index.json`.
 
 The builder writes `songbooks/<id>.json`, upserts the entry in
 `songbooks/index.json`, and writes `<id>-report.txt`. If validation reports an
@@ -504,13 +554,12 @@ the [PolyForm Noncommercial License 1.0.0](LICENSE). You may use, study, modify
 and share it for noncommercial purposes; **commercial use, including selling the
 app or a derivative, is not permitted**.
 
-The **code license does not cover the bundled songs**, and they are not
-relicensed by this repository. Lyrics, chord charts and arrangements belong to
-their respective authors, arrangers and publishers. The Krakow Ukulele Songbook
-dataset is mirrored from <https://ukulelekrakow.pl/> for offline personal use.
-The bundled song data is provided for **personal, non-commercial use only** — do
-not sell, relicense or redistribute it as a collection. See
-[NOTICE.md](NOTICE.md) for full attribution and takedown information.
+The repository **ships no third-party song data**. The only bundled book,
+`demo`, was written for this project and is covered by the same license as the
+code. Songbooks you import are your responsibility: lyrics, melodies, chord
+charts and arrangements belong to their respective authors and publishers, and
+importing a file does not relicense it. See [NOTICE.md](NOTICE.md) for the full
+notice.
 
 ## Run the tests
 
@@ -540,14 +589,14 @@ python3 tests/tuner.py  http://localhost:8777
 # full behavior suite: search/filter/sort/fav/notes/scroll/theme/chooser/…
 python3 tests/run_html.py http://localhost:8777/tests/e2e.html
 
-# all 198 songs: every legacy page line present in the rendered sheet + transpose cycles
+# fidelity (local only): needs a copy of the retired legacy/ archive
+python3 tests/generate_fidelity.py
 python3 tests/run_html.py http://localhost:8777/tests/fidelity-all.html
 ```
 
 Each HTML suite sets `window.__done` and reports `<title>DONE …</title>` on
 success (`FAILS:n` / `CRASH` on failure); `run_html.py` prints the title and the
-full `<pre id="log">`. `fidelity-all.html` is generated from the `legacy/` pages
-by `python3 tests/generate_fidelity.py`.
+full `<pre id="log">`.
 
 ## Chord engine
 
