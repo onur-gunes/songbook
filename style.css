@@ -1055,6 +1055,12 @@ main {
 .step-btn:hover { background: var(--surface-2); }
 .step-btn:active { background: var(--chip); }
 
+.bpm-reset {
+    font-size: 0.95rem;
+    color: var(--muted);
+}
+.bpm-reset:hover { color: var(--text); }
+
 .step-value {
     min-width: 44px;
     text-align: center;

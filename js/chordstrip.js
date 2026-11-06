@@ -99,15 +99,23 @@
     }
 
     var voicingEsc = null;
+    var chooserOpener = null;
 
     SB.closeVoicingChooser = function () {
         var ov = document.getElementById('voicingChooser');
         if (ov) ov.remove();
         if (voicingEsc) { document.removeEventListener('keydown', voicingEsc); voicingEsc = null; }
+        // Return focus to the diagram that opened the dialog, so keyboard
+        // users do not fall back to the top of the document.
+        if (chooserOpener && chooserOpener.isConnected) {
+            try { chooserOpener.focus({ preventScroll: true }); } catch (e) { chooserOpener.focus(); }
+        }
+        chooserOpener = null;
     }
 
     function showVoicingChooser(strip, item, chordName, label, img) {
         SB.closeVoicingChooser();
+        chooserOpener = item;
         var shapes = voicingsFor(chordName);
         if (!shapes.length) return;
         var cur = SB.chosenVoicing(chordName);
@@ -156,9 +164,17 @@
         box.appendChild(grid);
         ov.appendChild(box);
         ov.addEventListener('mousedown', function (e) { if (e.target === ov) SB.closeVoicingChooser(); });
-        voicingEsc = function (e) { if (e.key === 'Escape') SB.closeVoicingChooser(); };
+        voicingEsc = function (e) {
+            if (e.key !== 'Escape') return;
+            e.preventDefault();
+            SB.closeVoicingChooser();
+        };
         document.addEventListener('keydown', voicingEsc);
         document.body.appendChild(ov);
+        // Put focus inside the dialog: the chosen shape if there is one,
+        // otherwise the first option, so Enter/Space works immediately.
+        var focusTarget = grid.querySelector('button.sel') || grid.querySelector('button') || closeBtn;
+        try { focusTarget.focus({ preventScroll: true }); } catch (e) { focusTarget.focus(); }
     }
 
 })(window.SB = window.SB || {});

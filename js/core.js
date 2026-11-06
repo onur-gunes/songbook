@@ -50,8 +50,23 @@
             return v === null ? fallback : JSON.parse(v);
         } catch (e) { return fallback; }
     }
+    /* Personal-data lists are read at boot, before anything can validate them.
+     * A stored value of the wrong shape (an older version, a sync tool, or a
+     * hand-edited key) used to throw here and leave the app blank, so callers
+     * get an array or an empty one — never the raw object. */
+    SB.lsGetArray = function (key) {
+        var v = SB.lsGet(key, []);
+        return Array.isArray(v) ? v : [];
+    }
     SB.lsSet = function (key, value) {
         try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ignore */ }
+    }
+    /* Builds a hash from ids that may contain spaces, '%' or other characters
+     * that are not safe in a URL fragment. Every navigation goes through this
+     * so the router only ever has to decode well-formed input. */
+    SB.routeHash = function (sbId, songId) {
+        return '#/' + encodeURIComponent(sbId == null ? '' : sbId) +
+            (songId == null ? '' : '/' + encodeURIComponent(songId));
     }
     SB.el = function (tag, cls, text) {
         var n = document.createElement(tag);
@@ -71,6 +86,14 @@
     SB.FAV_KEY = SB.NS + ':favorites';
     SB.RECENT_KEY = SB.NS + ':recent';
     SB.RECENT_MAX = 15;
+
+    /* Runtime fallbacks for songs whose songbook entry has no tempo or metre.
+     * They make the metronome and strum controls usable on every song without
+     * changing the song data: the default is only shown until the user adjusts
+     * it, at which point the per-song override is stored as usual. Keep these
+     * in step with the README's tempo/metre section. */
+    SB.DEFAULT_BPM = 100;
+    SB.DEFAULT_TIME = '4/4';
 
     /* ---------------- shared state ----------------
      * Every value read or written by more than one section lives here, so
@@ -92,8 +115,13 @@
         currentSong: null,
 
         /* personal data */
-        favorites: new Set(SB.lsGet(SB.FAV_KEY, [])),   // composite "sbId\0songId"
-        recent: SB.lsGet(SB.RECENT_KEY, []),            // [{sb,id}]
+        favorites: new Set(SB.lsGetArray(SB.FAV_KEY).filter(function (v) {
+            return typeof v === 'string';
+        })),                                            // composite "sbId\0songId"
+        recent: SB.lsGetArray(SB.RECENT_KEY).filter(function (r) {
+            return r && typeof r === 'object' &&
+                typeof r.sb === 'string' && typeof r.id === 'string';
+        }),                                             // [{sb,id}]
 
         /* instrument + transpose */
         instrument: SB.lsGet(SB.NS + ':instrument', null),
@@ -113,16 +141,17 @@
         scrollState: { raf: null, last: 0, pos: 0, playing: false, started: false, finished: false, lastY: null },
         scrollSpeed: 1,
 
-        /* metronome — bpm is null until a song with tempo data is opened or
-         * the user sets one; beats is the meter's beats per bar, used to
-         * accent beat 1. See js/metronome.js. */
+        /* metronome — bpm starts null but loadMetronomeForSong always fills it
+         * with the song's tempo or DEFAULT_BPM, so the control is available on
+         * every song; beats is the meter's beats per bar, used to accent beat
+         * 1. See js/metronome.js. */
         metronome: { playing: false, bpm: null, beats: 4 },
 
         /* strum — the pattern chosen for the current song (a pattern object
-         * from the library, or null when the song has no time signature and so
-         * no selector), plus how the row is drawn: 'arrows' (↓ ↑ ·) or
-         * 'letters' (D U ·). The notation is a global display preference, like
-         * chordMode, not a per-song value. See js/strum.js. */
+         * from the library, using DEFAULT_TIME when the song has no metre),
+         * plus how the row is drawn: 'arrows' (↓ ↑ ·) or 'letters' (D U ·).
+         * The notation is a global display preference, like chordMode, not a
+         * per-song value. See js/strum.js. */
         strum: { pattern: null, notation: 'arrows' },
 
         /* strum row display, matching chordSize/chordPin: size scales the

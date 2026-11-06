@@ -67,7 +67,7 @@
 
             var a = document.createElement('a');
             a.className = 'song-link';
-            a.href = '#/' + sbId + '/' + s.id;
+            a.href = SB.routeHash(sbId, s.id);
             a.appendChild(SB.el('span', 'row-num', String(s.n)));
             var main = SB.el('span', 'row-main');
             main.appendChild(SB.el('span', 'row-title', s.title));
@@ -194,7 +194,7 @@
             var songs = SB.filteredSongs();
             if (!songs.length || !SB.state.active) return;
             var pick = songs[Math.floor(Math.random() * songs.length)];
-            location.hash = '#/' + SB.state.active.id + '/' + pick.id;
+            location.hash = SB.routeHash(SB.state.active.id, pick.id);
         });
 
         SB.$('recentClear').addEventListener('click', function () {
@@ -210,7 +210,7 @@
         });
 
         SB.$('songbookSelect').addEventListener('change', function () {
-            location.hash = '#/' + this.value;
+            location.hash = SB.routeHash(this.value);
         });
         SB.$('importBtn').addEventListener('click', function () { SB.$('importFile').click(); });
         SB.$('importFile').addEventListener('change', function (e) {
@@ -228,7 +228,7 @@
             SB.idbDelete(id).then(function () {
                 SB.state.imported = SB.state.imported.filter(function (sb) { return sb.id !== id; });
                 SB.rebuildIndex();
-                location.hash = '#/' + (SB.defaultSongbook() ? SB.defaultSongbook().id : '');
+                location.hash = SB.routeHash(SB.defaultSongbook() ? SB.defaultSongbook().id : '');
             }).catch(function (err) { window.alert('Could not remove: ' + err.message); });
         });
     }

@@ -250,6 +250,19 @@ async function main() {
     ok('notes status shown', $('notesStatus').classList.contains('show'));
     ok('notes in localStorage', (win().localStorage.getItem('songbook:note:krakow-ukulele\u0000riptide') || '') === 'test note 123');
 
+    // typing alone is autosaved after the debounce
+    $('notesBox').value = 'autosaved note';
+    $('notesBox').dispatchEvent(new Event('input', { bubbles: true }));
+    await wait(700);
+    ok('notes autosave after a pause',
+        (win().localStorage.getItem('songbook:note:krakow-ukulele\u0000riptide') || '') === 'autosaved note');
+    // blur flushes without waiting for the debounce
+    $('notesBox').value = 'blurred note';
+    $('notesBox').dispatchEvent(new Event('input', { bubbles: true }));
+    $('notesBox').dispatchEvent(new Event('blur'));
+    ok('notes flush on blur',
+        (win().localStorage.getItem('songbook:note:krakow-ukulele\u0000riptide') || '') === 'blurred note');
+
     // 11. favorite from song view
     $('favBtn').click(); await wait(50);
     ok('fav button on', $('favBtn').classList.contains('on'));
@@ -583,6 +596,39 @@ async function main() {
     await wait(250);
     doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
     win().localStorage.removeItem('songbook:chordMode');
+
+    // 12n. above mode keeps every chord, including one anchored at the very
+    // end of a line (common in intros like "Intro: [C]") and ones sitting on
+    // whitespace that a wrap breaks at.
+    win().location.hash = '#/krakow-ukulele/you-are-my-sunshine';
+    await wait(300);
+    const sheetChordLabels = () => Array.from(doc().querySelectorAll('#sheet .seg-chord'))
+        .map(c => c.textContent.replace(/^\[|\]$/g, ''));
+    doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
+    const inlineChords = sheetChordLabels();
+    doc().querySelector('.chord-mode-btn[data-chord-mode="above"]').click(); await wait(30);
+    const introUnit = Array.from(doc().querySelectorAll('#sheet .line-stacked'))
+        .find(l => l.querySelector('.ln-lyric') &&
+            l.querySelector('.ln-lyric').textContent.trim() === 'Intro:');
+    ok('above keeps the trailing intro chord', !!introUnit &&
+        Array.from(introUnit.querySelectorAll('.ln-chords .seg-chord'))
+            .map(c => c.textContent).join(',') === 'C',
+        introUnit ? introUnit.textContent : 'no intro unit');
+    ok('above keeps every chord in the song',
+        sheetChordLabels().join('|') === inlineChords.join('|'),
+        inlineChords.length + ' vs ' + sheetChordLabels().length);
+    const sunshineSheet = $('sheet');
+    sunshineSheet.style.width = '360px';
+    win().dispatchEvent(new (win().Event)('resize'));
+    await wait(250);
+    ok('above keeps every chord when wrapped',
+        sheetChordLabels().join('|') === inlineChords.join('|'),
+        inlineChords.length + ' vs ' + sheetChordLabels().length);
+    sunshineSheet.style.width = '';
+    win().dispatchEvent(new (win().Event)('resize'));
+    await wait(250);
+    doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
+    win().localStorage.removeItem('songbook:chordMode');
     win().location.hash = '#/krakow-ukulele';
     await wait(200);
     win().location.hash = '';
@@ -877,20 +923,37 @@ async function main() {
     const mGroup = () => $('metronomeGroup');
     const mState = () => win().songbookTest.metronome;
 
-    // the control only exists for songs that have a tempo
+    // Every song gets the metronome. A song with no tempo data starts at the
+    // app default, and the default is not stored until the user adjusts it.
+    const defaultBpm = win().songbookTest.defaultBpm;
+    const defaultBpmKey = 'songbook:bpm:polska-gurom\u0000nie-ma-nas';
+    win().localStorage.removeItem(defaultBpmKey);
     win().location.hash = '#/polska-gurom/nie-ma-nas';
     await wait(250);
-    ok('metronome hidden without tempo data', mGroup().hidden === true, 'hidden=' + mGroup().hidden);
-    ok('no bpm without tempo data', mState().bpm === null, String(mState().bpm));
-    // the stepper must not invent a tempo for a song that has none: null
-    // coerces to 0 in arithmetic, which would clamp up to the 20 floor and
-    // un-hide the control
-    $('bpmUp').click(); $('bpmDown').click(); await wait(30);
-    ok('stepper does not invent a tempo', mState().bpm === null, String(mState().bpm));
-    ok('still hidden after stepping', mGroup().hidden === true, 'hidden=' + mGroup().hidden);
-    ok('no bpm key written without a tempo',
-        win().localStorage.getItem('songbook:bpm:polska-gurom\u0000nie-ma-nas') === null,
-        win().localStorage.getItem('songbook:bpm:polska-gurom\u0000nie-ma-nas'));
+    ok('metronome shown without tempo data', mGroup().hidden === false, 'hidden=' + mGroup().hidden);
+    ok('bpm falls back to the app default', mState().bpm === defaultBpm, String(mState().bpm));
+    ok('default bpm is shown', $('bpmValue').textContent === String(defaultBpm),
+        $('bpmValue').textContent);
+    ok('beats per bar fall back to the default metre', mState().beats === 4,
+        String(mState().beats));
+    ok('default bpm is not stored until adjusted',
+        win().localStorage.getItem(defaultBpmKey) === null,
+        win().localStorage.getItem(defaultBpmKey));
+    $('bpmUp').click(); await wait(30);
+    ok('stepper adjusts the default tempo', mState().bpm === defaultBpm + 1,
+        String(mState().bpm));
+    ok('adjusted default is persisted per song',
+        win().localStorage.getItem(defaultBpmKey) === String(defaultBpm + 1),
+        win().localStorage.getItem(defaultBpmKey));
+    ok('reset shown for an override', $('bpmReset').hidden === false);
+    $('bpmReset').click(); await wait(30);
+    ok('reset returns to the app default',
+        mState().bpm === defaultBpm && $('bpmValue').textContent === String(defaultBpm),
+        String(mState().bpm));
+    ok('reset clears the default override',
+        win().localStorage.getItem(defaultBpmKey) === null,
+        win().localStorage.getItem(defaultBpmKey));
+    ok('reset hidden without an override', $('bpmReset').hidden === true);
 
     // arahja carries bpm 176 / 4-4 in the songbook
     win().location.hash = '#/polska-gurom/arahja';
@@ -910,6 +973,18 @@ async function main() {
     ok('bpm -1 twice', $('bpmValue').textContent === '175', $('bpmValue').textContent);
     ok('bpm persisted', win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja') === '175',
         win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja'));
+
+    // a per-song override has a way back to the documented tempo
+    ok('reset shown for a song override', $('bpmReset').hidden === false);
+    $('bpmReset').click(); await wait(30);
+    ok('reset returns to the song tempo', $('bpmValue').textContent === '176', $('bpmValue').textContent);
+    ok('reset clears the song override',
+        win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja') === null,
+        win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja'));
+    ok('reset hidden after clearing', $('bpmReset').hidden === true);
+    // put the override back for the navigation assertions below
+    $('bpmDown').click(); await wait(30);
+    ok('override restored for navigation', $('bpmValue').textContent === '175', $('bpmValue').textContent);
 
     // the override survives navigation away and back, and does not leak
     // into another song that has its own tempo
@@ -969,6 +1044,25 @@ async function main() {
         mState().playing === true && win().songbookTest.metronomeLog().length > nBefore,
         nBefore + ' -> ' + win().songbookTest.metronomeLog().length);
 
+    // A live tempo change must re-space the clicks, not just keep the timer
+    // alive. Clear the log so only post-change clicks are measured; every gap
+    // between them should be the new seconds-per-beat, never the old one.
+    win().songbookTest.clearMetronomeLog();
+    win().songbookTest.setBpm(120);
+    await wait(1800);
+    const postChange = win().songbookTest.metronomeLog();
+    ok('clicks continue after a tempo change', postChange.length >= 3, 'n=' + postChange.length);
+    if (postChange.length >= 3) {
+        const newGap = 60 / 120;
+        let worstGap = 0;
+        for (let i = 1; i < postChange.length; i++) {
+            worstGap = Math.max(worstGap,
+                Math.abs((postChange[i].time - postChange[i - 1].time) - newGap));
+        }
+        ok('post-change clicks use the new spacing', worstGap < 1e-6,
+            'worst gap error=' + worstGap.toExponential(2) + 's');
+    }
+
     $('metronomeBtn').click(); await wait(50);
     ok('metronome stops', mState().playing === false);
     ok('stopped button state',
@@ -991,7 +1085,8 @@ async function main() {
     win().localStorage.removeItem('songbook:bpm:polska-gurom\u0000arahja');
     win().location.hash = '#/krakow-ukulele/riptide';
     await wait(250);
-    ok('metronome hidden on a book with no tempo data', mGroup().hidden === true, 'hidden=' + mGroup().hidden);
+    ok('metronome shown on a book with no tempo data', mGroup().hidden === false, 'hidden=' + mGroup().hidden);
+    ok('other book uses the default bpm', mState().bpm === defaultBpm, String(mState().bpm));
 
     // 20b. strum pattern selector (issue #41)
     const sGroup = () => $('strumGroup');
@@ -1013,12 +1108,30 @@ async function main() {
         ['4/4', '3/4', '6/8', '2/4'].every(t => win().songbookTest.strumPatternsFor(t).length >= 2),
         ['4/4', '3/4', '6/8', '2/4'].map(t => t + '=' + win().songbookTest.strumPatternsFor(t).length).join(' '));
 
-    // hidden for a song with no time signature
+    // Songs without a metre use the default metre and still get a usable row.
+    const defaultTime = win().songbookTest.defaultTime;
+    const defaultStrum = win().songbookTest.strumPatternsFor(defaultTime)[0];
+    win().localStorage.removeItem('songbook:strum:polska-gurom\u0000nie-ma-nas');
     win().location.hash = '#/polska-gurom/nie-ma-nas';
     await wait(250);
-    ok('strum hidden without a time signature', sGroup().hidden === true, 'hidden=' + sGroup().hidden);
-    ok('strum row hidden too', sRow().hidden === true, 'hidden=' + sRow().hidden);
-    ok('no strum pattern without time', sState().pattern === null, String(sState().pattern));
+    ok('strum shown without a time signature', sGroup().hidden === false, 'hidden=' + sGroup().hidden);
+    ok('strum row shown without a time signature', sRow().hidden === false, 'hidden=' + sRow().hidden);
+    ok('default metre supplies a pattern',
+        sState().pattern && sState().pattern.id === defaultStrum.id,
+        sState().pattern && sState().pattern.id);
+    ok('selector lists patterns for the default metre',
+        Array.prototype.every.call(sSel().options, o =>
+            win().songbookTest.strumPatterns().some(p => p.id === o.value && p.time === defaultTime)),
+        Array.prototype.map.call(sSel().options, o => o.value).join(','));
+    // The default is adjustable, and the choice is remembered like any other.
+    win().songbookTest.setStrum('eighths-4-4');
+    await wait(30);
+    ok('manual choice works on the default metre', sState().pattern.id === 'eighths-4-4',
+        sState().pattern.id);
+    ok('manual choice persisted for a no-time song',
+        win().localStorage.getItem('songbook:strum:polska-gurom\u0000nie-ma-nas') === 'eighths-4-4',
+        win().localStorage.getItem('songbook:strum:polska-gurom\u0000nie-ma-nas'));
+    win().localStorage.removeItem('songbook:strum:polska-gurom\u0000nie-ma-nas');
 
     // arahja carries time 4/4 and the documented default strum downs-4-4
     win().localStorage.removeItem('songbook:strum:polska-gurom\u0000arahja');
@@ -1700,6 +1813,39 @@ async function main() {
     await wait(60);
     win().localStorage.removeItem('songbook:chordMode');
     win().localStorage.removeItem('songbook:bpm:popular\u0000riptide');
+
+    // 20c. the voicing chooser owns Escape and Space while it is open
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(300);
+    const chordItem = doc().querySelector('#chordStrip .chord-item[role="button"]');
+    ok('a chord diagram is available for the keyboard test', !!chordItem);
+    if (chordItem) {
+        const press = (key) => doc().dispatchEvent(new KeyboardEvent('keydown', {
+            key: key, bubbles: true, cancelable: true
+        }));
+        chordItem.click();
+        await wait(40);
+        ok('click opens the voicing chooser', !!doc().getElementById('voicingChooser'));
+        press('Escape');
+        await wait(40);
+        ok('Escape closes the chooser', !doc().getElementById('voicingChooser'));
+        ok('Escape does not leave the song', win().location.hash.indexOf('/riptide') > -1,
+            win().location.hash);
+
+        const scrollBefore = win().songbookTest.scrollState.playing;
+        chordItem.focus();
+        chordItem.dispatchEvent(new KeyboardEvent('keydown', {
+            key: ' ', bubbles: true, cancelable: true
+        }));
+        await wait(40);
+        ok('Space opens the chooser', !!doc().getElementById('voicingChooser'));
+        ok('Space does not toggle auto-scroll',
+            win().songbookTest.scrollState.playing === scrollBefore,
+            String(scrollBefore) + ' -> ' + String(win().songbookTest.scrollState.playing));
+        press('Escape');
+        await wait(40);
+        ok('chooser closed after the Space test', !doc().getElementById('voicingChooser'));
+    }
 
     // 21. no console/page errors overall
     ok('no page errors', errors.length === 0, errors.join('; '));

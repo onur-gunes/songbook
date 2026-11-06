@@ -52,6 +52,10 @@
     // thing they pass in.
     function appendLineSegments(lineDiv, line, chordLabelFn) {
         line.forEach(function (seg) {
+            // Normalisation (js/songbooks.js) already removes malformed
+            // segments; this guard keeps a hand-edited or stale stored sheet
+            // from throwing during render.
+            if (!Array.isArray(seg) || seg.length < 2) return;
             var kind = seg[0], val = seg[1];
             if (kind === 'c') {
                 lineDiv.appendChild(SB.el('span', 'seg-chord', chordLabelFn(val)));
@@ -75,11 +79,17 @@
         return m ? '[' + mapChordTokens(m[1]) + ']' : cv;
     }
 
+    function sheetLines(song) {
+        var sheet = song && song.sheet;
+        if (!Array.isArray(sheet)) return [];
+        return sheet.filter(function (line) { return Array.isArray(line); });
+    }
+
     function renderSheetInline(song) {
         var wrap = SB.$('sheet');
         wrap.textContent = '';
         var frag = document.createDocumentFragment();
-        (song.sheet || []).forEach(function (line) {
+        sheetLines(song).forEach(function (line) {
             var lineDiv = SB.el('div', 'line');
             var isPre = line.some(function (seg) { return seg[0] === 'p'; });
             if (isPre) lineDiv.classList.add('is-pre');
@@ -264,9 +274,27 @@
     // must use the same measurement (including the mono family in degree mode).
     SB.chordLabelWidth = chordLabelWidth;
 
+    // Which visual line a chord belongs to. Ranges are half-open [start, end),
+    // so a chord anchored at the very end of the line — the common case in an
+    // intro like "Intro: [C]" or a verse ending on a chord change — has no
+    // range of its own and used to disappear. This also covers chords that sit
+    // on whitespace a wrap broke at: attach them to the last line that starts
+    // at or before the chord's column.
+    function rangeIndexForCol(ranges, col) {
+        var i;
+        for (i = 0; i < ranges.length; i++) {
+            if (col >= ranges[i][0] && col < ranges[i][1]) return i;
+        }
+        for (i = ranges.length - 1; i >= 0; i--) {
+            if (col >= ranges[i][0]) return i;
+        }
+        return 0;
+    }
+
     function buildAboveLine(line, avail) {
-        var hasWord = false, L = '', parts = [], chords = [], prevEnd = 0, hadChord = false;
+        var L = '', parts = [], chords = [], prevEnd = 0, hadChord = false;
         line.forEach(function (seg) {
+            if (!Array.isArray(seg) || seg.length < 2) return;
             if (seg[0] === 'c') {
                 var label = chordLabel(seg[1]);
                 var col = hadChord ? Math.max(L.length, prevEnd + 1) : L.length;
@@ -283,20 +311,20 @@
             if (t.replace(/\s/g, '').length) hadChord = false;
             parts.push({ kind: seg[0], text: t, start: L.length });
             L += t;
-            if (/\S/.test(t)) hasWord = true;
         });
 
         var div = SB.el('div', 'line line-stacked');
         var ranges = splitLyric(parts, L, avail);
         if (!ranges.length) ranges = [[0, L.length]];
-        ranges.forEach(function (r) {
+        var chordRanges = chords.map(function (c) { return rangeIndexForCol(ranges, c.col); });
+        ranges.forEach(function (r, ri) {
             var unit = SB.el('div', 'ln-unit');
             unit.setAttribute('data-start', r[0]);
             var chor = SB.el('div', 'ln-chords');
             var minGap = sheetEmPx() * 0.5;
             var prevRight = null;
-            chords.forEach(function (c) {
-                if (c.col >= r[0] && c.col < r[1]) {
+            chords.forEach(function (c, ci) {
+                if (chordRanges[ci] === ri) {
                     var left = lyricPrefixWidth(parts, r[0], c.col);
                     // Keep a chord at its lyric column, but never let it run
                     // into the one before it: proportional lyric gaps can be
@@ -334,7 +362,7 @@
         wrap.textContent = '';
         var frag = document.createDocumentFragment();
         var avail = Math.max(1, wrap.clientWidth - 0.5);
-        (song.sheet || []).forEach(function (line) {
+        sheetLines(song).forEach(function (line) {
             var lineDiv = SB.el('div', 'line');
             var isPre = line.some(function (s) { return s[0] === 'p'; });
             if (isPre) lineDiv.classList.add('is-pre');

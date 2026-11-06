@@ -40,6 +40,24 @@ SONGBOOK = {
             "chords": ["C", "E7"],
             "sheet": [[["c", "[C]"], ["x", " one "], ["c", "[E7]"], ["x", " two"]]],
         },
+        {
+            "id": "bad-sheet-1",
+            "title": "Bad Sheet String",
+            "artist": "Tester",
+            "sheet": "not an array",
+        },
+        {
+            "id": "bad-sheet-2",
+            "title": "Bad Sheet Entries",
+            "artist": "Tester",
+            "sheet": [None, [[None]], [[1, 2]], [["c", "[C]"], ["x", "ok"]]],
+        },
+        {
+            "id": "100%",
+            "title": "Percent Song",
+            "artist": "Tester",
+            "sheet": [[["c", "[C]"], ["x", " percent"]]],
+        },
     ],
 }
 
@@ -89,7 +107,7 @@ def main():
         run_checks(cdp, 'after import', expected_after_import)
         ok('after import: active is test-sb', cdp.eval('songbookTest.getActive().id') == 'test-sb')
         rows = cdp.eval("document.querySelectorAll('#songList .song-row').length")
-        ok('after import: 2 rows', rows == 2, rows)
+        ok('after import: 5 rows', rows == 5, rows)
 
         # brand logo follows the active songbook
         ok('imported songbook: logo hidden', cdp.eval("document.getElementById('logo').hidden === true"))
@@ -111,6 +129,42 @@ def main():
         ok('imported song chords', names == 'C,G,Am,F', names)
         text = cdp.eval("document.querySelector('.sheet').textContent")
         ok('imported sheet text', 'hello' in text and 'world' in text and 'a minor' in text, text[:60])
+
+        # malformed sheet shapes are normalised instead of crashing the view
+        cdp.eval("location.hash = '#/test-sb/bad-sheet-1'")
+        cdp.wait_js("document.getElementById('songView').hidden === false", timeout=10)
+        ok('malformed sheet string opens',
+           cdp.eval("document.getElementById('songTitle').textContent") == 'Bad Sheet String')
+        ok('malformed sheet string renders empty',
+           cdp.eval("document.querySelector('.sheet').textContent.trim()") == '')
+
+        cdp.eval("location.hash = '#/test-sb/bad-sheet-2'")
+        cdp.wait_js("document.getElementById('songView').hidden === false", timeout=10)
+        bad_text = cdp.eval("document.querySelector('.sheet').textContent")
+        ok('malformed sheet entries are dropped', 'ok' in bad_text, repr(bad_text))
+        ok('valid line survives malformed siblings',
+           cdp.eval("document.querySelectorAll('.sheet .line').length") >= 1)
+
+        # ids with characters that need URL-encoding must still route
+        cdp.eval("location.hash = SB.routeHash('test-sb', '100%')")
+        cdp.wait_js("document.getElementById('songView').hidden === false", timeout=10)
+        ok('percent id routes to its song',
+           cdp.eval("document.getElementById('songTitle').textContent") == 'Percent Song')
+        ok('percent id hash is encoded', '%25' in cdp.eval("location.hash"),
+           cdp.eval("location.hash"))
+
+        # a hand-edited, malformed hash must not throw or blank the app
+        cdp.eval("location.hash = '#/%'")
+        time.sleep(0.2)
+        ok('malformed hash falls back to the list',
+           cdp.eval("document.getElementById('listView').hidden === false"))
+
+        # the list's own link must encode the id too
+        cdp.eval("location.hash = '#/test-sb'")
+        cdp.wait_js("document.getElementById('listView').hidden === false", timeout=10)
+        href = cdp.eval(
+            "document.querySelector('#songList .song-row[data-id=\"100%\"] a.song-link').getAttribute('href')")
+        ok('list link encodes the song id', href == '#/test-sb/100%25', href)
 
         # persistence across reload
         cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw#/test-sb'})
