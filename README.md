@@ -71,7 +71,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/grid.js` | Play-along grid chart: bars, beat slashes, diagrams and the metronome-driven beat cursor |
 | `js/chordstrip.js` | Sticky chord strip and the voicing chooser |
 | `js/list.js` | List view: search, filters, sort, songbook picker |
-| `js/import.js` | Importing a songbook JSON from disk |
+| `js/import.js` | Importing songbook JSON from disk (shared parse/validate/persist pipeline) |
 | `js/export.js` | Exporting any songbook (bundled or imported) back to a JSON file |
 | `js/song.js` | Song view and its controls |
 | `js/autoscroll.js` | Auto-scroll, text/chord sizing, pinch zoom |
@@ -88,9 +88,10 @@ attached to `SB`.
 ## Features
 
 - **Multiple songbooks** — a picker switches between the bundled list and any
-  imported lists. Import a `.json` songbook from disk; it is saved in
-  **IndexedDB** and restored on reload (remove anytime). Export any songbook,
-  bundled or imported, back out as the same `.json` shape.
+  imported lists. Import one or more `.json` songbooks from disk; they are
+  saved in **IndexedDB** and restored on reload (remove anytime). Re-importing
+  an id replaces your imported copy; a bundled id stays read-only. Export any
+  songbook, bundled or imported, back out as the same `.json` shape.
 - **Global instrument toggle** — Ukulele or Guitar. Chord diagrams and the
   voicing chooser are generated for the selected instrument; the choice is
   remembered.

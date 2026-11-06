@@ -182,6 +182,24 @@
         });
     }
 
+    /* A batch gets one report, not one alert per file. A failure carries the
+     * file's own name (sourceName) so the reason reads as "<name> — <why>". */
+    function summarizeImport(results) {
+        var imported = 0;
+        var failed = [];
+        results.forEach(function (r) {
+            if (r.ok) imported++;
+            else failed.push(r);
+        });
+        var msg = imported + ' imported';
+        if (failed.length) {
+            msg += ', ' + failed.length + ' failed: ' + failed.map(function (f) {
+                return f.name + ' — ' + f.reason;
+            }).join('; ');
+        }
+        return msg;
+    }
+
     SB.bindListControls = function () {
         var input = SB.$('search');
         input.addEventListener('input', function () {
@@ -242,9 +260,38 @@
         SB.$('importBtn').addEventListener('click', function () { SB.$('importFile').click(); });
         SB.$('emptyImportBtn').addEventListener('click', function () { SB.$('importFile').click(); });
         SB.$('importFile').addEventListener('change', function (e) {
-            var file = e.target.files && e.target.files[0];
-            if (file) SB.importSongbook(file);
+            var files = Array.prototype.slice.call(e.target.files || []);
             e.target.value = '';
+            if (!files.length) return;
+
+            /* Serial, not Promise.all: a later duplicate must see the earlier
+             * file's replace prompt and in-memory entry, and one bad file must
+             * only fail its own slot in the batch. */
+            var results = [];
+            var last = null;
+            function step(i) {
+                if (i >= files.length) {
+                    window.alert(summarizeImport(results));
+                    if (last) {
+                        var hash = SB.routeHash(last.id);
+                        if (location.hash === hash) SB.route();
+                        else location.hash = hash;
+                    }
+                    return;
+                }
+                var file = files[i];
+                SB.importSongbook(file).then(function (sb) {
+                    results.push({ ok: true, sb: sb });
+                    last = sb;
+                }, function (err) {
+                    results.push({
+                        ok: false,
+                        name: err.sourceName || file.name,
+                        reason: err.message
+                    });
+                }).then(function () { step(i + 1); });
+            }
+            step(0);
         });
         SB.$('exportSongsBtn').addEventListener('click', function () {
             if (SB.state.active) SB.exportSongbook(SB.state.active);
