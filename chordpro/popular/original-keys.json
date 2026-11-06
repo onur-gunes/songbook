@@ -96,5 +96,12 @@
       "capo": 2,
       "confidence": "high",
       "source": "recording is in D major; chart transposed to C for easy ukulele shapes (capo 2 sounds the original key)"
+   },
+   "bitter-sweet-symphony": {
+      "key": "A",
+      "sheetKey": "A",
+      "capo": 0,
+      "confidence": "high",
+      "source": "recording is in A major; standard open E-Bm-D-A chart, no capo"
    }
 }

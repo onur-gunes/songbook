@@ -124,5 +124,14 @@
       "strum_source": "steady D DU UDU pop-rock strum; a reasonable per-song fit, though the recorded guitar uses a more syncopated pattern.",
       "confidence": "high",
       "source": "songbpm ~130 bpm (half-time feel around 65)"
+   },
+   "bitter-sweet-symphony": {
+      "bpm": 85,
+      "time": "4/4",
+      "strum": "eighths-4-4",
+      "strum_confidence": "medium",
+      "strum_source": "continuous eighth-note strum approximates the song's string ostinato; chords change every two beats.",
+      "confidence": "high",
+      "source": "widely documented ~85 bpm (songbpm lists 171 as double-time)"
    }
 }
