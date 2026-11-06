@@ -716,6 +716,47 @@ async function main() {
         pickerIds.join(','));
     ok('import button present', !!$('importBtn'));
 
+    // 19c2. export: every songbook can be written back out, and the JSON is
+    // exactly what normalizeSongbook() accepts — re-importing it reproduces
+    // the book, minus the storage-only `imported` flag.
+    ok('export button present', !!$('exportSongsBtn'));
+    ok('export button visible for a bundled songbook', $('exportSongsBtn').hidden === false);
+    bundledIds.forEach(function (id) {
+        const sb = win().songbookTest.allSongbooks().filter(b => b.id === id)[0];
+        const round = win().songbookTest.normalizeSongbook(
+            JSON.parse(win().songbookTest.songbookJSON(sb)));
+        const expected = JSON.parse(JSON.stringify(sb));
+        delete expected.imported;
+        ok('export round-trip: ' + id,
+            JSON.stringify(round) === JSON.stringify(expected),
+            round.songs.length + ' songs, ' + win().songbookTest.songbookJSON(sb).length + ' bytes');
+    });
+
+    // The click path itself: filename, blob contents and URL cleanup.
+    const origin = win().songbookTest.getActive();
+    const origCreate = win().URL.createObjectURL;
+    const origRevoke = win().URL.revokeObjectURL;
+    const origAnchorClick = win().HTMLAnchorElement.prototype.click;
+    let exportBlob = null, exportUrl = null, revokedUrl = null, exportAnchor = null;
+    win().URL.createObjectURL = function (blob) { exportBlob = blob; exportUrl = 'blob:export-test'; return exportUrl; };
+    win().URL.revokeObjectURL = function (url) { revokedUrl = url; };
+    win().HTMLAnchorElement.prototype.click = function () {
+        exportAnchor = { href: this.href, download: this.download };
+    };
+    $('exportSongsBtn').click();
+    win().URL.createObjectURL = origCreate;
+    win().URL.revokeObjectURL = origRevoke;
+    win().HTMLAnchorElement.prototype.click = origAnchorClick;
+    ok('export names the file after the songbook id',
+        !!exportAnchor && exportAnchor.download === origin.id + '.json',
+        exportAnchor && exportAnchor.download);
+    ok('export revokes the object URL after clicking',
+        !!exportUrl && revokedUrl === exportUrl, revokedUrl);
+    const exportText = exportBlob ? await exportBlob.text() : '';
+    ok('export downloads the songbook JSON',
+        exportText === win().songbookTest.songbookJSON(origin),
+        exportText.slice(0, 40));
+
     // 19d. legacy y-note HTML is sanitized before rendering (XSS)
     const xssNote = win().songbookTest.noteNode(
         '<img src=x onerror="window.__xss=1">safe ' +

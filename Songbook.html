@@ -2290,6 +2290,7 @@ body.tuner-open { overflow: hidden; }
             <select id="songbookSelect" class="songbook-select" aria-label="Choose a songbook"></select>
             <button id="importBtn" class="pill-btn" type="button">Import list…</button>
             <button id="removeSongsBtn" class="link-btn" type="button" hidden>Remove</button>
+            <button id="exportSongsBtn" class="link-btn" type="button">Export</button>
             <input id="importFile" type="file" accept=".json,application/json" hidden>
             <button id="tunerBtn" class="pill-btn tuner-open-btn" type="button"
                     aria-haspopup="dialog" title="Open tuner">
@@ -7142,6 +7143,9 @@ body.tuner-open { overflow: hidden; }
             if (file) SB.importSongbook(file);
             e.target.value = '';
         });
+        SB.$('exportSongsBtn').addEventListener('click', function () {
+            if (SB.state.active) SB.exportSongbook(SB.state.active);
+        });
         SB.$('removeSongsBtn').addEventListener('click', function () {
             if (!SB.state.active || !SB.state.active.imported) return;
             if (!window.confirm('Remove imported songbook "' + SB.state.active.name + '"? Your notes and favorites for it are kept.')) return;
@@ -7192,6 +7196,43 @@ body.tuner-open { overflow: hidden; }
         };
         reader.onerror = function () { window.alert('Could not read file.'); };
         reader.readAsText(file);
+    }
+
+})(window.SB = window.SB || {});
+
+</script>
+<script>
+/* Songbook — export
+ * writing a songbook back out as a JSON file
+ *
+ * Part of the window.SB namespace. Loaded as a classic script in the
+ * order set by index.html; see js/core.js for the shared state.
+ */
+(function (SB) {
+    'use strict';
+
+    /* The JSON shape SB.normalizeSongbook() accepts. Everything the app keeps
+     * on a songbook is content and survives the round-trip unchanged; only
+     * `imported` is dropped, because it records where this copy is stored
+     * rather than what the book contains, and the importer sets it again. */
+    SB.songbookJSON = function (sb) {
+        var out = {};
+        Object.keys(sb).forEach(function (key) {
+            if (key !== 'imported') out[key] = sb[key];
+        });
+        return JSON.stringify(out, null, 2);
+    }
+
+    SB.exportSongbook = function (sb) {
+        var blob = new Blob([SB.songbookJSON(sb)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = sb.id + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
 })(window.SB = window.SB || {});
@@ -8677,6 +8718,8 @@ body.tuner-open { overflow: hidden; }
         favorites: SB.state.favorites,
         activeSongs: SB.activeSongs,
         allSongbooks: SB.allSongbooks,
+        normalizeSongbook: SB.normalizeSongbook,
+        songbookJSON: SB.songbookJSON,
         getActive: function () { return SB.state.active; },
         getSong: function (id) { return SB.state.byId[id]; },
         setInstrument: SB.setInstrument,
