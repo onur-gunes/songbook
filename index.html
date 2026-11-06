@@ -54,7 +54,7 @@
             </button>
         </div>
 
-        <div class="controls">
+        <div id="listControls" class="controls">
             <div class="search-wrap">
                 <input id="search" type="search" autocomplete="off" spellcheck="false"
                        placeholder="Search songs or artists..." aria-label="Search songs or artists">
@@ -86,6 +86,15 @@
             </div>
         </div>
 
+        <div id="emptyState" class="empty-state empty-state-books" hidden>
+            <h2 class="empty-state-title">No songbooks yet</h2>
+            <p class="empty-state-lead">Import a songbook JSON file to start building your library.</p>
+            <button id="emptyImportBtn" class="pill-btn accent empty-state-import" type="button">Import a songbook…</button>
+            <p class="empty-state-docs">New to the format? Read the
+                <a href="https://github.com/onur-gunes/songbook#songbook-json-format"
+                   target="_blank" rel="noopener noreferrer">songbook format docs</a>.</p>
+        </div>
+
         <div id="recentBlock" class="recent-block" hidden>
             <div class="section-head">
                 <h2 class="section-title">Recently played</h2>
@@ -96,7 +105,7 @@
 
         <p id="resultCount" class="result-count"></p>
         <ul id="songList" class="song-list"></ul>
-        <p id="emptyState" class="empty-state" hidden>No songs match.</p>
+        <p id="noMatches" class="empty-state" hidden>No songs match.</p>
     </section>
 
     <!-- ============ SONG VIEW ============ -->

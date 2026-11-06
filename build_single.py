@@ -116,9 +116,12 @@ for src, code in scripts:
 # 5) self-containment sanity checks
 bad = []
 # every script index.html loaded must now be inlined, not referenced
+# The only external URLs allowed are links the user may choose to follow (the
+# tuner attribution and the songbook format docs); no asset is loaded from them
+# at boot, so the bundle itself stays self-contained.
 patterns = [r'src="chords/', r'src="images/', r'href="images/', r'data-light="images/', r'data-dark="images/',
             r'href="style\.css', r'href="manifest\.webmanifest', r'href="sw\.js',
-            r'https?://(?!www\.w3\.org|github\.com/fgnass/tuner)']
+            r'https?://(?!www\.w3\.org|github\.com/fgnass/tuner|github\.com/onur-gunes/songbook)']
 patterns += [r'src="%s"' % re.escape(s) for s, _ in scripts]
 for pat in patterns:
     if re.search(pat, html):

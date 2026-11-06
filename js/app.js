@@ -91,7 +91,10 @@
                 try { var sb = SB.normalizeSongbook(raw); sb.imported = true; return sb; }
                 catch (e) { return null; }
             }).filter(Boolean);
-            if (!SB.state.bundled.length && !SB.state.imported.length) { showFatal('No songbooks available.'); return; }
+            /* Zero songbooks is a supported first-run state, not a fatal one:
+             * keep booting, bind every control, and let the list view show the
+             * empty state with its Import call to action. */
+            if (!SB.state.bundled.length && !SB.state.imported.length) SB.renderEmptyState();
             if (!SB.state.instrument) SB.state.instrument = (SB.defaultSongbook() && SB.defaultSongbook().instrument) || 'ukulele';
             SB.applyInstrumentUi();
             SB.rebuildIndex();

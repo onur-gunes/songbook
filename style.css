@@ -665,6 +665,37 @@ main {
     padding: 40px 0;
 }
 
+.empty-state-books {
+    margin: 8px 0 18px;
+    padding: 44px 24px;
+    background: var(--surface);
+    border: 1px dashed var(--line);
+    border-radius: 18px;
+}
+
+.empty-state-title {
+    margin: 0 0 8px;
+    color: var(--text);
+    font-size: 1.2rem;
+}
+
+.empty-state-lead {
+    max-width: 40ch;
+    margin: 0 auto 18px;
+}
+
+.empty-state-import {
+    padding: 11px 24px;
+    font-size: 0.95rem;
+}
+
+.empty-state-docs {
+    margin: 16px 0 0;
+    font-size: 0.85rem;
+}
+
+.empty-state-docs a { color: var(--accent); }
+
 /* ===== song view ===== */
 
 .song-nav {

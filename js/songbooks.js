@@ -169,13 +169,21 @@
     }
 
     SB.loadBundled = function () {
-        if (window.__SONGBOOKS__ && window.__SONGBOOKS__.length) {
+        /* An injected empty list is authoritative, not an invitation to fetch:
+         * the single-file build and the test harness both use this hook to say
+         * "this app has no bundled books", which is now a valid state. */
+        if (Array.isArray(window.__SONGBOOKS__)) {
             return Promise.resolve(window.__SONGBOOKS__.map(SB.normalizeSongbook));
         }
         return fetch('songbooks/index.json', { cache: 'no-cache' }).then(function (r) {
+            /* An absent manifest means a content-free app, not a broken one.
+             * Anything else non-OK (and malformed JSON below) is still a real
+             * error: a 500, or a corrupt manifest, must not be swallowed. */
+            if (r.status === 404) return null;
             if (!r.ok) throw new Error('songbooks/index.json ' + r.status);
             return r.json();
         }).then(function (manifest) {
+            if (!manifest) return [];
             var entries = (manifest && manifest.songbooks) || [];
             return Promise.all(entries.map(function (e) {
                 return fetch('songbooks/' + e.file, { cache: 'no-cache' }).then(function (r) {
@@ -195,6 +203,7 @@
         SB.state.bySb = {};
         SB.allSongbooks().forEach(function (sb) { SB.state.bySb[sb.id] = sb; });
         buildSongbookSelect();
+        SB.renderEmptyState();
     }
 
     SB.setActive = function (sb) {
@@ -202,10 +211,12 @@
         SB.state.byId = {};
         if (sb) sb.songs.forEach(function (s) { SB.state.byId[s.id] = s; });
         var sel = SB.$('songbookSelect');
-        if (sel && sb) sel.value = sb.id;
+        if (sel) sel.value = sb ? sb.id : '';
         var rm = SB.$('removeSongsBtn');
         if (rm) rm.hidden = !(sb && sb.imported);
-        SB.applyBrand();
+        var ex = SB.$('exportSongsBtn');
+        if (ex) ex.hidden = !sb;
+        if (SB.applyBrand) SB.applyBrand();
     }
 
     function buildSongbookSelect() {
