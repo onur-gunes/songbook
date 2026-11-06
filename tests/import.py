@@ -61,16 +61,47 @@ SONGBOOK = {
     ],
 }
 
-IMPORT_JS = """
+def make_book(book_id, name, song_ids):
+    return {
+        "id": book_id,
+        "name": name,
+        "songs": [
+            {
+                "id": song_id,
+                "title": "Song " + song_id,
+                "artist": "Tester",
+                "sheet": [[["c", "[C]"], ["x", " " + song_id]]],
+            }
+            for song_id in song_ids
+        ],
+    }
+
+
+MULTI_ONE = make_book("multi-one", "Multi One", ["m1", "m2"])
+MULTI_TWO = make_book("multi-two", "Multi Two", ["m3"])
+MULTI_ONE_V2 = make_book("multi-one", "Multi One v2", ["m1"])
+BUNDLED_HIJACK = make_book("krakow-ukulele", "Hijacked Krakow", ["hijack"])
+
+
+def import_files_js(files):
+    """Build file-input dispatch JS for a batch of (name, content) pairs."""
+    items = ''.join(
+        "dt.items.add(new File([%s], %s, { type: 'application/json' }));"
+        % (json.dumps(content), json.dumps(name))
+        for name, content in files)
+    return """
 (function () {
   var inp = document.getElementById('importFile');
   var dt = new DataTransfer();
-  dt.items.add(new File([%s], 'test-sb.json', { type: 'application/json' }));
+  %s
   inp.files = dt.files;
   inp.dispatchEvent(new Event('change', { bubbles: true }));
   return true;
 })()
-""" % json.dumps(json.dumps(SONGBOOK))
+""" % items
+
+
+IMPORT_JS = import_files_js([('test-sb.json', json.dumps(SONGBOOK))])
 
 
 def main():
@@ -90,6 +121,12 @@ def main():
         target = new_tab(PORT, BASE + '/index.html?nosw')
         cdp = CDP(target['webSocketDebuggerUrl'])
         cdp.enable()
+        # Imports report one summary alert per batch. Capture it instead of
+        # letting a real (blocking) dialog stall every reload.
+        cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+            'source': 'window.__alerts = [];'
+                      'window.alert = function (m) { window.__alerts.push(String(m)); };'
+        })
         cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
         cdp.wait_js('!!(window.songbookTest && songbookTest.getActive())', timeout=30)
 
@@ -222,6 +259,86 @@ def main():
         ok('exported book keeps its grid (208 beats)',
            cdp.eval('songbookTest.gridInfo().totalBeats') == 208,
            cdp.eval('songbookTest.gridInfo().totalBeats'))
+
+        # --- Phase 3: import hardening -----------------------------------
+        ok('import input accepts multiple files',
+           cdp.eval("document.getElementById('importFile').multiple === true"))
+        # One summary for the batch, and a malformed file must not abort the
+        # files after it.
+        cdp.eval("window.__alerts = [];")
+        cdp.eval(import_files_js([
+            ('multi-one.json', json.dumps(MULTI_ONE)),
+            ('broken.json', '{"id": "broken",'),
+            ('multi-two.json', json.dumps(MULTI_TWO)),
+        ]), await_promise=False)
+        cdp.wait_js("songbookTest.allSongbooks().length === %d" % (bundled_count + 3),
+                    timeout=15)
+        alerts = cdp.eval('window.__alerts')
+        ok('batch import: one summary alert', len(alerts) == 1, alerts)
+        summary = alerts[0] if alerts else ''
+        ok('batch import: summary counts',
+           summary.startswith('2 imported, 1 failed:'), summary)
+        ok('batch import: names the failed file and reason',
+           'broken.json' in summary and ' — ' in summary and 'not valid JSON' in summary,
+           summary)
+        ids = cdp.eval("songbookTest.allSongbooks().map(s=>s.id).join(',')")
+        ok('batch import: valid files on both sides of the failure imported',
+           'multi-one' in ids and 'multi-two' in ids, ids)
+        ok('batch import: last successful file is active',
+           cdp.eval('songbookTest.getActive().id') == 'multi-two')
+
+        # Re-importing the same id replaces the user's own copy in place.
+        cdp.eval("window.__alerts = []; window.__confirms = [];"
+                 "window.confirm = function (m) { window.__confirms.push(m); return true; };")
+        cdp.eval(import_files_js([('multi-one-v2.json', json.dumps(MULTI_ONE_V2))]),
+                 await_promise=False)
+        cdp.wait_js("songbookTest.getActive().id === 'multi-one'"
+                    " && songbookTest.getActive().name === 'Multi One v2'", timeout=15)
+        ok('replace import: prompted once for the imported id',
+           len(cdp.eval('window.__confirms')) == 1, cdp.eval('window.__confirms'))
+        ok('replace import: no duplicate entry',
+           cdp.eval('songbookTest.allSongbooks().length') == bundled_count + 3,
+           cdp.eval('songbookTest.allSongbooks().length'))
+        ok('replace import: in-memory entry swapped',
+           cdp.eval("SB.state.imported.filter(function (b) {"
+                    " return b.id === 'multi-one'; }).length") == 1
+           and cdp.eval('songbookTest.getActive().songs.length') == 1,
+           cdp.eval('songbookTest.getActive().songs.length'))
+        ok('replace import: summary reports it as imported',
+           cdp.eval('window.__alerts[0]') == '1 imported', cdp.eval('window.__alerts'))
+
+        # A bundled id is not the user's to overwrite, even if a stale
+        # confirm handler would say yes.
+        bundled_name = cdp.eval(
+            "SB.state.bundled.filter(function (b) { return b.id === 'krakow-ukulele'; })[0].name")
+        cdp.eval("window.__alerts = []; window.__confirms = [];"
+                 "window.confirm = function (m) { window.__confirms.push(m); return true; };")
+        cdp.eval(import_files_js([('krakow.json', json.dumps(BUNDLED_HIJACK))]),
+                 await_promise=False)
+        cdp.wait_js('window.__alerts.length === 1', timeout=15)
+        ok('bundled reject: no replace prompt', cdp.eval('window.__confirms.length') == 0,
+           cdp.eval('window.__confirms'))
+        alerts = cdp.eval('window.__alerts')
+        ok('bundled reject: summary reports the failure',
+           bool(alerts) and alerts[0].startswith('0 imported, 1 failed: krakow.json'),
+           alerts)
+        ok('bundled reject: bundled book untouched',
+           cdp.eval("SB.state.bundled.filter(function (b) {"
+                    " return b.id === 'krakow-ukulele'; })[0].name") == bundled_name)
+        ok('bundled reject: nothing appended',
+           cdp.eval('songbookTest.allSongbooks().length') == bundled_count + 3,
+           cdp.eval('songbookTest.allSongbooks().length'))
+
+        # The replace persisted, and the rejected overwrite did not.
+        cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
+        cdp.wait_js('!!(window.songbookTest && songbookTest.allSongbooks().length === %d)'
+                    % (bundled_count + 3), timeout=30)
+        ok('replace persists after reload',
+           cdp.eval("SB.state.imported.filter(function (b) {"
+                    " return b.id === 'multi-one'; })[0].name") == 'Multi One v2')
+        ok('bundled reject persists after reload',
+           cdp.eval("SB.state.bundled.filter(function (b) {"
+                    " return b.id === 'krakow-ukulele'; })[0].name") == bundled_name)
 
         n_fail = 0
         for name, passed, detail in results:
