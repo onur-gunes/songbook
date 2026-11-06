@@ -723,18 +723,18 @@ class BuildTests(unittest.TestCase):
             keys = build_songbook.load_original_keys(tmp)
             self.assertEqual(keys['song'], {'key': 'D'})
 
-    def test_bundled_polish_book_rebuilds_from_chordpro(self):
-        source = os.path.join(ROOT, 'chordpro', 'polska-gurom')
-        committed = os.path.join(ROOT, 'songbooks', 'polska-gurom.json')
+    def test_demo_book_rebuilds_from_chordpro(self):
+        # The demo is the only book committed to the tree, so it carries the
+        # guarantee the old bundled book used to: committed JSON matches its
+        # ChordPro sources byte for byte.
+        source = os.path.join(ROOT, 'chordpro', 'demo')
+        committed = os.path.join(ROOT, 'songbooks', 'demo.json')
         with tempfile.TemporaryDirectory() as tmp:
             result = build_songbook.build_book(
                 source, out_dir=os.path.join(tmp, 'songbooks'),
                 index_path=os.path.join(tmp, 'songbooks', 'index.json'),
-                report_path=os.path.join(tmp, 'report.txt'), chord_check=False,
-                allow_trusted_notes=True)
+                report_path=os.path.join(tmp, 'report.txt'), chord_check=False)
             self.assertEqual(result['errors'], [])
-            self.assertTrue(any('049-love-story.cho: chords override differs' in w
-                                for w in result['warnings']))
             with open(committed, encoding='utf-8') as f:
                 expected = f.read()
             with open(result['output'], encoding='utf-8') as f:

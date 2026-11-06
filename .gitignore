@@ -4,3 +4,14 @@ __pycache__/
 _site/
 migration-report.txt
 *-report.txt
+
+# Local songbooks are the user's own content and must never be committed.
+# The shipped demo book and the index manifest are the only exceptions.
+songbooks/*.json
+!songbooks/index.json
+!songbooks/demo.json
+!songbooks/original-keys.json
+
+# ChordPro sources are local authoring input; only the demo book is shipped.
+chordpro/*/
+!chordpro/demo/

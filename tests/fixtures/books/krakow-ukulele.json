@@ -1,0 +1,1415 @@
+{
+ "id": "krakow-ukulele",
+ "name": "Krakow Ukulele",
+ "description": "Fixture book (test only, original content).",
+ "instrument": "ukulele",
+ "logo": "images/ukulele-krakow-trans-light.png",
+ "songs": [
+  {
+   "id": "harbour-lights",
+   "title": "Harbour Lights",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": true,
+   "key": "C",
+   "sheetKey": "C",
+   "capo": 1,
+   "time": "4/4",
+   "chords": [
+    "C",
+    "G",
+    "Am",
+    "F"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Paper boats are "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "sleeping by the "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "wall"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Lanterns paint the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "water gold and "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "small"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Hold the night a "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "little longer"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Let the quiet "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "carry on"
+     ]
+    ]
+   ],
+   "bpm": 96,
+   "strum": "dduudu-4-4",
+   "dur": 2.5,
+   "grid": [
+    {
+     "label": "Intro",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Chorus",
+     "repeat": true,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "three-quarter-time",
+   "title": "Three Quarter Time",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": true,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "3/4",
+   "chords": [
+    "G",
+    "C",
+    "D",
+    "Em"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Count the evening "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "slowly, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "one and two and "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "three"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Three quarter "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "time"
+     ]
+    ]
+   ],
+   "bpm": 108,
+   "strum": "waltz-3-4",
+   "dur": 2.5
+  },
+  {
+   "id": "river-of-stars",
+   "title": "River of Stars",
+   "artist": "Demo Artist",
+   "level": "Medium",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "6/8",
+   "chords": [
+    "G",
+    "D",
+    "Em",
+    "C"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "River of stars, carry me "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "home"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Past every field and the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "roads I have known"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Row, row, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "follow the "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "light"
+     ]
+    ]
+   ],
+   "bpm": 60,
+   "strum": "du-6-8",
+   "dur": 2.5,
+   "grid": [
+    {
+     "label": "Verse",
+     "repeat": true,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "budapest",
+   "title": "Budapest",
+   "artist": "Demo Artist",
+   "level": "Hard",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": -2,
+   "time": "4/4",
+   "chords": [
+    "G",
+    "C",
+    "Em",
+    "D"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Budapest in the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "evening "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "glow"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "Cobblestones and "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "night"
+     ]
+    ]
+   ],
+   "bpm": 87,
+   "dur": 2.5
+  },
+  {
+   "id": "let-her-go",
+   "title": "Let Her Go",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "G",
+    "C",
+    "Em",
+    "D",
+    "NC"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Let her go "
+     ],
+     [
+      "c",
+      "[NC]"
+     ],
+     [
+      "x",
+      "and move on"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Staring at the "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "ceiling "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "again"
+     ]
+    ]
+   ],
+   "dur": 2.5
+  },
+  {
+   "id": "all-apologies",
+   "title": "All Apologies",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "G",
+    "C",
+    "Em",
+    "D"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "All apologies "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "said and done"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "In the "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "sunlight"
+     ]
+    ]
+   ],
+   "bpm": 90,
+   "dur": 2.5
+  },
+  {
+   "id": "american-idiot",
+   "title": "American Idiot",
+   "artist": "Demo Artist",
+   "level": "Medium",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "G",
+    "C",
+    "Em",
+    "D"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Don't wanna be "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "an american idiot"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "One nation "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "under the media"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      ""
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      ""
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      ""
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      ""
+     ]
+    ]
+   ],
+   "bpm": 92,
+   "dur": 2.5
+  },
+  {
+   "id": "lost-on-you",
+   "title": "Lost On You",
+   "artist": "Demo Artist",
+   "level": "Medium",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "Am",
+    "D",
+    "Em",
+    "C"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "When you "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "get lost "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "on you"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "And the "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "bridge"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      ""
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      ""
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      ""
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      ""
+     ]
+    ]
+   ],
+   "bpm": 85,
+   "dur": 2.5
+  },
+  {
+   "id": "zombie",
+   "title": "Zombie",
+   "artist": "Demo Artist",
+   "level": "Medium",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "G",
+    "C",
+    "Em",
+    "D"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "In the head "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "the family "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "cries"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "Another "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "head hangs lowly"
+     ]
+    ]
+   ],
+   "bpm": 95,
+   "dur": 2.5
+  },
+  {
+   "id": "you-are-my-sunshine",
+   "title": "You Are My Sunshine",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": false,
+   "key": "C",
+   "sheetKey": "C",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "C",
+    "F",
+    "G"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Intro:"
+     ],
+     [
+      "c",
+      "[C]"
+     ]
+    ],
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "You are my "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "sunshine "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "my only"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "sunshine "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "you make me"
+     ]
+    ]
+   ],
+   "bpm": 100,
+   "dur": 2.5
+  },
+  {
+   "id": "just-like-heaven",
+   "title": "Just Like Heaven",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": false,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "G",
+    "C",
+    "Em",
+    "D",
+    "A"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Just like "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "heaven "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "touched"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "I wait "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "for you"
+     ]
+    ],
+    [
+     [
+      "p",
+      "(riff)"
+     ],
+     [
+      "c",
+      "[A]"
+     ],
+     [
+      "x",
+      "  "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "  "
+     ],
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "  "
+     ],
+     [
+      "c",
+      "[A]"
+     ]
+    ]
+   ],
+   "bpm": 98,
+   "dur": 2.5
+  },
+  {
+   "id": "house-of-the-rising-sun",
+   "title": "House Of The Rising Sun",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": false,
+   "key": "Am",
+   "sheetKey": "Am",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "Am",
+    "C",
+    "D",
+    "F",
+    "E7",
+    "Dm"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "There is a "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "house "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "in "
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "New "
+     ],
+     [
+      "c",
+      "[E7]"
+     ],
+     [
+      "x",
+      "Orleans"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "Called the "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "rising sun"
+     ]
+    ]
+   ],
+   "bpm": 80,
+   "dur": 2.5
+  },
+  {
+   "id": "black",
+   "title": "Black",
+   "artist": "Demo Artist",
+   "level": "Medium",
+   "new": false,
+   "key": "E",
+   "sheetKey": "E",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "E",
+    "Em",
+    "G",
+    "D"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E]"
+     ],
+     [
+      "x",
+      "Black "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "sheets"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "pillows"
+     ]
+    ]
+   ],
+   "bpm": 110,
+   "dur": 2.5
+  },
+  {
+   "id": "500-miles",
+   "title": "500 Miles",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": false,
+   "key": "Em",
+   "sheetKey": "Em",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "Em",
+    "C",
+    "G",
+    "D"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "Five "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "hundred miles"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "I would "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "walk"
+     ]
+    ]
+   ],
+   "bpm": 95,
+   "dur": 2.5
+  },
+  {
+   "id": "a-little-respect",
+   "title": "A Little Respect",
+   "artist": "Demo Artist",
+   "level": "Easy",
+   "new": false,
+   "key": "C",
+   "sheetKey": "C",
+   "capo": 0,
+   "time": "4/4",
+   "chords": [
+    "C",
+    "Csus4",
+    "G",
+    "E7",
+    "F",
+    "Am",
+    "Em",
+    "Bb"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "A little "
+     ],
+     [
+      "c",
+      "[Csus4]"
+     ],
+     [
+      "x",
+      "respect"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Is all "
+     ],
+     [
+      "c",
+      "[E7]"
+     ],
+     [
+      "x",
+      "I ask"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "From "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "you"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[Bb]"
+     ],
+     [
+      "x",
+      "nothing more"
+     ]
+    ]
+   ],
+   "bpm": 100,
+   "dur": 2.5
+  }
+ ]
+}
