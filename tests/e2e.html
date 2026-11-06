@@ -1701,6 +1701,39 @@ async function main() {
     win().localStorage.removeItem('songbook:chordMode');
     win().localStorage.removeItem('songbook:bpm:popular\u0000riptide');
 
+    // 20c. the voicing chooser owns Escape and Space while it is open
+    win().location.hash = '#/krakow-ukulele/riptide';
+    await wait(300);
+    const chordItem = doc().querySelector('#chordStrip .chord-item[role="button"]');
+    ok('a chord diagram is available for the keyboard test', !!chordItem);
+    if (chordItem) {
+        const press = (key) => doc().dispatchEvent(new KeyboardEvent('keydown', {
+            key: key, bubbles: true, cancelable: true
+        }));
+        chordItem.click();
+        await wait(40);
+        ok('click opens the voicing chooser', !!doc().getElementById('voicingChooser'));
+        press('Escape');
+        await wait(40);
+        ok('Escape closes the chooser', !doc().getElementById('voicingChooser'));
+        ok('Escape does not leave the song', win().location.hash.indexOf('/riptide') > -1,
+            win().location.hash);
+
+        const scrollBefore = win().songbookTest.scrollState.playing;
+        chordItem.focus();
+        chordItem.dispatchEvent(new KeyboardEvent('keydown', {
+            key: ' ', bubbles: true, cancelable: true
+        }));
+        await wait(40);
+        ok('Space opens the chooser', !!doc().getElementById('voicingChooser'));
+        ok('Space does not toggle auto-scroll',
+            win().songbookTest.scrollState.playing === scrollBefore,
+            String(scrollBefore) + ' -> ' + String(win().songbookTest.scrollState.playing));
+        press('Escape');
+        await wait(40);
+        ok('chooser closed after the Space test', !doc().getElementById('voicingChooser'));
+    }
+
     // 21. no console/page errors overall
     ok('no page errors', errors.length === 0, errors.join('; '));
 

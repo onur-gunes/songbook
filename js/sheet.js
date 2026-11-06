@@ -75,11 +75,17 @@
         return m ? '[' + mapChordTokens(m[1]) + ']' : cv;
     }
 
+    function sheetLines(song) {
+        var sheet = song && song.sheet;
+        if (!Array.isArray(sheet)) return [];
+        return sheet.filter(function (line) { return Array.isArray(line); });
+    }
+
     function renderSheetInline(song) {
         var wrap = SB.$('sheet');
         wrap.textContent = '';
         var frag = document.createDocumentFragment();
-        (song.sheet || []).forEach(function (line) {
+        sheetLines(song).forEach(function (line) {
             var lineDiv = SB.el('div', 'line');
             var isPre = line.some(function (seg) { return seg[0] === 'p'; });
             if (isPre) lineDiv.classList.add('is-pre');

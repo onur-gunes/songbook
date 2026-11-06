@@ -193,7 +193,10 @@ attached to `SB`.
 `i` italic, `y` comment, `p` preformatted/tab. `grid` is a separate top-level
 field, **parallel to `sheet`, not nested in it**: it is a different view of the
 same song (where beat 1 is and how many beats each chord gets), and is simply
-absent on songs that have no chart. Personal data (favorites, notes, recent,
+absent on songs that have no chart. Imported sheets are normalised: a missing or
+wrong-typed `sheet` becomes empty, and malformed lines/segments are dropped
+instead of reaching the renderer. Song ids may contain any characters; the app
+percent-encodes them in the hash. Personal data (favorites, notes, recent,
 theme, scroll speed, voicing picks) lives only in `localStorage`; the imported
 songbook JSON lives in `IndexedDB`.
 
