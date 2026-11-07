@@ -563,8 +563,10 @@ notice.
 
 ## Run the tests
 
-Every suite below runs in CI on pull requests, and a push to `main` must pass
-them before it is allowed to deploy (`.github/workflows/tests.yml`).
+Every suite below except the fidelity tool runs in CI on pull requests, and a
+push to `main` must pass them before it is allowed to deploy
+(`.github/workflows/tests.yml`). Fidelity is local-only because its subject,
+the retired `legacy/` archive, is no longer in the repo.
 
 To run them locally, start a server first. Chrome is driven over the DevTools
 Protocol (requires `pip install websocket-client`); the browser is found
@@ -580,7 +582,10 @@ python3 tests/run_html.py http://localhost:8777/tests/chordkit.html
 # app smoke: list, routing, instrument toggle, diagrams
 python3 tests/smoke.py  http://localhost:8777
 
-# import -> IndexedDB -> reload -> remove
+# content-free boot: zero songbooks, import, remove the last book
+python3 tests/empty.py  http://localhost:8777
+
+# import -> IndexedDB -> reload -> remove; export -> import round-trip
 python3 tests/import.py http://localhost:8777
 
 # tuner: presets, calibration, octave guards, overlay behaviour
@@ -589,7 +594,9 @@ python3 tests/tuner.py  http://localhost:8777
 # full behavior suite: search/filter/sort/fav/notes/scroll/theme/chooser/…
 python3 tests/run_html.py http://localhost:8777/tests/e2e.html
 
-# fidelity (local only): needs a copy of the retired legacy/ archive
+# fidelity (local authoring tool, NOT run in CI): it compares a local copy of
+# the retired legacy/ archive against a local songbooks/krakow-ukulele.json.
+# Restore both from git history (or another local copy) before running it.
 python3 tests/generate_fidelity.py
 python3 tests/run_html.py http://localhost:8777/tests/fidelity-all.html
 ```

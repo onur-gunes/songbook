@@ -231,6 +231,27 @@ def main():
         # An exported songbook is a valid import. The bundled ids still exist
         # in this profile, so the copy gets a fresh id; its contents, including
         # the beat grid, must survive the export -> import round-trip.
+        cdp.eval("location.hash = '#/popular/stand-by-me'")
+        cdp.wait_js("document.getElementById('songView').hidden === false", timeout=10)
+        cdp.eval("document.querySelector('.chord-mode-btn[data-chord-mode=\"grid\"]').click()")
+        cdp.wait_js('!!songbookTest.gridInfo()', timeout=10)
+        original_beats = cdp.eval('songbookTest.gridInfo().totalBeats')
+
+        # Phase 1 invariant: normalizeSongbook(JSON.parse(export(sb))) must
+        # deep-equal sb minus the storage-only `imported` flag. This is the
+        # strongest form of the round-trip; the import below then proves the
+        # file path accepts it too.
+        ok('export -> normalize round-trip is deep-equal',
+           cdp.eval(
+               "(function () {"
+               "  var sb = songbookTest.allSongbooks().filter(function (b) { return b.id === 'popular'; })[0];"
+               "  var round = songbookTest.normalizeSongbook("
+               "      JSON.parse(songbookTest.songbookJSON(sb)));"
+               "  var expected = JSON.parse(JSON.stringify(sb));"
+               "  delete expected.imported;"
+               "  return JSON.stringify(round) === JSON.stringify(expected);"
+               "})()"))
+
         exported = cdp.eval(
             "(function () {"
             "  var sb = songbookTest.allSongbooks().filter(function (b) { return b.id === 'popular'; })[0];"
@@ -262,8 +283,8 @@ def main():
         cdp.eval("document.querySelector('.chord-mode-btn[data-chord-mode=\"grid\"]').click()")
         cdp.wait_js('!!songbookTest.gridInfo()', timeout=10)
         ok('exported book keeps its grid',
-           cdp.eval('songbookTest.gridInfo().totalBeats') > 0,
-           cdp.eval('songbookTest.gridInfo().totalBeats'))
+           cdp.eval('songbookTest.gridInfo().totalBeats') == original_beats,
+           '%s vs original %s' % (cdp.eval('songbookTest.gridInfo().totalBeats'), original_beats))
 
         # --- Phase 3: import hardening -----------------------------------
         ok('import input accepts multiple files',

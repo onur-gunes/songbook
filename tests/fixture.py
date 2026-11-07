@@ -22,8 +22,10 @@ import os
 FIXTURE_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'books')
 
-# Book ids, in the order they should appear (bundled order).
-FIXTURE_BOOK_IDS = ('krakow-ukulele', 'polska-gurom', 'popular')
+# Book ids, in the order they should appear (bundled order). The first book is
+# the default, so keep the richer content book there; test-book is the compact
+# coverage fixture used by tests/empty.py.
+FIXTURE_BOOK_IDS = ('krakow-ukulele', 'polska-gurom', 'popular', 'test-book')
 
 
 def load_fixture(book_id):
