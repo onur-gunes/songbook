@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Regenerate tests/fidelity-all.html (and fidelity.html) from the legacy/ pages.
 
+Local authoring tool, not a CI suite. It has no subject in a clean checkout:
+both the retired ``legacy/`` archive and ``songbooks/krakow-ukulele.json`` are
+absent (the latter is gitignored local content). Restore a local copy of both
+from git history before running it.
+
 Each legacy page's #tab content is extracted line-by-line as the expected text;
 the test then opens the song in the SPA and asserts every line appears in the
 rendered sheet, plus transpose re-render/roundtrip checks.

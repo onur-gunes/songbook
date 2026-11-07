@@ -1,0 +1,152 @@
+{
+  "id": "test-book",
+  "name": "Test Book",
+  "description": "Purpose-built fixture: grids, metres, capo and missing metadata.",
+  "instrument": "ukulele",
+  "songs": [
+    {
+      "id": "grid-song",
+      "title": "Grid Song",
+      "artist": "Fixture Author",
+      "level": "Easy",
+      "key": "C",
+      "sheetKey": "C",
+      "capo": 0,
+      "time": "4/4",
+      "bpm": 100,
+      "strum": "downs-4-4",
+      "chords": ["C", "G", "Am", "F"],
+      "sheet": [
+        [["i", "Verse 1"]],
+        [["c", "[C]"], ["x", "Grid song "], ["c", "[G]"], ["x", "line one"]],
+        [["c", "[Am]"], ["x", "Grid song "], ["c", "[F]"], ["x", "line two"]]
+      ],
+      "grid": [
+        {
+          "label": "Verse 1",
+          "repeat": false,
+          "bars": [
+            {"beats": [{"chord": "C", "beats": 2}, {"chord": "G", "beats": 2}]},
+            {"beats": [{"chord": "Am", "beats": 2}, {"chord": "F", "beats": 2}]}
+          ]
+        },
+        {
+          "label": "Chorus",
+          "repeat": true,
+          "bars": [
+            {"beats": [{"chord": "C", "beats": 4}]},
+            {"beats": [{"chord": "G", "beats": 4}]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "no-grid-song",
+      "title": "No Grid Song",
+      "artist": "Fixture Author",
+      "level": "Medium",
+      "key": "G",
+      "sheetKey": "G",
+      "capo": 0,
+      "time": "3/4",
+      "bpm": 90,
+      "strum": "waltz-3-4",
+      "chords": ["G", "C", "D"],
+      "sheet": [
+        [["i", "Verse 1"]],
+        [["c", "[G]"], ["x", "No grid "], ["c", "[C]"], ["x", "here"]],
+        [["c", "[D]"], ["x", "Just a "], ["c", "[G]"], ["x", "sheet"]]
+      ]
+    },
+    {
+      "id": "six-eight-song",
+      "title": "Six Eight Song",
+      "artist": "Fixture Author",
+      "level": "Hard",
+      "key": "D",
+      "sheetKey": "D",
+      "capo": 0,
+      "time": "6/8",
+      "bpm": 60,
+      "strum": "du-6-8",
+      "chords": ["D", "A", "Bm", "G"],
+      "sheet": [
+        [["i", "Verse 1"]],
+        [["c", "[D]"], ["x", "Six eight "], ["c", "[A]"], ["x", "time"]],
+        [["c", "[Bm]"], ["x", "Two pulses "], ["c", "[G]"], ["x", "per bar"]]
+      ],
+      "grid": [
+        {
+          "label": "Verse 1",
+          "repeat": false,
+          "bars": [
+            {"beats": [{"chord": "D", "beats": 2}]},
+            {"beats": [{"chord": "A", "beats": 2}]},
+            {"beats": [{"chord": "Bm", "beats": 2}]},
+            {"beats": [{"chord": "G", "beats": 2}]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "two-four-song",
+      "title": "Two Four Song",
+      "artist": "Fixture Author",
+      "level": "Easy",
+      "key": "A",
+      "sheetKey": "A",
+      "capo": 0,
+      "time": "2/4",
+      "bpm": 80,
+      "strum": "ddu-2-4",
+      "chords": ["A", "D", "E7"],
+      "sheet": [
+        [["i", "Verse 1"]],
+        [["c", "[A]"], ["x", "Two four "], ["c", "[D]"], ["x", "time"]],
+        [["c", "[E7]"], ["x", "Back to "], ["c", "[A]"], ["x", "one"]]
+      ],
+      "grid": [
+        {
+          "label": "Verse 1",
+          "repeat": false,
+          "bars": [
+            {"beats": [{"chord": "A", "beats": 1}, {"chord": "D", "beats": 1}]},
+            {"beats": [{"chord": "E7", "beats": 1}, {"chord": "A", "beats": 1}]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "capo-key-song",
+      "title": "Capo Key Song",
+      "artist": "Fixture Author",
+      "level": "Medium",
+      "key": "D",
+      "sheetKey": "C",
+      "capo": 2,
+      "time": "4/4",
+      "bpm": 110,
+      "chords": ["C", "G", "Am", "F"],
+      "sheet": [
+        [["i", "Verse 1"]],
+        [["c", "[C]"], ["x", "Capo two "], ["c", "[G]"], ["x", "sounds in D"]],
+        [["c", "[Am]"], ["x", "Shapes in "], ["c", "[F]"], ["x", "C"]]
+      ]
+    },
+    {
+      "id": "no-time-song",
+      "title": "No Time Song",
+      "artist": "Fixture Author",
+      "level": "Easy",
+      "key": "E",
+      "sheetKey": "E",
+      "capo": 0,
+      "chords": ["E", "A", "B7"],
+      "sheet": [
+        [["i", "Verse 1"]],
+        [["c", "[E]"], ["x", "No metre "], ["c", "[A]"], ["x", "and no tempo"]],
+        [["c", "[B7]"], ["x", "Still "], ["c", "[E]"], ["x", "opens"]]
+      ]
+    }
+  ]
+}

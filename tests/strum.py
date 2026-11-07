@@ -29,6 +29,8 @@ sys.path.insert(0, ROOT)
 import chordpro  # noqa: E402
 
 STRUM_JS = os.path.join(ROOT, 'js', 'strum.js')
+METRONOME_JS = os.path.join(ROOT, 'js', 'metronome.js')
+SONGBOOKS_JS = os.path.join(ROOT, 'js', 'songbooks.js')
 
 # Felt beats per bar per metre, mirroring js/metronome.js BEATS_PER_BAR and
 # SB.metronomeBeatsPerBar. 6/8 is two dotted-quarter pulses, not six eighths.
@@ -48,6 +50,41 @@ def extract_js_patterns():
     out = subprocess.run(['node', '-e', script], capture_output=True,
                          text=True, check=True, cwd=ROOT)
     return json.loads(out.stdout)
+
+
+def _eval_js(expr):
+    """Evaluate a literal JS expression under node and return its JSON value."""
+    out = subprocess.run(
+        ['node', '-e', 'console.log(JSON.stringify(%s));' % expr],
+        capture_output=True, text=True, check=True, cwd=ROOT)
+    return json.loads(out.stdout)
+
+
+def extract_js_constants(path):
+    """Extract the tempo/metre constants shared by the browser scripts.
+
+    These are plain literals, but they are still evaluated under node rather
+    than parsed by hand so the test reads the same values the browser sees.
+    Missing declarations raise: a rename must fail this guard, not silently
+    skip the comparison.
+    """
+    with open(path, encoding='utf-8') as fh:
+        src = fh.read()
+
+    bpm = re.search(r'var\s+BPM_MIN\s*=\s*(\d+)\s*,\s*BPM_MAX\s*=\s*(\d+)\s*;', src)
+    if not bpm:
+        raise AssertionError('could not find BPM_MIN/BPM_MAX in %s' % path)
+    out = {'bpm_min': int(bpm.group(1)), 'bpm_max': int(bpm.group(2))}
+
+    beats = re.search(r'var\s+BEATS_PER_BAR\s*=\s*(\{[^}]*\})\s*;', src)
+    if beats:
+        out['beats_per_bar'] = _eval_js(beats.group(1))
+
+    times = re.search(r'var\s+TIME_SIGNATURES\s*=\s*(\[[^\]]*\])\s*;', src)
+    if times:
+        out['time_signatures'] = _eval_js(times.group(1))
+
+    return out
 
 
 class StrumLibraryTests(unittest.TestCase):
@@ -140,6 +177,48 @@ class StrumLibraryTests(unittest.TestCase):
         for time in ('4/4', '3/4', '6/8'):
             self.assertTrue(chordpro.strum_patterns_for(time),
                             'no patterns for %s' % time)
+
+    def test_tempo_and_metre_tables_agree(self):
+        """The Python copies are one allowlist, not three loose constants."""
+        self.assertLess(chordpro.BPM_MIN, chordpro.BPM_MAX)
+        self.assertEqual(set(chordpro.BEATS_PER_BAR), set(chordpro.TIME_SIGNATURES))
+        for time, beats in chordpro.BEATS_PER_BAR.items():
+            self.assertGreater(beats, 0, time)
+
+
+class MirrorConstantTests(unittest.TestCase):
+    """The browser copies of the tempo/metre constants must match chordpro.py.
+
+    Three copies exist because the build (Python) and the app (classic
+    scripts) cannot import each other: chordpro.py, js/metronome.js and
+    js/songbooks.js. Comments alone do not fail CI when one drifts, so this
+    guard extracts the JS literals under node and compares them.
+    """
+
+    def setUp(self):
+        if not shutil.which('node'):
+            self.skipTest('node not available')
+
+    def test_metronome_matches_python(self):
+        js = extract_js_constants(METRONOME_JS)
+        self.assertEqual(js['bpm_min'], chordpro.BPM_MIN)
+        self.assertEqual(js['bpm_max'], chordpro.BPM_MAX)
+        self.assertEqual(js['beats_per_bar'], chordpro.BEATS_PER_BAR)
+        self.assertEqual(set(js['beats_per_bar']), set(chordpro.TIME_SIGNATURES))
+
+    def test_songbooks_matches_python(self):
+        js = extract_js_constants(SONGBOOKS_JS)
+        self.assertEqual(js['bpm_min'], chordpro.BPM_MIN)
+        self.assertEqual(js['bpm_max'], chordpro.BPM_MAX)
+        self.assertEqual(js['time_signatures'], list(chordpro.TIME_SIGNATURES))
+        self.assertEqual(js['beats_per_bar'], chordpro.BEATS_PER_BAR)
+
+    def test_js_copies_match_each_other(self):
+        met = extract_js_constants(METRONOME_JS)
+        sb = extract_js_constants(SONGBOOKS_JS)
+        self.assertEqual((met['bpm_min'], met['bpm_max']),
+                         (sb['bpm_min'], sb['bpm_max']))
+        self.assertEqual(met['beats_per_bar'], sb['beats_per_bar'])
 
 
 class StrumMirrorTests(unittest.TestCase):

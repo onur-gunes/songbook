@@ -32,6 +32,11 @@ jobs:
         run: |
           google-chrome --version || chromium --version
 
+      # tests/env.py and tests/strum.py compare the JS copies of constants and
+      # patterns under node; fail here rather than silently skipping them.
+      - name: Show Node version
+        run: node --version
+
       - name: Serve the app
         run: |
           python3 -m http.server 8777 >/tmp/http.log 2>&1 &
@@ -63,6 +68,9 @@ jobs:
       - name: App smoke tests
         run: python3 tests/smoke.py "$BASE_URL"
 
+      - name: Empty-state boot (zero songbooks)
+        run: python3 tests/empty.py "$BASE_URL"
+
       - name: Import / IndexedDB tests
         run: python3 tests/import.py "$BASE_URL"
 
@@ -72,13 +80,19 @@ jobs:
       - name: Full behaviour suite
         run: python3 tests/run_html.py "$BASE_URL/tests/e2e.html"
 
-      # Fidelity (all songs of a book) runs against a local fixture book and is
-      # intentionally excluded from CI: it needs a served fixture and compares
-      # against locally-authored reference output. See tests/fidelity.html.
+      # Fidelity (all songs of a book) is a local authoring tool, not a CI
+      # suite: it needs a copy of the retired legacy/ archive and a matching
+      # local songbooks/krakow-ukulele.json. See "Run the tests" in README.md.
       # - name: Fidelity — all songs of the demo book
       #   run: python3 tests/run_html.py "$BASE_URL/tests/fidelity.html"
 
       # --- builds must succeed and stay reproducible ---
+      # Rebuild the shipped book from its ChordPro sources first: this runs
+      # validate_songbook()/validate_grid() and makes the drift check below
+      # cover songbooks/demo.json too, not just the single-file/Pages output.
+      - name: Rebuild ChordPro books
+        run: python3 build_songbook.py chordpro/demo
+
       - name: Build portable single file
         run: python3 build_single.py
 
