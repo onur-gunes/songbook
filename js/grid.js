@@ -30,6 +30,9 @@
     var activeGrid = null;      // { song, beatsPerBar, totalBeats, bpm, ... }
     var cursorRaf = null;
     var lastBeat = -1;
+    /* The currently lit strum arrow within the playhead's beat, so the grid
+       lane pulses subdivision-by-subdivision like the top strum row. */
+    var lastStrumEl = null;
 
     /* ---------------- helpers ---------------- */
 
@@ -450,6 +453,10 @@
             if (chord) chord.classList.remove('on');
         }
         lastBeat = -1;
+        if (lastStrumEl) {
+            lastStrumEl.classList.remove('on');
+            lastStrumEl = null;
+        }
         if (activeGrid && activeGrid.wrap) {
             delete activeGrid.wrap.dataset.activeBeat;
         }
@@ -578,6 +585,29 @@
         SB.strumSetPattern(resolved.pattern);
     }
 
+    /* Lights the subdivision arrow within the playhead's beat, one slot at a
+       time, exactly as the top strum row pulses each down / up. `chartBeats`
+       is the metronome position in beats (fraction = position within the
+       beat). Only the current beat carries a lit arrow. */
+    function paintStrumSlot(chartBeats) {
+        var idx = Math.floor(chartBeats);
+        var beatEl = activeGrid && activeGrid.beatEls ? activeGrid.beatEls[idx] : null;
+        if (!beatEl) {
+            if (lastStrumEl) { lastStrumEl.classList.remove('on'); lastStrumEl = null; }
+            return;
+        }
+        var subdiv = parseInt(beatEl.dataset.subdiv, 10) || 1;
+        var frac = chartBeats - idx;
+        var slot = Math.floor(frac * subdiv);
+        if (slot < 0) slot = 0;
+        if (slot >= subdiv) slot = subdiv - 1;
+        var slotEl = beatEl.querySelectorAll('.grid-beat-slot')[slot];
+        if (slotEl === lastStrumEl) return;
+        if (lastStrumEl) lastStrumEl.classList.remove('on');
+        lastStrumEl = slotEl;
+        if (slotEl) slotEl.classList.add('on');
+    }
+
     /* One repaint loop, driven by the metronome's audio clock. rAF is only a
      * repaint cadence; the beat is always recomputed from
      * SB.metronomePosition(), so a dropped frame cannot make the cursor drift
@@ -615,6 +645,8 @@
             activeGrid.wrap.dataset.gridPhase = 'playing';
         }
         if (idx !== lastBeat) setActive(idx);
+        // Pulse the current strum arrow within the playhead's beat.
+        paintStrumSlot(chartBeats);
         cursorRaf = requestAnimationFrame(cursorFrame);
     }
 
@@ -1032,10 +1064,6 @@
                 strokes.appendChild(slot);
             }
             beat.appendChild(strokes);
-
-            // The beat number underneath, faint, so the beat count stays legible.
-            var no = SB.el('span', 'grid-beat-no', String(b.index + 1));
-            beat.appendChild(no);
 
             // Mark overridden beats with a visible ring (not colour alone).
             if (resolved.source === 'beat' || resolved.source === 'bar') {

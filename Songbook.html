@@ -2000,16 +2000,16 @@ body.pattern-open { overflow: hidden; }
 }
 
 /* One cell per subdivision slot: the down / up arrows (or D / U letters),
-   with a dot for a rest. Bigger than before so the strum pattern reads at a
-   glance under each diagram. */
+   with a dot for a rest. Bigger so the strum pattern reads at a glance under
+   each diagram; the playhead lights each arrow in turn like the top row. */
 .sheet.chords-grid .grid-beat-slot {
-    width: calc(var(--grid-beat-h, 1.7em) * 0.72);
-    height: calc(var(--grid-beat-h, 1.7em) * 0.72);
-    line-height: calc(var(--grid-beat-h, 1.7em) * 0.72);
+    width: calc(var(--grid-beat-h, 1.7em) * 0.85);
+    height: calc(var(--grid-beat-h, 1.7em) * 0.85);
+    line-height: calc(var(--grid-beat-h, 1.7em) * 0.85);
     text-align: center;
     border-radius: 8px;
     color: var(--muted);
-    font-size: 1.05em;
+    font-size: 1.15em;
     font-weight: 800;
     position: relative;
     z-index: 1;
@@ -2021,30 +2021,23 @@ body.pattern-open { overflow: hidden; }
     opacity: 0.45;
 }
 
-/* The beat number stays small and faint behind the strokes — the line above
-   is the beat now, so the number only supports the count. */
-.sheet.chords-grid .grid-beat-no {
-    font-size: 0.5em;
-    color: var(--muted);
-    opacity: 0.35;
-    position: relative;
-    z-index: 1;
+/* The playhead's arrow: lights up subdivision-by-subdivision within the
+   active beat, so each down / up pulses as the metronome passes it. */
+.sheet.chords-grid .grid-beat-slot.on {
+    color: var(--surface);
+    opacity: 1;
+    font-weight: 900;
+    transform: scale(1.15);
 }
 
-/* The playhead's beat: the line turns to the accent colour and the arrows
-   pop, so the current strum pulse is readable at a glance. */
+/* The playhead's beat: the line turns to the accent colour and the current
+   arrow pops, so the current strum pulse is readable at a glance. */
 .sheet.chords-grid .grid-beat.on {
     color: var(--surface);
 }
 .sheet.chords-grid .grid-beat.on::before {
     background: var(--accent);
     opacity: 1;
-}
-.sheet.chords-grid .grid-beat.on .grid-beat-slot,
-.sheet.chords-grid .grid-beat.on .grid-beat-slot.rest {
-    color: var(--surface);
-    opacity: 1;
-    font-weight: 900;
 }
 
 /* An overridden beat keeps its own ring so the distinction is not colour
@@ -7105,6 +7098,9 @@ button.structure-close,
     var activeGrid = null;      // { song, beatsPerBar, totalBeats, bpm, ... }
     var cursorRaf = null;
     var lastBeat = -1;
+    /* The currently lit strum arrow within the playhead's beat, so the grid
+       lane pulses subdivision-by-subdivision like the top strum row. */
+    var lastStrumEl = null;
 
     /* ---------------- helpers ---------------- */
 
@@ -7525,6 +7521,10 @@ button.structure-close,
             if (chord) chord.classList.remove('on');
         }
         lastBeat = -1;
+        if (lastStrumEl) {
+            lastStrumEl.classList.remove('on');
+            lastStrumEl = null;
+        }
         if (activeGrid && activeGrid.wrap) {
             delete activeGrid.wrap.dataset.activeBeat;
         }
@@ -7653,6 +7653,29 @@ button.structure-close,
         SB.strumSetPattern(resolved.pattern);
     }
 
+    /* Lights the subdivision arrow within the playhead's beat, one slot at a
+       time, exactly as the top strum row pulses each down / up. `chartBeats`
+       is the metronome position in beats (fraction = position within the
+       beat). Only the current beat carries a lit arrow. */
+    function paintStrumSlot(chartBeats) {
+        var idx = Math.floor(chartBeats);
+        var beatEl = activeGrid && activeGrid.beatEls ? activeGrid.beatEls[idx] : null;
+        if (!beatEl) {
+            if (lastStrumEl) { lastStrumEl.classList.remove('on'); lastStrumEl = null; }
+            return;
+        }
+        var subdiv = parseInt(beatEl.dataset.subdiv, 10) || 1;
+        var frac = chartBeats - idx;
+        var slot = Math.floor(frac * subdiv);
+        if (slot < 0) slot = 0;
+        if (slot >= subdiv) slot = subdiv - 1;
+        var slotEl = beatEl.querySelectorAll('.grid-beat-slot')[slot];
+        if (slotEl === lastStrumEl) return;
+        if (lastStrumEl) lastStrumEl.classList.remove('on');
+        lastStrumEl = slotEl;
+        if (slotEl) slotEl.classList.add('on');
+    }
+
     /* One repaint loop, driven by the metronome's audio clock. rAF is only a
      * repaint cadence; the beat is always recomputed from
      * SB.metronomePosition(), so a dropped frame cannot make the cursor drift
@@ -7690,6 +7713,8 @@ button.structure-close,
             activeGrid.wrap.dataset.gridPhase = 'playing';
         }
         if (idx !== lastBeat) setActive(idx);
+        // Pulse the current strum arrow within the playhead's beat.
+        paintStrumSlot(chartBeats);
         cursorRaf = requestAnimationFrame(cursorFrame);
     }
 
@@ -8107,10 +8132,6 @@ button.structure-close,
                 strokes.appendChild(slot);
             }
             beat.appendChild(strokes);
-
-            // The beat number underneath, faint, so the beat count stays legible.
-            var no = SB.el('span', 'grid-beat-no', String(b.index + 1));
-            beat.appendChild(no);
 
             // Mark overridden beats with a visible ring (not colour alone).
             if (resolved.source === 'beat' || resolved.source === 'bar') {
