@@ -1584,6 +1584,124 @@ async function main() {
     win().songbookTest.clearPlan('polska-gurom', 'arahja');
     win().localStorage.removeItem(strumKey);
 
+    // 20e. per-section strum selectors (issue #107)
+    const sectionBtn = () => $('strumSectionsBtn');
+    const sectionPanel = () => $('strumSections');
+    const sectionSelects = () => Array.from(doc().querySelectorAll('#strumSectionsList .strum-section-select'));
+    const sectionSummary = () => $('strumSectionsSummary').textContent;
+    const sectionSong = () => win().songbookTest.getSong('stand-by-me');
+    const sectionPlan = () => win().songbookTest.loadPlan('popular', 'stand-by-me');
+    const sectionSelect = role => sectionSelects().filter(s => s.dataset.role === role)[0];
+    const chooseSection = (role, id) => {
+        const sel = sectionSelect(role);
+        sel.value = id;
+        sel.dispatchEvent(new (win().Event)('change', {bubbles: true}));
+    };
+
+    win().songbookTest.clearPlan('popular', 'stand-by-me');
+    win().location.hash = '#/popular/stand-by-me';
+    await wait(350);
+    ok('per-section control is present', !!sectionBtn());
+    ok('per-section control starts collapsed',
+        sectionBtn().getAttribute('aria-expanded') === 'false' && sectionPanel().hidden === true,
+        sectionBtn().getAttribute('aria-expanded') + ' hidden=' + sectionPanel().hidden);
+    ok('per-section control points at its panel',
+        sectionBtn().getAttribute('aria-controls') === 'strumSections');
+
+    const sectionRoles = win().songbookTest.songSectionRoles(sectionSong(), sectionPlan());
+    ok('roles are generated from the song, not a fixed list',
+        JSON.stringify(sectionRoles) === JSON.stringify(['verse', 'chorus', 'bridge']),
+        sectionRoles.join(','));
+    ok('repeated verse sections collapse into one role',
+        sectionRoles.filter(r => r === 'verse').length === 1, sectionRoles.join(','));
+    ok('a song with no sections yields no roles',
+        win().songbookTest.songSectionRoles({sheet: [[['x', 'just lyrics']]]}).length === 0);
+
+    const sectionMain = win().songbookTest.mainStrumFor(sectionSong(), sectionPlan());
+    sectionBtn().click();
+    await wait(60);
+    ok('expanding shows the section panel',
+        sectionBtn().getAttribute('aria-expanded') === 'true' && sectionPanel().hidden === false);
+    ok('one selector per section role', sectionSelects().length === sectionRoles.length,
+        sectionSelects().length + ' vs ' + sectionRoles.length);
+    ok('selectors are keyed by canonical role',
+        sectionSelects().map(s => s.dataset.role).join(',') === sectionRoles.join(','),
+        sectionSelects().map(s => s.dataset.role).join(','));
+    ok('every selector defaults to Same as song',
+        sectionSelects().every(s => s.value === ''),
+        sectionSelects().map(s => s.value).join(','));
+    ok('selectors use the full pattern list for the metre',
+        sectionSelects().every(s => s.options.length ===
+            win().songbookTest.strumPatternsForSong(sectionSong(), sectionPlan()).length + 1),
+        sectionSelects().map(s => s.options.length).join(','));
+    ok('selectors are labelled for screen readers',
+        sectionSelects().every(s => /strum pattern/i.test(s.getAttribute('aria-label'))),
+        sectionSelects()[0] && sectionSelects()[0].getAttribute('aria-label'));
+    ok('the collapsed summary is not claiming a difference yet',
+        $('strumSectionsSummary').hidden === true && sectionSummary() === '',
+        sectionSummary());
+
+    chooseSection('chorus', 'dddudu-4-4');
+    await wait(60);
+    ok('a section choice writes the plan',
+        sectionPlan().sectionStrums.chorus === 'dddudu-4-4',
+        JSON.stringify(sectionPlan().sectionStrums));
+    ok('the strum row updates immediately to that section',
+        sState().pattern && sState().pattern.id === 'dddudu-4-4',
+        sState().pattern && sState().pattern.id);
+    ok('the row is redrawn with the chosen pattern',
+        sRow().querySelectorAll('.strum-slot').length === 8,
+        sRow().querySelectorAll('.strum-slot').length);
+    const chorusAt = win().songbookTest.resolveStrumAt(
+        sectionSong(), {block: 1, bar: 0, beat: 0}, sectionPlan());
+    ok('the resolver applies the choice to the chorus role',
+        chorusAt.source === 'section' && chorusAt.id === 'dddudu-4-4',
+        chorusAt.source + ':' + chorusAt.id);
+
+    chooseSection('bridge', 'eighths-4-4');
+    await wait(40);
+    sectionBtn().click();
+    await wait(60);
+    ok('collapsing hides the section panel',
+        sectionBtn().getAttribute('aria-expanded') === 'false' && sectionPanel().hidden === true);
+    ok('collapsed summary reports that patterns differ',
+        sectionSummary() === 'Multiple patterns', sectionSummary());
+    ok('collapsed row returns to the one song pattern',
+        sState().pattern && sState().pattern.id === sectionMain.id,
+        sState().pattern && sState().pattern.id);
+
+    sectionBtn().click();
+    await wait(60);
+    chooseSection('chorus', '');
+    chooseSection('bridge', '');
+    await wait(60);
+    ok('choosing Same as song removes the override',
+        !sectionPlan().sectionStrums.chorus && !sectionPlan().sectionStrums.bridge,
+        JSON.stringify(sectionPlan().sectionStrums));
+    ok('the selectors show Same as song again',
+        sectionSelect('chorus').value === '' && sectionSelect('bridge').value === '',
+        sectionSelect('chorus').value + ',' + sectionSelect('bridge').value);
+    sectionBtn().click();
+    await wait(60);
+    ok('collapsed summary clears once sections agree again',
+        $('strumSectionsSummary').hidden === true && sectionSummary() === '',
+        sectionSummary());
+
+    // Escape closes the expanded panel and returns focus to the control.
+    sectionBtn().click();
+    await wait(60);
+    const focusSel = sectionSelect('verse');
+    focusSel.focus();
+    focusSel.dispatchEvent(new (win().KeyboardEvent)('keydown', {key: 'Escape', bubbles: true}));
+    await wait(60);
+    ok('Escape collapses the section panel',
+        sectionBtn().getAttribute('aria-expanded') === 'false' && sectionPanel().hidden === true);
+    ok('Escape returns focus to the disclosure control',
+        doc().activeElement === sectionBtn(),
+        doc().activeElement && (doc().activeElement.id || doc().activeElement.tagName));
+
+    win().songbookTest.clearPlan('popular', 'stand-by-me');
+
     // 20d. play-along grid chart (issue #44)
     const gridBtn = () => doc().querySelector('.chord-mode-btn[data-chord-mode="grid"]');
     const gridSheet = () => doc().querySelector('.sheet.chords-grid');

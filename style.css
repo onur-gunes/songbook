@@ -1254,6 +1254,99 @@ main {
     font-size: 0.95rem;
 }
 
+/* per-section strum selectors */
+.strum-sections-btn {
+    height: 36px;
+    min-width: 0;
+    padding: 0 10px;
+    gap: 6px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.strum-sections-btn:hover,
+.strum-sections-btn:focus-visible { border-color: var(--accent); }
+
+.strum-sections-btn.is-multiple {
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--line));
+}
+
+.strum-sections-btn.is-multiple .strum-sections-summary { color: var(--accent); }
+
+.strum-sections-chevron {
+    display: inline-block;
+    font-size: 0.8rem;
+    line-height: 1;
+    transition: transform 0.15s ease;
+}
+
+.strum-sections-btn[aria-expanded="true"] .strum-sections-chevron {
+    transform: rotate(90deg);
+}
+
+.strum-sections {
+    /* Full row in the wrapped desktop toolbar; the mobile rule below turns
+     * this back into a normal column item. */
+    flex: 0 0 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px 18px;
+    padding: 8px 2px 2px;
+    border-top: 1px dashed var(--line);
+}
+
+.strum-sections[hidden] { display: none; }
+
+.strum-sections-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+}
+
+.strum-section-field {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.strum-section-label {
+    color: var(--muted);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.strum-section-select {
+    height: 34px;
+    max-width: 220px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.strum-section-select:hover,
+.strum-section-select:focus-visible { border-color: var(--accent); }
+
+.strum-sections-empty {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
 /* custom strum pattern editor */
 
 body.pattern-open { overflow: hidden; }
@@ -2663,6 +2756,29 @@ body.tuner-open { overflow: hidden; }
         font-size: 0.75rem;
         text-overflow: ellipsis;
     }
+    #strumGroup .tool-controls {
+        flex-wrap: wrap;
+        row-gap: 6px;
+    }
+    .strum-sections-btn {
+        flex: 0 1 auto;
+        min-width: 0;
+        padding: 0 8px;
+        font-size: 0.7rem;
+    }
+    .strum-sections-summary {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .strum-sections {
+        flex: none;
+        width: 100%;
+        gap: 8px 12px;
+        padding-top: 6px;
+    }
+    .strum-sections-list { width: 100%; gap: 8px 12px; }
+    .strum-section-field { flex: 1 1 140px; }
+    .strum-section-select { max-width: 100%; width: 100%; }
 
     .chord-item img, .chord-item .missing { height: calc(62px * var(--chord-size, 1)); }
 

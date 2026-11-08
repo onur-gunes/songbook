@@ -96,11 +96,11 @@ class SectionMirrorTests(unittest.TestCase):
         ]
         with open(SECTIONS_JS, encoding='utf-8') as fh:
             src = fh.read()
-        script = ('var window = { SB: {} };\n'
-                  + src
-                  + '\nconsole.log(JSON.stringify(%s.map(function (c) { '
-                  + 'return window.SB.sectionRole(c); })));'
-                  % json.dumps(cases))
+        script = (('var window = { SB: {} };\n'
+                   + src
+                   + '\nconsole.log(JSON.stringify(%s.map(function (c) { '
+                   + 'return window.SB.sectionRole(c); })));'
+                  ) % json.dumps(cases))
         out = subprocess.run(['node', '-e', script], capture_output=True,
                              text=True, check=True, cwd=ROOT)
         got = json.loads(out.stdout)
