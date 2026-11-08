@@ -70,14 +70,14 @@ def main():
             cells = grid_beats()
 
             all_have_strokes = all(c['hasStrokes'] for c in cells)
-            all_have_numbers = all(c['hasNumber'] for c in cells)
+            no_numbers = not any(c['hasNumber'] for c in cells)
             no_legacy_slash = not any(c['text'].strip() == '/' for c in cells)
             bar_controls_match = info['barControls'] == info['bars']
 
             ok('%s/%s grid opens (%d bars, %d beats)' % (book, song, info['bars'], info['beats']),
                info['bars'] > 0 and info['beats'] > 0)
             ok('%s/%s every beat shows strokes' % (book, song), all_have_strokes)
-            ok('%s/%s every beat shows its number' % (book, song), all_have_numbers)
+            ok('%s/%s beat numbers removed from under the diagrams' % (book, song), no_numbers)
             ok('%s/%s no legacy "/" beat' % (book, song), no_legacy_slash)
             ok('%s/%s one bar strum control per bar' % (book, song), bar_controls_match)
 
