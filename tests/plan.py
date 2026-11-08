@@ -66,7 +66,7 @@ def harness(extra='', local_storage=None):
         )
     return (
         'var SB = { state: {} };\n'
-        'var window = { SB: SB };\n'
+        'var window = { SB: SB, location: { pathname: \'/songbook/\', protocol: \'https:\' } };\n'
         + storage_init
         + read(CORE_JS)
         + '\n' + read(SECTIONS_JS)
@@ -191,15 +191,20 @@ class PlanRoundTripTests(unittest.TestCase):
             plan.sectionStrums = { chorus: 'ddudu-4-4' };
             SB.savePlan('sb', 'song', plan);
             var loaded = SB.loadPlan('sb', 'song');
-            console.log(JSON.stringify({ loaded: loaded, edits: SB.hasLocalEdits(loaded) }));
             SB.clearPlan('sb', 'song');
-            console.log(JSON.stringify({ after: SB.loadPlan('sb', 'song'), edits: SB.hasLocalEdits('sb', 'song') }));
+            var after = SB.loadPlan('sb', 'song');
+            console.log(JSON.stringify({
+                loaded: loaded,
+                edits: SB.hasLocalEdits(loaded),
+                after: after,
+                afterEdits: SB.hasLocalEdits('sb', 'song')
+            }));
         ''', {'songbook:plan:sb\0song': '{"version":1,"songStrum":null,"sectionStrums":{},"customPatterns":[],"barStrums":{},"beatStrums":{}}'})
         self.assertEqual(got['loaded']['songStrum'], 'dddudu-4-4')
         self.assertEqual(got['loaded']['sectionStrums'], {'chorus': 'ddudu-4-4'})
-        self.assertTrue(got['loaded']['edits'])
+        self.assertTrue(got['edits'])
         self.assertEqual(got['after']['songStrum'], None)
-        self.assertFalse(got['after']['edits'])
+        self.assertFalse(got['afterEdits'])
 
     def test_seed_from_legacy_strum_key(self):
         got = run_js('''
@@ -217,7 +222,7 @@ class PlanRoundTripTests(unittest.TestCase):
             SB.clearPlan('sb', 'song');
             var b = SB.hasLocalEdits('sb', 'song');
             console.log(JSON.stringify([a, b]));
-        ''')
+        ''', {})
         self.assertEqual(got, [True, False])
 
 
@@ -232,17 +237,19 @@ class PlanPrecedenceTests(unittest.TestCase):
                 'grid': None, 'time': None}
 
     def test_beat_override_wins_over_bar_and_section(self):
+        # A beat override replaces just that beat's slots (2 slots for 4/4),
+        # but keeps the id of the pattern the bar/section resolved to.
         plan = dict(self.default_plan())
         plan['sectionStrums'] = {'verse': 'dddudu-4-4'}
         plan['barStrums'] = {'0:0': 'ddudu-4-4'}
-        plan['beatStrums'] = {'0:0:2': 'DU-U'}
+        plan['beatStrums'] = {'0:0:2': 'DU'}
         got = run_js('''
             var song = %s;
             var plan = %s;
             var r = SB.resolveStrumAt(song, { block: 0, bar: 0, beat: 2 }, plan);
             console.log(JSON.stringify({ source: r.source, id: r.id, slots: r.slots }));
         ''' % (json.dumps(SONG), json.dumps(plan)))
-        self.assertEqual(got, {'source': 'beat', 'id': None, 'slots': 'DU-U'})
+        self.assertEqual(got, {'source': 'beat', 'id': 'ddudu-4-4', 'slots': 'DU'})
 
     def test_bar_override_wins_over_section(self):
         plan = dict(self.default_plan())
@@ -285,7 +292,7 @@ class PlanPrecedenceTests(unittest.TestCase):
             var plan = SB.loadPlan('sb', 'song-1');
             var r = SB.resolveStrumAt(song, { block: 0, bar: 0, beat: 0 }, plan);
             console.log(JSON.stringify({ source: r.source, id: r.id }));
-        ''' % json.dumps(SONG))
+        ''' % json.dumps(SONG), {'songbook:strum:sb\0song-1': '"dddudu-4-4"'})
         self.assertEqual(got, {'source': 'manual', 'id': 'dddudu-4-4'})
 
     def test_song_default_wins_over_fallback(self):
@@ -307,21 +314,21 @@ class PlanPrecedenceTests(unittest.TestCase):
             var r = SB.resolveStrumAt(song, { block: 0, bar: 0, beat: 0 }, plan);
             console.log(JSON.stringify({ source: r.source, id: r.id }));
         ''' % (json.dumps(song), json.dumps(plan)))
-        self.assertEqual(got['source'], 'fallback')
-        self.assertTrue(got['id'].endswith('-4-4'))
+        self.assertEqual(got, {'source': 'fallback', 'id': 'downs-4-4'})
 
     def test_beat_override_slots_line_up_with_subdivision(self):
         plan = dict(self.default_plan())
-        plan['beatStrums'] = {'0:0:1': 'DU-U'}
+        plan['beatStrums'] = {'0:0:1': 'DU'}
         got = run_js('''
             var song = %s;
             var plan = %s;
             var r = SB.resolveStrumAt(song, { block: 0, bar: 0, beat: 1 }, plan);
             console.log(JSON.stringify({ source: r.source, slots: r.slots, subdiv: r.subdiv }));
         ''' % (json.dumps(SONG), json.dumps(plan)))
-        self.assertEqual(got, {'source': 'beat', 'slots': 'DU-U', 'subdiv': 2})
+        self.assertEqual(got, {'source': 'beat', 'slots': 'DU', 'subdiv': 2})
 
     def test_invalid_beat_override_falls_back(self):
+        # 'XY' is dropped by normalization, so beat 1 inherits from the song.
         plan = dict(self.default_plan())
         plan['beatStrums'] = {'0:0:1': 'XY'}
         got = run_js('''
@@ -331,7 +338,7 @@ class PlanPrecedenceTests(unittest.TestCase):
             console.log(JSON.stringify({ source: r.source, slots: r.slots }));
         ''' % (json.dumps(SONG), json.dumps(plan)))
         self.assertEqual(got['source'], 'song')
-        self.assertEqual(got['slots'], 'D')
+        self.assertEqual(got['slots'], 'D-')
 
     def test_no_song_gives_none(self):
         got = run_js('''
