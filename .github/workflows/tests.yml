@@ -66,6 +66,11 @@ jobs:
       - name: Per-song edit plan unit tests
         run: python3 tests/plan.py
 
+      # Grid strum lane: strokes per felt beat, beat count, bar/beat strum
+      # controls, 4/4 / 3/4 / 6/8 / 2/4 and held chords (beats > 1).
+      - name: Grid strum lane browser tests
+        run: python3 tests/grid.py "$BASE_URL"
+
       # --- browser suites ---
       - name: Chord engine unit tests
         run: python3 tests/run_html.py "$BASE_URL/tests/chordkit.html"

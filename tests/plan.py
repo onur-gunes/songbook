@@ -21,6 +21,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -109,8 +110,19 @@ def harness(extra='', local_storage=None):
 def run_js(extra, local_storage=None):
     script = harness(extra, local_storage)
     try:
-        out = subprocess.run(
-            ['node', '-e', script], capture_output=True, text=True, check=True, cwd=ROOT)
+        # Write the script to a temp file instead of passing it inline via
+        # `node -e`: the concatenated app modules can exceed the OS argument
+        # limit (ARG_MAX), especially on runners with a large environment.
+        with tempfile.NamedTemporaryFile(
+                'w', suffix='.js', delete=False, dir=ROOT) as fh:
+            fh.write(script)
+            tmp = fh.name
+        try:
+            out = subprocess.run(
+                ['node', tmp], capture_output=True, text=True, check=True,
+                cwd=ROOT)
+        finally:
+            os.unlink(tmp)
     except subprocess.CalledProcessError as e:
         print('NODE STDERR:', e.stderr, file=sys.stderr)
         raise

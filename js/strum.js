@@ -232,6 +232,13 @@
         return planIndex(block) + ':' + planIndex(bar) + ':' + planIndex(beat);
     };
 
+    /* Look up a pattern id (library or custom) for a metre, validating it with
+     * patternFits so a corrupt id never resolves to a row that misaligns with
+     * the metronome. Returns null when the id is unknown or doesn't fit. */
+    SB.strumPatternFor = function (id, time, plan) {
+        return findPattern(id, time, plan);
+    };
+
     function roleAt(song, plan, at) {
         if (at && SB.isSectionRole(at.role)) return at.role;
         var grid = (plan && plan.grid) || (song && song.grid) || [];
@@ -320,6 +327,47 @@
      * deliberately not consulted here: until the grid lane follows playback
      * (Step 5), choosing a section pattern previews it while the selectors
      * are open, and collapsing returns to this song default. */
+
+    /* Set the strum pattern shown on the top row without persisting it: used
+     * when playback follows the effective pattern section by section. Rebuilds
+     * the row and keeps the selector in step. */
+    SB.strumSetPattern = function (pattern) {
+        SB.state.strum.pattern = pattern;
+        if (pattern) {
+            renderRow();
+            buildSelect();
+        }
+        SB.applyStrumSettings();
+    };
+
+    /* Persist a bar-level strum override (pattern id, or null to inherit) in
+     * the per-song edit plan. Coordinates are block/bar positions in the grid. */
+    SB.setBarOverride = function (sbId, songId, block, bar, patternId) {
+        if (!sbId) sbId = SB.state.active && SB.state.active.id;
+        if (!sbId || !songId) return;
+        var plan = SB.loadPlan(sbId, songId);
+        var key = SB.planBarKey(block, bar);
+        if (patternId == null) { delete plan.barStrums[key]; }
+        else { plan.barStrums[key] = patternId; }
+        SB.savePlan(sbId, songId, plan);
+    };
+
+    /* Persist a beat-level strum override (subdivision slots string, or null
+     * to inherit) in the per-song edit plan. Coordinates are block/bar/beat. */
+    SB.setBeatOverride = function (sbId, songId, block, bar, beat, slots) {
+        if (!sbId) sbId = SB.state.active && SB.state.active.id;
+        if (!sbId || !songId) return;
+        var plan = SB.loadPlan(sbId, songId);
+        var key = SB.planBeatKey(block, bar, beat);
+        if (slots == null) { delete plan.beatStrums[key]; }
+        else { plan.beatStrums[key] = String(slots); }
+        SB.savePlan(sbId, songId, plan);
+    };
+
+    /* The row still shows one song-wide pattern until the expanded section
+     * selectors land; start at the song's first section so a section default
+     * previews correctly when one exists. */
+
     function chooseFor(song) {
         if (!song) return null;
         return mainPatternFor(song, currentPlanFor(song));

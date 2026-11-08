@@ -1950,21 +1950,204 @@ body.pattern-open { overflow: hidden; }
 .sheet.chords-grid .grid-beat {
     position: absolute;
     bottom: 0;
-    width: var(--grid-beat-h, 1.7em);
+    /* left + width are set inline per beat; content is centred inside the cell. */
     height: var(--grid-beat-h, 1.7em);
-    line-height: var(--grid-beat-h, 1.7em);
-    transform: translateX(-50%);
-    text-align: center;
-    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 3px;
+    padding-top: 3px;
+    box-sizing: border-box;
     color: var(--muted);
     font-family: var(--mono);
     font-size: 0.85em;
 }
 
-.sheet.chords-grid .grid-beat.on {
-    color: var(--surface);
-    background: var(--accent);
+.sheet.chords-grid .grid-beat-strokes {
+    display: flex;
+    gap: 4px;
 }
+
+.sheet.chords-grid .grid-beat-slot {
+    width: calc(var(--grid-beat-h, 1.7em) * 0.5);
+    height: calc(var(--grid-beat-h, 1.7em) * 0.5);
+    line-height: calc(var(--grid-beat-h, 1.7em) * 0.5);
+    text-align: center;
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.8em;
+    font-weight: 700;
+}
+
+.sheet.chords-grid .grid-beat-slot.rest {
+    color: var(--muted);
+    font-weight: 400;
+    opacity: 0.55;
+}
+
+.sheet.chords-grid .grid-beat-no {
+    font-size: 0.6em;
+    color: var(--muted);
+    opacity: 0.6;
+}
+
+.sheet.chords-grid .grid-beat.on {
+    background: var(--accent);
+    border-radius: 6px;
+    color: var(--surface);
+}
+.sheet.chords-grid .grid-beat.on .grid-beat-slot,
+.sheet.chords-grid .grid-beat.on .grid-beat-slot.rest {
+    color: var(--surface);
+    opacity: 1;
+    font-weight: 700;
+}
+
+/* An overridden beat keeps its own ring so the distinction is not colour
+   only. An editing highlight rings the beat currently being edited. */
+.sheet.chords-grid .grid-beat-overridden {
+    border: 2px solid var(--accent);
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+.sheet.chords-grid .grid-beat-editing,
+.sheet.chords-grid .grid-beat.editing {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+    z-index: 2;
+}
+
+/* Bar-level strum control: opens the bar strum editor. */
+.sheet.chords-grid .grid-bar-strum {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.68rem;
+    padding: 2px 7px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    line-height: 1;
+}
+.sheet.chords-grid .grid-bar-strum:hover { background: var(--surface-2); }
+.sheet.chords-grid .grid-bar-strum.grid-bar-strum-overridden,
+.sheet.chords-grid .grid-bar-strum[aria-pressed="true"] {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--surface-2);
+}
+
+/* Grid strum editor (bar / beat overrides). Fixed panel, separate from the
+   sheet so it survives grid re-renders. */
+.grid-strum-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 60;
+}
+.grid-strum-editor {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(440px, 92vw);
+    max-height: 78vh;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+    z-index: 65;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    color: var(--text);
+}
+.grid-strum-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    flex: none;
+}
+.grid-strum-kicker {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+}
+.grid-strum-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+.grid-strum-close {
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    color: var(--muted);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+}
+.grid-strum-close:hover { color: var(--text); }
+.grid-strum-body {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+.grid-editor-option {
+    flex: none;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
+.grid-editor-option:hover { background: var(--surface); }
+.grid-editor-option-active {
+    background: var(--accent);
+    color: var(--surface);
+    border-color: var(--accent);
+}
+.grid-editor-slot-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin: 0 0 4px;
+}
+.grid-editor-slots {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.grid-editor-slot {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-family: var(--mono);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.grid-editor-slot.rest { color: var(--muted); font-weight: 400; opacity: 0.65; }
+.grid-editor-slot:hover { border-color: var(--accent); }
 
 /* Lyric rows sit in the system's bottom padding, one row per sheet line.
    Each phrase in a row starts at the x of the chord change that introduced it
