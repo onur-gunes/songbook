@@ -80,6 +80,7 @@
    "grid": [
     {
      "label": "Intro/Chorus",
+     "role": "intro",
      "repeat": true,
      "bars": [
       {

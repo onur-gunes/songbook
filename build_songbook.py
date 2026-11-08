@@ -176,6 +176,9 @@ def validate_grid(song):
         if not isinstance(block, dict):
             problems.append('%s: block is not an object' % where)
             continue
+        role = block.get('role')
+        if role is not None and role not in chordpro.SECTION_ROLES:
+            problems.append('%s: invalid section role %r' % (where, role))
         label = block.get('label')
         if label is not None:
             where = '%s %r' % (where, label)

@@ -97,12 +97,12 @@
         return core === 'FC' ? 'F/C' : core;
     }
 
-    /* Sheet section headers are italic lines. Performance directions are
-     * italic too ("quietly", "down-down"), so only section words count. */
+    /* Sheet section headers are italic lines whose label resolves to a real
+     * section role (bilingual: "Zwrotka 2" and "Verse 2" are both verses).
+     * Performance directions ("quietly") and chord-only lines resolve to
+     * `other`, so they stay lyric lines. */
     function isSectionHeader(text) {
-        var t = String(text == null ? '' : text).trim().toLowerCase();
-        if (!t) return false;
-        return /(^|[\s(])(intro|verse|chorus|bridge|pre-?chorus|outro|interlude|instrumental|solo|riff|refrain|hook|coda|tag)([\s):,/]|$)/.test(t);
+        return SB.sectionRole(String(text == null ? '' : text)) !== 'other';
     }
 
     function sheetSections(song) {
@@ -333,6 +333,7 @@
                     used[match.index] = true;
                     out.push({
                         label: section.name || match.block.label || '',
+                        role: SB.sectionRole(match.block.label || section.name || ''),
                         bars: tiled.bars,
                         repeat: !!match.block.repeat,
                         model: model
@@ -344,6 +345,7 @@
             if (bars.length) {
                 out.push({
                     label: section.name || '',
+                    role: SB.sectionRole(section.name || ''),
                     bars: bars,
                     repeat: false,
                     model: model
@@ -357,6 +359,7 @@
             out = authored.map(function (block) {
                 return {
                     label: block.label || '',
+                    role: SB.sectionRole(block.label || ''),
                     bars: block.bars || [],
                     repeat: !!block.repeat,
                     model: null
