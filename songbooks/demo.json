@@ -235,6 +235,7 @@
    "grid": [
     {
      "label": "Intro",
+     "role": "intro",
      "repeat": false,
      "bars": [
       {
@@ -273,6 +274,7 @@
     },
     {
      "label": "Chorus",
+     "role": "chorus",
      "repeat": true,
      "bars": [
       {
@@ -865,6 +867,7 @@
    "grid": [
     {
      "label": "Verse",
+     "role": "verse",
      "repeat": true,
      "bars": [
       {

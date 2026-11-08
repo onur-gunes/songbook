@@ -84,11 +84,22 @@
             }
             blocks.push({
                 label: (typeof block.label === 'string') ? block.label : '',
+                role: normalizeGridRole(block),
                 repeat: !!block.repeat,
                 bars: bars
             });
         }
         return blocks;
+    }
+
+    /* A missing or invalid role is derived from the block's label via the
+     * shared role model (js/sections.js), so every imported grid block carries
+     * a valid role. An explicitly present, valid role is kept as authored. */
+    function normalizeGridRole(block) {
+        var role = block.role;
+        if (typeof role === 'string' && SB.isSectionRole(role)) return role;
+        var label = typeof block.label === 'string' ? block.label : '';
+        return SB.sectionRole(label);
     }
 
     /* The sheet is the only imported field with a nested shape. A missing or
