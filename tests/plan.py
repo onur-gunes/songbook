@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Unit tests for the per-song edit plan (issue #105).
+"""Unit tests for the per-song edit plan (issue #105) and custom strum
+patterns (issue #106).
 
 The plan object lives in js/personal.js, exposed through songbookTest. These
 tests load js/core.js, js/sections.js, js/songbooks.js, js/personal.js and
@@ -387,6 +388,146 @@ class PlanPrecedenceTests(unittest.TestCase):
         ''' % (json.dumps(SONG), json.dumps(plan)))
         self.assertEqual(got['after'], 'downs-4-4')
         self.assertEqual(got['id'], 'dddudu-4-4')
+
+
+class CustomPatternTests(unittest.TestCase):
+    """Step 3 custom patterns: the full list, references and validation."""
+
+    def setUp(self):
+        if not shutil.which('node'):
+            self.skipTest('node not available')
+
+    def plan(self, **kwargs):
+        plan = {'version': 1, 'songStrum': None, 'sectionStrums': {},
+                'customPatterns': [], 'barStrums': {}, 'beatStrums': {},
+                'grid': None, 'time': None}
+        plan.update(kwargs)
+        return plan
+
+    def test_full_list_is_library_plus_matching_custom_patterns(self):
+        plan = self.plan(customPatterns=[
+            {'id': 'custom-1', 'name': 'Mine', 'time': '4/4',
+             'subdiv': 2, 'slots': 'DUDUDUDU'},
+            {'id': 'custom-waltz', 'name': 'Waltz', 'time': '3/4',
+             'subdiv': 2, 'slots': 'D-DUDU'},
+            # Right metre, wrong slot count: not usable, so not listed.
+            {'id': 'custom-short', 'name': 'Short', 'time': '4/4',
+             'subdiv': 2, 'slots': 'DUDU'},
+        ])
+        got = run_js('''
+            var song = %s;
+            var plan = %s;
+            var list = SB.strumPatternsForSong(song, plan);
+            console.log(JSON.stringify({
+                ids: list.map(function (p) { return p.id; }),
+                times: list.map(function (p) { return p.time; }),
+                last: list[list.length - 1].id
+            }));
+        ''' % (json.dumps(SONG), json.dumps(plan)))
+        self.assertIn('custom-1', got['ids'])
+        self.assertNotIn('custom-waltz', got['ids'])
+        self.assertNotIn('custom-short', got['ids'])
+        self.assertIn('downs-4-4', got['ids'])
+        self.assertEqual(set(got['times']), {'4/4'})
+        self.assertEqual(got['ids'].index('custom-1'), len(got['ids']) - 1)
+
+    def test_custom_pattern_resolves_by_reference(self):
+        plan = self.plan(
+            songStrum='custom-1',
+            customPatterns=[{'id': 'custom-1', 'name': 'Mine', 'time': '4/4',
+                             'subdiv': 2, 'slots': 'D-DUD-DU'}])
+        got = run_js('''
+            var song = %s;
+            var plan = %s;
+            var r = SB.resolveStrumAt(song, { block: 0, bar: 0, beat: 0 }, plan);
+            console.log(JSON.stringify({ source: r.source, id: r.id, slots: r.slots }));
+        ''' % (json.dumps(SONG), json.dumps(plan)))
+        self.assertEqual(got, {'source': 'manual', 'id': 'custom-1', 'slots': 'D-'})
+
+    def test_editing_a_custom_pattern_updates_every_reference(self):
+        # Same id, new definition: every reference must resolve to the new
+        # slots without rewriting the references themselves.
+        before = self.plan(
+            sectionStrums={'verse': 'custom-1'},
+            barStrums={'0:0': 'custom-1'},
+            customPatterns=[{'id': 'custom-1', 'name': 'Mine', 'time': '4/4',
+                             'subdiv': 2, 'slots': 'D-DUD-DU'}])
+        after = self.plan(
+            sectionStrums={'verse': 'custom-1'},
+            barStrums={'0:0': 'custom-1'},
+            customPatterns=[{'id': 'custom-1', 'name': 'Mine', 'time': '4/4',
+                             'subdiv': 2, 'slots': 'DUDUDUDU'}])
+        got = run_js('''
+            var song = %s;
+            function get(plan, at) {
+                var r = SB.resolveStrumAt(song, at, plan);
+                return { id: r.id, slots: r.slots };
+            }
+            console.log(JSON.stringify({
+                beforeBar: get(%s, { block: 0, bar: 0, beat: 2 }),
+                afterBar: get(%s, { block: 0, bar: 0, beat: 2 }),
+                afterSection: get(%s, { block: 0, bar: 1, beat: 0 })
+            }));
+        ''' % (json.dumps(SONG), json.dumps(before), json.dumps(after),
+               json.dumps(after)))
+        self.assertEqual(got['beforeBar'], {'id': 'custom-1', 'slots': 'D-'})
+        self.assertEqual(got['afterBar'], {'id': 'custom-1', 'slots': 'DU'})
+        self.assertEqual(got['afterSection'], {'id': 'custom-1', 'slots': 'DU'})
+
+    def test_built_in_patterns_cannot_be_shadowed(self):
+        plan = self.plan(
+            songStrum='downs-4-4',
+            customPatterns=[{'id': 'downs-4-4', 'name': 'Fake', 'time': '4/4',
+                             'subdiv': 2, 'slots': 'DUDUDUDU'}])
+        got = run_js('''
+            var song = %s;
+            var plan = %s;
+            var list = SB.strumPatternsForSong(song, plan);
+            var r = SB.resolveStrumAt(song, { block: 0, bar: 0, beat: 0 }, plan);
+            console.log(JSON.stringify({
+                ids: list.map(function (p) { return p.id; }),
+                name: r.pattern.name,
+                slots: r.pattern.slots
+            }));
+        ''' % (json.dumps(SONG), json.dumps(plan)))
+        self.assertEqual(got['ids'].count('downs-4-4'), 1)
+        self.assertEqual(got['name'], 'All downs')
+        self.assertEqual(got['slots'], 'D-D-D-D-')
+
+    def test_validation_messages(self):
+        plan = self.plan(customPatterns=[
+            {'id': 'taken', 'name': 'Taken', 'time': '4/4',
+             'subdiv': 2, 'slots': 'DUDUDUDU'}])
+        got = run_js('''
+            var plan = %s;
+            function check(p, exclude) {
+                return SB.validateCustomPattern(p, plan, '4/4', exclude);
+            }
+            function p(over) {
+                var base = { id: 'new', name: 'Mine', time: '4/4',
+                             subdiv: 2, slots: 'DUDUDUDU' };
+                Object.keys(over || {}).forEach(function (k) { base[k] = over[k]; });
+                return base;
+            }
+            console.log(JSON.stringify({
+                ok: check(p()),
+                noName: check(p({ name: '   ' })),
+                wrongTime: check(p({ time: '3/4' })),
+                badChar: check(p({ slots: 'DUDUDUDX' })),
+                badLength: check(p({ slots: 'DUDU' })),
+                duplicate: check(p({ id: 'taken' })),
+                selfEdit: check(p({ id: 'taken' }), 'taken'),
+                builtIn: check(p({ id: 'downs-4-4' }))
+            }));
+        ''' % json.dumps(plan))
+        self.assertIsNone(got['ok'])
+        self.assertIn('name', got['noName'])
+        self.assertIn('metre', got['wrongTime'])
+        self.assertIn('D (down), U (up)', got['badChar'])
+        self.assertIn('needs 8 slots', got['badLength'])
+        self.assertIn('already in use', got['duplicate'])
+        self.assertIsNone(got['selfEdit'])
+        self.assertIn('built-in', got['builtIn'])
 
 
 if __name__ == '__main__':
