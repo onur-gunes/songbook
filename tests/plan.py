@@ -48,8 +48,16 @@ def read(path):
 
 
 def harness(extra='', local_storage=None):
-    """Build a node script that stubs SB/window/localStorage, loads the app
-    modules, runs `extra`, and console.logs its result as JSON."""
+    """Build a node script that stubs the SB surface, loads the app modules
+    under test (sections.js, personal.js, strum.js), runs `extra`, and
+    console.logs its result as JSON.
+
+    core.js is deliberately *not* loaded: it references `document` at load
+    time, which does not exist under node. The existing node suites
+    (env.py, strum.py) avoid loading it for the same reason. The minimal SB
+    surface below is what personal.js and strum.js touch; they attach their
+    own functions to window.SB.
+    """
     storage_init = ''
     if local_storage is not None:
         storage_init = (
@@ -64,14 +72,30 @@ def harness(extra='', local_storage=None):
             '  };\n'
             '})();\n'
         )
+    sep = chr(0)
     return (
-        'var SB = { state: {} };\n'
+        'var SB = {\n'
+        '  state: { active: null },\n'
+        '  NS: \'songbook\',\n'
+        '  SEP: \'\\u0000\',\n'
+        '  DEFAULT_TIME: \'4/4\',\n'
+        '  lsGet: function (k, f) {\n'
+        '    try { var v = window.localStorage.getItem(k); return v === null ? f : JSON.parse(v); }\n'
+        '    catch (e) { return f; }\n'
+        '  },\n'
+        '  lsSet: function (k, v) {\n'
+        '    try { window.localStorage.setItem(k, JSON.stringify(v)); }\n'
+        '    catch (e) { /* ignore */ }\n'
+        '  },\n'
+        '  metronomeBeatsPerBar: function (t) {\n'
+        '    var b = { \'4/4\': 4, \'3/4\': 3, \'6/8\': 2, \'2/4\': 2 };\n'
+        '    return b[t] || 4;\n'
+        '  }\n'
+        '};\n'
         'var document = { body: {} };\n'
         'var window = { SB: SB, document: document, location: { pathname: \'/songbook/\', protocol: \'https:\' } };\n'
         + storage_init
-        + read(CORE_JS)
-        + '\n' + read(SECTIONS_JS)
-        + '\n' + read(SONGBOOKS_JS)
+        + read(SECTIONS_JS)
         + '\n' + read(PLAN_JS)
         + '\n' + read(STRUM_JS)
         + '\n' + extra
