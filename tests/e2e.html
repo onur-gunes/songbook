@@ -1397,7 +1397,194 @@ async function main() {
     win().localStorage.removeItem('songbook:strum:polska-gurom\u0000arahja');
     win().localStorage.removeItem('songbook:bpm:polska-gurom\u0000arahja');
 
-    // 20c. play-along grid chart (issue #44)
+    // 20c. custom strum pattern editor (issue #106)
+    const planKey = 'songbook:plan:polska-gurom\u0000arahja';
+    const strumKey = 'songbook:strum:polska-gurom\u0000arahja';
+    const planFor = () => {
+        const raw = win().localStorage.getItem(planKey);
+        return raw ? JSON.parse(raw) : null;
+    };
+    const emptyPlan = () => win().songbookTest.emptyPlan();
+    const libraryIds = new Set(win().songbookTest.strumPatterns().map(p => p.id));
+    const fullList = () => win().songbookTest.strumPatternsForSong(
+        win().songbookTest.getSong('arahja'), planFor() || emptyPlan());
+    const customPatterns = () => (planFor() || emptyPlan()).customPatterns;
+    const editorSlots = () => Array.from(doc().querySelectorAll('#patternSlots .pattern-slot'));
+    const openEditor = () => { $('strumEditBtn').focus(); $('strumEditBtn').click(); };
+    const editorItem = id => doc().querySelector('.pattern-item[data-pattern-id="' + id + '"]');
+
+    win().songbookTest.clearPlan('polska-gurom', 'arahja');
+    win().location.hash = '#/polska-gurom/arahja';
+    await wait(300);
+    const libraryBefore = JSON.stringify(win().songbookTest.strumPatterns());
+
+    openEditor();
+    await wait(50);
+    ok('pattern editor opens', $('patternOverlay').hidden === false, $('patternOverlay').hidden);
+    ok('pattern editor is a modal dialog',
+        $('patternSheet').getAttribute('role') === 'dialog' &&
+        $('patternSheet').getAttribute('aria-modal') === 'true' &&
+        $('patternSheet').getAttribute('aria-labelledby') === 'patternTitle');
+    ok('pattern list shows every pattern for the metre',
+        doc().querySelectorAll('#patternList .pattern-item').length === fullList().length,
+        doc().querySelectorAll('#patternList .pattern-item').length + ' vs ' + fullList().length);
+    ok('focus starts inside the dialog',
+        doc().activeElement === $('patternSheet') || $('patternSheet').contains(doc().activeElement),
+        doc().activeElement && doc().activeElement.id);
+    const builtInItems = Array.from(doc().querySelectorAll('#patternList .pattern-item'))
+        .filter(li => libraryIds.has(li.dataset.patternId));
+    ok('built-in patterns are not editable',
+        builtInItems.length > 0 && builtInItems.every(li =>
+            !li.querySelector('[data-pattern-action="edit"]') &&
+            !li.querySelector('[data-pattern-action="delete"]') &&
+            li.querySelector('[data-pattern-action="duplicate"]')),
+        builtInItems.length);
+
+    // create: a fresh row starts on every felt beat
+    $('patternNew').click();
+    await wait(30);
+    ok('new pattern opens the form',
+        $('patternForm').hidden === false && $('patternListPane').hidden === true);
+    ok('metre is fixed to the song', $('patternTime').textContent === '4/4',
+        $('patternTime').textContent);
+    ok('fresh row has one slot per subdivision',
+        editorSlots().length === 8, editorSlots().length);
+    ok('first slot starts as a down-stroke', editorSlots()[0].textContent === 'D',
+        editorSlots()[0].textContent);
+
+    // slots cycle D -> U -> rest on click
+    editorSlots()[0].click(); await wait(20);
+    ok('slot cycles down to up', editorSlots()[0].textContent === 'U', editorSlots()[0].textContent);
+    editorSlots()[0].click(); await wait(20);
+    ok('slot cycles up to rest', editorSlots()[0].textContent === '\u00b7',
+        editorSlots()[0].textContent);
+    editorSlots()[0].click(); await wait(20);
+    ok('slot cycles rest back to down', editorSlots()[0].textContent === 'D',
+        editorSlots()[0].textContent);
+    // second slot ('-') -> D -> U, so the pattern is D U - D - D - D -
+    editorSlots()[1].click(); editorSlots()[1].click(); await wait(20);
+    const upGlyph = sState().notation === 'letters' ? 'U' : '\u2191';
+    ok('live preview follows the slots',
+        $('patternPreview').textContent.indexOf(upGlyph) > -1,
+        $('patternPreview').textContent);
+
+    $('patternName').value = 'My strum';
+    $('patternName').dispatchEvent(new (win().Event)('input'));
+    $('patternSave').click();
+    await wait(100);
+    const custom = customPatterns()[0];
+    ok('editor closes after save', $('patternOverlay').hidden === true);
+    ok('custom pattern saved in the plan',
+        custom && custom.name === 'My strum' && custom.slots === 'DUD-D-D-' &&
+        custom.time === '4/4' && custom.subdiv === 2, JSON.stringify(custom));
+    ok('custom pattern is selected', sState().pattern && sState().pattern.id === custom.id,
+        sState().pattern && sState().pattern.id);
+    ok('custom pattern appears in the main selector',
+        Array.prototype.some.call(sSel().options, o => o.value === custom.id && o.dataset.custom === '1'),
+        Array.prototype.map.call(sSel().options, o => o.value).join(','));
+    ok('custom pattern is drawn in the row',
+        sState().pattern.slots === 'DUD-D-D-', sState().pattern.slots);
+
+    // persists across navigation
+    win().location.hash = '#/polska-gurom/baranek';
+    await wait(250);
+    win().location.hash = '#/polska-gurom/arahja';
+    await wait(250);
+    ok('custom pattern persists across navigation',
+        sState().pattern && sState().pattern.id === custom.id,
+        sState().pattern && sState().pattern.id);
+
+    // edit updates the definition and therefore every reference to its id
+    openEditor(); await wait(50);
+    const customItem = editorItem(custom.id);
+    ok('custom pattern offers edit and delete',
+        !!customItem && !!customItem.querySelector('[data-pattern-action="edit"]') &&
+        !!customItem.querySelector('[data-pattern-action="delete"]'));
+    customItem.querySelector('[data-pattern-action="edit"]').click();
+    await wait(30);
+    ok('edit form is prefilled', $('patternName').value === 'My strum', $('patternName').value);
+    $('patternName').value = 'My strum edited';
+    $('patternName').dispatchEvent(new (win().Event)('input'));
+    editorSlots()[0].click(); // D -> U
+    await wait(20);
+    $('patternSave').click();
+    await wait(100);
+    const edited = customPatterns().filter(p => p.id === custom.id)[0];
+    ok('edit keeps the id and replaces the definition',
+        edited && edited.name === 'My strum edited' && edited.slots === 'UUD-D-D-',
+        JSON.stringify(edited));
+    ok('editing updates the visible row', sState().pattern.slots === 'UUD-D-D-',
+        sState().pattern.slots);
+
+    // duplicate-from-library opens a prefilled new pattern
+    openEditor(); await wait(50);
+    editorItem('downs-4-4').querySelector('[data-pattern-action="duplicate"]').click();
+    await wait(30);
+    ok('duplicate opens a prefilled form',
+        $('patternForm').hidden === false &&
+        $('patternName').value.indexOf('All downs copy') === 0,
+        $('patternName').value);
+    ok('duplicate keeps the source slots',
+        editorSlots().map(b => b.textContent).join('') === 'D\u00b7D\u00b7D\u00b7D\u00b7',
+        editorSlots().map(b => b.textContent).join(''));
+    $('patternSave').click();
+    await wait(100);
+    ok('duplicate saved as a second custom pattern', customPatterns().length === 2,
+        customPatterns().length);
+    const duplicate = customPatterns().filter(p => p.id !== custom.id)[0];
+    ok('duplicate is a new custom pattern with the copied slots',
+        duplicate && duplicate.slots === 'D-D-D-D-' && !libraryIds.has(duplicate.id),
+        JSON.stringify(duplicate));
+    ok('duplicate is selected', sState().pattern.id === duplicate.id, sState().pattern.id);
+
+    // delete removes the definition and falls back from a reference to it
+    openEditor(); await wait(50);
+    editorItem(duplicate.id).querySelector('[data-pattern-action="delete"]').click();
+    await wait(100);
+    ok('delete removes the custom pattern',
+        !customPatterns().some(p => p.id === duplicate.id),
+        JSON.stringify(customPatterns().map(p => p.id)));
+    ok('deleted pattern leaves the selector',
+        !Array.prototype.some.call(sSel().options, o => o.value === duplicate.id));
+    ok('selection falls back after deleting the selected pattern',
+        sState().pattern && sState().pattern.id !== duplicate.id,
+        sState().pattern && sState().pattern.id);
+
+    // invalid values are rejected with a message. The slot row itself always
+    // has the right shape, so the same validator the editor uses is checked
+    // here for length and characters.
+    const planNow = planFor() || emptyPlan();
+    const badLength = win().songbookTest.validateCustomPattern(
+        {id: 'x', name: 'X', time: '4/4', subdiv: 2, slots: 'DUDU'}, planNow, '4/4');
+    const badChar = win().songbookTest.validateCustomPattern(
+        {id: 'x', name: 'X', time: '4/4', subdiv: 2, slots: 'DUDUDUDX'}, planNow, '4/4');
+    const badTime = win().songbookTest.validateCustomPattern(
+        {id: 'x', name: 'X', time: '3/4', subdiv: 2, slots: 'D-DUDU'}, planNow, '4/4');
+    ok('invalid slot length is rejected', /needs 8 slots/.test(badLength), badLength);
+    ok('invalid slot character is rejected', /D \(down\), U \(up\)/.test(badChar), badChar);
+    ok('a mismatched metre is rejected', /metre/.test(badTime), badTime);
+
+    openEditor(); await wait(50);
+    $('patternNew').click(); await wait(30);
+    $('patternName').value = '   ';
+    $('patternSave').click(); await wait(30);
+    ok('blank name shows a clear message',
+        $('patternError').hidden === false && /name/i.test($('patternError').textContent),
+        $('patternError').textContent);
+    ok('the form stays open after a validation error', $('patternForm').hidden === false);
+    doc().dispatchEvent(new (win().KeyboardEvent)('keydown', {key: 'Escape', bubbles: true}));
+    await wait(30);
+    ok('Escape closes the pattern editor', $('patternOverlay').hidden === true);
+    ok('focus returns to the editor button',
+        doc().activeElement === $('strumEditBtn'),
+        doc().activeElement && (doc().activeElement.id || doc().activeElement.tagName));
+
+    ok('built-in library is unchanged', JSON.stringify(win().songbookTest.strumPatterns()) === libraryBefore);
+
+    win().songbookTest.clearPlan('polska-gurom', 'arahja');
+    win().localStorage.removeItem(strumKey);
+
+    // 20d. play-along grid chart (issue #44)
     const gridBtn = () => doc().querySelector('.chord-mode-btn[data-chord-mode="grid"]');
     const gridSheet = () => doc().querySelector('.sheet.chords-grid');
     const gridBeatEls = () => doc().querySelectorAll('.sheet.chords-grid .grid-beat');

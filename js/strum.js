@@ -87,6 +87,24 @@
         return PATTERNS.filter(function (p) { return p.time === time; });
     }
 
+    /* The full list a song can use: the immutable library plus the custom
+     * definitions stored in its edit plan, filtered to the song's effective
+     * metre. Custom definitions are validated with patternFits (below), so a
+     * corrupt one can never reach the row; an id that belongs to the library is
+     * skipped, because a built-in pattern must not be shadowed or replaced. */
+    SB.strumPatternsForSong = function (song, plan) {
+        if (!song) return [];
+        if (plan === undefined) plan = currentPlanFor(song);
+        var time = timeFor(song, plan);
+        var list = SB.strumPatternsFor(time).slice();
+        var custom = (SB.normalizePlan(plan).customPatterns) || [];
+        custom.forEach(function (p) {
+            if (byId[p.id]) return;
+            if (patternFits(p, time)) list.push(p);
+        });
+        return list;
+    }
+
     /* Resolve a stored/sidecar id to a pattern, but only if it actually fits
      * the song's metre: a 3/4 id on a 4/4 song would render a row that does not
      * line up with the clicks, so it is treated as "no choice" rather than
@@ -150,11 +168,16 @@
 
     function findPattern(id, time, plan) {
         if (!id || !time) return null;
+        // Built-ins win over a custom definition with the same id: the library
+        // is immutable, and this is what stops an imported/corrupt plan from
+        // silently replacing "All downs" with different slots.
+        var builtIn = patternForSong(id, time);
+        if (builtIn) return builtIn;
         var custom = (plan && plan.customPatterns) || [];
         for (var i = 0; i < custom.length; i++) {
             if (custom[i].id === id) return patternFits(custom[i], time) ? custom[i] : null;
         }
-        return patternForSong(id, time);
+        return null;
     }
 
     function currentPlanFor(song) {
@@ -230,7 +253,7 @@
             source = pattern ? 'song' : null;
         }
         if (!pattern) {
-            var list = SB.strumPatternsFor(time);
+            var list = SB.strumPatternsForSong(song, plan);
             pattern = list.length ? list[0] : null;
             source = pattern ? 'fallback' : 'none';
         }
@@ -356,10 +379,14 @@
         if (!sel) return;
         sel.textContent = '';
         var song = SB.state.currentSong;
-        var list = song ? SB.strumPatternsFor(timeFor(song)) : [];
+        var plan = song ? currentPlanFor(song) : SB.emptyPlan();
+        var list = song ? SB.strumPatternsForSong(song, plan) : [];
         list.forEach(function (p) {
             var opt = SB.el('option', null, p.name);
             opt.value = p.id;
+            // Marks the entries that came from the plan, so a stylesheet or a
+            // test can tell them apart without relying on the name.
+            if (!byId[p.id]) opt.dataset.custom = '1';
             sel.appendChild(opt);
         });
         if (SB.state.strum.pattern) sel.value = SB.state.strum.pattern.id;
@@ -546,6 +573,7 @@
      * when the song has no metre), renders the row and the selector, and shows
      * the whole control on every song. */
     SB.loadStrumForSong = function (song) {
+        closePatternEditor();
         SB.strumOnMetronomeStop();
         SB.state.strum.pattern = chooseFor(song);
         renderRow();
@@ -556,7 +584,8 @@
     SB.setStrum = function (id) {
         var song = SB.state.currentSong;
         if (!song) return;
-        var pattern = patternForSong(id, timeFor(song));
+        var plan = currentPlanFor(song);
+        var pattern = findPattern(id, timeFor(song, plan), plan);
         if (!pattern) return;
         SB.state.strum.pattern = pattern;
         if (SB.state.active) saveChoice(SB.state.active.id, song.id, pattern.id);
@@ -568,11 +597,559 @@
         if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
     }
 
+    /* ---------------- custom pattern editor ----------------
+     *
+     * Custom definitions live in the Step 2 plan (plan.customPatterns). The
+     * editor never touches the built-in PATTERNS array: a built-in can only be
+     * duplicated into a custom definition, and every custom reference is by id
+     * so renaming or re-slotting one definition updates every place that uses
+     * it. */
+
+    var editor = null;
+    var MAX_SUBDIV = 4;
+
+    function customPatternIn(plan, id) {
+        var custom = (plan && plan.customPatterns) || [];
+        for (var i = 0; i < custom.length; i++) {
+            if (custom[i].id === id) return custom[i];
+        }
+        return null;
+    }
+
+    function generatePatternId(plan) {
+        var base = 'custom-' + Date.now().toString(36);
+        var id = base;
+        var n = 2;
+        while (byId[id] || customPatternIn(plan, id)) id = base + '-' + (n++);
+        return id;
+    }
+
+    function copyName(base, plan) {
+        var stem = (base || 'Pattern') + ' copy';
+        var name = stem;
+        var n = 2;
+        while ((plan.customPatterns || []).some(function (p) { return p.name === name; })) {
+            name = stem + ' ' + (n++);
+        }
+        return name;
+    }
+
+    function slotWord(ch) {
+        return ch === 'D' ? 'down' : (ch === 'U' ? 'up' : 'rest');
+    }
+
+    function nextSlot(ch) {
+        return ch === 'D' ? 'U' : (ch === 'U' ? '-' : 'D');
+    }
+
+    /* The single validation the editor uses before it writes a definition to
+     * the plan. Returns a clear, user-facing message, or null when valid. The
+     * `excludeId` argument lets an edit keep its own id while still rejecting
+     * a duplicate. */
+    SB.validateCustomPattern = function (pattern, plan, time, excludeId) {
+        if (!pattern || typeof pattern !== 'object') return 'Pattern data is missing.';
+        var name = typeof pattern.name === 'string' ? pattern.name.trim() : '';
+        if (!name) return 'Give the pattern a name.';
+        if (!time) return 'This song has no metre to match.';
+        if (pattern.time !== time) {
+            return 'Pattern metre must match the song\'s metre (' + time + ').';
+        }
+        var subdiv = pattern.subdiv;
+        if (typeof subdiv !== 'number' || !isFinite(subdiv) ||
+            subdiv < 1 || subdiv !== Math.floor(subdiv)) {
+            return 'Subdivision must be a whole number of at least 1.';
+        }
+        var slots = pattern.slots;
+        if (typeof slots !== 'string' || !slots.length) return 'Add at least one slot.';
+        if (!/^[DU-]+$/.test(slots)) {
+            return 'Use only D (down), U (up) and - (rest) in the slots.';
+        }
+        var expected = SB.metronomeBeatsPerBar(time) * subdiv;
+        if (slots.length !== expected) {
+            return 'A ' + time + ' pattern at ' + subdiv + ' slot' +
+                (subdiv === 1 ? '' : 's') + ' per beat needs ' + expected +
+                ' slots; this one has ' + slots.length + '.';
+        }
+        var id = pattern.id;
+        if (typeof id !== 'string' || !id) return 'Pattern id is missing.';
+        if (byId[id]) return 'That id belongs to a built-in pattern, which cannot be replaced.';
+        var custom = (plan && plan.customPatterns) || [];
+        for (var i = 0; i < custom.length; i++) {
+            if (custom[i].id === id && id !== excludeId) {
+                return 'That pattern id is already in use.';
+            }
+        }
+        return null;
+    }
+
+    function defaultSlots(beats, subdiv) {
+        var out = '';
+        for (var b = 0; b < beats; b++) {
+            for (var i = 0; i < subdiv; i++) out += i === 0 ? 'D' : '-';
+        }
+        return out;
+    }
+
+    /* Changing the subdivision keeps each felt beat's opening slots and pads
+     * the rest with rests, so beat 1 does not jump from down-stroke to rest
+     * while the user is nudging the grid finer. */
+    function resizeSlots(slots, oldSubdiv, newSubdiv, beats) {
+        var out = '';
+        for (var b = 0; b < beats; b++) {
+            for (var i = 0; i < newSubdiv; i++) {
+                var idx = b * oldSubdiv + i;
+                out += i < oldSubdiv && idx < slots.length ? slots[idx] : '-';
+            }
+        }
+        return out;
+    }
+
+    function showPatternError(message) {
+        var err = SB.$('patternError');
+        if (!err) return;
+        err.textContent = message;
+        err.hidden = false;
+        try { err.focus({ preventScroll: true }); } catch (e) { err.focus(); }
+    }
+
+    function clearPatternError() {
+        var err = SB.$('patternError');
+        if (!err) return;
+        err.textContent = '';
+        err.hidden = true;
+    }
+
+    function patternTitle(text) {
+        var title = SB.$('patternTitle');
+        if (title) title.textContent = text;
+    }
+
+    function setPatternPane(name) {
+        var list = SB.$('patternListPane');
+        var form = SB.$('patternForm');
+        if (list) list.hidden = name === 'form';
+        if (form) form.hidden = name !== 'form';
+    }
+
+    function renderPatternList(plan) {
+        var list = SB.$('patternList');
+        if (!list || !editor) return;
+        list.textContent = '';
+        var song = SB.state.currentSong;
+        var patterns = SB.strumPatternsForSong(song, plan);
+        patterns.forEach(function (p) {
+            var custom = !byId[p.id] && !!customPatternIn(plan, p.id);
+            var li = SB.el('li', 'pattern-item');
+            li.dataset.patternId = p.id;
+
+            var main = SB.el('div', 'pattern-item-main');
+            var title = SB.el('div', 'pattern-item-title');
+            title.appendChild(SB.el('strong', 'pattern-item-name', p.name));
+            title.appendChild(SB.el('span', 'pattern-tag' + (custom ? ' is-custom' : ''),
+                custom ? 'Custom' : 'Built-in'));
+            if (SB.state.strum.pattern && SB.state.strum.pattern.id === p.id) {
+                title.appendChild(SB.el('span', 'pattern-tag is-current', 'In use'));
+            }
+            main.appendChild(title);
+
+            var mini = SB.el('span', 'pattern-item-mini');
+            for (var i = 0; i < p.slots.length; i++) {
+                var cell = SB.el('span', 'pattern-mini-slot' +
+                    (p.slots[i] === '-' ? ' rest' : '') +
+                    (i % p.subdiv === 0 ? ' beat' : ''), slotGlyph(p.slots[i]));
+                mini.appendChild(cell);
+            }
+            main.appendChild(mini);
+            main.appendChild(SB.el('span', 'pattern-item-meta',
+                p.time + ' \u00b7 ' + p.subdiv + ' per beat \u00b7 ' + p.slots.length + ' slots'));
+            li.appendChild(main);
+
+            var actions = SB.el('div', 'pattern-item-actions');
+            if (custom) {
+                actions.appendChild(patternActionButton('Edit', 'edit', p.id, p.name));
+                actions.appendChild(patternActionButton('Delete', 'delete', p.id, p.name));
+            }
+            actions.appendChild(patternActionButton('Duplicate', 'duplicate', p.id, p.name));
+            li.appendChild(actions);
+            list.appendChild(li);
+        });
+    }
+
+    function patternActionButton(label, action, id, name) {
+        var btn = SB.el('button', 'pattern-action', label);
+        btn.type = 'button';
+        btn.dataset.patternAction = action;
+        btn.dataset.patternId = id;
+        btn.setAttribute('aria-label', label + ' pattern ' + (name || id));
+        btn.addEventListener('click', function () {
+            if (action === 'edit') beginPatternEdit(id);
+            else if (action === 'delete') deleteCustomPattern(id);
+            else duplicatePattern(id);
+        });
+        return btn;
+    }
+
+    function showPatternList(focus) {
+        if (!editor) return;
+        var plan = SB.loadPlan(editor.sbId, editor.songId);
+        editor.mode = null;
+        editor.id = null;
+        editor.selectOnSave = false;
+        clearPatternError();
+        renderPatternList(plan);
+        setPatternPane('list');
+        patternTitle('Strum patterns');
+        if (focus !== false) {
+            var target = SB.$('patternNew');
+            if (target) {
+                try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+            }
+        }
+    }
+
+    function populateSubdivs(current) {
+        var sel = SB.$('patternSubdiv');
+        if (!sel) return;
+        sel.textContent = '';
+        var max = Math.max(MAX_SUBDIV, current || 1);
+        for (var n = 1; n <= max; n++) {
+            var opt = SB.el('option', null, n + ' per beat');
+            opt.value = String(n);
+            sel.appendChild(opt);
+        }
+        sel.value = String(current || 2);
+    }
+
+    function renderEditorSlots() {
+        var wrap = SB.$('patternSlots');
+        if (!wrap || !editor) return;
+        var subdiv = editor.subdiv;
+        var expected = SB.metronomeBeatsPerBar(editor.time) * subdiv;
+        if (editor.slots.length !== expected) {
+            editor.slots = resizeSlots(editor.slots, subdiv, subdiv,
+                SB.metronomeBeatsPerBar(editor.time));
+        }
+        wrap.textContent = '';
+        for (var i = 0; i < editor.slots.length; i++) {
+            (function (idx) {
+                var ch = editor.slots.charAt(idx);
+                var btn = SB.el('button', 'pattern-slot' +
+                    (ch === '-' ? ' rest' : '') +
+                    (idx % subdiv === 0 ? ' beat' : '') +
+                    (idx === 0 ? ' first' : ''),
+                    ch === '-' ? '\u00b7' : ch);
+                btn.type = 'button';
+                btn.dataset.idx = String(idx);
+                btn.setAttribute('aria-label', 'Slot ' + (idx + 1) + ': ' + slotWord(ch) +
+                    '. Activate to change to ' + slotWord(nextSlot(ch)) + '.');
+                btn.title = 'Slot ' + (idx + 1) + ': ' + slotWord(ch) +
+                    ' \u2014 click for ' + slotWord(nextSlot(ch));
+                btn.addEventListener('click', function () {
+                    cyclePatternSlot(idx);
+                });
+                wrap.appendChild(btn);
+            })(i);
+        }
+        updatePatternPreview();
+    }
+
+    function cyclePatternSlot(idx) {
+        if (!editor || idx < 0 || idx >= editor.slots.length) return;
+        var next = nextSlot(editor.slots.charAt(idx));
+        editor.slots = editor.slots.slice(0, idx) + next + editor.slots.slice(idx + 1);
+        renderEditorSlots();
+        var btn = SB.$('patternSlots') &&
+            SB.$('patternSlots').querySelector('.pattern-slot[data-idx="' + idx + '"]');
+        if (btn) {
+            try { btn.focus({ preventScroll: true }); } catch (e) { btn.focus(); }
+        }
+    }
+
+    function updatePatternPreview() {
+        var preview = SB.$('patternPreview');
+        if (!preview || !editor) return;
+        preview.textContent = '';
+        for (var i = 0; i < editor.slots.length; i++) {
+            var ch = editor.slots.charAt(i);
+            preview.appendChild(SB.el('span', 'pattern-preview-slot' +
+                (ch === '-' ? ' rest' : '') +
+                (i % editor.subdiv === 0 ? ' beat' : ''), slotGlyph(ch)));
+        }
+    }
+
+    function fillPatternForm(pattern) {
+        if (!editor) return;
+        editor.subdiv = pattern.subdiv;
+        editor.slots = pattern.slots;
+        editor.time = pattern.time;
+        var name = SB.$('patternName');
+        if (name) name.value = pattern.name;
+        var time = SB.$('patternTime');
+        if (time) time.textContent = pattern.time;
+        populateSubdivs(pattern.subdiv);
+        clearPatternError();
+        renderEditorSlots();
+        var del = SB.$('patternDelete');
+        if (del) del.hidden = editor.mode !== 'edit';
+        var save = SB.$('patternSave');
+        if (save) save.textContent = editor.mode === 'edit' ? 'Save' : 'Create';
+        setPatternPane('form');
+        patternTitle(editor.mode === 'edit' ? 'Edit pattern' :
+            (editor.mode === 'duplicate' ? 'Duplicate pattern' : 'New pattern'));
+        if (name) {
+            try { name.focus({ preventScroll: true }); name.select(); }
+            catch (e) { name.focus(); }
+        }
+    }
+
+    function beginPatternCreate(prefill) {
+        if (!editor) return;
+        var plan = SB.loadPlan(editor.sbId, editor.songId);
+        var time = editor.time;
+        var subdiv = (prefill && prefill.subdiv) || 2;
+        if (subdiv < 1 || subdiv !== Math.floor(subdiv)) subdiv = 2;
+        var slots = prefill && prefill.slots;
+        if (!slots || slots.length !== SB.metronomeBeatsPerBar(time) * subdiv) {
+            slots = defaultSlots(SB.metronomeBeatsPerBar(time), subdiv);
+        }
+        editor.mode = prefill ? 'duplicate' : 'create';
+        editor.id = null;
+        editor.selectOnSave = true;
+        fillPatternForm({
+            name: prefill ? copyName(prefill.name, plan) : '',
+            time: time,
+            subdiv: subdiv,
+            slots: slots
+        });
+    }
+
+    function beginPatternEdit(id) {
+        if (!editor) return;
+        var plan = SB.loadPlan(editor.sbId, editor.songId);
+        var pattern = customPatternIn(plan, id);
+        if (!pattern) return;
+        editor.mode = 'edit';
+        editor.id = id;
+        editor.selectOnSave = false;
+        fillPatternForm(pattern);
+    }
+
+    function duplicatePattern(id) {
+        if (!editor) return;
+        var plan = SB.loadPlan(editor.sbId, editor.songId);
+        var pattern = findPattern(id, editor.time, plan);
+        if (pattern) beginPatternCreate(pattern);
+    }
+
+    function refreshCurrentStrum() {
+        var song = SB.state.currentSong;
+        if (!song) return;
+        SB.state.strum.pattern = chooseFor(song);
+        renderRow();
+        buildSelect();
+        SB.updateStrumUi();
+        if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
+    }
+
+    function savePatternForm(e) {
+        if (e) e.preventDefault();
+        if (!editor) return;
+        var song = SB.state.currentSong;
+        var active = SB.state.active;
+        if (!song || !active || active.id !== editor.sbId || song.id !== editor.songId) {
+            showPatternError('The song changed while this editor was open. Close it and try again.');
+            return;
+        }
+        var plan = SB.loadPlan(editor.sbId, editor.songId);
+        var time = timeFor(song, plan);
+        if (time !== editor.time) {
+            showPatternError('The song\'s metre changed to ' + time + '. Close the editor and try again.');
+            return;
+        }
+        var nameEl = SB.$('patternName');
+        var name = nameEl ? nameEl.value.replace(/\s+/g, ' ').trim() : '';
+        var id = editor.id || generatePatternId(plan);
+        var pattern = {
+            id: id,
+            name: name,
+            time: time,
+            subdiv: editor.subdiv,
+            slots: editor.slots
+        };
+        var error = SB.validateCustomPattern(pattern, plan, time, editor.id);
+        if (error) { showPatternError(error); return; }
+
+        var list = plan.customPatterns || [];
+        var idx = -1;
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].id === id) { idx = i; break; }
+        }
+        if (idx >= 0) list[idx] = pattern;
+        else list.push(pattern);
+        plan.customPatterns = list;
+        // A newly created/duplicated pattern becomes the song's manual choice;
+        // editing an existing one leaves the current selection alone.
+        if (editor.mode !== 'edit') plan.songStrum = pattern.id;
+        SB.savePlan(editor.sbId, editor.songId, plan);
+        if (editor.mode !== 'edit') saveChoice(editor.sbId, editor.songId, pattern.id);
+
+        refreshCurrentStrum();
+        closePatternEditor();
+    }
+
+    function deleteCustomPattern(id) {
+        if (!editor) return;
+        var plan = SB.loadPlan(editor.sbId, editor.songId);
+        if (!customPatternIn(plan, id)) return;
+        plan.customPatterns = (plan.customPatterns || []).filter(function (p) {
+            return p.id !== id;
+        });
+        // A deleted definition must not leave dangling references: fall back to
+        // the song/library defaults rather than silently keeping a dead id.
+        if (plan.songStrum === id) plan.songStrum = null;
+        Object.keys(plan.sectionStrums || {}).forEach(function (role) {
+            if (plan.sectionStrums[role] === id) delete plan.sectionStrums[role];
+        });
+        Object.keys(plan.barStrums || {}).forEach(function (key) {
+            if (plan.barStrums[key] === id) delete plan.barStrums[key];
+        });
+        SB.savePlan(editor.sbId, editor.songId, plan);
+        try {
+            if (window.localStorage.getItem(SB.strumKey(editor.sbId, editor.songId)) === id) {
+                window.localStorage.removeItem(SB.strumKey(editor.sbId, editor.songId));
+            }
+        } catch (e) { /* ignore */ }
+        refreshCurrentStrum();
+        showPatternList();
+    }
+
+    function patternFocusables() {
+        var sheet = SB.$('patternSheet');
+        if (!sheet) return [];
+        return Array.prototype.filter.call(
+            sheet.querySelectorAll('button, input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+            function (el) {
+                return !el.disabled && !el.hidden && el.offsetParent !== null;
+            });
+    }
+
+    function onPatternEditorKeydown(e) {
+        var ov = SB.$('patternOverlay');
+        if (!ov || ov.hidden) return;
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            closePatternEditor();
+            return;
+        }
+        if (e.key !== 'Tab') return;
+        var focusables = patternFocusables();
+        if (!focusables.length) { e.preventDefault(); return; }
+        var first = focusables[0];
+        var last = focusables[focusables.length - 1];
+        var active = document.activeElement;
+        if (e.shiftKey && (active === first || active === SB.$('patternSheet'))) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && active === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    }
+
+    function openPatternEditor() {
+        var song = SB.state.currentSong;
+        var active = SB.state.active;
+        var ov = SB.$('patternOverlay');
+        if (!song || !active || !ov) return;
+        var plan = SB.loadPlan(active.id, song.id);
+        // Opening again while the manager is already up (for example after a
+        // programmatic click on the toolbar) must keep the original opener;
+        // the focused element at that point may be inside the dialog and about
+        // to be hidden.
+        var opener = (editor && editor.opener) || document.activeElement;
+        if (editor) closePatternEditor({ restoreFocus: false });
+        editor = {
+            sbId: active.id,
+            songId: song.id,
+            time: timeFor(song, plan),
+            opener: opener,
+            mode: null,
+            id: null,
+            selectOnSave: false
+        };
+        ov.hidden = false;
+        ov.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('pattern-open');
+        document.addEventListener('keydown', onPatternEditorKeydown);
+        renderPatternList(plan);
+        setPatternPane('list');
+        patternTitle('Strum patterns');
+        var sheet = SB.$('patternSheet');
+        if (sheet) {
+            try { sheet.focus({ preventScroll: true }); } catch (e) { sheet.focus(); }
+        }
+    }
+
+    function closePatternEditor(opts) {
+        var ov = SB.$('patternOverlay');
+        if (!ov || ov.hidden) {
+            editor = null;
+            return;
+        }
+        var opener = editor && editor.opener;
+        ov.hidden = true;
+        ov.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('pattern-open');
+        document.removeEventListener('keydown', onPatternEditorKeydown);
+        editor = null;
+        if (!opts || opts.restoreFocus !== false) {
+            var target = (opener && opener.isConnected && opener.offsetParent !== null)
+                ? opener : SB.$('strumEditBtn');
+            if (target) {
+                try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+            }
+        }
+    }
+
+    SB.openPatternEditor = openPatternEditor;
+    SB.closePatternEditor = closePatternEditor;
+
     SB.bindStrum = function () {
         var sel = SB.$('strumSelect');
         if (sel) sel.addEventListener('change', function () { SB.setStrum(sel.value); });
         var nbtn = SB.$('strumNotationBtn');
         if (nbtn) nbtn.addEventListener('click', SB.toggleStrumNotation);
+
+        var edit = SB.$('strumEditBtn');
+        if (edit) edit.addEventListener('click', openPatternEditor);
+        var close = SB.$('patternClose');
+        if (close) close.addEventListener('click', function () { closePatternEditor(); });
+        var cancel = SB.$('patternCancel');
+        if (cancel) cancel.addEventListener('click', function () { showPatternList(); });
+        var newBtn = SB.$('patternNew');
+        if (newBtn) newBtn.addEventListener('click', function () { beginPatternCreate(null); });
+        var form = SB.$('patternForm');
+        if (form) form.addEventListener('submit', savePatternForm);
+        var del = SB.$('patternDelete');
+        if (del) del.addEventListener('click', function () {
+            if (editor && editor.id) deleteCustomPattern(editor.id);
+        });
+        var subdiv = SB.$('patternSubdiv');
+        if (subdiv) subdiv.addEventListener('change', function () {
+            if (!editor) return;
+            var next = parseInt(subdiv.value, 10);
+            if (!(next >= 1) || next !== Math.floor(next)) return;
+            editor.slots = resizeSlots(editor.slots, editor.subdiv, next,
+                SB.metronomeBeatsPerBar(editor.time));
+            editor.subdiv = next;
+            renderEditorSlots();
+        });
+        var name = SB.$('patternName');
+        if (name) name.addEventListener('input', clearPatternError);
+        var overlay = SB.$('patternOverlay');
+        if (overlay) overlay.addEventListener('mousedown', function (e) {
+            if (e.target === overlay) closePatternEditor();
+        });
 
         var down = SB.$('strumSizeDown');
         if (down) down.addEventListener('click', function () { SB.setStrumSize(SB.state.strumSize - 0.1); });

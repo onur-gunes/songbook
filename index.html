@@ -202,6 +202,9 @@
                         <span class="sr-only">Strum pattern</span>
                         <select id="strumSelect" class="strum-select" aria-label="Strum pattern"></select>
                     </label>
+                    <button id="strumEditBtn" class="step-btn strum-edit-btn" type="button"
+                            aria-haspopup="dialog" aria-label="Edit custom strum patterns"
+                            title="Custom strum patterns">✎</button>
                     <div class="stepper">
                         <button id="strumNotationBtn" class="step-btn strum-notation-btn" type="button"
                                 aria-label="Showing arrows — click for D/U letters"
@@ -262,6 +265,61 @@
     Personal offline songbook · ukulele + guitar<br>
     Songs © their respective authors · personal, non-commercial use only
 </footer>
+
+<div id="patternOverlay" class="pattern-overlay" hidden aria-hidden="true">
+    <div id="patternSheet" class="pattern-sheet" role="dialog" aria-modal="true"
+         aria-labelledby="patternTitle" tabindex="-1">
+        <header class="pattern-head">
+            <div>
+                <span class="pattern-kicker">Strum</span>
+                <h2 id="patternTitle">Strum patterns</h2>
+            </div>
+            <button id="patternClose" class="pattern-close" type="button"
+                    aria-label="Close strum pattern editor">×</button>
+        </header>
+
+        <div id="patternListPane" class="pattern-list-pane">
+            <p class="pattern-hint">Built-in patterns cannot be changed. Duplicate one to make it yours.</p>
+            <ul id="patternList" class="pattern-list" aria-label="Strum patterns for this song"></ul>
+            <button id="patternNew" class="pattern-new" type="button">+ New pattern</button>
+        </div>
+
+        <form id="patternForm" class="pattern-form" novalidate hidden>
+            <label class="pattern-field" for="patternName">
+                <span>Name</span>
+                <input id="patternName" type="text" maxlength="60" autocomplete="off" required>
+            </label>
+
+            <div class="pattern-meta">
+                <span class="pattern-fixed">Metre <strong id="patternTime">4/4</strong></span>
+                <label class="pattern-field pattern-subdiv" for="patternSubdiv">
+                    <span>Subdivision</span>
+                    <select id="patternSubdiv"></select>
+                </label>
+            </div>
+
+            <span id="patternSlotLabel" class="pattern-slot-label">
+                Slots — tap to cycle down → up → rest
+            </span>
+            <div id="patternSlots" class="pattern-slots" role="group"
+                 aria-labelledby="patternSlotLabel"></div>
+
+            <div class="pattern-preview-wrap">
+                <span class="pattern-preview-label">Preview</span>
+                <div id="patternPreview" class="pattern-preview" aria-hidden="true"></div>
+            </div>
+
+            <p id="patternError" class="pattern-error" role="alert" tabindex="-1" hidden></p>
+
+            <div class="pattern-actions">
+                <button id="patternDelete" class="pattern-delete" type="button" hidden>Delete</button>
+                <span class="pattern-spacer"></span>
+                <button id="patternCancel" class="pattern-cancel" type="button">Cancel</button>
+                <button id="patternSave" class="pattern-save" type="submit">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <div id="tunerOverlay" class="tuner-overlay" hidden aria-hidden="true">
     <div class="tuner-sheet" role="dialog" aria-modal="true" aria-labelledby="tunerTitle" tabindex="-1">
