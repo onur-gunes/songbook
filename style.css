@@ -1448,20 +1448,83 @@ main {
 .sheet.chords-grid .grid-beat {
     position: absolute;
     bottom: 0;
-    width: var(--grid-beat-h, 1.7em);
+    left: 0;
+    /* left + width are set inline per beat so the beat cells tile the bar. */
     height: var(--grid-beat-h, 1.7em);
-    line-height: var(--grid-beat-h, 1.7em);
-    transform: translateX(-50%);
-    text-align: center;
-    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    padding-top: 4px;
+    box-sizing: border-box;
     color: var(--muted);
     font-family: var(--mono);
     font-size: 0.85em;
+    cursor: default;
 }
 
+/* The horizontal line that runs through each beat cell: the beat itself,
+   shown as a thin line under the strum strokes. */
+.sheet.chords-grid .grid-beat::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 1.1em;
+    height: 1px;
+    background: var(--line);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.sheet.chords-grid .grid-beat-strokes {
+    display: flex;
+    gap: 5px;
+}
+
+/* One cell per subdivision slot: the down / up arrows (or D / U letters),
+   with a dot for a rest. Bigger than the old beat slash so the strum
+   pattern reads at a glance under each diagram. */
+.sheet.chords-grid .grid-beat-slot {
+    width: calc(var(--grid-beat-h, 1.7em) * 0.66);
+    height: calc(var(--grid-beat-h, 1.7em) * 0.66);
+    line-height: calc(var(--grid-beat-h, 1.7em) * 0.66);
+    text-align: center;
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 1em;
+    font-weight: 800;
+}
+
+.sheet.chords-grid .grid-beat-slot.rest {
+    color: var(--muted);
+    font-weight: 400;
+    opacity: 0.5;
+}
+
+/* The beat number stays small and faint behind the strokes. */
+.sheet.chords-grid .grid-beat-no {
+    font-size: 0.55em;
+    color: var(--muted);
+    opacity: 0.45;
+}
+
+/* The playhead's beat: the whole cell lights up and the arrows pop, so the
+   current strum pulse is readable at a glance. */
 .sheet.chords-grid .grid-beat.on {
     color: var(--surface);
+}
+.sheet.chords-grid .grid-beat.on .grid-beat-slot,
+.sheet.chords-grid .grid-beat.on .grid-beat-slot.rest {
+    color: var(--surface);
+    opacity: 1;
+    font-weight: 900;
+}
+
+.sheet.chords-grid .grid-beat.on::before {
     background: var(--accent);
+    opacity: 1;
 }
 
 /* Lyric rows sit in the system's bottom padding, one row per sheet line.

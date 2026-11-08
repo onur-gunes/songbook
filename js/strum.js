@@ -283,6 +283,9 @@
         if (ch === 'U') return '\u2191';   // upward arrow
         return '\u00b7';
     }
+    /* Shared with the grid strum lane (js/grid.js) so the lane under the
+       diagrams and the row under the chord strip use identical glyphs. */
+    SB.strumGlyph = slotGlyph;
 
     /* The count-in's label for a slot: the felt beat number on each beat
      * ("1 2 3 4"), a dot on the subdivisions in between. Counting out loud is

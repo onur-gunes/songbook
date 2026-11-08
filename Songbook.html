@@ -1461,20 +1461,83 @@ main {
 .sheet.chords-grid .grid-beat {
     position: absolute;
     bottom: 0;
-    width: var(--grid-beat-h, 1.7em);
+    left: 0;
+    /* left + width are set inline per beat so the beat cells tile the bar. */
     height: var(--grid-beat-h, 1.7em);
-    line-height: var(--grid-beat-h, 1.7em);
-    transform: translateX(-50%);
-    text-align: center;
-    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    padding-top: 4px;
+    box-sizing: border-box;
     color: var(--muted);
     font-family: var(--mono);
     font-size: 0.85em;
+    cursor: default;
 }
 
+/* The horizontal line that runs through each beat cell: the beat itself,
+   shown as a thin line under the strum strokes. */
+.sheet.chords-grid .grid-beat::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 1.1em;
+    height: 1px;
+    background: var(--line);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.sheet.chords-grid .grid-beat-strokes {
+    display: flex;
+    gap: 5px;
+}
+
+/* One cell per subdivision slot: the down / up arrows (or D / U letters),
+   with a dot for a rest. Bigger than the old beat slash so the strum
+   pattern reads at a glance under each diagram. */
+.sheet.chords-grid .grid-beat-slot {
+    width: calc(var(--grid-beat-h, 1.7em) * 0.66);
+    height: calc(var(--grid-beat-h, 1.7em) * 0.66);
+    line-height: calc(var(--grid-beat-h, 1.7em) * 0.66);
+    text-align: center;
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 1em;
+    font-weight: 800;
+}
+
+.sheet.chords-grid .grid-beat-slot.rest {
+    color: var(--muted);
+    font-weight: 400;
+    opacity: 0.5;
+}
+
+/* The beat number stays small and faint behind the strokes. */
+.sheet.chords-grid .grid-beat-no {
+    font-size: 0.55em;
+    color: var(--muted);
+    opacity: 0.45;
+}
+
+/* The playhead's beat: the whole cell lights up and the arrows pop, so the
+   current strum pulse is readable at a glance. */
 .sheet.chords-grid .grid-beat.on {
     color: var(--surface);
+}
+.sheet.chords-grid .grid-beat.on .grid-beat-slot,
+.sheet.chords-grid .grid-beat.on .grid-beat-slot.rest {
+    color: var(--surface);
+    opacity: 1;
+    font-weight: 900;
+}
+
+.sheet.chords-grid .grid-beat.on::before {
     background: var(--accent);
+    opacity: 1;
 }
 
 /* Lyric rows sit in the system's bottom padding, one row per sheet line.
@@ -6831,7 +6894,10 @@ body.tuner-open { overflow: hidden; }
         return byChange;
     }
 
-    function buildBarSpec(bar, song, ctx, changeState, lyricW) {
+    /* One glyph for a strum slot, shared with js/strum.js (SB.strumGlyph) so
+       the grid lane under the diagrams and the row under the chord strip use
+       the same notation (arrows ↓↑· or letters D U ·). */
+    function buildBarSpec(bar, song, ctx, changeState, lyricW, blockIdx, barIdx) {
         var segments = bar.beats.map(function (seg) {
             var tname = SB.transposeChartName(seg.chord, SB.state.transpose);
             var label = gridLabel(song, seg.chord);
@@ -6866,10 +6932,16 @@ body.tuner-open { overflow: hidden; }
         });
 
         var x = BAR_PAD, beatXs = [], changeXs = [];
+        var beat = 0;
         segments.forEach(function (seg) {
             changeXs.push(x);
+            var beatW = seg.width / seg.beats;
             for (var i = 0; i < seg.beats; i++) {
-                beatXs.push(x + seg.width * (i + 0.5) / seg.beats);
+                beatXs.push({
+                    x: x + seg.width * (i + 0.5) / seg.beats,
+                    w: beatW,
+                    beat: beat++
+                });
             }
             x += seg.width;
         });
@@ -6878,11 +6950,13 @@ body.tuner-open { overflow: hidden; }
             segments: segments,
             beatXs: beatXs,
             changeXs: changeXs,
-            width: x + BAR_PAD
+            width: x + BAR_PAD,
+            blockIdx: blockIdx,
+            barIdx: barIdx
         };
     }
 
-    function buildBarEl(spec, ctx) {
+    function buildBarEl(spec, ctx, song, plan) {
         var bar = SB.el('div', 'grid-bar');
         bar.style.width = spec.width + 'px';
         bar.style.height = ctx.barH + 'px';
@@ -6919,10 +6993,43 @@ body.tuner-open { overflow: hidden; }
             bar.appendChild(change);
         });
 
-        spec.beatXs.forEach(function (x) {
-            var beat = SB.el('span', 'grid-beat', '/');
-            beat.style.left = x + 'px';
-            beat.setAttribute('aria-hidden', 'true');
+        // The strum lane: under each diagram, every beat shows the felt-beat
+        // strokes (down / up / rest) for that beat, one cell per subdivision
+        // slot, with a thin horizontal line marking the beat itself. The active
+        // beat is lit by the cursor (.grid-beat.on).
+        spec.beatXs.forEach(function (b) {
+            var resolved = SB.resolveStrumAt(song, {
+                block: spec.blockIdx,
+                bar: spec.barIdx,
+                beat: b.beat
+            }, plan);
+            var slots = resolved.slots || '';
+
+            var beat = SB.el('span', 'grid-beat');
+            beat.style.left = (b.x - b.w / 2) + 'px';
+            beat.style.width = b.w + 'px';
+            beat.setAttribute('data-beat-local', String(b.beat));
+            beat.setAttribute('data-block', String(spec.blockIdx));
+            beat.setAttribute('data-bar', String(spec.barIdx));
+            beat.setAttribute('data-strum-source', resolved.source || 'none');
+            if (resolved.id) beat.setAttribute('data-strum-id', resolved.id);
+            beat.setAttribute('aria-label', 'Beat ' + String(b.beat + 1) + ' — ' + slots);
+
+            // One cell per subdivision slot: the down / up arrows (or letters),
+            // with a dot for a rest. These are the strum pattern "by beat".
+            var strokes = SB.el('span', 'grid-beat-strokes');
+            for (var s = 0; s < slots.length; s++) {
+                var slot = SB.el('span', 'grid-beat-slot', SB.strumGlyph(slots[s]));
+                if (slots[s] === '-') slot.classList.add('rest');
+                strokes.appendChild(slot);
+            }
+            beat.appendChild(strokes);
+
+            // Faint beat index underneath so the count stays legible without
+            // competing with the strokes.
+            var no = SB.el('span', 'grid-beat-no', String(b.beat + 1));
+            beat.appendChild(no);
+
             bar.appendChild(beat);
         });
 
@@ -7091,6 +7198,11 @@ body.tuner-open { overflow: hidden; }
         var lyricSections = [];
         var measurer = makeMeasurer(wrap);
         var blocks = gridBlocksFor(song);
+        // The per-song edit plan supplies bar/beat strum overrides; the grid
+        // lane draws the resolved strum for every beat from it.
+        var plan = (SB.state.active && SB.state.active.id)
+            ? SB.loadPlan(SB.state.active.id, song.id)
+            : SB.emptyPlan();
 
         /* The animated view swaps whole systems into one stage. Build every
          * system now so its width, lyric anchoring and beat range are final;
@@ -7111,13 +7223,13 @@ body.tuner-open { overflow: hidden; }
         var beatEls = [], beatSystem = [], chordAt = [], animSystems = [];
         var lyricCount = 0;
 
-        blocks.forEach(function (block) {
+        blocks.forEach(function (block, blockIdx) {
             var model = block.model;
             if (block.label) lyricSections.push(block.label);
             var lyricW = model ? changeWidths(model, measurer) : {};
             var changeState = { prev: null, index: -1 };
-            var specs = (block.bars || []).map(function (bar) {
-                return buildBarSpec(bar, song, ctx, changeState, lyricW);
+            var specs = (block.bars || []).map(function (bar, barIdx) {
+                return buildBarSpec(bar, song, ctx, changeState, lyricW, blockIdx, barIdx);
             });
             // Repeat signs are flex items too, so reserve their width before
             // packing or a repeated block overflows its system by 24px.
@@ -7147,7 +7259,7 @@ body.tuner-open { overflow: hidden; }
                     system.appendChild(repeatSign('start', ctx.barH));
                 }
                 bars.forEach(function (spec) {
-                    system.appendChild(buildBarEl(spec, ctx));
+                    system.appendChild(buildBarEl(spec, ctx, song, plan));
                 });
                 if (block.repeat && last) {
                     system.classList.add('has-repeat-end');
@@ -9052,6 +9164,9 @@ body.tuner-open { overflow: hidden; }
         if (ch === 'U') return '\u2191';   // upward arrow
         return '\u00b7';
     }
+    /* Shared with the grid strum lane (js/grid.js) so the lane under the
+       diagrams and the row under the chord strip use identical glyphs. */
+    SB.strumGlyph = slotGlyph;
 
     /* The count-in's label for a slot: the felt beat number on each beat
      * ("1 2 3 4"), a dot on the subdivisions in between. Counting out loud is
