@@ -1955,53 +1955,83 @@ body.pattern-open { overflow: hidden; }
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    gap: 3px;
-    padding-top: 3px;
+    justify-content: center;
+    gap: 5px;
     box-sizing: border-box;
     color: var(--muted);
     font-family: var(--mono);
     font-size: 0.85em;
 }
 
-.sheet.chords-grid .grid-beat-strokes {
-    display: flex;
-    gap: 4px;
+/* The beat itself: a thin horizontal line running through each beat cell,
+   under the chord diagram. The line is the primary beat indicator; the
+   strum strokes sit on it and the number is demoted to faint text. */
+.sheet.chords-grid .grid-beat::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: var(--line);
+    opacity: 0.5;
+    transform: translateY(-50%);
+    pointer-events: none;
 }
 
+.sheet.chords-grid .grid-beat-strokes {
+    display: flex;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+}
+
+/* One cell per subdivision slot: the down / up arrows (or D / U letters),
+   with a dot for a rest. Bigger than before so the strum pattern reads at a
+   glance under each diagram. */
 .sheet.chords-grid .grid-beat-slot {
-    width: calc(var(--grid-beat-h, 1.7em) * 0.5);
-    height: calc(var(--grid-beat-h, 1.7em) * 0.5);
-    line-height: calc(var(--grid-beat-h, 1.7em) * 0.5);
+    width: calc(var(--grid-beat-h, 1.7em) * 0.72);
+    height: calc(var(--grid-beat-h, 1.7em) * 0.72);
+    line-height: calc(var(--grid-beat-h, 1.7em) * 0.72);
     text-align: center;
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--muted);
-    font-size: 0.8em;
-    font-weight: 700;
+    font-size: 1.05em;
+    font-weight: 800;
+    position: relative;
+    z-index: 1;
 }
 
 .sheet.chords-grid .grid-beat-slot.rest {
     color: var(--muted);
     font-weight: 400;
-    opacity: 0.55;
+    opacity: 0.45;
 }
 
+/* The beat number stays small and faint behind the strokes — the line above
+   is the beat now, so the number only supports the count. */
 .sheet.chords-grid .grid-beat-no {
-    font-size: 0.6em;
+    font-size: 0.5em;
     color: var(--muted);
-    opacity: 0.6;
+    opacity: 0.35;
+    position: relative;
+    z-index: 1;
 }
 
+/* The playhead's beat: the line turns to the accent colour and the arrows
+   pop, so the current strum pulse is readable at a glance. */
 .sheet.chords-grid .grid-beat.on {
-    background: var(--accent);
-    border-radius: 6px;
     color: var(--surface);
+}
+.sheet.chords-grid .grid-beat.on::before {
+    background: var(--accent);
+    opacity: 1;
 }
 .sheet.chords-grid .grid-beat.on .grid-beat-slot,
 .sheet.chords-grid .grid-beat.on .grid-beat-slot.rest {
     color: var(--surface);
     opacity: 1;
-    font-weight: 700;
+    font-weight: 900;
 }
 
 /* An overridden beat keeps its own ring so the distinction is not colour
