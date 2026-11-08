@@ -160,6 +160,16 @@
         strumPatternsFor: SB.strumPatternsFor,
         setStrum: SB.setStrum,
         toggleStrumNotation: SB.toggleStrumNotation,
+        planKey: SB.planKey,
+        planBarKey: SB.planBarKey,
+        planBeatKey: SB.planBeatKey,
+        emptyPlan: SB.emptyPlan,
+        normalizePlan: SB.normalizePlan,
+        loadPlan: SB.loadPlan,
+        savePlan: SB.savePlan,
+        clearPlan: SB.clearPlan,
+        hasLocalEdits: SB.hasLocalEdits,
+        resolveStrumAt: SB.resolveStrumAt,
         // Read through functions: these are numbers/booleans, so unlike the
         // strum object above they cannot be exported by reference.
         getStrumSize: function () { return SB.state.strumSize; },

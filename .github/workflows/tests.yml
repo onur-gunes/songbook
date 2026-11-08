@@ -61,6 +61,11 @@ jobs:
       - name: Strum library mirror + musical invariants
         run: python3 tests/strum.py
 
+      # Guards the per-song edit plan (issue #105): serialization, migration
+      # and the beat > bar > section > song > manual-default precedence.
+      - name: Per-song edit plan unit tests
+        run: python3 tests/plan.py
+
       # --- browser suites ---
       - name: Chord engine unit tests
         run: python3 tests/run_html.py "$BASE_URL/tests/chordkit.html"
