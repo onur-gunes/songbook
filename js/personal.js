@@ -96,7 +96,7 @@
         var out = {};
         if (!planObject(raw)) return out;
         Object.keys(raw).forEach(function (key) {
-            if (key === '__proto__' || key === 'constructor' || key === 'prototype') return;
+            if (!key || key === '__proto__' || key === 'constructor' || key === 'prototype') return;
             var value = raw[key];
             if (typeof value !== 'string' || !value) return;
             if (isValue && !isValue(value)) return;
