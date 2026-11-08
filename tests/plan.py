@@ -79,9 +79,13 @@ def harness(extra='', local_storage=None):
 
 
 def run_js(extra, local_storage=None):
-    out = subprocess.run(
-        ['node', '-e', harness(extra, local_storage)],
-        capture_output=True, text=True, check=True, cwd=ROOT)
+    script = harness(extra, local_storage)
+    try:
+        out = subprocess.run(
+            ['node', '-e', script], capture_output=True, text=True, check=True, cwd=ROOT)
+    except subprocess.CalledProcessError as e:
+        print('NODE STDERR:', e.stderr, file=sys.stderr)
+        raise
     return json.loads(out.stdout)
 
 
@@ -179,7 +183,7 @@ class PlanRoundTripTests(unittest.TestCase):
         got = run_js('''
             console.log(JSON.stringify(SB.normalizePlan({
                 barStrums: { '0:0': 'downs-4-4', __proto__: 'evil', '': 'x', '0:1': '' },
-                beatStrums: { '0:0:0': 'DU', '0:0:1': 'XY', bad: 'D' },
+                beatStrums: { '0:0:0': 'DU', '0:0:1': 'XY', bad: 'XY' },
             })));
         ''')
         self.assertEqual(got['barStrums'], {'0:0': 'downs-4-4'})
