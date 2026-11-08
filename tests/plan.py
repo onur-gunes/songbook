@@ -66,7 +66,8 @@ def harness(extra='', local_storage=None):
         )
     return (
         'var SB = { state: {} };\n'
-        'var window = { SB: SB, location: { pathname: \'/songbook/\', protocol: \'https:\' } };\n'
+        'var document = { body: {} };\n'
+        'var window = { SB: SB, document: document, location: { pathname: \'/songbook/\', protocol: \'https:\' } };\n'
         + storage_init
         + read(CORE_JS)
         + '\n' + read(SECTIONS_JS)
