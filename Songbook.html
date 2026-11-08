@@ -1267,6 +1267,99 @@ main {
     font-size: 0.95rem;
 }
 
+/* per-section strum selectors */
+.strum-sections-btn {
+    height: 36px;
+    min-width: 0;
+    padding: 0 10px;
+    gap: 6px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.strum-sections-btn:hover,
+.strum-sections-btn:focus-visible { border-color: var(--accent); }
+
+.strum-sections-btn.is-multiple {
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--line));
+}
+
+.strum-sections-btn.is-multiple .strum-sections-summary { color: var(--accent); }
+
+.strum-sections-chevron {
+    display: inline-block;
+    font-size: 0.8rem;
+    line-height: 1;
+    transition: transform 0.15s ease;
+}
+
+.strum-sections-btn[aria-expanded="true"] .strum-sections-chevron {
+    transform: rotate(90deg);
+}
+
+.strum-sections {
+    /* Full row in the wrapped desktop toolbar; the mobile rule below turns
+     * this back into a normal column item. */
+    flex: 0 0 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px 18px;
+    padding: 8px 2px 2px;
+    border-top: 1px dashed var(--line);
+}
+
+.strum-sections[hidden] { display: none; }
+
+.strum-sections-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+}
+
+.strum-section-field {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.strum-section-label {
+    color: var(--muted);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.strum-section-select {
+    height: 34px;
+    max-width: 220px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.strum-section-select:hover,
+.strum-section-select:focus-visible { border-color: var(--accent); }
+
+.strum-sections-empty {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
 /* custom strum pattern editor */
 
 body.pattern-open { overflow: hidden; }
@@ -2676,6 +2769,29 @@ body.tuner-open { overflow: hidden; }
         font-size: 0.75rem;
         text-overflow: ellipsis;
     }
+    #strumGroup .tool-controls {
+        flex-wrap: wrap;
+        row-gap: 6px;
+    }
+    .strum-sections-btn {
+        flex: 0 1 auto;
+        min-width: 0;
+        padding: 0 8px;
+        font-size: 0.7rem;
+    }
+    .strum-sections-summary {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .strum-sections {
+        flex: none;
+        width: 100%;
+        gap: 8px 12px;
+        padding-top: 6px;
+    }
+    .strum-sections-list { width: 100%; gap: 8px 12px; }
+    .strum-section-field { flex: 1 1 140px; }
+    .strum-section-select { max-width: 100%; width: 100%; }
 
     .chord-item img, .chord-item .missing { height: calc(62px * var(--chord-size, 1)); }
 
@@ -2929,7 +3045,21 @@ body.tuner-open { overflow: hidden; }
                         <span class="step-divider" role="separator"></span>
                         <button id="strumPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
                     </div>
+                    <button id="strumSectionsBtn" class="step-btn strum-sections-btn" type="button"
+                            aria-expanded="false" aria-controls="strumSections"
+                            aria-label="Show per-section strum patterns"
+                            title="Show per-section strum patterns">
+                        <span class="strum-sections-chevron" aria-hidden="true">▸</span>
+                        <span id="strumSectionsSummary" class="strum-sections-summary">Sections</span>
+                    </button>
                 </div>
+            </div>
+            <div id="strumSections" class="strum-sections" role="group"
+                 aria-label="Per-section strum patterns" hidden>
+                <p id="strumSectionsEmpty" class="strum-sections-empty" hidden>
+                    This song has no sections — the strum above applies to the whole song.
+                </p>
+                <div id="strumSectionsList" class="strum-sections-list"></div>
             </div>
             <div class="tool-group" role="group" aria-label="Chord diagram size">
                 <span class="tool-label">Diagram</span>
@@ -6866,7 +6996,12 @@ body.tuner-open { overflow: hidden; }
                     used[match.index] = true;
                     out.push({
                         label: section.name || match.block.label || '',
-                        role: SB.sectionRole(match.block.label || section.name || ''),
+                        // The role belongs to the section the player is in, not
+                        // to whichever authored template happened to fit it:
+                        // a Bridge that reuses the Verse progression is still
+                        // a bridge, and must not be offered as a verse strum
+                        // selector (issue #107).
+                        role: SB.sectionRole(section.name || match.block.label || ''),
                         bars: tiled.bars,
                         repeat: !!match.block.repeat,
                         model: model
@@ -6902,6 +7037,39 @@ body.tuner-open { overflow: hidden; }
         return out;
     }
     SB.gridBlocksFor = gridBlocksFor;
+
+    /* Every canonical section role the song actually contains, in the order
+     * the player meets them (sheet order, then any authored grid block the
+     * sheet does not cover). The per-section strum selectors are keyed by this
+     * list, not by a fixed menu: a song with no bridge must not offer one.
+     *
+     * Two labels with the same role ("Verse 1", "Verse 2") collapse into one
+     * entry, because section strums are stored per role. `other` is included
+     * when a block carries it, so an unrecognised authored section still gets
+     * a selector rather than silently falling back to the song pattern. */
+    SB.songSectionRoles = function (song, plan) {
+        var roles = [];
+        var seen = {};
+        function add(block) {
+            if (!block) return;
+            var label = block.label || '';
+            var role = SB.isSectionRole(block.role)
+                ? block.role
+                : SB.sectionRole(label);
+            if (!role || seen[role]) return;
+            // An auto-generated block with no label (or an unnamed block) is
+            // just "the rest of the song", not a section worth a selector.
+            if (role === 'other' && !label) return;
+            seen[role] = true;
+            roles.push(role);
+        }
+        if (!song) return roles;
+
+        gridBlocksFor(song).forEach(add);
+        var authored = (plan && plan.grid) || song.grid || [];
+        authored.forEach(add);
+        return roles;
+    };
 
     /* ---------------- cursor ---------------- */
 
@@ -9443,6 +9611,40 @@ body.tuner-open { overflow: hidden; }
         return (typeof value === 'number' && isFinite(value) && value >= 0) ? Math.floor(value) : 0;
     }
 
+    /* The song-level pattern, ignoring section/bar/beat overrides. This is
+     * what the collapsed row shows: per-section choices are a separate layer
+     * until the grid lane follows them during playback (Step 5). */
+    function mainPatternFor(song, plan) {
+        if (!song) return null;
+        if (plan === undefined) plan = currentPlanFor(song);
+        plan = SB.normalizePlan(plan);
+        var time = timeFor(song, plan);
+        var pattern = findPattern(plan.songStrum, time, plan);
+        if (!pattern && SB.state.active) {
+            pattern = findPattern(storedChoice(SB.state.active.id, song.id), time, plan);
+        }
+        if (!pattern) pattern = findPattern(song.strum, time, plan);
+        if (!pattern) {
+            var list = SB.strumPatternsForSong(song, plan);
+            pattern = list.length ? list[0] : null;
+        }
+        return pattern;
+    }
+
+    /* A section's effective pattern: its plan override when one fits the
+     * metre, otherwise the song-level pattern it inherits. Returns the main
+     * pattern for an unknown/corrupt override, never a dead id. */
+    function sectionPatternFor(song, role, plan) {
+        if (!song) return null;
+        if (plan === undefined) plan = currentPlanFor(song);
+        plan = SB.normalizePlan(plan);
+        var pattern = findPattern(plan.sectionStrums[role], timeFor(song, plan), plan);
+        return pattern || mainPatternFor(song, plan);
+    }
+
+    SB.mainStrumFor = mainPatternFor;
+    SB.sectionStrumFor = sectionPatternFor;
+
     /* Override coordinates are the block/bar/beat positions inside the
      * effective grid, not the song's labels: labels are free text and may be
      * translated, while the positions are what the grid renderer walks. */
@@ -9535,18 +9737,25 @@ body.tuner-open { overflow: hidden; }
         };
     };
 
-    /* The row still shows one song-wide pattern until the expanded section
-     * selectors land; start at the song's first section so a section default
-     * previews correctly when one exists. */
+    /* The collapsed row shows one song-wide pattern. Section overrides are
+     * deliberately not consulted here: until the grid lane follows playback
+     * (Step 5), choosing a section pattern previews it while the selectors
+     * are open, and collapsing returns to this song default. */
     function chooseFor(song) {
         if (!song) return null;
-        return SB.resolveStrumAt(song, { block: 0, bar: 0, beat: 0 }, currentPlanFor(song)).pattern;
+        return mainPatternFor(song, currentPlanFor(song));
     }
 
     /* ---------------- rendering ---------------- */
 
     var raf = null;
     var lastSlot = -1;
+    /* Per-section selectors: the disclosure state and the role whose pattern
+     * is being previewed in the row. Both are UI-only (the plan is the source
+     * of truth), so they reset when the song changes and never leak into the
+     * songbook data. */
+    var sectionsOpen = false;
+    var previewRole = null;
     /* 'countin' while the lead-in bar runs, 'pattern' once it hands over. The
      * two phases share one set of cells (see renderRow), so this is what says
      * which glyphs those cells are currently showing. */
@@ -9645,6 +9854,172 @@ body.tuner-open { overflow: hidden; }
         if (SB.state.strum.pattern) sel.value = SB.state.strum.pattern.id;
     }
 
+    /* ---------------- per-section selectors ---------------- */
+
+    /* Display names for the canonical roles in js/sections.js. Kept as a
+     * presentation table so the stored/exported value stays language-neutral
+     * (`pre_chorus`, not "Pre-chorus"). */
+    var ROLE_LABELS = {
+        intro: 'Intro',
+        verse: 'Verse',
+        pre_chorus: 'Pre-chorus',
+        chorus: 'Chorus',
+        bridge: 'Bridge',
+        outro: 'Outro',
+        interlude: 'Interlude',
+        solo: 'Solo',
+        tag: 'Tag',
+        other: 'Other'
+    };
+
+    function roleLabel(role) {
+        return ROLE_LABELS[role] || role;
+    }
+
+    function sectionRolesFor(song, plan) {
+        if (!song) return [];
+        return SB.songSectionRoles ? SB.songSectionRoles(song, plan) : [];
+    }
+
+    /* True when the sections do not all play the same effective pattern as
+     * the song. A role with no override inherits by definition; only a valid
+     * override that resolves to a different pattern counts. */
+    function sectionsDiffer(song, plan, roles) {
+        var main = mainPatternFor(song, plan);
+        if (!main) return false;
+        var time = timeFor(song, plan);
+        return roles.some(function (role) {
+            var pattern = findPattern(plan.sectionStrums[role], time, plan);
+            return !!pattern && pattern.id !== main.id;
+        });
+    }
+
+    function appendPatternOptions(select, song, plan, selected) {
+        var inherit = SB.el('option', null, 'Same as song');
+        inherit.value = '';
+        select.appendChild(inherit);
+        SB.strumPatternsForSong(song, plan).forEach(function (p) {
+            var opt = SB.el('option', null, p.name);
+            opt.value = p.id;
+            if (!byId[p.id]) opt.dataset.custom = '1';
+            select.appendChild(opt);
+        });
+        select.value = selected || '';
+        // A stale/corrupt value can name a pattern that no longer fits the
+        // metre (or was deleted). Showing "Same as song" is truthful: the
+        // resolver will inherit until the user chooses again.
+        if (select.value !== (selected || '')) select.value = '';
+    }
+
+    function updateSectionsButton(song, plan, roles) {
+        var btn = SB.$('strumSectionsBtn');
+        var summary = SB.$('strumSectionsSummary');
+        if (!btn) return;
+        if (!roles) roles = sectionRolesFor(song, plan || SB.emptyPlan());
+        var differ = roles.length > 0 && sectionsDiffer(song, plan || SB.emptyPlan(), roles);
+        var collapsedDiff = !sectionsOpen && differ;
+        if (summary) {
+            // Keep the control down to its chevron unless there is something
+            // to report: "multiple patterns" when sections disagree, or a
+            // short notice when there are no sections to choose from.
+            var note = collapsedDiff ? 'Multiple patterns'
+                : (!sectionsOpen && !roles.length ? 'No sections' : '');
+            summary.textContent = note;
+            summary.hidden = !note;
+        }
+        btn.classList.toggle('is-multiple', collapsedDiff);
+        btn.setAttribute('aria-expanded', sectionsOpen ? 'true' : 'false');
+        var label = sectionsOpen
+            ? 'Hide per-section strum patterns'
+            : (roles.length
+                ? 'Show per-section strum patterns' +
+                    (differ ? ' (multiple patterns in use)' : '')
+                : 'Show per-section strum patterns (this song has no sections)');
+        btn.setAttribute('aria-label', label);
+        btn.title = label;
+    }
+
+    function renderSectionSelectors() {
+        var list = SB.$('strumSectionsList');
+        var empty = SB.$('strumSectionsEmpty');
+        if (!list) return;
+        var song = SB.state.currentSong;
+        var plan = song ? currentPlanFor(song) : SB.emptyPlan();
+        var roles = sectionRolesFor(song, plan);
+        var time = song ? timeFor(song, plan) : null;
+
+        list.textContent = '';
+        if (empty) empty.hidden = roles.length > 0;
+        roles.forEach(function (role) {
+            var field = SB.el('label', 'strum-section-field');
+            var name = roleLabel(role);
+            var text = SB.el('span', 'strum-section-label', name);
+            field.appendChild(text);
+
+            var select = SB.el('select', 'strum-section-select');
+            select.dataset.role = role;
+            select.setAttribute('aria-label',
+                'Strum pattern for all ' + name.toLowerCase() + ' sections');
+            var stored = plan.sectionStrums[role];
+            appendPatternOptions(select, song, plan,
+                findPattern(stored, time, plan) ? stored : '');
+            select.addEventListener('change', function () {
+                setSectionChoice(role, select.value);
+            });
+            field.appendChild(select);
+            list.appendChild(field);
+        });
+        updateSectionsButton(song, plan, roles);
+        var panel = SB.$('strumSections');
+        if (panel) panel.hidden = !(sectionsOpen && song && SB.state.strum.pattern);
+    }
+
+    function setSectionChoice(role, id) {
+        var song = SB.state.currentSong;
+        var active = SB.state.active;
+        if (!song || !active) return;
+        var plan = SB.loadPlan(active.id, song.id);
+        var pattern = id ? findPattern(id, timeFor(song, plan), plan) : null;
+        if (pattern) plan.sectionStrums[role] = pattern.id;
+        else delete plan.sectionStrums[role];
+        SB.savePlan(active.id, song.id, plan);
+
+        // Selecting a section previews it in the single row. "Same as song"
+        // removes the override and returns the row to the inherited pattern.
+        previewRole = pattern ? role : null;
+        SB.state.strum.pattern = previewRole
+            ? sectionPatternFor(song, role, plan)
+            : mainPatternFor(song, plan);
+        renderRow();
+        if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
+        updateSectionsButton(song, plan);
+    }
+
+    /* Expand/collapse the section selectors. Collapsing is also a preview
+     * reset: the row goes back to the one song-wide pattern, exactly as it
+     * behaved before this control existed. */
+    SB.toggleStrumSections = function () {
+        sectionsOpen = !sectionsOpen;
+        if (!sectionsOpen) previewRole = null;
+        var song = SB.state.currentSong;
+        var plan = song ? currentPlanFor(song) : SB.emptyPlan();
+        if (song) {
+            SB.state.strum.pattern = previewRole
+                ? sectionPatternFor(song, previewRole, plan)
+                : mainPatternFor(song, plan);
+        }
+        renderRow();
+        renderSectionSelectors();
+        SB.updateStrumUi();
+        if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
+        if (!sectionsOpen) {
+            var btn = SB.$('strumSectionsBtn');
+            if (btn) {
+                try { btn.focus({ preventScroll: true }); } catch (e) { btn.focus(); }
+            }
+        }
+    };
+
     /* ---------------- highlight (metronome-driven) ----------------
      *
      * The highlight reads SB.metronomePosition() — the metronome's own audio
@@ -9728,9 +10103,11 @@ body.tuner-open { overflow: hidden; }
     SB.updateStrumUi = function () {
         var group = SB.$('strumGroup');
         var row = SB.$('strumRow');
+        var sections = SB.$('strumSections');
         var on = SB.state.strum.pattern !== null;
         if (group) group.hidden = !on;
         if (row) row.hidden = !on;
+        if (sections) sections.hidden = !on || !sectionsOpen;
         SB.applyStrumSettings();
     }
 
@@ -9828,9 +10205,12 @@ body.tuner-open { overflow: hidden; }
     SB.loadStrumForSong = function (song) {
         closePatternEditor();
         SB.strumOnMetronomeStop();
+        sectionsOpen = false;
+        previewRole = null;
         SB.state.strum.pattern = chooseFor(song);
         renderRow();
         buildSelect();
+        renderSectionSelectors();
         SB.updateStrumUi();
     }
 
@@ -9840,10 +10220,12 @@ body.tuner-open { overflow: hidden; }
         var plan = currentPlanFor(song);
         var pattern = findPattern(id, timeFor(song, plan), plan);
         if (!pattern) return;
+        previewRole = null;
         SB.state.strum.pattern = pattern;
         if (SB.state.active) saveChoice(SB.state.active.id, song.id, pattern.id);
         renderRow();
         buildSelect();
+        renderSectionSelectors();
         SB.updateStrumUi();
         // If the metronome is already running, keep the highlight going on the
         // new row; strumOnMetronomeStart is a no-op if the loop is already up.
@@ -10197,9 +10579,16 @@ body.tuner-open { overflow: hidden; }
     function refreshCurrentStrum() {
         var song = SB.state.currentSong;
         if (!song) return;
-        SB.state.strum.pattern = chooseFor(song);
+        var plan = currentPlanFor(song);
+        if (previewRole && sectionRolesFor(song, plan).indexOf(previewRole) < 0) {
+            previewRole = null;
+        }
+        SB.state.strum.pattern = previewRole
+            ? sectionPatternFor(song, previewRole, plan)
+            : chooseFor(song);
         renderRow();
         buildSelect();
+        renderSectionSelectors();
         SB.updateStrumUi();
         if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
     }
@@ -10375,6 +10764,15 @@ body.tuner-open { overflow: hidden; }
 
         var edit = SB.$('strumEditBtn');
         if (edit) edit.addEventListener('click', openPatternEditor);
+        var sectionsBtn = SB.$('strumSectionsBtn');
+        if (sectionsBtn) sectionsBtn.addEventListener('click', SB.toggleStrumSections);
+        var sectionsPanel = SB.$('strumSections');
+        if (sectionsPanel) sectionsPanel.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && sectionsOpen) {
+                e.preventDefault();
+                SB.toggleStrumSections();
+            }
+        });
         var close = SB.$('patternClose');
         if (close) close.addEventListener('click', function () { closePatternEditor(); });
         var cancel = SB.$('patternCancel');
@@ -10724,6 +11122,10 @@ body.tuner-open { overflow: hidden; }
         strumPatterns: SB.strumPatterns,
         strumPatternsFor: SB.strumPatternsFor,
         strumPatternsForSong: SB.strumPatternsForSong,
+        mainStrumFor: SB.mainStrumFor,
+        sectionStrumFor: SB.sectionStrumFor,
+        songSectionRoles: SB.songSectionRoles,
+        toggleStrumSections: SB.toggleStrumSections,
         validateCustomPattern: SB.validateCustomPattern,
         openPatternEditor: SB.openPatternEditor,
         closePatternEditor: SB.closePatternEditor,

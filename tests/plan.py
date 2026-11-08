@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Unit tests for the per-song edit plan (issue #105) and custom strum
-patterns (issue #106).
+"""Unit tests for the per-song edit plan (issue #105), custom strum patterns
+(issue #106) and per-section strum selectors (issue #107).
 
 The plan object lives in js/personal.js, exposed through songbookTest. These
-tests load js/core.js, js/sections.js, js/songbooks.js, js/personal.js and
-js/strum.js under node, build a plan, round-trip it through JSON, and assert
-the precedence:
+tests load js/sections.js, js/grid.js, js/personal.js and js/strum.js under
+node, build a plan, round-trip it through JSON, and assert the precedence:
 
     beat > bar > section role > manual song default > song default
 
-They also cover migration of corrupt / unknown-version plans, clearing, and
-that manual SB.strumKey choices are migrated into the plan rather than lost.
+They also cover migration of corrupt / unknown-version plans, clearing, that
+manual SB.strumKey choices are migrated into the plan rather than lost, and
+that section roles/pattern inheritance are derived from the song's real
+sections.
 
 Usage:
     python3 tests/plan.py
@@ -28,6 +29,7 @@ sys.path.insert(0, ROOT)
 PLAN_JS = os.path.join(ROOT, 'js', 'personal.js')
 CORE_JS = os.path.join(ROOT, 'js', 'core.js')
 SECTIONS_JS = os.path.join(ROOT, 'js', 'sections.js')
+GRID_JS = os.path.join(ROOT, 'js', 'grid.js')
 SONGBOOKS_JS = os.path.join(ROOT, 'js', 'songbooks.js')
 STRUM_JS = os.path.join(ROOT, 'js', 'strum.js')
 
@@ -97,6 +99,7 @@ def harness(extra='', local_storage=None):
         'var window = { SB: SB, document: document, location: { pathname: \'/songbook/\', protocol: \'https:\' } };\n'
         + storage_init
         + read(SECTIONS_JS)
+        + '\n' + read(GRID_JS)
         + '\n' + read(PLAN_JS)
         + '\n' + read(STRUM_JS)
         + '\n' + extra
@@ -388,6 +391,133 @@ class PlanPrecedenceTests(unittest.TestCase):
         ''' % (json.dumps(SONG), json.dumps(plan)))
         self.assertEqual(got['after'], 'downs-4-4')
         self.assertEqual(got['id'], 'dddudu-4-4')
+
+
+class SectionSelectorTests(unittest.TestCase):
+    """Step 4: selectors come from the song's real roles, inherit the main
+    pattern until changed, and apply to every section with that role."""
+
+    def setUp(self):
+        if not shutil.which('node'):
+            self.skipTest('node not available')
+
+    def plan(self, **kwargs):
+        plan = {'version': 1, 'songStrum': None, 'sectionStrums': {},
+                'customPatterns': [], 'barStrums': {}, 'beatStrums': {},
+                'grid': None, 'time': None}
+        plan.update(kwargs)
+        return plan
+
+    def test_roles_are_derived_from_sheet_sections_and_deduped(self):
+        song = {
+            'id': 'roles', 'title': 'Roles', 'time': '4/4',
+            'strum': 'downs-4-4',
+            'sheet': [
+                [['i', 'Verse 1']], [['c', '[C]'], ['x', 'one']],
+                [['i', 'Chorus']], [['c', '[G]'], ['x', 'two']],
+                [['i', 'Verse 2']], [['c', '[C]'], ['x', 'three']],
+                [['i', 'Bridge']], [['c', '[F]'], ['x', 'four']],
+            ],
+            # Authored-only section the sheet does not cover.
+            'grid': [{'label': 'Intro', 'role': 'intro',
+                      'bars': [{'beats': [{'chord': 'C', 'beats': 4}]}]}],
+        }
+        got = run_js('''
+            var song = %s;
+            console.log(JSON.stringify(SB.songSectionRoles(song)));
+        ''' % json.dumps(song))
+        self.assertEqual(got, ['verse', 'chorus', 'bridge', 'intro'])
+
+    def test_roles_include_other_and_plan_grid_sections(self):
+        song = {
+            'id': 'roles', 'title': 'Roles', 'time': '4/4',
+            'grid': [
+                {'label': 'Something', 'role': 'other',
+                 'bars': [{'beats': [{'chord': 'C', 'beats': 4}]}]},
+            ],
+        }
+        plan = self.plan(grid=[
+            {'label': 'Solo', 'role': 'solo',
+             'bars': [{'beats': [{'chord': 'C', 'beats': 4}]}]},
+        ])
+        got = run_js('''
+            var song = %s;
+            var plan = %s;
+            console.log(JSON.stringify(SB.songSectionRoles(song, plan)));
+        ''' % (json.dumps(song), json.dumps(plan)))
+        self.assertEqual(got, ['other', 'solo'])
+
+    def test_song_with_no_sections_has_no_roles(self):
+        song = {
+            'id': 'plain', 'title': 'Plain', 'time': '4/4',
+            'sheet': [[['c', '[C]'], ['x', 'just lyrics']]],
+        }
+        got = run_js('''
+            var song = %s;
+            console.log(JSON.stringify(SB.songSectionRoles(song)));
+        ''' % json.dumps(song))
+        self.assertEqual(got, [])
+
+    def test_section_inherits_until_overridden(self):
+        plan = self.plan(songStrum='dduudu-4-4')
+        got = run_js('''
+            var song = %s;
+            var plan = %s;
+            var before = SB.sectionStrumFor(song, 'verse', plan);
+            plan.sectionStrums.verse = 'dddudu-4-4';
+            var after = SB.sectionStrumFor(song, 'verse', plan);
+            var chorus = SB.sectionStrumFor(song, 'chorus', plan);
+            console.log(JSON.stringify({
+                before: before.id, after: after.id, chorus: chorus.id
+            }));
+        ''' % (json.dumps(SONG), json.dumps(plan)))
+        self.assertEqual(got['before'], 'dduudu-4-4')
+        self.assertEqual(got['after'], 'dddudu-4-4')
+        # An untouched role still inherits the song's manual default.
+        self.assertEqual(got['chorus'], 'dduudu-4-4')
+
+    def test_same_role_shares_one_override(self):
+        song = {
+            'id': 'verses', 'title': 'Verses', 'time': '4/4',
+            'strum': 'downs-4-4',
+            'grid': [
+                {'label': 'Verse 1', 'role': 'verse',
+                 'bars': [{'beats': [{'chord': 'C', 'beats': 4}]}]},
+                {'label': 'Verse 2', 'role': 'verse',
+                 'bars': [{'beats': [{'chord': 'C', 'beats': 4}]}]},
+            ],
+        }
+        plan = self.plan(sectionStrums={'verse': 'dddudu-4-4'})
+        got = run_js('''
+            var song = %s;
+            var plan = %s;
+            function at(block) {
+                var r = SB.resolveStrumAt(song, { block: block, bar: 0, beat: 0 }, plan);
+                return { source: r.source, id: r.id };
+            }
+            console.log(JSON.stringify({ one: at(0), two: at(1) }));
+        ''' % (json.dumps(song), json.dumps(plan)))
+        self.assertEqual(got['one'], {'source': 'section', 'id': 'dddudu-4-4'})
+        self.assertEqual(got['two'], {'source': 'section', 'id': 'dddudu-4-4'})
+
+    def test_invalid_section_override_falls_back_to_main(self):
+        plan = self.plan(sectionStrums={'verse': 'waltz-3-4'})
+        got = run_js('''
+            var song = %s;
+            var plan = %s;
+            var r = SB.sectionStrumFor(song, 'verse', plan);
+            console.log(JSON.stringify(r.id));
+        ''' % (json.dumps(SONG), json.dumps(plan)))
+        self.assertEqual(got, 'downs-4-4')
+
+    def test_main_pattern_ignores_section_overrides(self):
+        plan = self.plan(sectionStrums={'verse': 'dddudu-4-4'})
+        got = run_js('''
+            var song = %s;
+            var plan = %s;
+            console.log(JSON.stringify(SB.mainStrumFor(song, plan).id));
+        ''' % (json.dumps(SONG), json.dumps(plan)))
+        self.assertEqual(got, 'downs-4-4')
 
 
 class CustomPatternTests(unittest.TestCase):

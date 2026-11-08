@@ -333,7 +333,12 @@
                     used[match.index] = true;
                     out.push({
                         label: section.name || match.block.label || '',
-                        role: SB.sectionRole(match.block.label || section.name || ''),
+                        // The role belongs to the section the player is in, not
+                        // to whichever authored template happened to fit it:
+                        // a Bridge that reuses the Verse progression is still
+                        // a bridge, and must not be offered as a verse strum
+                        // selector (issue #107).
+                        role: SB.sectionRole(section.name || match.block.label || ''),
                         bars: tiled.bars,
                         repeat: !!match.block.repeat,
                         model: model
@@ -369,6 +374,39 @@
         return out;
     }
     SB.gridBlocksFor = gridBlocksFor;
+
+    /* Every canonical section role the song actually contains, in the order
+     * the player meets them (sheet order, then any authored grid block the
+     * sheet does not cover). The per-section strum selectors are keyed by this
+     * list, not by a fixed menu: a song with no bridge must not offer one.
+     *
+     * Two labels with the same role ("Verse 1", "Verse 2") collapse into one
+     * entry, because section strums are stored per role. `other` is included
+     * when a block carries it, so an unrecognised authored section still gets
+     * a selector rather than silently falling back to the song pattern. */
+    SB.songSectionRoles = function (song, plan) {
+        var roles = [];
+        var seen = {};
+        function add(block) {
+            if (!block) return;
+            var label = block.label || '';
+            var role = SB.isSectionRole(block.role)
+                ? block.role
+                : SB.sectionRole(label);
+            if (!role || seen[role]) return;
+            // An auto-generated block with no label (or an unnamed block) is
+            // just "the rest of the song", not a section worth a selector.
+            if (role === 'other' && !label) return;
+            seen[role] = true;
+            roles.push(role);
+        }
+        if (!song) return roles;
+
+        gridBlocksFor(song).forEach(add);
+        var authored = (plan && plan.grid) || song.grid || [];
+        authored.forEach(add);
+        return roles;
+    };
 
     /* ---------------- cursor ---------------- */
 

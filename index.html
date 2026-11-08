@@ -216,7 +216,21 @@
                         <span class="step-divider" role="separator"></span>
                         <button id="strumPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
                     </div>
+                    <button id="strumSectionsBtn" class="step-btn strum-sections-btn" type="button"
+                            aria-expanded="false" aria-controls="strumSections"
+                            aria-label="Show per-section strum patterns"
+                            title="Show per-section strum patterns">
+                        <span class="strum-sections-chevron" aria-hidden="true">▸</span>
+                        <span id="strumSectionsSummary" class="strum-sections-summary">Sections</span>
+                    </button>
                 </div>
+            </div>
+            <div id="strumSections" class="strum-sections" role="group"
+                 aria-label="Per-section strum patterns" hidden>
+                <p id="strumSectionsEmpty" class="strum-sections-empty" hidden>
+                    This song has no sections — the strum above applies to the whole song.
+                </p>
+                <div id="strumSectionsList" class="strum-sections-list"></div>
             </div>
             <div class="tool-group" role="group" aria-label="Chord diagram size">
                 <span class="tool-label">Diagram</span>

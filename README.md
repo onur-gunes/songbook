@@ -158,10 +158,14 @@ attached to `SB`.
   on a phone is the difference between the pattern fitting on screen and not.
   Available on every song: one with no `time` uses 4/4, so the row and
   selector still work and a manual choice can be stored per song.
-  **One pattern per song is an approximation**: strum is far less
-  reliably documented than key or bpm and most songs change feel between verse
-  and chorus; per-section patterns are a later feature. Visual only — the
-  metronome is the audio.
+  Per-section patterns: expand the strum group to pick a pattern per section
+  role present in the song (Verse, Chorus, Bridge, …; "Verse 1" and "Verse 2"
+  share one choice). Each selector defaults to "Same as song" and inherits the
+  main pattern until changed, and the row updates immediately. Choosing a
+  section pattern applies to every section with that role and is remembered in
+  the song's edit plan; which pattern is active during playback follows the
+  song pattern until the grid strum lane lands (a later step). Visual only —
+  the metronome is the audio.
 - **Tuner** — chromatic-style pitch detection from the microphone with
   ukulele/guitar presets, auto or manual string selection, A4 calibration
   (430–450 Hz), and an octave-safe detector. Requires a secure context
