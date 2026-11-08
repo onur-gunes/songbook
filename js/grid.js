@@ -1524,20 +1524,24 @@
     }
 
     /* Delegated clicks on the sheet: open the bar strum editor or the beat
-     * editor. The animated view is read-only and ignores these. */
-    document.addEventListener('click', function (ev) {
-        if (!activeGrid || activeGrid.anim) return;
-        var btn = ev.target.closest('.grid-bar-strum');
-        if (btn) {
-            ev.preventDefault();
-            gridEditorShow('bar', parseInt(btn.dataset.block, 10), parseInt(btn.dataset.bar, 10), 0);
-            return;
-        }
-        var beat = ev.target.closest('.grid-beat');
-        if (beat) {
-            ev.preventDefault();
-            gridEditorShow('beat', parseInt(beat.dataset.block, 10), parseInt(beat.dataset.bar, 10), parseInt(beat.dataset.beatLocal, 10));
-        }
-    });
+     * editor. The animated view is read-only and ignores these. Guarded so the
+     * module loads under node (tests/plan.py stubs document without
+     * addEventListener). */
+    if (typeof document !== 'undefined' && document.addEventListener) {
+        document.addEventListener('click', function (ev) {
+            if (!activeGrid || activeGrid.anim) return;
+            var btn = ev.target.closest('.grid-bar-strum');
+            if (btn) {
+                ev.preventDefault();
+                gridEditorShow('bar', parseInt(btn.dataset.block, 10), parseInt(btn.dataset.bar, 10), 0);
+                return;
+            }
+            var beat = ev.target.closest('.grid-beat');
+            if (beat) {
+                ev.preventDefault();
+                gridEditorShow('beat', parseInt(beat.dataset.block, 10), parseInt(beat.dataset.bar, 10), parseInt(beat.dataset.beatLocal, 10));
+            }
+        });
+    }
 
 })(window.SB = window.SB || {});
