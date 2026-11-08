@@ -5258,6 +5258,205 @@ body.tuner-open { overflow: hidden; }
     SB.bpmKey = function (sbId, songId) { return SB.NS + ':bpm:' + sbId + SB.SEP + songId; }
     SB.strumKey = function (sbId, songId) { return SB.NS + ':strum:' + sbId + SB.SEP + songId; }
 
+    /* ---------------- per-song edit plan ----------------
+     *
+     * Every local edit to one song — strum choices today, structure later —
+     * lives in a single versioned object under one key. It is deliberately
+     * separate from the songbook object: the imported book in memory/IDB is
+     * never mutated, and the plan is merged only when exporting. The key is
+     * scoped to songbook + song because two books may reuse a song id.
+     *
+     * Shape (version 1):
+     *
+     *   {
+     *     version: 1,
+     *     songStrum: 'dduudu-4-4',      // manual song-level default
+     *     sectionStrums: { verse: '…' }, // keyed by canonical role
+     *     customPatterns: [{id, name, time, subdiv, slots}],
+     *     barStrums: { 'block:bar': '…' },
+     *     beatStrums: { 'block:bar:beat': 'DU' },
+     *     grid: [...],                   // structural override (Step 6)
+     *     time: '4/4'                    // metre override (Step 6)
+     *   }
+     *
+     * Only overrides are stored, never a copy of the whole song. Unknown or
+     * corrupt data is ignored rather than allowed to break the song view. */
+    var PLAN_VERSION = 1;
+    var PLAN_TIMES = { '4/4': 1, '3/4': 1, '6/8': 1, '2/4': 1 };
+
+    function planString(v) { return (typeof v === 'string' && v) ? v : null; }
+    function planObject(v) { return v && typeof v === 'object' && !Array.isArray(v); }
+
+    function emptyPlan() {
+        return {
+            version: PLAN_VERSION,
+            songStrum: null,
+            sectionStrums: {},
+            customPatterns: [],
+            barStrums: {},
+            beatStrums: {},
+            grid: null,
+            time: null
+        };
+    }
+
+    /* Pattern definitions may come from a future/older build, so validate the
+     * whole shape before the strum resolver can trust an id to refer to a
+     * usable pattern. The metre/slot-count check happens in js/strum.js, where
+     * the pattern library and BEATS_PER_BAR live. */
+    function normalizeCustomPattern(raw) {
+        if (!planObject(raw)) return null;
+        var id = planString(raw.id);
+        var time = planString(raw.time);
+        var slots = planString(raw.slots);
+        var subdiv = raw.subdiv;
+        if (!id || !time || !slots || !/^[DU-]+$/.test(slots)) return null;
+        if (typeof subdiv !== 'number' || !isFinite(subdiv) ||
+            subdiv < 1 || subdiv !== Math.floor(subdiv)) return null;
+        return {
+            id: id,
+            name: planString(raw.name) || id,
+            time: time,
+            subdiv: subdiv,
+            slots: slots
+        };
+    }
+
+    /* Copy a key -> string map, dropping anything that is not a safe, plain
+     * string value. `__proto__` and friends are skipped so corrupt storage can
+     * never change a prototype while it is being read. */
+    function normalizeOverrides(raw, isValue) {
+        var out = {};
+        if (!planObject(raw)) return out;
+        Object.keys(raw).forEach(function (key) {
+            if (!key || key === '__proto__' || key === 'constructor' || key === 'prototype') return;
+            var value = raw[key];
+            if (typeof value !== 'string' || !value) return;
+            if (isValue && !isValue(value)) return;
+            out[key] = value;
+        });
+        return out;
+    }
+
+    function hasBeatSlots(value) { return /^[DU-]+$/.test(value); }
+
+    /* Bring any stored shape up to the current version. A missing version is
+     * treated as v0 (the shape before this key existed, e.g. an unversioned
+     * test fixture or an old manual choice). A NEWER version is rejected: a
+     * future build may have written fields this one would silently discard. */
+    function migratePlan(raw) {
+        if (!planObject(raw)) return null;
+        var version = raw.version;
+        if (typeof version !== 'number' || !isFinite(version)) version = 0;
+        if (version > PLAN_VERSION) return null;
+        if (version < 1) {
+            raw = {
+                version: PLAN_VERSION,
+                songStrum: planString(raw.songStrum) || planString(raw.strum),
+                sectionStrums: raw.sectionStrums,
+                customPatterns: raw.customPatterns,
+                barStrums: raw.barStrums,
+                beatStrums: raw.beatStrums,
+                grid: raw.grid,
+                time: raw.time
+            };
+        }
+        return raw;
+    }
+
+    SB.normalizePlan = function (raw) {
+        var migrated = migratePlan(raw);
+        if (!migrated) return emptyPlan();
+
+        var sections = {};
+        var rawSections = planObject(migrated.sectionStrums) ? migrated.sectionStrums : {};
+        Object.keys(rawSections).forEach(function (role) {
+            var id = planString(rawSections[role]);
+            if (id && SB.isSectionRole(role)) sections[role] = id;
+        });
+
+        var patterns = [];
+        var seen = {};
+        if (Array.isArray(migrated.customPatterns)) {
+            migrated.customPatterns.forEach(function (rawPattern) {
+                var pattern = normalizeCustomPattern(rawPattern);
+                if (!pattern || seen[pattern.id]) return;
+                seen[pattern.id] = true;
+                patterns.push(pattern);
+            });
+        }
+
+        var grid = null;
+        if (Array.isArray(migrated.grid) && migrated.grid.every(function (block) {
+            return block && typeof block === 'object' && Array.isArray(block.bars);
+        })) {
+            grid = migrated.grid;
+        }
+
+        var time = planString(migrated.time);
+        return {
+            version: PLAN_VERSION,
+            songStrum: planString(migrated.songStrum),
+            sectionStrums: sections,
+            customPatterns: patterns,
+            barStrums: normalizeOverrides(migrated.barStrums),
+            beatStrums: normalizeOverrides(migrated.beatStrums, hasBeatSlots),
+            grid: grid,
+            time: knownPlanTime(time)
+        };
+    };
+
+    function knownPlanTime(value) { return value && PLAN_TIMES[value] ? value : null; }
+
+    SB.emptyPlan = emptyPlan;
+    SB.PLAN_VERSION = PLAN_VERSION;
+    SB.planKey = function (sbId, songId) { return SB.NS + ':plan:' + sbId + SB.SEP + songId; }
+
+    /* The plan's own song-level default is the manual strum choice. Older
+     * builds stored only that id under SB.strumKey, so seed it on read: an
+     * existing user keeps their choice without writing anything until they
+     * change something. */
+    SB.loadPlan = function (sbId, songId) {
+        var plan = SB.normalizePlan(SB.lsGet(SB.planKey(sbId, songId), null));
+        if (!plan.songStrum) {
+            try {
+                plan.songStrum = planString(window.localStorage.getItem(SB.strumKey(sbId, songId)));
+            } catch (e) { /* ignore */ }
+        }
+        return plan;
+    };
+
+    SB.savePlan = function (sbId, songId, plan) {
+        var clean = SB.normalizePlan(plan);
+        SB.lsSet(SB.planKey(sbId, songId), clean);
+        return clean;
+    };
+
+    /* Clearing the plan removes every local edit for the song, including the
+     * pre-plan manual choice it was migrated from. Per-song preferences that
+     * are not song edits (notes, tempo, scroll speed, text size) stay put. */
+    SB.clearPlan = function (sbId, songId) {
+        try { window.localStorage.removeItem(SB.planKey(sbId, songId)); } catch (e) { /* ignore */ }
+        try { window.localStorage.removeItem(SB.strumKey(sbId, songId)); } catch (e) { /* ignore */ }
+    };
+
+    function planHasEdits(plan) {
+        if (!plan || typeof plan !== 'object') return false;
+        return !!(plan.songStrum || plan.time ||
+            (plan.grid && plan.grid.length) ||
+            (plan.customPatterns && plan.customPatterns.length) ||
+            Object.keys(plan.sectionStrums || {}).length ||
+            Object.keys(plan.barStrums || {}).length ||
+            Object.keys(plan.beatStrums || {}).length);
+    }
+
+    /* Accepts either a plan object (for a plan already in hand) or a
+     * songbook/song pair (reads and migrates it). */
+    SB.hasLocalEdits = function (sbId, songId) {
+        if (planObject(sbId)) return planHasEdits(sbId);
+        return planHasEdits(SB.loadPlan(sbId, songId));
+    };
+
     /* ---------------- recent ---------------- */
 
     SB.renderRecent = function () {
@@ -8571,7 +8770,8 @@ body.tuner-open { overflow: hidden; }
 /* Songbook — strum
  * a strum-pattern row under the chord strip, chosen from a small library
  * filtered by the song's time signature, highlighted in lockstep with the
- * metronome. See GitHub issue #41.
+ * metronome. Also resolves the per-song edit plan (issue #105): beat, bar and
+ * section-role overrides first, then the song's/plan's defaults.
  *
  * Part of the window.SB namespace. Loaded as a classic script in the order
  * set by index.html; see js/core.js for the shared state.
@@ -8685,34 +8885,155 @@ body.tuner-open { overflow: hidden; }
         catch (e) { return null; }
     }
 
+    /* The main selector is the plan's song-level default, so keep the plan and
+     * the pre-plan SB.strumKey copy in step. The old key is what existing
+     * builds and users' current storage understand; the plan is where all the
+     * new per-section/bar/beat edits live. */
     function saveChoice(sbId, songId, id) {
         try { window.localStorage.setItem(SB.strumKey(sbId, songId), id); }
         catch (e) { /* ignore */ }
+        var plan = SB.loadPlan(sbId, songId);
+        plan.songStrum = id;
+        SB.savePlan(sbId, songId, plan);
     }
 
-    /* The metre used for the row: the song's own, or the app default when the
-     * songbook has none. The default is what makes the feature available on
-     * every song; it is not written into the song data. */
-    function timeFor(song) {
-        return (song && song.time) || SB.DEFAULT_TIME;
+    /* The metre used for the row: the plan's structural override, the song's
+     * own metre, or the app default. The default is what makes the feature
+     * available on every song; it is not written into the song data. */
+    function timeFor(song, plan) {
+        return (plan && plan.time) || (song && song.time) || SB.DEFAULT_TIME;
     }
 
-    /* The documented default (the song's `strum`) is used unless the user has
-     * made a manual choice here, exactly as bpm prefers the user override over
-     * the song's value. A manual choice that no longer fits the metre (e.g. an
-     * imported book changed) falls back to the default rather than nothing.
-     * Songs with no metre use DEFAULT_TIME, so they always get a usable row. */
+    /* Custom patterns live in the plan, library patterns in PATTERNS. A
+     * definition is usable only when its metre matches and its slot count
+     * lines up with that metre: the same invariant the library is built on,
+     * which is what keeps the row aligned with the metronome. */
+    function patternFits(pattern, time) {
+        if (!pattern || !time || pattern.time !== time) return false;
+        var subdiv = pattern.subdiv;
+        if (typeof subdiv !== 'number' || subdiv < 1 || subdiv !== Math.floor(subdiv)) return false;
+        var slots = pattern.slots;
+        if (typeof slots !== 'string' || !/^[DU-]+$/.test(slots)) return false;
+        return slots.length === SB.metronomeBeatsPerBar(time) * subdiv;
+    }
+
+    function findPattern(id, time, plan) {
+        if (!id || !time) return null;
+        var custom = (plan && plan.customPatterns) || [];
+        for (var i = 0; i < custom.length; i++) {
+            if (custom[i].id === id) return patternFits(custom[i], time) ? custom[i] : null;
+        }
+        return patternForSong(id, time);
+    }
+
+    function currentPlanFor(song) {
+        var sbId = SB.state.active ? SB.state.active.id : null;
+        if (!sbId || !song) return SB.emptyPlan();
+        return SB.loadPlan(sbId, song.id);
+    }
+
+    function planIndex(value) {
+        return (typeof value === 'number' && isFinite(value) && value >= 0) ? Math.floor(value) : 0;
+    }
+
+    /* Override coordinates are the block/bar/beat positions inside the
+     * effective grid, not the song's labels: labels are free text and may be
+     * translated, while the positions are what the grid renderer walks. */
+    SB.planBarKey = function (block, bar) { return planIndex(block) + ':' + planIndex(bar); };
+    SB.planBeatKey = function (block, bar, beat) {
+        return planIndex(block) + ':' + planIndex(bar) + ':' + planIndex(beat);
+    };
+
+    function roleAt(song, plan, at) {
+        if (at && SB.isSectionRole(at.role)) return at.role;
+        var grid = (plan && plan.grid) || (song && song.grid) || [];
+        var block = grid[planIndex(at && at.block)];
+        if (!block) return null;
+        if (SB.isSectionRole(block.role)) return block.role;
+        return SB.sectionRole(block.label || '');
+    }
+
+    /* One resolver for every strum question. Precedence:
+     *
+     *   beat > bar > section role > manual song default > song default
+     *
+     * "Manual song default" is the plan's songStrum, migrated on read from the
+     * pre-plan SB.strumKey choice; the legacy key is also consulted directly
+     * as a fallback so an existing user's choice can never disappear. "Song
+     * default" is the songbook's documented `strum`. If none of those fit the
+     * metre, the first pattern for that metre is used, exactly as the old
+     * single-pattern row did.
+     *
+     * `slots` is the effective subdivision string for the requested felt beat,
+     * while `pattern` is the full pattern it came from: a beat override can
+     * replace one beat without replacing the song's pattern. */
+    SB.resolveStrumAt = function (song, at, plan) {
+        var none = { id: null, pattern: null, slots: null, subdiv: 0, source: 'none', time: null };
+        if (!song) return none;
+        if (plan === undefined) plan = currentPlanFor(song);
+        plan = SB.normalizePlan(plan);
+        at = at || {};
+
+        var time = timeFor(song, plan);
+        var block = planIndex(at.block);
+        var bar = planIndex(at.bar);
+        var beat = planIndex(at.beat);
+        var role = roleAt(song, plan, { block: block, role: at.role });
+
+        var pattern = findPattern(plan.barStrums[SB.planBarKey(block, bar)], time, plan);
+        var source = pattern ? 'bar' : null;
+        if (!pattern && role) {
+            pattern = findPattern(plan.sectionStrums[role], time, plan);
+            source = pattern ? 'section' : null;
+        }
+        if (!pattern) {
+            pattern = findPattern(plan.songStrum, time, plan);
+            source = pattern ? 'manual' : null;
+        }
+        if (!pattern && SB.state.active) {
+            pattern = findPattern(storedChoice(SB.state.active.id, song.id), time, plan);
+            source = pattern ? 'manual' : null;
+        }
+        if (!pattern) {
+            pattern = findPattern(song.strum, time, plan);
+            source = pattern ? 'song' : null;
+        }
+        if (!pattern) {
+            var list = SB.strumPatternsFor(time);
+            pattern = list.length ? list[0] : null;
+            source = pattern ? 'fallback' : 'none';
+        }
+        if (!pattern) return none;
+
+        var beatSlots = plan.beatStrums[SB.planBeatKey(block, bar, beat)];
+        if (beatSlots && beatSlots.length === pattern.subdiv && /^[DU-]+$/.test(beatSlots)) {
+            return {
+                id: pattern.id,
+                pattern: pattern,
+                slots: beatSlots,
+                subdiv: pattern.subdiv,
+                source: 'beat',
+                time: time
+            };
+        }
+
+        var start = beat * pattern.subdiv;
+        return {
+            id: pattern.id,
+            pattern: pattern,
+            slots: pattern.slots.slice(start, start + pattern.subdiv) || null,
+            subdiv: pattern.subdiv,
+            source: source,
+            time: time
+        };
+    };
+
+    /* The row still shows one song-wide pattern until the expanded section
+     * selectors land; start at the song's first section so a section default
+     * previews correctly when one exists. */
     function chooseFor(song) {
         if (!song) return null;
-        var time = timeFor(song);
-        if (SB.state.active) {
-            var saved = patternForSong(storedChoice(SB.state.active.id, song.id), time);
-            if (saved) return saved;
-        }
-        var def = patternForSong(song.strum, time);
-        if (def) return def;
-        var list = SB.strumPatternsFor(time);
-        return list.length ? list[0] : null;
+        return SB.resolveStrumAt(song, { block: 0, bar: 0, beat: 0 }, currentPlanFor(song)).pattern;
     }
 
     /* ---------------- rendering ---------------- */
@@ -9339,6 +9660,16 @@ body.tuner-open { overflow: hidden; }
         strumPatternsFor: SB.strumPatternsFor,
         setStrum: SB.setStrum,
         toggleStrumNotation: SB.toggleStrumNotation,
+        planKey: SB.planKey,
+        planBarKey: SB.planBarKey,
+        planBeatKey: SB.planBeatKey,
+        emptyPlan: SB.emptyPlan,
+        normalizePlan: SB.normalizePlan,
+        loadPlan: SB.loadPlan,
+        savePlan: SB.savePlan,
+        clearPlan: SB.clearPlan,
+        hasLocalEdits: SB.hasLocalEdits,
+        resolveStrumAt: SB.resolveStrumAt,
         // Read through functions: these are numbers/booleans, so unlike the
         // strum object above they cannot be exported by reference.
         getStrumSize: function () { return SB.state.strumSize; },

@@ -1,7 +1,8 @@
 /* Songbook — strum
  * a strum-pattern row under the chord strip, chosen from a small library
  * filtered by the song's time signature, highlighted in lockstep with the
- * metronome. See GitHub issue #41.
+ * metronome. Also resolves the per-song edit plan (issue #105): beat, bar and
+ * section-role overrides first, then the song's/plan's defaults.
  *
  * Part of the window.SB namespace. Loaded as a classic script in the order
  * set by index.html; see js/core.js for the shared state.
@@ -115,34 +116,155 @@
         catch (e) { return null; }
     }
 
+    /* The main selector is the plan's song-level default, so keep the plan and
+     * the pre-plan SB.strumKey copy in step. The old key is what existing
+     * builds and users' current storage understand; the plan is where all the
+     * new per-section/bar/beat edits live. */
     function saveChoice(sbId, songId, id) {
         try { window.localStorage.setItem(SB.strumKey(sbId, songId), id); }
         catch (e) { /* ignore */ }
+        var plan = SB.loadPlan(sbId, songId);
+        plan.songStrum = id;
+        SB.savePlan(sbId, songId, plan);
     }
 
-    /* The metre used for the row: the song's own, or the app default when the
-     * songbook has none. The default is what makes the feature available on
-     * every song; it is not written into the song data. */
-    function timeFor(song) {
-        return (song && song.time) || SB.DEFAULT_TIME;
+    /* The metre used for the row: the plan's structural override, the song's
+     * own metre, or the app default. The default is what makes the feature
+     * available on every song; it is not written into the song data. */
+    function timeFor(song, plan) {
+        return (plan && plan.time) || (song && song.time) || SB.DEFAULT_TIME;
     }
 
-    /* The documented default (the song's `strum`) is used unless the user has
-     * made a manual choice here, exactly as bpm prefers the user override over
-     * the song's value. A manual choice that no longer fits the metre (e.g. an
-     * imported book changed) falls back to the default rather than nothing.
-     * Songs with no metre use DEFAULT_TIME, so they always get a usable row. */
+    /* Custom patterns live in the plan, library patterns in PATTERNS. A
+     * definition is usable only when its metre matches and its slot count
+     * lines up with that metre: the same invariant the library is built on,
+     * which is what keeps the row aligned with the metronome. */
+    function patternFits(pattern, time) {
+        if (!pattern || !time || pattern.time !== time) return false;
+        var subdiv = pattern.subdiv;
+        if (typeof subdiv !== 'number' || subdiv < 1 || subdiv !== Math.floor(subdiv)) return false;
+        var slots = pattern.slots;
+        if (typeof slots !== 'string' || !/^[DU-]+$/.test(slots)) return false;
+        return slots.length === SB.metronomeBeatsPerBar(time) * subdiv;
+    }
+
+    function findPattern(id, time, plan) {
+        if (!id || !time) return null;
+        var custom = (plan && plan.customPatterns) || [];
+        for (var i = 0; i < custom.length; i++) {
+            if (custom[i].id === id) return patternFits(custom[i], time) ? custom[i] : null;
+        }
+        return patternForSong(id, time);
+    }
+
+    function currentPlanFor(song) {
+        var sbId = SB.state.active ? SB.state.active.id : null;
+        if (!sbId || !song) return SB.emptyPlan();
+        return SB.loadPlan(sbId, song.id);
+    }
+
+    function planIndex(value) {
+        return (typeof value === 'number' && isFinite(value) && value >= 0) ? Math.floor(value) : 0;
+    }
+
+    /* Override coordinates are the block/bar/beat positions inside the
+     * effective grid, not the song's labels: labels are free text and may be
+     * translated, while the positions are what the grid renderer walks. */
+    SB.planBarKey = function (block, bar) { return planIndex(block) + ':' + planIndex(bar); };
+    SB.planBeatKey = function (block, bar, beat) {
+        return planIndex(block) + ':' + planIndex(bar) + ':' + planIndex(beat);
+    };
+
+    function roleAt(song, plan, at) {
+        if (at && SB.isSectionRole(at.role)) return at.role;
+        var grid = (plan && plan.grid) || (song && song.grid) || [];
+        var block = grid[planIndex(at && at.block)];
+        if (!block) return null;
+        if (SB.isSectionRole(block.role)) return block.role;
+        return SB.sectionRole(block.label || '');
+    }
+
+    /* One resolver for every strum question. Precedence:
+     *
+     *   beat > bar > section role > manual song default > song default
+     *
+     * "Manual song default" is the plan's songStrum, migrated on read from the
+     * pre-plan SB.strumKey choice; the legacy key is also consulted directly
+     * as a fallback so an existing user's choice can never disappear. "Song
+     * default" is the songbook's documented `strum`. If none of those fit the
+     * metre, the first pattern for that metre is used, exactly as the old
+     * single-pattern row did.
+     *
+     * `slots` is the effective subdivision string for the requested felt beat,
+     * while `pattern` is the full pattern it came from: a beat override can
+     * replace one beat without replacing the song's pattern. */
+    SB.resolveStrumAt = function (song, at, plan) {
+        var none = { id: null, pattern: null, slots: null, subdiv: 0, source: 'none', time: null };
+        if (!song) return none;
+        if (plan === undefined) plan = currentPlanFor(song);
+        plan = SB.normalizePlan(plan);
+        at = at || {};
+
+        var time = timeFor(song, plan);
+        var block = planIndex(at.block);
+        var bar = planIndex(at.bar);
+        var beat = planIndex(at.beat);
+        var role = roleAt(song, plan, { block: block, role: at.role });
+
+        var pattern = findPattern(plan.barStrums[SB.planBarKey(block, bar)], time, plan);
+        var source = pattern ? 'bar' : null;
+        if (!pattern && role) {
+            pattern = findPattern(plan.sectionStrums[role], time, plan);
+            source = pattern ? 'section' : null;
+        }
+        if (!pattern) {
+            pattern = findPattern(plan.songStrum, time, plan);
+            source = pattern ? 'manual' : null;
+        }
+        if (!pattern && SB.state.active) {
+            pattern = findPattern(storedChoice(SB.state.active.id, song.id), time, plan);
+            source = pattern ? 'manual' : null;
+        }
+        if (!pattern) {
+            pattern = findPattern(song.strum, time, plan);
+            source = pattern ? 'song' : null;
+        }
+        if (!pattern) {
+            var list = SB.strumPatternsFor(time);
+            pattern = list.length ? list[0] : null;
+            source = pattern ? 'fallback' : 'none';
+        }
+        if (!pattern) return none;
+
+        var beatSlots = plan.beatStrums[SB.planBeatKey(block, bar, beat)];
+        if (beatSlots && beatSlots.length === pattern.subdiv && /^[DU-]+$/.test(beatSlots)) {
+            return {
+                id: pattern.id,
+                pattern: pattern,
+                slots: beatSlots,
+                subdiv: pattern.subdiv,
+                source: 'beat',
+                time: time
+            };
+        }
+
+        var start = beat * pattern.subdiv;
+        return {
+            id: pattern.id,
+            pattern: pattern,
+            slots: pattern.slots.slice(start, start + pattern.subdiv) || null,
+            subdiv: pattern.subdiv,
+            source: source,
+            time: time
+        };
+    };
+
+    /* The row still shows one song-wide pattern until the expanded section
+     * selectors land; start at the song's first section so a section default
+     * previews correctly when one exists. */
     function chooseFor(song) {
         if (!song) return null;
-        var time = timeFor(song);
-        if (SB.state.active) {
-            var saved = patternForSong(storedChoice(SB.state.active.id, song.id), time);
-            if (saved) return saved;
-        }
-        var def = patternForSong(song.strum, time);
-        if (def) return def;
-        var list = SB.strumPatternsFor(time);
-        return list.length ? list[0] : null;
+        return SB.resolveStrumAt(song, { block: 0, bar: 0, beat: 0 }, currentPlanFor(song)).pattern;
     }
 
     /* ---------------- rendering ---------------- */
