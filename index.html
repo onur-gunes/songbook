@@ -244,6 +244,18 @@
                     </div>
                 </div>
             </div>
+            <div id="editGroup" class="tool-group" role="group" aria-label="Structure editing">
+                <span class="tool-label">Structure</span>
+                <div class="tool-controls">
+                    <button id="editBtn" class="step-btn edit-toggle" type="button"
+                            aria-pressed="false" aria-label="Turn structure editing on or off"
+                            title="Edit chords, bars, beats and metre">Edit</button>
+                    <button id="resetBtn" class="step-btn reset-btn" type="button"
+                            disabled hidden
+                            aria-label="Reset this song to its songbook version"
+                            title="Reset this song to its songbook version">↺ Reset</button>
+                </div>
+            </div>
         </div>
 
         <div id="sheet" class="sheet" tabindex="0" aria-label="Chord sheet"></div>
@@ -425,6 +437,7 @@
 <script src="js/autoscroll.js"></script>
 <script src="js/metronome.js"></script>
 <script src="js/strum.js"></script>
+<script src="js/editor.js"></script>
 <script src="js/router.js"></script>
 <script src="js/keyboard.js"></script>
 <script src="js/app.js"></script>

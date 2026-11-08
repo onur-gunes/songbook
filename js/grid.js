@@ -316,12 +316,39 @@
 
     /* Build the complete chart from the sheet. Authored blocks are used as
      * templates where their progression fits the section; every other section
-     * gets an automatic chart, so no song needs a hand-written grid. */
-    function gridBlocksFor(song) {
+     * gets an automatic chart, so no song needs a hand-written grid.
+     *
+     * When a per-song edit plan carries a structural grid override
+     * (plan.grid, Step 6 edit mode), that override wins over the songbook's
+     * authored grid: the user's structure is what the chart shows. Each plan
+     * block renders as its own section, keyed by its own label/role, so the
+     * editor's add/remove/split/merge edits appear verbatim.
+     */
+    function gridBlocksFor(song, plan) {
         var beatsPerBar = SB.metronomeBeatsPerBar(song.time);
-        var authored = song.grid || [];
         var used = {};
         var out = [];
+
+        var planGrid = (plan && plan.grid) || null;
+        if (planGrid && planGrid.length) {
+            planGrid.forEach(function (block) {
+                var bars = (block.bars || []).map(function (bar) {
+                    return { beats: (bar.beats || []).map(function (seg) {
+                        return { chord: seg.chord, beats: seg.beats };
+                    }) };
+                });
+                out.push({
+                    label: block.label || '',
+                    role: SB.isSectionRole(block.role) ? block.role : SB.sectionRole(block.label || ''),
+                    bars: bars,
+                    repeat: !!block.repeat,
+                    model: null
+                });
+            });
+            return out;
+        }
+
+        var authored = song.grid || [];
 
         sheetSections(song).forEach(function (section) {
             var model = sectionModel(section);
@@ -1184,7 +1211,7 @@
         var frag = document.createDocumentFragment();
         var lyricSections = [];
         var measurer = makeMeasurer(wrap);
-        var blocks = gridBlocksFor(song);
+        var blocks = gridBlocksFor(song, plan);
         // The per-song edit plan supplies bar/beat strum overrides; fall back
         // to an empty plan when there is no active songbook/song.
         var sbId = SB.state.active && SB.state.active.id;

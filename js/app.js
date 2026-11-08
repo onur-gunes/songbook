@@ -82,6 +82,17 @@
         SB.bindSongControls();
         SB.bindKeyboard();
         SB.updateSpeedLabel();
+
+        /* Structure editing (Step 6): Edit toggle and Reset button. */
+        var editBtn = SB.$('editBtn');
+        if (editBtn) editBtn.addEventListener('click', SB.toggleEdit);
+        var resetBtn = SB.$('resetBtn');
+        if (resetBtn) resetBtn.addEventListener('click', function () {
+            SB.resetStructure();
+        });
+
+        SB.updateEditUi();
+
         registerServiceWorker();
         window.addEventListener('hashchange', SB.route);
 
