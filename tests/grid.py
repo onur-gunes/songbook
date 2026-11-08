@@ -50,13 +50,10 @@ def main():
         def grid_beats():
             return js(
                 "Array.from(document.querySelectorAll('.sheet.chords-grid .grid-beat')).map(function(b){"
-                "  return { strokes: b.querySelector('.grid-beat-strokes'),"
-                "           number: b.querySelector('.grid-beat-no'),"
-                "           slots: b.querySelectorAll('.grid-beat-slot');"
-                "           return { hasStrokes: !!b.querySelector('.grid-beat-strokes'),"
-                "                  hasNumber: !!b.querySelector('.grid-beat-no'),"
-                "                  slotCount: b.querySelectorAll('.grid-beat-slot').length,"
-                "                  text: b.textContent };"
+                "  return { hasStrokes: !!b.querySelector('.grid-beat-strokes'),"
+                "           hasNumber: !!b.querySelector('.grid-beat-no'),"
+                "           slotCount: b.querySelectorAll('.grid-beat-slot').length,"
+                "           text: b.textContent };"
                 "});")
 
         for book, song, time in SONGS:
