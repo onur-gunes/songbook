@@ -23,7 +23,7 @@ PORT = 9340
 # automatic one-chord-per-bar grid.
 SONGS = [
     ('test-book', 'grid-song', '4/4'),
-    ('test-book', 'three-quarter-time', '3/4'),
+    ('krakow-ukulele', 'three-quarter-time', '3/4'),
     ('test-book', 'six-eight-song', '6/8'),
     ('test-book', 'two-four-song', '2/4'),
 ]
