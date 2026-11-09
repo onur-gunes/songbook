@@ -170,6 +170,7 @@
         strumPatterns: SB.strumPatterns,
         strumPatternsFor: SB.strumPatternsFor,
         strumPatternsForSong: SB.strumPatternsForSong,
+        strumPlanFor: SB.strumPlanFor,
         mainStrumFor: SB.mainStrumFor,
         sectionStrumFor: SB.sectionStrumFor,
         songSectionRoles: SB.songSectionRoles,

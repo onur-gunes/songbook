@@ -336,9 +336,11 @@
         if (planGrid && planGrid.length) {
             planGrid.forEach(function (block) {
                 var bars = (block.bars || []).map(function (bar) {
-                    return { beats: (bar.beats || []).map(function (seg) {
+                    var out = { beats: (bar.beats || []).map(function (seg) {
                         return { chord: seg.chord, beats: seg.beats };
                     }) };
+                    if (Array.isArray(bar.strums)) out.strums = bar.strums.slice();
+                    return out;
                 });
                 out.push({
                     label: block.label || '',
@@ -569,6 +571,12 @@
         if (!activeGrid.anim) gridFollowStrum(idx);
     }
 
+    function barStrumsAt(block, bar) {
+        var blockObj = activeGrid && activeGrid.blocks ? activeGrid.blocks[block] : null;
+        var barObj = blockObj && blockObj.bars ? blockObj.bars[bar] : null;
+        return barObj ? barObj.strums : null;
+    }
+
     function gridFollowStrum(idx) {
         if (!activeGrid || !activeGrid.song) return;
         var el = activeGrid.beatEls[idx];
@@ -576,7 +584,9 @@
         var block = parseInt(el.dataset.block, 10);
         var bar = parseInt(el.dataset.bar, 10);
         var beat = parseInt(el.dataset.beatLocal, 10);
-        var resolved = SB.resolveStrumAt(activeGrid.song, { block: block, bar: bar, beat: beat }, activeGrid.plan);
+        var resolved = SB.resolveStrumAt(activeGrid.song, {
+            block: block, bar: bar, beat: beat, strums: barStrumsAt(block, bar)
+        }, activeGrid.plan);
         if (!resolved.pattern) return;
         var cur = SB.state.strum.pattern;
         if (cur && cur.id === resolved.pattern.id) return;
@@ -958,6 +968,7 @@
             changeXs: changeXs,
             blockIdx: blockIdx,
             barIdx: barIdx,
+            strums: bar.strums,
             width: x + BAR_PAD
         };
     }
@@ -979,7 +990,8 @@
     function barStrumText(song, plan, blockIdx, barIdx) {
         var id = (plan && plan.barStrums) ? plan.barStrums[SB.planBarKey(blockIdx, barIdx)] : null;
         if (!id) return '';
-        var p = SB.strumPatternFor(id, song.time || SB.DEFAULT_TIME, plan);
+        var merged = SB.strumPlanFor ? SB.strumPlanFor(song, plan) : plan;
+        var p = SB.strumPatternFor(id, song.time || SB.DEFAULT_TIME, merged);
         return p ? p.name : id;
     }
 
@@ -1048,7 +1060,10 @@
         }
 
         spec.beats.forEach(function (b) {
-            var resolved = SB.resolveStrumAt(song, { block: spec.blockIdx, bar: spec.barIdx, beat: b.index }, plan);
+            var resolved = SB.resolveStrumAt(song, {
+                block: spec.blockIdx, bar: spec.barIdx, beat: b.index,
+                strums: spec.strums
+            }, plan);
             var slots = resolved.slots || '';
             var subdiv = resolved.subdiv || 1;
 
@@ -1382,6 +1397,7 @@
         activeGrid = {
             song: song,
             plan: plan,
+            blocks: blocks,
             beatsPerBar: beatsPerBar,
             totalBeats: beatEls.length,
             bpm: bpm,
@@ -1495,7 +1511,6 @@
         var plan = activeGrid.plan;
         var sbId = SB.state.active && SB.state.active.id;
         var title = el.querySelector('.grid-strum-title');
-        var time = song.time || SB.DEFAULT_TIME;
 
         if (mode === 'bar') {
             title.textContent = 'Bar ' + String(bar + 1) + ' strum';
@@ -1509,13 +1524,7 @@
                 gridEditApply(function () { SB.setBarOverride(sbId, song.id, block, bar, null); });
             });
             body.appendChild(inherit);
-            var list = SB.strumPatternsFor(time).slice();
-            var seen = {};
-            list.forEach(function (p) { seen[p.id] = true; });
-            var custom = (plan && plan.customPatterns) || [];
-            custom.forEach(function (p) {
-                if (!seen[p.id] && patternFitsLocal(p, time)) { list.push(p); seen[p.id] = true; }
-            });
+            var list = SB.strumPatternsForSong(song, plan);
             list.forEach(function (p) {
                 var btn = SB.el('button', 'grid-editor-option');
                 btn.type = 'button';
@@ -1529,7 +1538,9 @@
             });
         } else if (mode === 'beat') {
             title.textContent = 'Beat ' + String(beat + 1) + ' of bar ' + String(bar + 1);
-            var resolved = SB.resolveStrumAt(song, { block: block, bar: bar, beat: beat }, plan);
+            var resolved = SB.resolveStrumAt(song, {
+                block: block, bar: bar, beat: beat, strums: barStrumsAt(block, bar)
+            }, plan);
             var slots = (resolved.slots || '').split('');
             var subdiv = resolved.subdiv || 1;
             while (slots.length < subdiv) slots.push('-');
@@ -1576,16 +1587,6 @@
                 }
             });
         }
-    }
-
-    /* patternFitsLocal: validate a custom pattern definition for a metre. */
-    function patternFitsLocal(p, time) {
-        if (!p || !time) return false;
-        var subdiv = p.subdiv;
-        if (typeof subdiv !== 'number' || subdiv < 1 || subdiv !== Math.floor(subdiv)) return false;
-        var slots = p.slots;
-        if (typeof slots !== 'string' || !/^[DU-]+$/.test(slots)) return false;
-        return slots.length === SB.metronomeBeatsPerBar(time) * subdiv;
     }
 
     /* Delegated clicks on the sheet: open the bar strum editor or the beat

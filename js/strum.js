@@ -87,17 +87,65 @@
         return PATTERNS.filter(function (p) { return p.time === time; });
     }
 
+    /* Songbook data is the baseline, local plan edits are the overlay. An
+     * exported song carries its section strums and custom pattern definitions
+     * in the song itself (the import schema), while the plan holds only what
+     * the player changed after opening it. Merge them for every read path so
+     * importing an exported song plays the same chart without copying those
+     * fields into local storage first. Plan values win on a shared role or id;
+     * a local definition can therefore correct an imported one. */
+    function planWithSong(song, plan) {
+        plan = SB.normalizePlan(plan);
+        if (!song) return plan;
+        var merged = {
+            version: plan.version,
+            songStrum: plan.songStrum,
+            sectionStrums: {},
+            customPatterns: [],
+            barStrums: plan.barStrums,
+            beatStrums: plan.beatStrums,
+            grid: plan.grid,
+            time: plan.time
+        };
+        var songSections = (song.sectionStrums && typeof song.sectionStrums === 'object' &&
+            !Array.isArray(song.sectionStrums)) ? song.sectionStrums : {};
+        Object.keys(songSections).forEach(function (role) {
+            var id = songSections[role];
+            if (SB.isSectionRole(role) && typeof id === 'string' && id) {
+                merged.sectionStrums[role] = id;
+            }
+        });
+        Object.keys(plan.sectionStrums).forEach(function (role) {
+            merged.sectionStrums[role] = plan.sectionStrums[role];
+        });
+
+        var byId = Object.create(null);
+        var order = [];
+        function add(pattern) {
+            if (!pattern || typeof pattern !== 'object' || typeof pattern.id !== 'string' || !pattern.id) return;
+            if (!(pattern.id in byId)) order.push(pattern.id);
+            byId[pattern.id] = pattern;
+        }
+        (Array.isArray(song.strumPatterns) ? song.strumPatterns : []).forEach(add);
+        plan.customPatterns.forEach(add);
+        merged.customPatterns = order.map(function (id) { return byId[id]; });
+        return merged;
+    }
+    SB.strumPlanFor = planWithSong;
+
     /* The full list a song can use: the immutable library plus the custom
-     * definitions stored in its edit plan, filtered to the song's effective
-     * metre. Custom definitions are validated with patternFits (below), so a
-     * corrupt one can never reach the row; an id that belongs to the library is
-     * skipped, because a built-in pattern must not be shadowed or replaced. */
+     * definitions stored in the song or its edit plan, filtered to the song's
+     * effective metre. Custom definitions are validated with patternFits
+     * (below), so a corrupt one can never reach the row; an id that belongs to
+     * the library is skipped, because a built-in pattern must not be shadowed
+     * or replaced. */
     SB.strumPatternsForSong = function (song, plan) {
         if (!song) return [];
         if (plan === undefined) plan = currentPlanFor(song);
+        plan = planWithSong(song, plan);
         var time = timeFor(song, plan);
         var list = SB.strumPatternsFor(time).slice();
-        var custom = (SB.normalizePlan(plan).customPatterns) || [];
+        var custom = plan.customPatterns || [];
         custom.forEach(function (p) {
             if (byId[p.id]) return;
             if (patternFits(p, time)) list.push(p);
@@ -183,7 +231,11 @@
     function currentPlanFor(song) {
         var sbId = SB.state.active ? SB.state.active.id : null;
         if (!sbId || !song) return SB.emptyPlan();
-        return SB.loadPlan(sbId, song.id);
+        /* Read paths get the song's exported fields layered under the local
+         * plan, so a freshly imported book renders its section strums and
+         * custom patterns exactly as exported. Writers still call loadPlan()
+         * and save only the overrides, never a merged copy. */
+        return planWithSong(song, SB.loadPlan(sbId, song.id));
     }
 
     /* The grid lane is rendered from the plan, not from the live top row, so
@@ -206,7 +258,7 @@
     function mainPatternFor(song, plan) {
         if (!song) return null;
         if (plan === undefined) plan = currentPlanFor(song);
-        plan = SB.normalizePlan(plan);
+        plan = planWithSong(song, plan);
         var time = timeFor(song, plan);
         var pattern = findPattern(plan.songStrum, time, plan);
         if (!pattern && SB.state.active) {
@@ -226,7 +278,7 @@
     function sectionPatternFor(song, role, plan) {
         if (!song) return null;
         if (plan === undefined) plan = currentPlanFor(song);
-        plan = SB.normalizePlan(plan);
+        plan = planWithSong(song, plan);
         var pattern = findPattern(plan.sectionStrums[role], timeFor(song, plan), plan);
         return pattern || mainPatternFor(song, plan);
     }
@@ -276,7 +328,7 @@
         var none = { id: null, pattern: null, slots: null, subdiv: 0, source: 'none', time: null };
         if (!song) return none;
         if (plan === undefined) plan = currentPlanFor(song);
-        plan = SB.normalizePlan(plan);
+        plan = planWithSong(song, plan);
         at = at || {};
 
         var time = timeFor(song, plan);
@@ -285,7 +337,9 @@
         var beat = planIndex(at.beat);
         var role = roleAt(song, plan, { block: block, role: at.role });
 
-        var pattern = findPattern(plan.barStrums[SB.planBarKey(block, bar)], time, plan);
+        var barKey = SB.planBarKey(block, bar);
+        var barOverride = findPattern(plan.barStrums[barKey], time, plan);
+        var pattern = barOverride;
         var source = pattern ? 'bar' : null;
         if (!pattern && role) {
             pattern = findPattern(plan.sectionStrums[role], time, plan);
@@ -320,6 +374,25 @@
                 source: 'beat',
                 time: time
             };
+        }
+
+        /* A song exported from the grid carries the effective beat slots in
+         * `bars[].strums` instead of a plan entry. They are per felt beat, not
+         * a pattern id, so they override the inherited section/song stride but
+         * yield to an explicit local bar override for the same position. */
+        if (!barOverride && Array.isArray(at.strums) && beat < at.strums.length) {
+            var songSlots = at.strums[beat];
+            if (typeof songSlots === 'string' && songSlots.length === pattern.subdiv &&
+                /^[DU-]+$/.test(songSlots)) {
+                return {
+                    id: pattern.id,
+                    pattern: pattern,
+                    slots: songSlots,
+                    subdiv: pattern.subdiv,
+                    source: 'bar',
+                    time: time
+                };
+            }
         }
 
         var start = beat * pattern.subdiv;
@@ -616,7 +689,8 @@
         var active = SB.state.active;
         if (!song || !active) return;
         var plan = SB.loadPlan(active.id, song.id);
-        var pattern = id ? findPattern(id, timeFor(song, plan), plan) : null;
+        var merged = planWithSong(song, plan);
+        var pattern = id ? findPattern(id, timeFor(song, merged), merged) : null;
         if (pattern) plan.sectionStrums[role] = pattern.id;
         else delete plan.sectionStrums[role];
         SB.savePlan(active.id, song.id, plan);
@@ -1211,8 +1285,10 @@
 
     function duplicatePattern(id) {
         if (!editor) return;
+        var song = SB.state.currentSong;
         var plan = SB.loadPlan(editor.sbId, editor.songId);
-        var pattern = findPattern(id, editor.time, plan);
+        var pattern = findPattern(id, editor.time,
+            song ? planWithSong(song, plan) : plan);
         if (pattern) beginPatternCreate(pattern);
     }
 
