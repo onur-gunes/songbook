@@ -269,6 +269,26 @@
             </div>
         </section>
 
+        <section id="exportBlock" class="export-block" aria-labelledby="exportTitle">
+            <h2 id="exportTitle" class="section-title">Export</h2>
+            <p class="export-hint">Export this song with every local strum and structure change applied, or download the whole songbook.</p>
+            <div class="export-actions" role="group" aria-label="Export options">
+                <button id="showSongJsonBtn" class="pill-btn" type="button"
+                        aria-expanded="false" aria-controls="songJsonPanel">Show song JSON</button>
+                <button id="downloadSongBtn" class="pill-btn" type="button">Download song JSON</button>
+                <button id="downloadSongbookBtn" class="pill-btn" type="button">Download songbook JSON</button>
+            </div>
+            <div id="songJsonPanel" class="export-panel" hidden>
+                <div class="export-panel-head">
+                    <h3 class="export-panel-title">Effective song JSON</h3>
+                    <button id="copySongJsonBtn" class="pill-btn" type="button">Copy</button>
+                </div>
+                <pre id="songJsonOutput" class="export-json" tabindex="0"
+                     aria-label="Effective song JSON"></pre>
+            </div>
+            <p id="exportStatus" class="export-status" role="status" aria-live="polite"></p>
+        </section>
+
         <div id="scrollControl" class="scroll-control">
             <button id="scrollBtn" class="scroll-ctrl-btn" type="button"
                     aria-label="Start auto-scroll" title="Start auto-scroll (Space)">▶</button>

@@ -66,6 +66,11 @@ jobs:
       - name: Per-song edit plan unit tests
         run: python3 tests/plan.py
 
+      # Effective-song serialiser, timestamped export names and the
+      # export -> normalizeSongbook -> build round-trip (issue #111).
+      - name: Export serialiser unit tests
+        run: python3 tests/export.py
+
       # Grid strum lane: strokes per felt beat, beat count, bar/beat strum
       # controls, 4/4 / 3/4 / 6/8 / 2/4 and held chords (beats > 1).
       - name: Grid strum lane browser tests
