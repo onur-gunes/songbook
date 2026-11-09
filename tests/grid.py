@@ -2,8 +2,10 @@
 """Browser test: grid strum lane renders strokes per felt beat.
 
 Opens grid-bearing songs in grid mode and asserts each beat column shows its
-strum strokes (not just "/"), the beat number is shown, and the bar-level
-strum control is present. Covers 4/4, 3/4, 6/8 and held chords (beats > 1).
+strum strokes (not just "/"), the beat number is gone, every slot stays inside
+its beat column, and the bar-level strum control is present without repeating
+the word "Inherit" on every diagram. Covers 4/4, 3/4, 6/8 and held chords
+(beats > 1).
 
 Usage: start a server in the project root, then:
     python3 -m http.server 8777 &
@@ -50,9 +52,15 @@ def main():
         def grid_beats():
             return js(
                 "Array.from(document.querySelectorAll('.sheet.chords-grid .grid-beat')).map(function(b){"
+                "  var br = b.getBoundingClientRect();"
+                "  var slots = Array.from(b.querySelectorAll('.grid-beat-slot'));"
                 "  return { hasStrokes: !!b.querySelector('.grid-beat-strokes'),"
                 "           hasNumber: !!b.querySelector('.grid-beat-no'),"
-                "           slotCount: b.querySelectorAll('.grid-beat-slot').length,"
+                "           slotCount: slots.length,"
+                "           slotsFit: slots.every(function(s){"
+                "             var sr = s.getBoundingClientRect();"
+                "             return sr.left >= br.left - 1 && sr.right <= br.right + 1;"
+                "           }),"
                 "           text: b.textContent };"
                 "});")
 
@@ -66,20 +74,29 @@ def main():
             info = js(
                 "({ bars: document.querySelectorAll('.sheet.chords-grid .grid-bar').length,"
                 "  beats: document.querySelectorAll('.sheet.chords-grid .grid-beat').length,"
-                "  barControls: document.querySelectorAll('.sheet.chords-grid .grid-bar-strum').length });")
+                "  barControls: document.querySelectorAll('.sheet.chords-grid .grid-bar-strum').length,"
+                "  barLabels: Array.from(document.querySelectorAll('.sheet.chords-grid .grid-bar-strum'))."
+                "    map(function(b){ return { text: b.textContent, label: b.getAttribute('aria-label') }; }) });")
             cells = grid_beats()
 
             all_have_strokes = all(c['hasStrokes'] for c in cells)
             no_numbers = not any(c['hasNumber'] for c in cells)
             no_legacy_slash = not any(c['text'].strip() == '/' for c in cells)
+            slots_fit = all(c['slotsFit'] for c in cells)
             bar_controls_match = info['barControls'] == info['bars']
+            no_inherit_pills = all(
+                b['text'] != 'Inherit' and 'Bar strum' in (b['label'] or '')
+                for b in info['barLabels'])
 
             ok('%s/%s grid opens (%d bars, %d beats)' % (book, song, info['bars'], info['beats']),
                info['bars'] > 0 and info['beats'] > 0)
             ok('%s/%s every beat shows strokes' % (book, song), all_have_strokes)
             ok('%s/%s beat numbers removed from under the diagrams' % (book, song), no_numbers)
             ok('%s/%s no legacy "/" beat' % (book, song), no_legacy_slash)
+            ok('%s/%s strum slots stay inside their beat' % (book, song), slots_fit)
             ok('%s/%s one bar strum control per bar' % (book, song), bar_controls_match)
+            ok('%s/%s bar strum control is compact, not "Inherit"' % (book, song),
+               no_inherit_pills)
 
         # Held-chord check: in six-eight-song every bar is one chord held for
         # 2 felt beats, so there must be 8 beat cells for 4 bars, each with
