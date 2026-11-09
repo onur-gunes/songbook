@@ -1958,14 +1958,15 @@ body.pattern-open { overflow: hidden; }
     justify-content: center;
     gap: 5px;
     box-sizing: border-box;
+    padding: 0 2px;
     color: var(--muted);
     font-family: var(--mono);
     font-size: 0.85em;
 }
 
 /* The beat itself: a thin horizontal line running through each beat cell,
-   under the chord diagram. The line is the primary beat indicator; the
-   strum strokes sit on it and the number is demoted to faint text. */
+   under the chord diagram. The line is the primary beat indicator and the
+   strum strokes sit on it. */
 .sheet.chords-grid .grid-beat::before {
     content: '';
     position: absolute;
@@ -1979,24 +1980,45 @@ body.pattern-open { overflow: hidden; }
     pointer-events: none;
 }
 
+/* A faint tick at each beat boundary, so a run of subdivision arrows reads
+   as beats rather than one undifferentiated string of glyphs. */
+.sheet.chords-grid .grid-beat + .grid-beat::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 18%;
+    bottom: 18%;
+    width: 1px;
+    background: var(--line);
+    opacity: 0.35;
+    pointer-events: none;
+}
+
 .sheet.chords-grid .grid-beat-strokes {
     display: flex;
-    gap: 6px;
+    width: 100%;
+    gap: 2px;
     position: relative;
     z-index: 1;
 }
 
 /* One cell per subdivision slot: the down / up arrows (or D / U letters),
-   with a dot for a rest. Bigger so the strum pattern reads at a glance under
-   each diagram; the playhead lights each arrow in turn like the top row. */
+   with a dot for a rest. The slots divide the beat's own width, so a beat
+   with two or three subdivisions can never spill into its neighbours — the
+   lane stays aligned under the diagrams. The playhead lights each arrow in
+   turn like the top row. */
 .sheet.chords-grid .grid-beat-slot {
-    width: calc(var(--grid-beat-h, 1.7em) * 0.85);
-    height: calc(var(--grid-beat-h, 1.7em) * 0.85);
-    line-height: calc(var(--grid-beat-h, 1.7em) * 0.85);
+    flex: 1 1 0;
+    min-width: 0;
+    height: calc(var(--grid-beat-h, 1.7em) * 0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    border-radius: 8px;
-    color: var(--muted);
-    font-size: 1.15em;
+    border-radius: 999px;
+    color: var(--text);
+    opacity: 0.7;
+    font-size: 1.1em;
     font-weight: 800;
     position: relative;
     z-index: 1;
@@ -2012,6 +2034,7 @@ body.pattern-open { overflow: hidden; }
    active beat, so each down / up pulses as the metronome passes it. */
 .sheet.chords-grid .grid-beat-slot.on {
     color: var(--surface);
+    background: var(--accent);
     opacity: 1;
     font-weight: 900;
     transform: scale(1.15);
@@ -2042,26 +2065,43 @@ body.pattern-open { overflow: hidden; }
     z-index: 2;
 }
 
-/* Bar-level strum control: opens the bar strum editor. */
+/* Bar-level strum control: opens the bar strum editor. At rest it is only a
+   faint arrow glyph in the bar's corner — the grid is a chart first, so a
+   repeated "Inherit" pill on every diagram is too much noise. An overridden
+   bar shows its pattern name and keeps the accent ring. */
 .sheet.chords-grid .grid-bar-strum {
     position: absolute;
-    top: 5px;
-    right: 5px;
-    font-size: 0.68rem;
-    padding: 2px 7px;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--surface);
+    top: 3px;
+    right: 3px;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    padding: 1px 5px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
     color: var(--muted);
+    opacity: 0.45;
     cursor: pointer;
-    line-height: 1;
+    line-height: 1.2;
+    transition: opacity 120ms ease, background 120ms ease, border-color 120ms ease;
 }
-.sheet.chords-grid .grid-bar-strum:hover { background: var(--surface-2); }
+.sheet.chords-grid .grid-bar-strum:hover,
+.sheet.chords-grid .grid-bar-strum:focus-visible {
+    opacity: 1;
+    background: var(--surface-2);
+    border-color: var(--line);
+}
 .sheet.chords-grid .grid-bar-strum.grid-bar-strum-overridden,
 .sheet.chords-grid .grid-bar-strum[aria-pressed="true"] {
     color: var(--accent);
     border-color: var(--accent);
     background: var(--surface-2);
+    opacity: 1;
+}
+
+/* Touch screens have no hover, so keep the control discoverable there. */
+@media (hover: none) {
+    .sheet.chords-grid .grid-bar-strum { opacity: 0.7; }
 }
 
 /* Grid strum editor (bar / beat overrides). Fixed panel, separate from the

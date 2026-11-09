@@ -974,17 +974,24 @@
     }
 
     /* The label shown on a bar's strum button: the overridden pattern's name
-     * when the bar carries a bar-level override, otherwise "Inherit". */
+     * when the bar carries a bar-level override, otherwise empty so the
+     * button can fall back to a compact arrow glyph. */
     function barStrumText(song, plan, blockIdx, barIdx) {
         var id = (plan && plan.barStrums) ? plan.barStrums[SB.planBarKey(blockIdx, barIdx)] : null;
-        if (!id) return 'Inherit';
+        if (!id) return '';
         var p = SB.strumPatternFor(id, song.time || SB.DEFAULT_TIME, plan);
         return p ? p.name : id;
     }
 
     function updateBarStrumBtn(btn, song, plan, blockIdx, barIdx) {
-        btn.textContent = barStrumText(song, plan, blockIdx, barIdx);
-        var overridden = !!(plan && plan.barStrums && plan.barStrums[SB.planBarKey(blockIdx, barIdx)]);
+        var text = barStrumText(song, plan, blockIdx, barIdx);
+        var overridden = !!text;
+        var label = overridden
+            ? 'Bar strum: ' + text
+            : 'Bar strum: inherit from section/song';
+        btn.textContent = overridden ? text : '\u2193\u2191';
+        btn.setAttribute('aria-label', label);
+        btn.title = label;
         btn.classList.toggle('grid-bar-strum-overridden', overridden);
         btn.setAttribute('aria-pressed', overridden ? 'true' : 'false');
     }
@@ -1219,10 +1226,13 @@
 
         var em = SB.sheetEmPx();
         var ctx = {
-            beatW: Math.max(BEAT_MIN, em * 2.0),
+            // Wide enough for two (or three) strum glyphs inside one beat,
+            // so the lane under the diagrams stays legible instead of
+            // squeezing its arrows into overlapping specks.
+            beatW: Math.max(BEAT_MIN, em * 2.5),
             labelH: Math.ceil(em * 1.35),
-            // The beat row holds the felt-beat strokes plus the beat number
-            // underneath, so it needs room for two lines of small text.
+            // The beat row holds the felt-beat strokes on their own, so it
+            // only needs room for one line of glyphs and their padding.
             beatH: Math.ceil(em * 2.2),
             gap: Math.max(10, em * 0.6),
             diagram: diagramBox(SB.state.chordSize),
