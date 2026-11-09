@@ -80,7 +80,26 @@
                     beats.push({ chord: chord, beats: count });
                 }
                 if (total !== beatsPerBar) return null;
-                bars.push({ beats: beats });
+                /* `strums` is one slot string per felt beat (bar-level strum
+                 * overrides written into the grid at export). Its length must
+                 * match the bar's beat total and every entry must share one
+                 * subdivision; anything else drops the whole grid, matching
+                 * the strict import-boundary treatment of the rest of the grid. */
+                var barStrums = null;
+                if (Array.isArray(bar.strums)) {
+                    if (bar.strums.length !== total) return null;
+                    var slotLengths = {};
+                    var badEntry = false;
+                    bar.strums.forEach(function (entry) {
+                        if (typeof entry !== 'string' || !entry || !/^[DU-]+$/.test(entry)) badEntry = true;
+                        else slotLengths[entry.length] = true;
+                    });
+                    if (badEntry || Object.keys(slotLengths).length !== 1) return null;
+                    barStrums = bar.strums.slice();
+                }
+                var barOut = { beats: beats };
+                if (barStrums) barOut.strums = barStrums;
+                bars.push(barOut);
             }
             blocks.push({
                 label: (typeof block.label === 'string') ? block.label : '',
@@ -100,6 +119,50 @@
         if (typeof role === 'string' && SB.isSectionRole(role)) return role;
         var label = typeof block.label === 'string' ? block.label : '';
         return SB.sectionRole(label);
+    }
+
+    /* `sectionStrums` maps a canonical section role to a pattern id. Only
+     * real roles are kept, and only with a non-empty id; the id's metre is
+     * checked against the song at pattern-resolution time (in js/strum.js),
+     * so here we keep the shape clean without the pattern library (which loads
+     * after this module). */
+    function normalizeSectionStrums(value) {
+        if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+        var out = {};
+        var any = false;
+        Object.keys(value).forEach(function (role) {
+            if (!SB.isSectionRole(role)) return;
+            var id = value[role];
+            if (typeof id === 'string' && id) { out[role] = id; any = true; }
+        });
+        return any ? out : null;
+    }
+
+    /* `strumPatterns` are per-song custom pattern definitions (the plan's
+     * customPatterns carried into the songbook). Each entry is validated with
+     * the same invariant the library is built on: a real id that does not
+     * shadow a built-in (that check happens at build time, since the library
+     * lives in js/strum.js), a real metre, a whole-number subdivision, and a
+     * slot string whose length is exactly subdivision * felt-beats-per-bar.
+     * Duplicate ids collapse to the first valid definition. */
+    function normalizeStrumPatterns(value) {
+        if (!Array.isArray(value)) return null;
+        var out = [];
+        var seen = {};
+        value.forEach(function (p) {
+            if (!p || typeof p !== 'object') return;
+            var id = p.id, name = p.name, time = p.time, subdiv = p.subdiv, slots = p.slots;
+            if (typeof id !== 'string' || !id || seen[id]) return;
+            if (typeof name !== 'string' || !name.trim()) return;
+            if (TIME_SIGNATURES.indexOf(time) < 0) return;
+            if (typeof subdiv !== 'number' || !isFinite(subdiv) || subdiv < 1 || subdiv !== Math.floor(subdiv)) return;
+            if (typeof slots !== 'string' || !slots || !/^[DU-]+$/.test(slots)) return;
+            var expected = BEATS_PER_BAR[time] * subdiv;
+            if (slots.length !== expected) return;
+            seen[id] = true;
+            out.push({ id: id, name: name.trim(), time: time, subdiv: subdiv, slots: slots });
+        });
+        return out.length ? out : null;
     }
 
     /* The sheet is the only imported field with a nested shape. A missing or
@@ -153,8 +216,12 @@
             }).map(String) : [],
             sheet: normalizeSheet(s.sheet)
         };
-        /* Kept absent on the ~330 songs with no grid, parallel to how bpm/time
-         * are simply omitted, so nothing downstream has to special-case null. */
+        /* Kept absent when there is nothing to carry, so downstream code can
+         * test for the field's presence instead of special-casing null. */
+        var sectionStrums = normalizeSectionStrums(s.sectionStrums);
+        if (sectionStrums) song.sectionStrums = sectionStrums;
+        var strumPatterns = normalizeStrumPatterns(s.strumPatterns);
+        if (strumPatterns) song.strumPatterns = strumPatterns;
         if (grid) song.grid = grid;
         return song;
     }

@@ -210,9 +210,11 @@ Song fields:
 | `bpm` | integer | Optional tempo, 20–300 (see [Tempo and metre](#tempo-and-metre)) |
 | `time` | string | Optional metre: `4/4`, `3/4`, `6/8` or `2/4` |
 | `strum` | string | Optional pattern id from the strum library, matching `time` (see [Strum pattern](#strum-pattern)) |
+| `sectionStrums` | object | Pattern id per section role, e.g. `{ "verse": "dduudu-4-4" }`; keys are canonical roles (see [Per-section strums](#per-section-strums)) |
+| `strumPatterns` | array | Per-song custom pattern definitions, each `{ id, name, time, subdiv, slots }` (see [Per-section strums](#per-section-strums)) |
 | `chords` | string[] | Unique chord tokens; derived by the builder if omitted |
 | `sheet` | array | Lyric/chord lines (below) |
-| `grid` | array | Optional bar/beat chart, parallel to `sheet` (see [Bar/beat grid](#barbeat-grid)) |
+| `grid` | array | Optional bar/beat chart, parallel to `sheet`; each block carries a `role` (derived from its `label`) and each bar may carry `strums`, one slot string per felt beat (see [Bar/beat grid](#barbeat-grid)) |
 
 ```jsonc
 {
@@ -457,6 +459,13 @@ it (a different view of the same song, absent on songs that have none).
 - `|:` opens a repeat and `:|` closes one; a repeat wraps the whole block (the
   single `repeat` flag), so the marks belong at the block's edges, not mid-way.
 - The block label becomes the section name (`Intro/Chorus`, `Verse`, …).
+- Each block carries a `role` (a canonical section role such as `verse`,
+  `chorus`, `bridge`, `outro`); when absent it is derived from the block's
+  `label`, so `Verse 1` and `Verse 2` both map to `verse`.
+- Each bar may carry `strums`: one slot string per felt beat in the bar, each
+  a string of `D` (down), `U` (up) and `-` (rest) whose length is the
+  subdivision (all entries in a bar share one length). E.g. in 4/4,
+  `"strums": ["DU", "DU", "DU", "DU"]` is one down-up per beat.
 - A block may span several lines; each line opens and closes with a bar line.
 
 Chord tokens reuse the sheet's exact vocabulary — slash chords, `NC`, muted
@@ -499,6 +508,21 @@ are highlighted along with the beat slash. The metronome is the transport, so
 the view needs a tempo; the auto-scroll control is hidden while it is active.
 One bar of count-in precedes the first chart beat, and stopping the metronome
 returns the stage to the opening system.
+
+### Per-section strums and custom patterns
+
+`sectionStrums` assigns a pattern to each section role present in the song,
+e.g. `{ "verse": "dduudu-4-4", "chorus": "downs-4-4" }`. Keys are canonical
+roles (the same roles the grid blocks resolve to), so a song's section patterns
+stay language-independent. A role without an override inherits the song's
+documented `strum`.
+
+`strumPatterns` are per-song custom pattern definitions, each `{ id, name,
+time, subdiv, slots }`. The `id` must be unique within the song and must not
+shadow a built-in library id; `time` must be a valid metre; `subdiv` is a whole
+number of slots per beat; and `slots` is a `D`/`U`/`-` string whose length is
+exactly `subdiv * felt-beats-per-bar` for its metre. Invalid custom patterns,
+metre mismatches, and wrong slot counts are build errors.
 
 Run the parser/builder tests with `python3 tests/chordpro.py`, the strum
 library mirror guard with `python3 tests/strum.py`, and the dev/prod
