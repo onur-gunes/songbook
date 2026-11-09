@@ -811,6 +811,17 @@ class StrumStructureTests(unittest.TestCase):
                       'strums': ['DU', 'DX', 'DU', 'DU']}]}])
         self.assertTrue(any('slot string' in e for e in errors))
 
+    def test_grid_bar_strums_must_be_a_list(self):
+        errors, _ = self.validate(grid=[{'label': 'V',
+            'bars': [{'beats': [{'chord': 'C', 'beats': 4}],
+                      'strums': 'DUDUDUDU'}]}])
+        self.assertTrue(any('strums is not a list' in e for e in errors))
+
+    def test_grid_role_must_be_canonical(self):
+        errors, _ = self.validate(grid=[{'label': 'V', 'role': 'solo-2',
+            'bars': [{'beats': [{'chord': 'C', 'beats': 4}]}]}])
+        self.assertTrue(any('invalid section role' in e for e in errors))
+
     def test_custom_pattern_must_not_shadow_built_in(self):
         errors, _ = self.validate(strumPatterns=[{
             'id': 'downs-4-4', 'name': 'Shadow', 'time': '4/4',
@@ -853,6 +864,14 @@ class StrumStructureTests(unittest.TestCase):
             strumPatterns=[{'id': 'custom-1', 'name': 'C', 'time': '4/4',
                             'subdiv': 2, 'slots': 'DUDUDUDU'}])
         self.assertEqual(errors, [], errors)
+
+    def test_section_strums_need_the_song_metre(self):
+        song = self.song(sectionStrums={'verse': 'downs-4-4'})
+        del song['time']
+        errors, _ = build_songbook.validate_songbook({
+            'id': 'bk', 'name': 'Book', 'description': '',
+            'instrument': 'ukulele', 'songs': [song]})
+        self.assertTrue(any('section strums' in e for e in errors), errors)
 
     def test_song_strum_default_still_works(self):
         # The single documented `strum` remains the song default and is still

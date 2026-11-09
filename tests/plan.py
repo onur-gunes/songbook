@@ -99,7 +99,8 @@ def harness(extra='', local_storage=None):
         'var document = { body: {} };\n'
         'var window = { SB: SB, document: document, location: { pathname: \'/songbook/\', protocol: \'https:\' } };\n'
         + storage_init
-        + read(SECTIONS_JS)
+        + read(SONGBOOKS_JS)
+        + '\n' + read(SECTIONS_JS)
         + '\n' + read(GRID_JS)
         + '\n' + read(PLAN_JS)
         + '\n' + read(STRUM_JS)
@@ -670,6 +671,112 @@ class CustomPatternTests(unittest.TestCase):
         self.assertIn('already in use', got['duplicate'])
         self.assertIsNone(got['selfEdit'])
         self.assertIn('built-in', got['builtIn'])
+
+
+class SongbookImportTests(unittest.TestCase):
+    """Issue #110: normalizeSongbook preserves the exported per-song strum
+    fields, and the runtime treats them as the songbook baseline under the
+    local edit plan (so an exported song plays the same chart after import)."""
+
+    def setUp(self):
+        if not shutil.which('node'):
+            self.skipTest('node not available')
+
+    SONG = {
+        'id': 's1', 'title': 'Song', 'artist': 'A', 'level': 'Easy',
+        'dur': 3.0, 'time': '4/4', 'strum': 'downs-4-4',
+        'sectionStrums': {'verse': 'custom-1', 'chorus': 'dddudu-4-4'},
+        'strumPatterns': [{
+            'id': 'custom-1', 'name': 'Mine', 'time': '4/4',
+            'subdiv': 2, 'slots': 'DUDUDUDU'}],
+        'grid': [{
+            'label': 'Verse 1', 'role': 'verse', 'repeat': False,
+            'bars': [{
+                'beats': [{'chord': 'C', 'beats': 4}],
+                'strums': ['DU', 'DU', 'DU', 'DU']}],
+        }],
+    }
+
+    def normalize(self, **overrides):
+        song = dict(self.SONG)
+        song.update(overrides)
+        return run_js('''
+            var sb = SB.normalizeSongbook({ id: 'bk', name: 'Book',
+                songs: [%s] });
+            console.log(JSON.stringify(sb.songs[0]));
+        ''' % json.dumps(song))
+
+    def test_import_preserves_strums_roles_and_custom_patterns(self):
+        got = self.normalize()
+        self.assertEqual(got['sectionStrums'],
+                         {'verse': 'custom-1', 'chorus': 'dddudu-4-4'})
+        self.assertEqual(got['strumPatterns'], [{
+            'id': 'custom-1', 'name': 'Mine', 'time': '4/4',
+            'subdiv': 2, 'slots': 'DUDUDUDU'}])
+        self.assertEqual(got['grid'][0]['role'], 'verse')
+        self.assertEqual(got['grid'][0]['bars'][0]['strums'],
+                         ['DU', 'DU', 'DU', 'DU'])
+
+    def test_missing_role_is_derived_from_label(self):
+        got = self.normalize(grid=[{
+            'label': 'Zwrotka 2',
+            'bars': [{'beats': [{'chord': 'C', 'beats': 4}]}],
+        }])
+        self.assertEqual(got['grid'][0]['role'], 'verse')
+
+    def test_invalid_song_strums_drop_the_grid(self):
+        for strums in ('DUDU', ['DU', 'DU', 'DU'], ['DU', 'DU', 'DU', 'D'],
+                       ['DU', 'DX', 'DU', 'DU']):
+            got = self.normalize(grid=[{
+                'label': 'V',
+                'bars': [{'beats': [{'chord': 'C', 'beats': 4}],
+                          'strums': strums}],
+            }])
+            self.assertNotIn('grid', got, strums)
+
+    def test_invalid_custom_patterns_and_roles_are_dropped(self):
+        got = self.normalize(
+            sectionStrums={'not-a-role': 'downs-4-4', 'verse': 'custom-1'},
+            strumPatterns=[
+                {'id': 'custom-1', 'name': 'Mine', 'time': '4/4',
+                 'subdiv': 2, 'slots': 'DUDUDUDU'},
+                {'id': 'custom-1', 'name': 'Dup', 'time': '4/4',
+                 'subdiv': 2, 'slots': 'DUDUDUDU'},
+                {'id': 'downs-4-4', 'name': 'Shadow', 'time': '4/4',
+                 'subdiv': 2, 'slots': 'DUDUDUDU'},
+                {'id': 'bad', 'name': 'Bad', 'time': '4/4',
+                 'subdiv': 2, 'slots': 'DUDU'}])
+        self.assertEqual(got['sectionStrums'], {'verse': 'custom-1'})
+        self.assertEqual([p['id'] for p in got['strumPatterns']], ['custom-1'])
+
+    def test_imported_fields_are_effective_under_an_empty_plan(self):
+        got = run_js('''
+            var song = %s;
+            var plan = SB.emptyPlan();
+            var section = SB.sectionStrumFor(song, 'verse', plan);
+            var ids = SB.strumPatternsForSong(song, plan).map(function (p) {
+                return p.id;
+            });
+            var bySection = SB.resolveStrumAt(song,
+                { block: 0, bar: 0, beat: 0 }, plan);
+            var byBar = SB.resolveStrumAt(song,
+                { block: 0, bar: 0, beat: 1,
+                  strums: song.grid[0].bars[0].strums }, plan);
+            console.log(JSON.stringify({
+                section: section.id,
+                ids: ids,
+                sectionSource: bySection.source,
+                sectionSlots: bySection.slots,
+                barSource: byBar.source,
+                barSlots: byBar.slots
+            }));
+        ''' % json.dumps(self.SONG))
+        self.assertEqual(got['section'], 'custom-1')
+        self.assertIn('custom-1', got['ids'])
+        self.assertEqual(got['sectionSource'], 'section')
+        self.assertEqual(got['sectionSlots'], 'DU')
+        self.assertEqual(got['barSource'], 'bar')
+        self.assertEqual(got['barSlots'], 'DU')
 
 
 if __name__ == '__main__':

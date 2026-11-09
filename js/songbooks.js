@@ -84,17 +84,21 @@
                  * overrides written into the grid at export). Its length must
                  * match the bar's beat total and every entry must share one
                  * subdivision; anything else drops the whole grid, matching
-                 * the strict import-boundary treatment of the rest of the grid. */
+                 * the strict import-boundary treatment of the rest of the grid.
+                 * A null/undefined `strums` is the same as absent, but any
+                 * other non-array value is corrupt data and is not ignored. */
+                var hasStrums = bar.strums !== undefined && bar.strums !== null;
+                if (hasStrums && !Array.isArray(bar.strums)) return null;
                 var barStrums = null;
-                if (Array.isArray(bar.strums)) {
+                if (hasStrums) {
                     if (bar.strums.length !== total) return null;
-                    var slotLengths = {};
-                    var badEntry = false;
-                    bar.strums.forEach(function (entry) {
-                        if (typeof entry !== 'string' || !entry || !/^[DU-]+$/.test(entry)) badEntry = true;
-                        else slotLengths[entry.length] = true;
-                    });
-                    if (badEntry || Object.keys(slotLengths).length !== 1) return null;
+                    var barSubdiv = null;
+                    for (var vi = 0; vi < bar.strums.length; vi++) {
+                        var entry = bar.strums[vi];
+                        if (typeof entry !== 'string' || !entry || !/^[DU-]+$/.test(entry)) return null;
+                        if (barSubdiv === null) barSubdiv = entry.length;
+                        else if (entry.length !== barSubdiv) return null;
+                    }
                     barStrums = bar.strums.slice();
                 }
                 var barOut = { beats: beats };
@@ -147,12 +151,19 @@
      * Duplicate ids collapse to the first valid definition. */
     function normalizeStrumPatterns(value) {
         if (!Array.isArray(value)) return null;
+        /* Built-ins are immutable. The build also rejects a custom id that
+         * shadows one; at import time strum.js may not have run yet (it loads
+         * after this module), so filter only when its library is available. */
+        var builtIn = {};
+        if (typeof SB.strumPatterns === 'function') {
+            SB.strumPatterns().forEach(function (p) { builtIn[p.id] = true; });
+        }
         var out = [];
         var seen = {};
         value.forEach(function (p) {
             if (!p || typeof p !== 'object') return;
             var id = p.id, name = p.name, time = p.time, subdiv = p.subdiv, slots = p.slots;
-            if (typeof id !== 'string' || !id || seen[id]) return;
+            if (typeof id !== 'string' || !id || seen[id] || builtIn[id]) return;
             if (typeof name !== 'string' || !name.trim()) return;
             if (TIME_SIGNATURES.indexOf(time) < 0) return;
             if (typeof subdiv !== 'number' || !isFinite(subdiv) || subdiv < 1 || subdiv !== Math.floor(subdiv)) return;

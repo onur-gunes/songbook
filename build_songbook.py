@@ -359,7 +359,7 @@ def validate_songbook(book):
                     else:
                         ptime = _strum_metre.get(pid, custom_times.get(pid))
                         song_time = s.get('time')
-                        if song_time is not None and ptime is not None and ptime != song_time:
+                        if ptime is not None and ptime != song_time:
                             invalid_section_strums.append('%s: sectionStrums[%r] is a %s pattern on a %s song'
                                                           % (sid, role, ptime, song_time))
 
