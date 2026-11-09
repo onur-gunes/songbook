@@ -186,6 +186,16 @@
         return SB.loadPlan(sbId, song.id);
     }
 
+    /* The grid lane is rendered from the plan, not from the live top row, so
+       any change that lands in the plan (song default, section, bar or beat)
+       has to rebuild it. Without this the row and the lane silently disagree
+       until the next song or mode switch. */
+    function refreshGridLane() {
+        if (SB.isGridMode && SB.isGridMode() && SB.state.currentSong && SB.renderSheet) {
+            SB.renderSheet(SB.state.currentSong);
+        }
+    }
+
     function planIndex(value) {
         return (typeof value === 'number' && isFinite(value) && value >= 0) ? Math.floor(value) : 0;
     }
@@ -618,6 +628,7 @@
             ? sectionPatternFor(song, role, plan)
             : mainPatternFor(song, plan);
         renderRow();
+        refreshGridLane();
         if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
         updateSectionsButton(song, plan);
     }
@@ -813,6 +824,7 @@
         }
         if (SB.state.strum.pattern) {
             renderRow();
+            refreshGridLane();
             // Keep the highlight in step with the freshly rebuilt cells.
             if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
         }
@@ -854,6 +866,7 @@
         buildSelect();
         renderSectionSelectors();
         SB.updateStrumUi();
+        refreshGridLane();
         // If the metronome is already running, keep the highlight going on the
         // new row; strumOnMetronomeStart is a no-op if the loop is already up.
         if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
@@ -1217,6 +1230,7 @@
         buildSelect();
         renderSectionSelectors();
         SB.updateStrumUi();
+        refreshGridLane();
         if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
     }
 

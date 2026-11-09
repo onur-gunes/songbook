@@ -2117,26 +2117,35 @@ body.pattern-open { overflow: hidden; }
     .sheet.chords-grid .grid-bar-strum { opacity: 0.7; }
 }
 
-/* Grid strum editor (bar / beat overrides). Fixed panel, separate from the
-   sheet so it survives grid re-renders. */
+/* Grid strum editor (bar / beat overrides). The fixed outer element is the
+   overlay; the backdrop and the panel are siblings inside it. Keeping the
+   backdrop out of a transformed panel matters: a transform would make its
+   `position: fixed` resolve against the panel, painting it over the dialog
+   and swallowing every click. */
+.grid-strum-editor {
+    position: fixed;
+    inset: 0;
+    z-index: 65;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
 .grid-strum-backdrop {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.4);
-    z-index: 60;
+    z-index: 0;
 }
-.grid-strum-editor {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: min(440px, 92vw);
+.grid-strum-sheet {
+    position: relative;
+    z-index: 1;
+    width: min(440px, 100%);
     max-height: 78vh;
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
-    z-index: 65;
     display: flex;
     flex-direction: column;
     overflow: auto;
@@ -10437,6 +10446,16 @@ button.structure-close,
         return SB.loadPlan(sbId, song.id);
     }
 
+    /* The grid lane is rendered from the plan, not from the live top row, so
+       any change that lands in the plan (song default, section, bar or beat)
+       has to rebuild it. Without this the row and the lane silently disagree
+       until the next song or mode switch. */
+    function refreshGridLane() {
+        if (SB.isGridMode && SB.isGridMode() && SB.state.currentSong && SB.renderSheet) {
+            SB.renderSheet(SB.state.currentSong);
+        }
+    }
+
     function planIndex(value) {
         return (typeof value === 'number' && isFinite(value) && value >= 0) ? Math.floor(value) : 0;
     }
@@ -10869,6 +10888,7 @@ button.structure-close,
             ? sectionPatternFor(song, role, plan)
             : mainPatternFor(song, plan);
         renderRow();
+        refreshGridLane();
         if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
         updateSectionsButton(song, plan);
     }
@@ -11064,6 +11084,7 @@ button.structure-close,
         }
         if (SB.state.strum.pattern) {
             renderRow();
+            refreshGridLane();
             // Keep the highlight in step with the freshly rebuilt cells.
             if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
         }
@@ -11105,6 +11126,7 @@ button.structure-close,
         buildSelect();
         renderSectionSelectors();
         SB.updateStrumUi();
+        refreshGridLane();
         // If the metronome is already running, keep the highlight going on the
         // new row; strumOnMetronomeStart is a no-op if the loop is already up.
         if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
@@ -11468,6 +11490,7 @@ button.structure-close,
         buildSelect();
         renderSectionSelectors();
         SB.updateStrumUi();
+        refreshGridLane();
         if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
     }
 
