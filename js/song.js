@@ -69,6 +69,7 @@
         try { note = window.localStorage.getItem(SB.noteKey(SB.state.active.id, id)) || ''; } catch (e) { /* ignore */ }
         SB.$('notesBox').value = note;
         SB.$('notesStatus').classList.remove('show');
+        if (SB.resetExportUi) SB.resetExportUi();
 
         updateNavButtons();
         SB.updateEditUi();

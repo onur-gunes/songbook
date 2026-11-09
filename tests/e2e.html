@@ -785,8 +785,9 @@ async function main() {
     win().URL.createObjectURL = origCreate;
     win().URL.revokeObjectURL = origRevoke;
     win().HTMLAnchorElement.prototype.click = origAnchorClick;
-    ok('export names the file after the songbook id',
-        !!exportAnchor && exportAnchor.download === origin.id + '.json',
+    ok('export names the file after the songbook id and a timestamp',
+        !!exportAnchor && exportAnchor.download.indexOf(origin.id + '-') === 0 &&
+        /-\d{8}-\d{6}\.json$/.test(exportAnchor.download),
         exportAnchor && exportAnchor.download);
     ok('export revokes the object URL after clicking',
         !!exportUrl && revokedUrl === exportUrl, revokedUrl);
@@ -794,6 +795,103 @@ async function main() {
     ok('export downloads the songbook JSON',
         exportText === win().songbookTest.songbookJSON(origin),
         exportText.slice(0, 40));
+
+    // 19c3. song-view export area: the copyable panel and both downloads use
+    // the effective song (local plan applied), not the raw stored book.
+    const exportBlock = $('exportBlock');
+    ok('song export area present', !!exportBlock && !!$('exportTitle'));
+    ok('export area is separate from My notes',
+        !!exportBlock && exportBlock.previousElementSibling &&
+        exportBlock.previousElementSibling.classList.contains('notes-block'));
+    ok('no export trigger inside My notes',
+        !doc().querySelector('.notes-block #exportBlock, .notes-block #showSongJsonBtn'));
+    ok('song JSON panel starts hidden', $('songJsonPanel').hidden === true);
+    ok('show JSON starts collapsed',
+        $('showSongJsonBtn').getAttribute('aria-expanded') === 'false');
+    $('showSongJsonBtn').click(); await wait(50);
+    ok('show song JSON expands the panel',
+        $('songJsonPanel').hidden === false &&
+        $('showSongJsonBtn').getAttribute('aria-expanded') === 'true',
+        $('showSongJsonBtn').getAttribute('aria-expanded'));
+    let shownSong = null;
+    try { shownSong = JSON.parse($('songJsonOutput').textContent); } catch (e) { /* null */ }
+    ok('shown JSON is the effective song',
+        !!shownSong && shownSong.id === 'harbour-lights', shownSong && shownSong.id);
+    ok('shown JSON gives every grid block a role',
+        !!shownSong && !!shownSong.grid && shownSong.grid.length > 0 &&
+        shownSong.grid.every(b => typeof b.role === 'string' && b.role),
+        shownSong && shownSong.grid && shownSong.grid.map(b => b.role).join(','));
+    $('showSongJsonBtn').click(); await wait(30);
+    ok('show JSON collapses again',
+        $('songJsonPanel').hidden === true &&
+        $('showSongJsonBtn').getAttribute('aria-expanded') === 'false');
+
+    // Copy is keyboard-reachable and reports through the live status line.
+    let copiedText = null;
+    let clipboardStubbed = false;
+    try {
+        Object.defineProperty(win().navigator, 'clipboard', {
+            configurable: true,
+            value: { writeText: function (text) { copiedText = text; return Promise.resolve(); } }
+        });
+        clipboardStubbed = true;
+    } catch (e) { /* clipboard API not writable in this browser */ }
+    $('showSongJsonBtn').click(); await wait(30);
+    $('copySongJsonBtn').click(); await wait(50);
+    ok('copy puts the shown JSON on the clipboard',
+        !clipboardStubbed || copiedText === $('songJsonOutput').textContent,
+        clipboardStubbed ? String(copiedText).slice(0, 24) : 'clipboard unavailable');
+    ok('copy reports success in the live status',
+        !clipboardStubbed || $('exportStatus').textContent.indexOf('Copied') === 0,
+        $('exportStatus').textContent);
+
+    // Both download buttons: timestamped names, effective contents, feedback.
+    let songBlob = null, songAnchor = null, songUrl = null;
+    const origCreate2 = win().URL.createObjectURL;
+    const origRevoke2 = win().URL.revokeObjectURL;
+    const origClick2 = win().HTMLAnchorElement.prototype.click;
+    win().URL.createObjectURL = function (blob) { songBlob = blob; songUrl = 'blob:song-export'; return songUrl; };
+    win().URL.revokeObjectURL = function () { /* no-op */ };
+    win().HTMLAnchorElement.prototype.click = function () {
+        songAnchor = { href: this.href, download: this.download };
+    };
+    $('downloadSongBtn').click();
+    const songFilename = songAnchor && songAnchor.download;
+    const songExportText = songBlob ? await songBlob.text() : '';
+    songBlob = null; songAnchor = null;
+    $('downloadSongbookBtn').click();
+    const bookFilename = songAnchor && songAnchor.download;
+    const bookExportText = songBlob ? await songBlob.text() : '';
+    win().URL.createObjectURL = origCreate2;
+    win().URL.revokeObjectURL = origRevoke2;
+    win().HTMLAnchorElement.prototype.click = origClick2;
+    ok('download song names the file with a timestamp',
+        !!songFilename && songFilename.indexOf('harbour-lights-') === 0 &&
+        /-\d{8}-\d{6}\.json$/.test(songFilename), songFilename);
+    ok('download song writes the effective song',
+        songExportText === win().songbookTest.effectiveSongJSON(
+            win().songbookTest.getSong('harbour-lights'),
+            win().songbookTest.loadPlan('krakow-ukulele', 'harbour-lights')),
+        songExportText.slice(0, 40));
+    ok('download songbook names the file with a timestamp',
+        !!bookFilename && bookFilename.indexOf(origin.id + '-') === 0 &&
+        /-\d{8}-\d{6}\.json$/.test(bookFilename), bookFilename);
+    ok('download songbook writes every song with its plan applied',
+        bookExportText === win().songbookTest.effectiveSongbookJSON(origin),
+        bookExportText.slice(0, 40));
+    ok('download reports the file name',
+        $('exportStatus').textContent.indexOf('Downloaded ' + bookFilename) === 0,
+        $('exportStatus').textContent);
+
+    // Navigating away must not leave the previous song's JSON on screen.
+    win().location.hash = '#/krakow-ukulele/let-her-go';
+    await wait(250);
+    ok('song navigation resets the export panel',
+        $('songJsonPanel').hidden === true &&
+        $('songJsonOutput').textContent === '' &&
+        $('exportStatus').textContent === '');
+    win().location.hash = '#/krakow-ukulele/harbour-lights';
+    await wait(250);
 
     // 19d. legacy y-note HTML is sanitized before rendering (XSS)
     const xssNote = win().songbookTest.noteNode(

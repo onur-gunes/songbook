@@ -2379,6 +2379,72 @@ body.pattern-open { overflow: hidden; }
 
 .notes-status.show { opacity: 1; }
 
+/* export */
+
+.export-block {
+    margin-top: 26px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+}
+
+.export-hint {
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    max-width: 62ch;
+}
+
+.export-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.export-panel {
+    margin-top: 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    overflow: hidden;
+}
+
+.export-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px 8px 12px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-2);
+}
+
+.export-panel-title {
+    margin: 0;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+}
+
+.export-json {
+    margin: 0;
+    padding: 12px;
+    max-height: 22rem;
+    overflow: auto;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    white-space: pre;
+    tab-size: 2;
+}
+
+.export-status {
+    min-height: 1.2em;
+    margin: 8px 0 0;
+    color: var(--easy);
+    font-size: 0.85rem;
+}
+
 .site-foot {
     text-align: center;
     color: var(--muted);

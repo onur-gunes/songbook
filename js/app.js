@@ -80,6 +80,7 @@
 
         SB.bindListControls();
         SB.bindSongControls();
+        if (SB.bindExportControls) SB.bindExportControls();
         SB.bindKeyboard();
         SB.updateSpeedLabel();
 
@@ -138,6 +139,12 @@
         allSongbooks: SB.allSongbooks,
         normalizeSongbook: SB.normalizeSongbook,
         songbookJSON: SB.songbookJSON,
+        effectiveSong: SB.effectiveSong,
+        effectiveSongbook: SB.effectiveSongbook,
+        effectiveSongJSON: SB.effectiveSongJSON,
+        effectiveSongbookJSON: SB.effectiveSongbookJSON,
+        exportFilename: SB.exportFilename,
+        exportTimestamp: SB.exportTimestamp,
         getActive: function () { return SB.state.active; },
         getSong: function (id) { return SB.state.byId[id]; },
         setInstrument: SB.setInstrument,
