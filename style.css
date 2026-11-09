@@ -2064,6 +2064,14 @@ body.pattern-open { overflow: hidden; }
     border-radius: 6px;
     z-index: 2;
 }
+/* A beat cell is a button: show a visible focus ring so keyboard users can
+   tell which beat the strum editor will open on. */
+.sheet.chords-grid .grid-beat:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+    z-index: 2;
+}
 
 /* Bar-level strum control: opens the bar strum editor. At rest it is only a
    faint arrow glyph in the bar's corner — the grid is a chart first, so a
@@ -2204,8 +2212,8 @@ body.pattern-open { overflow: hidden; }
     flex-wrap: wrap;
 }
 .grid-editor-slot {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: var(--surface-2);

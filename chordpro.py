@@ -392,9 +392,11 @@ def parse_grid_block(label, body_lines, time_sig):
 # CAVEAT (stated here in the data, not only in the UI): strum patterns are far
 # less reliably documented than key or bpm, and most real songs change pattern
 # between verse and chorus. A per-song `strum` is one pattern for the whole
-# song and is explicitly an approximation; per-section patterns are a later
-# feature. The per-song field is a single id today but is designed so it can
-# grow to a list without a data migration.
+# song and is explicitly an approximation; songs can additionally carry
+# `sectionStrums` (one pattern per canonical section role, English or Polish
+# labels alike) and per-song custom patterns in `strumPatterns`. The per-song
+# field stays a single id but is designed so it can grow to a list without a
+# data migration.
 STRUM_PATTERNS = (
     # 4/4 — eighths (8 slots)
     {'id': 'downs-4-4', 'name': 'All downs', 'time': '4/4', 'subdiv': 2,

@@ -2077,6 +2077,14 @@ body.pattern-open { overflow: hidden; }
     border-radius: 6px;
     z-index: 2;
 }
+/* A beat cell is a button: show a visible focus ring so keyboard users can
+   tell which beat the strum editor will open on. */
+.sheet.chords-grid .grid-beat:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+    z-index: 2;
+}
 
 /* Bar-level strum control: opens the bar strum editor. At rest it is only a
    faint arrow glyph in the bar's corner — the grid is a chart first, so a
@@ -2217,8 +2225,8 @@ body.pattern-open { overflow: hidden; }
     flex-wrap: wrap;
 }
 .grid-editor-slot {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: var(--surface-2);
@@ -8351,13 +8359,18 @@ button.structure-close,
             var beat = SB.el('span', 'grid-beat');
             beat.style.left = b.x + 'px';
             beat.style.width = b.w + 'px';
+            beat.setAttribute('role', 'button');
+            beat.setAttribute('tabindex', '0');
             beat.setAttribute('data-beat-local', String(b.index));
             beat.setAttribute('data-block', String(spec.blockIdx));
             beat.setAttribute('data-bar', String(spec.barIdx));
             beat.setAttribute('data-strum-source', resolved.source || 'none');
             if (resolved.id) beat.setAttribute('data-strum-id', resolved.id);
             beat.setAttribute('data-subdiv', String(subdiv));
-            beat.setAttribute('aria-label', 'Beat ' + String(b.index + 1) + ' — ' + slots);
+            beat.setAttribute('aria-label', 'Beat ' + String(b.index + 1) + ' — ' + slots +
+                (resolved.source && resolved.source !== 'none'
+                    ? ' — overridden, press Enter or Space to edit'
+                    : ' — press Enter or Space to edit its strum'));
 
             // The felt-beat strokes (D U / ↓ ↑ / ·), one cell per subdivision slot.
             var strokes = SB.el('span', 'grid-beat-strokes');
@@ -8837,6 +8850,10 @@ button.structure-close,
                     btn.textContent = strumGlyph(ch);
                     if (ch === '-') btn.classList.add('rest');
                     btn.dataset.slot = String(s2);
+                    btn.setAttribute('aria-label', 'Slot ' + String(s2 + 1) + ': ' +
+                        (ch === 'D' ? 'down' : (ch === 'U' ? 'up' : 'rest')) +
+                        '. Activate to cycle to ' +
+                        (ch === 'D' ? 'up' : (ch === 'U' ? 'rest' : 'down')) + '.');
                     btn.addEventListener('click', function () {
                         var next = ch === 'D' ? 'U' : (ch === 'U' ? '-' : 'D');
                         var updated = slots.slice();
@@ -8883,6 +8900,18 @@ button.structure-close,
                 gridEditorShow('bar', parseInt(btn.dataset.block, 10), parseInt(btn.dataset.bar, 10), 0);
                 return;
             }
+            var beat = ev.target.closest('.grid-beat');
+            if (beat) {
+                ev.preventDefault();
+                gridEditorShow('beat', parseInt(beat.dataset.block, 10), parseInt(beat.dataset.bar, 10), parseInt(beat.dataset.beatLocal, 10));
+            }
+        });
+        /* The same beat cell opens from the keyboard: Enter or Space on a
+           beat cell opens its strum editor. Space also scrolls the page,
+           so it is prevented when the target is a beat cell. */
+        document.addEventListener('keydown', function (ev) {
+            if (!activeGrid || activeGrid.anim) return;
+            if (ev.key !== 'Enter' && ev.key !== ' ') return;
             var beat = ev.target.closest('.grid-beat');
             if (beat) {
                 ev.preventDefault();
@@ -10845,10 +10874,12 @@ button.structure-close,
      * CAVEAT (kept here in the data, not only in the comment above the UI):
      * strum patterns are far less reliably documented than key or bpm, and most
      * real songs change pattern between verse and chorus. A per-song `strum` is
-     * ONE pattern for the whole song and is explicitly an approximation. Per-
-     * section patterns are a later feature; the per-song field is a single id
-     * today but is deliberately shaped so it can grow to a list without a data
-     * migration (see normalizeStrum in js/songbooks.js). */
+     * ONE pattern for the whole song and is explicitly an approximation; songs
+     * can additionally carry `sectionStrums` (one pattern per canonical
+     * section role, English or Polish labels alike) and per-song custom
+     * patterns in `strumPatterns`. The per-song field stays a single id but is
+     * deliberately shaped so it can grow to a list without a data migration
+     * (see normalizeStrum in js/songbooks.js). */
     var PATTERNS = [
         // 4/4 — eighths (8 slots)
         { id: 'downs-4-4', name: 'All downs', time: '4/4', subdiv: 2, slots: 'D-D-D-D-' },
@@ -11135,8 +11166,8 @@ button.structure-close,
      * pre-plan SB.strumKey choice; the legacy key is also consulted directly
      * as a fallback so an existing user's choice can never disappear. "Song
      * default" is the songbook's documented `strum`. If none of those fit the
-     * metre, the first pattern for that metre is used, exactly as the old
-     * single-pattern row did.
+     * metre, the first pattern for that metre is used — the same fallback the
+     * row has always applied when nothing was chosen.
      *
      * `slots` is the effective subdivision string for the requested felt beat,
      * while `pattern` is the full pattern it came from: a beat override can
@@ -11223,10 +11254,11 @@ button.structure-close,
         };
     };
 
-    /* The collapsed row shows one song-wide pattern. Section overrides are
-     * deliberately not consulted here: until the grid lane follows playback
-     * (Step 5), choosing a section pattern previews it while the selectors
-     * are open, and collapsing returns to this song default. */
+    /* The collapsed row shows one song-wide pattern: section overrides are
+     * deliberately not consulted here. During playback the grid lane follows
+     * the effective pattern section by section (see gridFollowStrum in
+     * js/grid.js) and restores the user's choice when the metronome stops;
+     * collapsing the selectors returns the row to this song default. */
 
     /* Set the strum pattern shown on the top row without persisting it: used
      * when playback follows the effective pattern section by section. Rebuilds
@@ -11264,9 +11296,8 @@ button.structure-close,
         SB.savePlan(sbId, songId, plan);
     };
 
-    /* The row still shows one song-wide pattern until the expanded section
-     * selectors land; start at the song's first section so a section default
-     * previews correctly when one exists. */
+    /* The collapsed row shows one song-wide pattern: start at the song's
+     * first section so a section default previews correctly when one exists. */
 
     function chooseFor(song) {
         if (!song) return null;
@@ -12384,9 +12415,12 @@ button.structure-close,
     /* Canonical metres, mirrored from js/songbooks.js and chordpro.py. */
     var TIMES = ['4/4', '3/4', '6/8', '2/4'];
 
-    /* Section roles offered to the editor, in UI order. `other` is last so an
-     * unrecognised section still gets a role rather than none. */
-    var ROLES = ['intro', 'verse', 'pre_chorus', 'chorus', 'bridge',
+    /* Section roles offered to the editor, in UI order: the shared canonical
+     * enum from js/sections.js, mirrored from chordpro.py and guarded by
+     * tests/sections.py — one enum, not a second copy that can drift. `other`
+     * is last so an unrecognised section still gets a role rather than none. */
+    var ROLES = (SB.SECTION_ROLES && SB.SECTION_ROLES.slice()) || [
+        'intro', 'verse', 'pre_chorus', 'chorus', 'bridge',
         'outro', 'interlude', 'solo', 'tag', 'other'];
 
     var ROLE_LABELS = {

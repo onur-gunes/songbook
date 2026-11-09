@@ -28,10 +28,12 @@
      * CAVEAT (kept here in the data, not only in the comment above the UI):
      * strum patterns are far less reliably documented than key or bpm, and most
      * real songs change pattern between verse and chorus. A per-song `strum` is
-     * ONE pattern for the whole song and is explicitly an approximation. Per-
-     * section patterns are a later feature; the per-song field is a single id
-     * today but is deliberately shaped so it can grow to a list without a data
-     * migration (see normalizeStrum in js/songbooks.js). */
+     * ONE pattern for the whole song and is explicitly an approximation; songs
+     * can additionally carry `sectionStrums` (one pattern per canonical
+     * section role, English or Polish labels alike) and per-song custom
+     * patterns in `strumPatterns`. The per-song field stays a single id but is
+     * deliberately shaped so it can grow to a list without a data migration
+     * (see normalizeStrum in js/songbooks.js). */
     var PATTERNS = [
         // 4/4 — eighths (8 slots)
         { id: 'downs-4-4', name: 'All downs', time: '4/4', subdiv: 2, slots: 'D-D-D-D-' },
@@ -318,8 +320,8 @@
      * pre-plan SB.strumKey choice; the legacy key is also consulted directly
      * as a fallback so an existing user's choice can never disappear. "Song
      * default" is the songbook's documented `strum`. If none of those fit the
-     * metre, the first pattern for that metre is used, exactly as the old
-     * single-pattern row did.
+     * metre, the first pattern for that metre is used — the same fallback the
+     * row has always applied when nothing was chosen.
      *
      * `slots` is the effective subdivision string for the requested felt beat,
      * while `pattern` is the full pattern it came from: a beat override can
@@ -406,10 +408,11 @@
         };
     };
 
-    /* The collapsed row shows one song-wide pattern. Section overrides are
-     * deliberately not consulted here: until the grid lane follows playback
-     * (Step 5), choosing a section pattern previews it while the selectors
-     * are open, and collapsing returns to this song default. */
+    /* The collapsed row shows one song-wide pattern: section overrides are
+     * deliberately not consulted here. During playback the grid lane follows
+     * the effective pattern section by section (see gridFollowStrum in
+     * js/grid.js) and restores the user's choice when the metronome stops;
+     * collapsing the selectors returns the row to this song default. */
 
     /* Set the strum pattern shown on the top row without persisting it: used
      * when playback follows the effective pattern section by section. Rebuilds
@@ -447,9 +450,8 @@
         SB.savePlan(sbId, songId, plan);
     };
 
-    /* The row still shows one song-wide pattern until the expanded section
-     * selectors land; start at the song's first section so a section default
-     * previews correctly when one exists. */
+    /* The collapsed row shows one song-wide pattern: start at the song's
+     * first section so a section default previews correctly when one exists. */
 
     function chooseFor(song) {
         if (!song) return null;
