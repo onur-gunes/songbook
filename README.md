@@ -163,9 +163,9 @@ attached to `SB`.
   share one choice). Each selector defaults to "Same as song" and inherits the
   main pattern until changed, and the row updates immediately. Choosing a
   section pattern applies to every section with that role and is remembered in
-  the song's edit plan; which pattern is active during playback follows the
-  song pattern until the grid strum lane lands (a later step). Visual only —
-  the metronome is the audio.
+  the song's edit plan; during playback the grid lane follows the effective
+  pattern section by section, and stopping the metronome restores the user's
+  choice. Visual only — the metronome is the audio.
 - **Tuner** — chromatic-style pitch detection from the microphone with
   ukulele/guitar presets, auto or manual string selection, A4 calibration
   (430–450 Hz), and an octave-safe detector. Requires a secure context
@@ -174,6 +174,65 @@ attached to `SB`.
   On Android, Chrome also needs microphone permission at the OS level
   (Settings → Apps → Chrome → Permissions → Microphone).
 - **PWA** — installable, caches the app shell and songbooks for offline use.
+
+## Edit mode and Reset
+
+Structure editing lives behind the **Edit** button in the song view's
+toolbar. Play mode stays the default: strum selectors and per-beat strum
+overrides keep working, while chord names, chord lengths, beat counts and bar
+structure are read-only.
+
+Opening Edit mode opens a panel that works on the song's local edit plan,
+never on the imported songbook:
+
+- edit chord names (each must be a playable chord);
+- edit chord lengths in felt beats, with a stepper;
+- add and remove bars and beats, split and merge chords;
+- change the time signature among `4/4`, `3/4`, `6/8` and `2/4`;
+- add and remove sections, and assign each a canonical section role
+  (intro, verse, pre-chorus, chorus, bridge, outro, interlude, solo, tag,
+  other — English and Polish labels resolve to the same role);
+- every edit is validated so each bar sums to the metre; an invalid bar shows
+  an error and is not saved.
+
+Strum overrides (bar and beat patterns) and structure edits are separate
+layers: changing chords or beats never rewrites strums, and changing strums
+never rewrites chords, lengths or beats. Added beats inherit the effective
+strum; removed beats lose their overrides. All edits persist to `localStorage`
+and survive reload, and are merged into the export rather than written into
+the songbook itself.
+
+**Reset** sits next to Edit. It asks for confirmation, then restores the song
+exactly as it is in the songbook: it clears the strum plan, custom patterns,
+bar/beat overrides and all structural edits. Unrelated per-song preferences
+(notes, text size, scroll speed, transpose) are untouched, and Reset is
+disabled until there are local edits.
+
+## Export
+
+At the bottom of the song view, next to My notes, an export area offers three
+actions — a dedicated trigger, not part of My notes:
+
+- **Show song JSON** — opens an on-screen panel with the song's *effective*
+  JSON: the stored song merged with every local strum, custom-pattern,
+  bar/beat and structure change from the edit plan, with a canonical role on
+  every grid block. A **Copy** button puts it on the clipboard and the polite
+  status line confirms it.
+- **Download song JSON** — downloads one song object with all local changes
+  applied.
+- **Download songbook JSON** — downloads the whole active songbook, applying
+  every song's plan.
+
+File names are stamped with local time, e.g.
+`harbour-lights-20261109-152304.json`, so downloads never overwrite each other
+and the clock on the device that saved them is what shows in the name. The
+songbook export is the raw stored book (a byte-for-byte backup); the song
+download is the effective song, which is exactly what
+`SB.normalizeSongbook` / `build_songbook.py` accept, so an exported file can
+be imported by any build.
+
+Export works for bundled and imported songbooks alike; a bundled book stays
+read-only in the app — export is how its content leaves the app.
 
 ## Songbook JSON format
 
@@ -432,8 +491,9 @@ rejected — the row would not line up with the clicks). Give strum its own
 `strum_confidence` / `strum_source` in the sidecar rather than reusing the
 bpm's: strum is **less** reliably documented than bpm, so a per-song pattern is
 explicitly an approximation (most songs change feel between sections; per-
-section patterns are a later feature). The field is a single id today but is
-shaped so it can grow to a list without a data migration. When a song has no
+section patterns let each role play its own pattern — see
+[Per-section strums](#per-section-strums). The field is a single id today but
+is shaped so it can grow to a list without a data migration. When a song has no
 `time`, the runtime uses 4/4 so the strum row is still available; a manual
 choice made there is remembered per song just like a documented default.
 

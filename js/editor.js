@@ -19,9 +19,12 @@
     /* Canonical metres, mirrored from js/songbooks.js and chordpro.py. */
     var TIMES = ['4/4', '3/4', '6/8', '2/4'];
 
-    /* Section roles offered to the editor, in UI order. `other` is last so an
-     * unrecognised section still gets a role rather than none. */
-    var ROLES = ['intro', 'verse', 'pre_chorus', 'chorus', 'bridge',
+    /* Section roles offered to the editor, in UI order: the shared canonical
+     * enum from js/sections.js, mirrored from chordpro.py and guarded by
+     * tests/sections.py — one enum, not a second copy that can drift. `other`
+     * is last so an unrecognised section still gets a role rather than none. */
+    var ROLES = (SB.SECTION_ROLES && SB.SECTION_ROLES.slice()) || [
+        'intro', 'verse', 'pre_chorus', 'chorus', 'bridge',
         'outro', 'interlude', 'solo', 'tag', 'other'];
 
     var ROLE_LABELS = {

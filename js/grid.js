@@ -1070,13 +1070,18 @@
             var beat = SB.el('span', 'grid-beat');
             beat.style.left = b.x + 'px';
             beat.style.width = b.w + 'px';
+            beat.setAttribute('role', 'button');
+            beat.setAttribute('tabindex', '0');
             beat.setAttribute('data-beat-local', String(b.index));
             beat.setAttribute('data-block', String(spec.blockIdx));
             beat.setAttribute('data-bar', String(spec.barIdx));
             beat.setAttribute('data-strum-source', resolved.source || 'none');
             if (resolved.id) beat.setAttribute('data-strum-id', resolved.id);
             beat.setAttribute('data-subdiv', String(subdiv));
-            beat.setAttribute('aria-label', 'Beat ' + String(b.index + 1) + ' — ' + slots);
+            beat.setAttribute('aria-label', 'Beat ' + String(b.index + 1) + ' — ' + slots +
+                (resolved.source && resolved.source !== 'none'
+                    ? ' — overridden, press Enter or Space to edit'
+                    : ' — press Enter or Space to edit its strum'));
 
             // The felt-beat strokes (D U / ↓ ↑ / ·), one cell per subdivision slot.
             var strokes = SB.el('span', 'grid-beat-strokes');
@@ -1556,6 +1561,10 @@
                     btn.textContent = strumGlyph(ch);
                     if (ch === '-') btn.classList.add('rest');
                     btn.dataset.slot = String(s2);
+                    btn.setAttribute('aria-label', 'Slot ' + String(s2 + 1) + ': ' +
+                        (ch === 'D' ? 'down' : (ch === 'U' ? 'up' : 'rest')) +
+                        '. Activate to cycle to ' +
+                        (ch === 'D' ? 'up' : (ch === 'U' ? 'rest' : 'down')) + '.');
                     btn.addEventListener('click', function () {
                         var next = ch === 'D' ? 'U' : (ch === 'U' ? '-' : 'D');
                         var updated = slots.slice();
@@ -1602,6 +1611,18 @@
                 gridEditorShow('bar', parseInt(btn.dataset.block, 10), parseInt(btn.dataset.bar, 10), 0);
                 return;
             }
+            var beat = ev.target.closest('.grid-beat');
+            if (beat) {
+                ev.preventDefault();
+                gridEditorShow('beat', parseInt(beat.dataset.block, 10), parseInt(beat.dataset.bar, 10), parseInt(beat.dataset.beatLocal, 10));
+            }
+        });
+        /* The same beat cell opens from the keyboard: Enter or Space on a
+           beat cell opens its strum editor. Space also scrolls the page,
+           so it is prevented when the target is a beat cell. */
+        document.addEventListener('keydown', function (ev) {
+            if (!activeGrid || activeGrid.anim) return;
+            if (ev.key !== 'Enter' && ev.key !== ' ') return;
             var beat = ev.target.closest('.grid-beat');
             if (beat) {
                 ev.preventDefault();
