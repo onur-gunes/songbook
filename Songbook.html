@@ -1971,14 +1971,15 @@ body.pattern-open { overflow: hidden; }
     justify-content: center;
     gap: 5px;
     box-sizing: border-box;
+    padding: 0 2px;
     color: var(--muted);
     font-family: var(--mono);
     font-size: 0.85em;
 }
 
 /* The beat itself: a thin horizontal line running through each beat cell,
-   under the chord diagram. The line is the primary beat indicator; the
-   strum strokes sit on it and the number is demoted to faint text. */
+   under the chord diagram. The line is the primary beat indicator and the
+   strum strokes sit on it. */
 .sheet.chords-grid .grid-beat::before {
     content: '';
     position: absolute;
@@ -1992,24 +1993,45 @@ body.pattern-open { overflow: hidden; }
     pointer-events: none;
 }
 
+/* A faint tick at each beat boundary, so a run of subdivision arrows reads
+   as beats rather than one undifferentiated string of glyphs. */
+.sheet.chords-grid .grid-beat + .grid-beat::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 18%;
+    bottom: 18%;
+    width: 1px;
+    background: var(--line);
+    opacity: 0.35;
+    pointer-events: none;
+}
+
 .sheet.chords-grid .grid-beat-strokes {
     display: flex;
-    gap: 6px;
+    width: 100%;
+    gap: 2px;
     position: relative;
     z-index: 1;
 }
 
 /* One cell per subdivision slot: the down / up arrows (or D / U letters),
-   with a dot for a rest. Bigger than before so the strum pattern reads at a
-   glance under each diagram. */
+   with a dot for a rest. The slots divide the beat's own width, so a beat
+   with two or three subdivisions can never spill into its neighbours — the
+   lane stays aligned under the diagrams. The playhead lights each arrow in
+   turn like the top row. */
 .sheet.chords-grid .grid-beat-slot {
-    width: calc(var(--grid-beat-h, 1.7em) * 0.72);
+    flex: 1 1 0;
+    min-width: 0;
     height: calc(var(--grid-beat-h, 1.7em) * 0.72);
-    line-height: calc(var(--grid-beat-h, 1.7em) * 0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    border-radius: 8px;
-    color: var(--muted);
-    font-size: 1.05em;
+    border-radius: 999px;
+    color: var(--text);
+    opacity: 0.7;
+    font-size: 1.1em;
     font-weight: 800;
     position: relative;
     z-index: 1;
@@ -2021,30 +2043,24 @@ body.pattern-open { overflow: hidden; }
     opacity: 0.45;
 }
 
-/* The beat number stays small and faint behind the strokes — the line above
-   is the beat now, so the number only supports the count. */
-.sheet.chords-grid .grid-beat-no {
-    font-size: 0.5em;
-    color: var(--muted);
-    opacity: 0.35;
-    position: relative;
-    z-index: 1;
+/* The playhead's arrow: lights up subdivision-by-subdivision within the
+   active beat, so each down / up pulses as the metronome passes it. */
+.sheet.chords-grid .grid-beat-slot.on {
+    color: var(--surface);
+    background: var(--accent);
+    opacity: 1;
+    font-weight: 900;
+    transform: scale(1.15);
 }
 
-/* The playhead's beat: the line turns to the accent colour and the arrows
-   pop, so the current strum pulse is readable at a glance. */
+/* The playhead's beat: the line turns to the accent colour and the current
+   arrow pops, so the current strum pulse is readable at a glance. */
 .sheet.chords-grid .grid-beat.on {
     color: var(--surface);
 }
 .sheet.chords-grid .grid-beat.on::before {
     background: var(--accent);
     opacity: 1;
-}
-.sheet.chords-grid .grid-beat.on .grid-beat-slot,
-.sheet.chords-grid .grid-beat.on .grid-beat-slot.rest {
-    color: var(--surface);
-    opacity: 1;
-    font-weight: 900;
 }
 
 /* An overridden beat keeps its own ring so the distinction is not colour
@@ -2062,48 +2078,74 @@ body.pattern-open { overflow: hidden; }
     z-index: 2;
 }
 
-/* Bar-level strum control: opens the bar strum editor. */
+/* Bar-level strum control: opens the bar strum editor. At rest it is only a
+   faint arrow glyph in the bar's corner — the grid is a chart first, so a
+   repeated "Inherit" pill on every diagram is too much noise. An overridden
+   bar shows its pattern name and keeps the accent ring. */
 .sheet.chords-grid .grid-bar-strum {
     position: absolute;
-    top: 5px;
-    right: 5px;
-    font-size: 0.68rem;
-    padding: 2px 7px;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--surface);
+    top: 3px;
+    right: 3px;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    padding: 1px 5px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
     color: var(--muted);
+    opacity: 0.45;
     cursor: pointer;
-    line-height: 1;
+    line-height: 1.2;
+    transition: opacity 120ms ease, background 120ms ease, border-color 120ms ease;
 }
-.sheet.chords-grid .grid-bar-strum:hover { background: var(--surface-2); }
+.sheet.chords-grid .grid-bar-strum:hover,
+.sheet.chords-grid .grid-bar-strum:focus-visible {
+    opacity: 1;
+    background: var(--surface-2);
+    border-color: var(--line);
+}
 .sheet.chords-grid .grid-bar-strum.grid-bar-strum-overridden,
 .sheet.chords-grid .grid-bar-strum[aria-pressed="true"] {
     color: var(--accent);
     border-color: var(--accent);
     background: var(--surface-2);
+    opacity: 1;
 }
 
-/* Grid strum editor (bar / beat overrides). Fixed panel, separate from the
-   sheet so it survives grid re-renders. */
+/* Touch screens have no hover, so keep the control discoverable there. */
+@media (hover: none) {
+    .sheet.chords-grid .grid-bar-strum { opacity: 0.7; }
+}
+
+/* Grid strum editor (bar / beat overrides). The fixed outer element is the
+   overlay; the backdrop and the panel are siblings inside it. Keeping the
+   backdrop out of a transformed panel matters: a transform would make its
+   `position: fixed` resolve against the panel, painting it over the dialog
+   and swallowing every click. */
+.grid-strum-editor {
+    position: fixed;
+    inset: 0;
+    z-index: 65;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
 .grid-strum-backdrop {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.4);
-    z-index: 60;
+    z-index: 0;
 }
-.grid-strum-editor {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: min(440px, 92vw);
+.grid-strum-sheet {
+    position: relative;
+    z-index: 1;
+    width: min(440px, 100%);
     max-height: 78vh;
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
-    z-index: 65;
     display: flex;
     flex-direction: column;
     overflow: auto;
@@ -7105,6 +7147,9 @@ button.structure-close,
     var activeGrid = null;      // { song, beatsPerBar, totalBeats, bpm, ... }
     var cursorRaf = null;
     var lastBeat = -1;
+    /* The currently lit strum arrow within the playhead's beat, so the grid
+       lane pulses subdivision-by-subdivision like the top strum row. */
+    var lastStrumEl = null;
 
     /* ---------------- helpers ---------------- */
 
@@ -7525,6 +7570,10 @@ button.structure-close,
             if (chord) chord.classList.remove('on');
         }
         lastBeat = -1;
+        if (lastStrumEl) {
+            lastStrumEl.classList.remove('on');
+            lastStrumEl = null;
+        }
         if (activeGrid && activeGrid.wrap) {
             delete activeGrid.wrap.dataset.activeBeat;
         }
@@ -7653,6 +7702,29 @@ button.structure-close,
         SB.strumSetPattern(resolved.pattern);
     }
 
+    /* Lights the subdivision arrow within the playhead's beat, one slot at a
+       time, exactly as the top strum row pulses each down / up. `chartBeats`
+       is the metronome position in beats (fraction = position within the
+       beat). Only the current beat carries a lit arrow. */
+    function paintStrumSlot(chartBeats) {
+        var idx = Math.floor(chartBeats);
+        var beatEl = activeGrid && activeGrid.beatEls ? activeGrid.beatEls[idx] : null;
+        if (!beatEl) {
+            if (lastStrumEl) { lastStrumEl.classList.remove('on'); lastStrumEl = null; }
+            return;
+        }
+        var subdiv = parseInt(beatEl.dataset.subdiv, 10) || 1;
+        var frac = chartBeats - idx;
+        var slot = Math.floor(frac * subdiv);
+        if (slot < 0) slot = 0;
+        if (slot >= subdiv) slot = subdiv - 1;
+        var slotEl = beatEl.querySelectorAll('.grid-beat-slot')[slot];
+        if (slotEl === lastStrumEl) return;
+        if (lastStrumEl) lastStrumEl.classList.remove('on');
+        lastStrumEl = slotEl;
+        if (slotEl) slotEl.classList.add('on');
+    }
+
     /* One repaint loop, driven by the metronome's audio clock. rAF is only a
      * repaint cadence; the beat is always recomputed from
      * SB.metronomePosition(), so a dropped frame cannot make the cursor drift
@@ -7690,6 +7762,8 @@ button.structure-close,
             activeGrid.wrap.dataset.gridPhase = 'playing';
         }
         if (idx !== lastBeat) setActive(idx);
+        // Pulse the current strum arrow within the playhead's beat.
+        paintStrumSlot(chartBeats);
         cursorRaf = requestAnimationFrame(cursorFrame);
     }
 
@@ -8017,17 +8091,24 @@ button.structure-close,
     }
 
     /* The label shown on a bar's strum button: the overridden pattern's name
-     * when the bar carries a bar-level override, otherwise "Inherit". */
+     * when the bar carries a bar-level override, otherwise empty so the
+     * button can fall back to a compact arrow glyph. */
     function barStrumText(song, plan, blockIdx, barIdx) {
         var id = (plan && plan.barStrums) ? plan.barStrums[SB.planBarKey(blockIdx, barIdx)] : null;
-        if (!id) return 'Inherit';
+        if (!id) return '';
         var p = SB.strumPatternFor(id, song.time || SB.DEFAULT_TIME, plan);
         return p ? p.name : id;
     }
 
     function updateBarStrumBtn(btn, song, plan, blockIdx, barIdx) {
-        btn.textContent = barStrumText(song, plan, blockIdx, barIdx);
-        var overridden = !!(plan && plan.barStrums && plan.barStrums[SB.planBarKey(blockIdx, barIdx)]);
+        var text = barStrumText(song, plan, blockIdx, barIdx);
+        var overridden = !!text;
+        var label = overridden
+            ? 'Bar strum: ' + text
+            : 'Bar strum: inherit from section/song';
+        btn.textContent = overridden ? text : '\u2193\u2191';
+        btn.setAttribute('aria-label', label);
+        btn.title = label;
         btn.classList.toggle('grid-bar-strum-overridden', overridden);
         btn.setAttribute('aria-pressed', overridden ? 'true' : 'false');
     }
@@ -8107,10 +8188,6 @@ button.structure-close,
                 strokes.appendChild(slot);
             }
             beat.appendChild(strokes);
-
-            // The beat number underneath, faint, so the beat count stays legible.
-            var no = SB.el('span', 'grid-beat-no', String(b.index + 1));
-            beat.appendChild(no);
 
             // Mark overridden beats with a visible ring (not colour alone).
             if (resolved.source === 'beat' || resolved.source === 'bar') {
@@ -8266,10 +8343,13 @@ button.structure-close,
 
         var em = SB.sheetEmPx();
         var ctx = {
-            beatW: Math.max(BEAT_MIN, em * 2.0),
+            // Wide enough for two (or three) strum glyphs inside one beat,
+            // so the lane under the diagrams stays legible instead of
+            // squeezing its arrows into overlapping specks.
+            beatW: Math.max(BEAT_MIN, em * 2.5),
             labelH: Math.ceil(em * 1.35),
-            // The beat row holds the felt-beat strokes plus the beat number
-            // underneath, so it needs room for two lines of small text.
+            // The beat row holds the felt-beat strokes on their own, so it
+            // only needs room for one line of glyphs and their padding.
             beatH: Math.ceil(em * 2.2),
             gap: Math.max(10, em * 0.6),
             diagram: diagramBox(SB.state.chordSize),
@@ -10366,6 +10446,16 @@ button.structure-close,
         return SB.loadPlan(sbId, song.id);
     }
 
+    /* The grid lane is rendered from the plan, not from the live top row, so
+       any change that lands in the plan (song default, section, bar or beat)
+       has to rebuild it. Without this the row and the lane silently disagree
+       until the next song or mode switch. */
+    function refreshGridLane() {
+        if (SB.isGridMode && SB.isGridMode() && SB.state.currentSong && SB.renderSheet) {
+            SB.renderSheet(SB.state.currentSong);
+        }
+    }
+
     function planIndex(value) {
         return (typeof value === 'number' && isFinite(value) && value >= 0) ? Math.floor(value) : 0;
     }
@@ -10798,6 +10888,7 @@ button.structure-close,
             ? sectionPatternFor(song, role, plan)
             : mainPatternFor(song, plan);
         renderRow();
+        refreshGridLane();
         if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
         updateSectionsButton(song, plan);
     }
@@ -10993,6 +11084,7 @@ button.structure-close,
         }
         if (SB.state.strum.pattern) {
             renderRow();
+            refreshGridLane();
             // Keep the highlight in step with the freshly rebuilt cells.
             if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
         }
@@ -11034,6 +11126,7 @@ button.structure-close,
         buildSelect();
         renderSectionSelectors();
         SB.updateStrumUi();
+        refreshGridLane();
         // If the metronome is already running, keep the highlight going on the
         // new row; strumOnMetronomeStart is a no-op if the loop is already up.
         if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
@@ -11397,6 +11490,7 @@ button.structure-close,
         buildSelect();
         renderSectionSelectors();
         SB.updateStrumUi();
+        refreshGridLane();
         if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
     }
 
