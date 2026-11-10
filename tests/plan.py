@@ -441,7 +441,9 @@ class SectionSelectorTests(unittest.TestCase):
         ''' % json.dumps(song))
         self.assertEqual(got, ['verse', 'chorus', 'bridge', 'intro'])
 
-    def test_roles_include_other_and_plan_grid_sections(self):
+    def test_plan_grid_replaces_the_song_roles(self):
+        """A structural edit replaces the whole structure, so a role removed
+        from plan.grid must not leave a stale selector behind."""
         song = {
             'id': 'roles', 'title': 'Roles', 'time': '4/4',
             'grid': [
@@ -458,7 +460,7 @@ class SectionSelectorTests(unittest.TestCase):
             var plan = %s;
             console.log(JSON.stringify(SB.songSectionRoles(song, plan)));
         ''' % (json.dumps(song), json.dumps(plan)))
-        self.assertEqual(got, ['other', 'solo'])
+        self.assertEqual(got, ['solo'])
 
     def test_song_with_no_sections_has_no_roles(self):
         song = {

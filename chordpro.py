@@ -74,17 +74,32 @@ SECTION_ALIASES = {
     'other': 'other',
     # English variants
     'introduction': 'intro',
+    'opening': 'intro',
+    'prologue': 'intro',
+    'strophe': 'verse',
+    'prechorus': 'pre_chorus',
     'refrain': 'chorus',
     'hook': 'chorus',
+    'ending': 'outro',
     'coda': 'outro',
     'instrumental': 'interlude',
     # Polish
     'wstep': 'intro',
+    'prolog': 'intro',
     'zwrotka': 'verse',
+    'wers': 'verse',
+    'przedrefren': 'pre_chorus',
+    'przed refren': 'pre_chorus',
     'refren': 'chorus',
+    'przyspiew': 'chorus',
     'most': 'bridge',
+    'mostek': 'bridge',
     'zakonczenie': 'outro',
+    'koda': 'outro',
     'przejscie': 'pre_chorus',
+    'instrumentalny': 'interlude',
+    'przerywnik': 'interlude',
+    'solo gitarowe': 'solo',
 }
 
 _POLISH = str.maketrans({

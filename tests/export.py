@@ -219,6 +219,26 @@ class EffectiveSongTests(unittest.TestCase):
             self.assertEqual(sum(seg['beats'] for seg in bar['beats']), 4)
             self.assertNotIn('strums', bar)
 
+    def test_custom_song_default_round_trips_through_the_build(self):
+        """A custom pattern chosen as the song default is exported as `strum`;
+        that must still pass the build validator (issue #103 round-trip)."""
+        plan = {
+            'version': 1, 'songStrum': 'custom-1', 'sectionStrums': {},
+            'customPatterns': [{
+                'id': 'custom-1', 'name': 'Mine', 'time': '4/4',
+                'subdiv': 2, 'slots': 'DUDUDUDU',
+            }],
+            'barStrums': {}, 'beatStrums': {}, 'grid': None, 'time': None,
+        }
+        got = effective(SONG, plan)
+        self.assertEqual(got['strum'], 'custom-1')
+        book = {
+            'id': 'demo', 'name': 'Demo', 'description': '',
+            'instrument': 'ukulele', 'songs': [got],
+        }
+        errors, _ = build_songbook.validate_songbook(book)
+        self.assertEqual(errors, [], errors)
+
     def test_wrong_metre_patterns_are_dropped_not_exported(self):
         got = effective(SONG, {
             'version': 1,
