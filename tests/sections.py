@@ -61,6 +61,33 @@ class SectionRoleTests(unittest.TestCase):
         self.assertEqual(chordpro.section_role('Final Chorus'), 'chorus')
         self.assertEqual(chordpro.section_role('Intro/Chorus'), 'intro')
 
+    def test_every_documented_alias_resolves(self):
+        """The alias table in issue #103 is part of the contract, not a
+        starting point: a label the issue names must never fall to `other`."""
+        cases = {
+            'intro': ['Intro', 'Opening', 'Prologue', 'Wstęp', 'Wstep', 'Prolog'],
+            'verse': ['Verse', 'Strophe', 'Zwrotka', 'Wers'],
+            'pre_chorus': ['Pre-chorus', 'Prechorus', 'Pre chorus',
+                           'Przedrefren', 'Przed-refren', 'Przejście', 'Przejscie'],
+            'chorus': ['Chorus', 'Refrain', 'Hook', 'Refren',
+                       'Przyśpiew', 'Przyspiew'],
+            'bridge': ['Bridge', 'Most', 'Mostek'],
+            'outro': ['Outro', 'Ending', 'Zakończenie', 'Zakonczenie', 'Koda', 'Coda'],
+            'interlude': ['Interlude', 'Instrumental', 'Instrumentalny', 'Przerywnik'],
+            'solo': ['Solo', 'Solo gitarowe'],
+            'tag': ['Tag'],
+        }
+        for role, labels in cases.items():
+            for label in labels:
+                self.assertEqual(chordpro.section_role(label), role, label)
+
+    def test_a_hyphenated_pre_chorus_is_not_mistaken_for_a_chorus(self):
+        # "przed-refren" normalises to "przed refren"; without the multi-word
+        # alias the single-word fallback would match "refren" and assign the
+        # chorus pattern to a pre-chorus.
+        self.assertEqual(chordpro.section_role('Przed-refren'), 'pre_chorus')
+        self.assertEqual(chordpro.section_role('Pre-chorus'), 'pre_chorus')
+
     def test_unmatched_labels_return_other(self):
         self.assertEqual(chordpro.section_role('Quietly'), 'other')
         self.assertEqual(chordpro.section_role('Down-down'), 'other')
@@ -93,6 +120,10 @@ class SectionMirrorTests(unittest.TestCase):
             'Zwrotka 2', 'Verse 2', '(Chorus)', 'Refren 3',
             'Wstęp', 'Zakończenie', 'Most', 'Przejście', 'Final Chorus',
             'Intro/Chorus', 'Quietly', '', 'Coda', 'Hook',
+            'Opening', 'Prologue', 'Strophe', 'Prechorus', 'Pre-chorus',
+            'Ending', 'Prolog', 'Wers', 'Przedrefren', 'Przed-refren',
+            'Przyśpiew', 'Mostek', 'Koda', 'Instrumentalny', 'Przerywnik',
+            'Solo gitarowe', 'Tag',
         ]
         with open(SECTIONS_JS, encoding='utf-8') as fh:
             src = fh.read()

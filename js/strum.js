@@ -593,6 +593,24 @@
         return SB.songSectionRoles ? SB.songSectionRoles(song, plan) : [];
     }
 
+    /* The song's own section labels per role, so the selectors speak the
+     * language of the song ("Zwrotka 2", not an English "Verse"). Sections of
+     * the same role share one selector, so their labels are joined. */
+    function sectionLabelsFor(song, plan) {
+        var out = {};
+        if (!song || !SB.gridBlocksFor) return out;
+        SB.gridBlocksFor(song, plan).forEach(function (block) {
+            var label = String(block.label == null ? '' : block.label).trim();
+            var role = SB.isSectionRole(block.role) ? block.role : SB.sectionRole(label);
+            if (!role || (role === 'other' && !label)) return;
+            if (!out[role]) out[role] = [];
+            var name = label || roleLabel(role);
+            if (out[role].indexOf(name) < 0) out[role].push(name);
+        });
+        return out;
+    }
+    SB.sectionLabelsFor = sectionLabelsFor;
+
     /* True when the sections do not all play the same effective pattern as
      * the song. A role with no override inherits by definition; only a valid
      * override that resolves to a different pattern counts. */
@@ -658,20 +676,21 @@
         var song = SB.state.currentSong;
         var plan = song ? currentPlanFor(song) : SB.emptyPlan();
         var roles = sectionRolesFor(song, plan);
+        var labels = sectionLabelsFor(song, plan);
         var time = song ? timeFor(song, plan) : null;
 
         list.textContent = '';
         if (empty) empty.hidden = roles.length > 0;
         roles.forEach(function (role) {
             var field = SB.el('label', 'strum-section-field');
-            var name = roleLabel(role);
-            var text = SB.el('span', 'strum-section-label', name);
+            var names = labels[role] && labels[role].length ? labels[role] : [roleLabel(role)];
+            var text = SB.el('span', 'strum-section-label', names.join(' / '));
             field.appendChild(text);
 
             var select = SB.el('select', 'strum-section-select');
             select.dataset.role = role;
             select.setAttribute('aria-label',
-                'Strum pattern for all ' + name.toLowerCase() + ' sections');
+                'Strum pattern for ' + names.join(' / ') + ' sections');
             var stored = plan.sectionStrums[role];
             appendPatternOptions(select, song, plan,
                 findPattern(stored, time, plan) ? stored : '');

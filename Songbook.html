@@ -2106,6 +2106,14 @@ body.pattern-open { overflow: hidden; }
     line-height: 1.2;
     transition: opacity 120ms ease, background 120ms ease, border-color 120ms ease;
 }
+/* The visible glyph stays a quiet corner control, but the tappable area is
+   grown to >=44px without enlarging the paint: the pseudo-element belongs to
+   the button, so a touch outside the glyph still activates it. */
+.sheet.chords-grid .grid-bar-strum::after {
+    content: '';
+    position: absolute;
+    inset: -15px 0 -15px -22px;
+}
 .sheet.chords-grid .grid-bar-strum:hover,
 .sheet.chords-grid .grid-bar-strum:focus-visible {
     opacity: 1;
@@ -6412,17 +6420,32 @@ button.structure-close,
         other: 'other',
         // English variants
         introduction: 'intro',
+        opening: 'intro',
+        prologue: 'intro',
+        strophe: 'verse',
+        prechorus: 'pre_chorus',
         refrain: 'chorus',
         hook: 'chorus',
+        ending: 'outro',
         coda: 'outro',
         instrumental: 'interlude',
         // Polish
         wstep: 'intro',
+        prolog: 'intro',
         zwrotka: 'verse',
+        wers: 'verse',
+        przedrefren: 'pre_chorus',
+        'przed refren': 'pre_chorus',
         refren: 'chorus',
+        przyspiew: 'chorus',
         most: 'bridge',
+        mostek: 'bridge',
         zakonczenie: 'outro',
+        koda: 'outro',
         przejscie: 'pre_chorus',
+        instrumentalny: 'interlude',
+        przerywnik: 'interlude',
+        'solo gitarowe': 'solo',
     };
 
     var _POLISH = {
@@ -7614,7 +7637,7 @@ button.structure-close,
      * (plan.grid, Step 6 edit mode), that override wins over the songbook's
      * authored grid: the user's structure is what the chart shows. Each plan
      * block renders as its own section, keyed by its own label/role, so the
-     * editor's add/remove/split/merge edits appear verbatim.
+     * editor's add/remove edits appear verbatim.
      */
     function gridBlocksFor(song, plan) {
         var beatsPerBar = SB.metronomeBeatsPerBar(song.time);
@@ -7723,9 +7746,16 @@ button.structure-close,
         }
         if (!song) return roles;
 
-        gridBlocksFor(song).forEach(add);
-        var authored = (plan && plan.grid) || song.grid || [];
-        authored.forEach(add);
+        /* The effective structure is plan.grid when an edit plan carries one,
+         * so a removed/replaced section must not leave a stale selector
+         * behind. Only fall back to the song's authored grid when there is no
+         * structural override (it can hold an instrumental block the sheet
+         * does not cover). */
+        var planGrid = (plan && plan.grid) || null;
+        gridBlocksFor(song, plan).forEach(add);
+        if (!planGrid || !planGrid.length) {
+            (song.grid || []).forEach(add);
+        }
         return roles;
     };
 
@@ -8359,18 +8389,27 @@ button.structure-close,
             var beat = SB.el('span', 'grid-beat');
             beat.style.left = b.x + 'px';
             beat.style.width = b.w + 'px';
-            beat.setAttribute('role', 'button');
-            beat.setAttribute('tabindex', '0');
+            /* The static grid is editable; the animated view is read-only, so
+             * it must not advertise an editor it will not open (no button
+             * role, no tab stop, no "press Enter" hint). */
+            if (!ctx.animate) {
+                beat.setAttribute('role', 'button');
+                beat.setAttribute('tabindex', '0');
+            }
             beat.setAttribute('data-beat-local', String(b.index));
             beat.setAttribute('data-block', String(spec.blockIdx));
             beat.setAttribute('data-bar', String(spec.barIdx));
             beat.setAttribute('data-strum-source', resolved.source || 'none');
             if (resolved.id) beat.setAttribute('data-strum-id', resolved.id);
             beat.setAttribute('data-subdiv', String(subdiv));
-            beat.setAttribute('aria-label', 'Beat ' + String(b.index + 1) + ' — ' + slots +
-                (resolved.source && resolved.source !== 'none'
-                    ? ' — overridden, press Enter or Space to edit'
-                    : ' — press Enter or Space to edit its strum'));
+            if (!ctx.animate) {
+                beat.setAttribute('aria-label', 'Beat ' + String(b.index + 1) + ' — ' + slots +
+                    (resolved.source && resolved.source !== 'none'
+                        ? ' — overridden, press Enter or Space to edit'
+                        : ' — press Enter or Space to edit its strum'));
+            } else {
+                beat.setAttribute('aria-label', 'Beat ' + String(b.index + 1) + ' — ' + slots);
+            }
 
             // The felt-beat strokes (D U / ↓ ↑ / ·), one cell per subdivision slot.
             var strokes = SB.el('span', 'grid-beat-strokes');
@@ -8541,8 +8580,10 @@ button.structure-close,
             beatW: Math.max(BEAT_MIN, em * 2.5),
             labelH: Math.ceil(em * 1.35),
             // The beat row holds the felt-beat strokes on their own, so it
-            // only needs room for one line of glyphs and their padding.
-            beatH: Math.ceil(em * 2.2),
+            // only needs room for one line of glyphs and their padding. Keep
+            // at least 44px so the beat cell is a comfortable touch target
+            // (it opens the beat strum editor).
+            beatH: Math.max(44, Math.ceil(em * 2.2)),
             gap: Math.max(10, em * 0.6),
             diagram: diagramBox(SB.state.chordSize),
             animate: animate
@@ -8558,11 +8599,14 @@ button.structure-close,
         var frag = document.createDocumentFragment();
         var lyricSections = [];
         var measurer = makeMeasurer(wrap);
-        var blocks = gridBlocksFor(song, plan);
-        // The per-song edit plan supplies bar/beat strum overrides; fall back
-        // to an empty plan when there is no active songbook/song.
+        // The per-song edit plan supplies the structural overrides and the
+        // bar/beat strum overrides. It must be loaded *before* the blocks are
+        // built: plan.grid is the authoritative structure in Edit mode, and
+        // reading it after `gridBlocksFor` would silently render the songbook
+        // grid instead of the user's edits.
         var sbId = SB.state.active && SB.state.active.id;
         var plan = sbId ? SB.loadPlan(sbId, song.id) : SB.emptyPlan();
+        var blocks = gridBlocksFor(song, plan);
 
         /* The animated view swaps whole systems into one stage. Build every
          * system now so its width, lyric anchoring and beat range are final;
@@ -11439,6 +11483,24 @@ button.structure-close,
         return SB.songSectionRoles ? SB.songSectionRoles(song, plan) : [];
     }
 
+    /* The song's own section labels per role, so the selectors speak the
+     * language of the song ("Zwrotka 2", not an English "Verse"). Sections of
+     * the same role share one selector, so their labels are joined. */
+    function sectionLabelsFor(song, plan) {
+        var out = {};
+        if (!song || !SB.gridBlocksFor) return out;
+        SB.gridBlocksFor(song, plan).forEach(function (block) {
+            var label = String(block.label == null ? '' : block.label).trim();
+            var role = SB.isSectionRole(block.role) ? block.role : SB.sectionRole(label);
+            if (!role || (role === 'other' && !label)) return;
+            if (!out[role]) out[role] = [];
+            var name = label || roleLabel(role);
+            if (out[role].indexOf(name) < 0) out[role].push(name);
+        });
+        return out;
+    }
+    SB.sectionLabelsFor = sectionLabelsFor;
+
     /* True when the sections do not all play the same effective pattern as
      * the song. A role with no override inherits by definition; only a valid
      * override that resolves to a different pattern counts. */
@@ -11504,20 +11566,21 @@ button.structure-close,
         var song = SB.state.currentSong;
         var plan = song ? currentPlanFor(song) : SB.emptyPlan();
         var roles = sectionRolesFor(song, plan);
+        var labels = sectionLabelsFor(song, plan);
         var time = song ? timeFor(song, plan) : null;
 
         list.textContent = '';
         if (empty) empty.hidden = roles.length > 0;
         roles.forEach(function (role) {
             var field = SB.el('label', 'strum-section-field');
-            var name = roleLabel(role);
-            var text = SB.el('span', 'strum-section-label', name);
+            var names = labels[role] && labels[role].length ? labels[role] : [roleLabel(role)];
+            var text = SB.el('span', 'strum-section-label', names.join(' / '));
             field.appendChild(text);
 
             var select = SB.el('select', 'strum-section-select');
             select.dataset.role = role;
             select.setAttribute('aria-label',
-                'Strum pattern for all ' + name.toLowerCase() + ' sections');
+                'Strum pattern for ' + names.join(' / ') + ' sections');
             var stored = plan.sectionStrums[role];
             appendPatternOptions(select, song, plan,
                 findPattern(stored, time, plan) ? stored : '');
@@ -12448,18 +12511,26 @@ button.structure-close,
         return !!ChordKit.parse(name);
     }
 
-    /* Deep-copy a grid block array into the editor's working shape. */
+    /* Deep-copy a grid block array into the editor's working shape. Repeat
+     * signs and per-bar `strums` are structure the editor does not change, so
+     * they must survive every structural edit: dropping them here would make
+     * a chord change silently erase strum data (and the issue requires strum
+     * and structure edits to stay independent). */
     function copyBlocks(blocks) {
         return (blocks || []).map(function (block) {
-            return {
+            var out = {
                 label: String(block.label || ''),
                 role: SB.isSectionRole(block.role) ? block.role : 'other',
+                repeat: !!block.repeat,
                 bars: (block.bars || []).map(function (bar) {
-                    return { beats: (bar.beats || []).map(function (seg) {
+                    var copy = { beats: (bar.beats || []).map(function (seg) {
                         return { chord: String(seg.chord || ''), beats: seg.beats || 1 };
                     }) };
+                    if (Array.isArray(bar.strums)) copy.strums = bar.strums.slice();
+                    return copy;
                 })
             };
+            return out;
         });
     }
 
@@ -12530,8 +12601,11 @@ button.structure-close,
         plan.beatStrums = newBeat;
     }
 
-    /* Validate every bar of the working grid sums to the metre. Returns null
-     * when valid, else a user-facing message. */
+    /* Validate every bar of the working grid sums to the metre and every chord
+     * is playable. Returns null when valid, else a user-facing message. The
+     * chord check matters because the "+ beat"/"+ bar"/"+ section" actions
+     * start with an empty chord: without this a bar that summed correctly
+     * could be saved (and exported) with an empty chord the build rejects. */
     function validateWorking() {
         if (!working) return null;
         var bpb = beatsPerBar(working.time);
@@ -12539,9 +12613,15 @@ button.structure-close,
             var block = working.blocks[bi];
             for (var ri = 0; ri < block.bars.length; ri++) {
                 var total = 0;
-                (block.bars[ri].beats || []).forEach(function (seg) {
+                var beats = block.bars[ri].beats || [];
+                for (var ei = 0; ei < beats.length; ei++) {
+                    var seg = beats[ei];
+                    if (!validChord(seg.chord)) {
+                        return 'Chord ' + String(ei + 1) + ' of bar ' + String(ri + 1) +
+                            ' in "' + (block.label || 'section') + '" is empty or not playable.';
+                    }
                     total += seg.beats || 0;
-                });
+                }
                 if (total !== bpb) {
                     return 'Bar ' + String(ri + 1) + ' of "' +
                         (block.label || 'section') + '" sums to ' + String(total) +
@@ -12826,14 +12906,7 @@ button.structure-close,
             var derived = SB.gridBlocksFor(SB.state.currentSong, {
                 grid: null, time: plan.time || SB.state.currentSong.time || SB.DEFAULT_TIME
             });
-            base = derived.map(function (b) {
-                return { label: b.label || '', role: b.role || 'other',
-                    bars: (b.bars || []).map(function (bar) {
-                        return { beats: (bar.beats || []).map(function (seg) {
-                            return { chord: seg.chord, beats: seg.beats };
-                        }) };
-                    }) };
-            });
+            base = copyBlocks(derived);
         }
         var time = plan.time || SB.state.currentSong.time || SB.DEFAULT_TIME;
         working = {

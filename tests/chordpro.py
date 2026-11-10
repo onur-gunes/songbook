@@ -881,6 +881,23 @@ class StrumStructureTests(unittest.TestCase):
         errors, _ = self.validate(strum='not-a-pattern')
         self.assertTrue(any('unknown pattern' in e for e in errors))
 
+    def test_song_strum_can_reference_its_own_custom_pattern(self):
+        """Export writes a custom pattern chosen as the song default into
+        `strum`; the build must accept it or a normal custom-pattern flow
+        cannot round-trip."""
+        errors, _ = self.validate(
+            strum='custom-1',
+            strumPatterns=[{'id': 'custom-1', 'name': 'Mine', 'time': '4/4',
+                            'subdiv': 2, 'slots': 'DUDUDUDU'}])
+        self.assertEqual(errors, [], errors)
+
+    def test_custom_song_strum_still_needs_the_song_metre(self):
+        errors, _ = self.validate(
+            strum='custom-1',
+            strumPatterns=[{'id': 'custom-1', 'name': 'Mine', 'time': '3/4',
+                            'subdiv': 2, 'slots': 'DUDUDU'}])
+        self.assertTrue(any('song time' in e for e in errors), errors)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

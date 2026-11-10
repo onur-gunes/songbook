@@ -187,7 +187,7 @@ never on the imported songbook:
 
 - edit chord names (each must be a playable chord);
 - edit chord lengths in felt beats, with a stepper;
-- add and remove bars and beats, split and merge chords;
+- add and remove bars and beats;
 - change the time signature among `4/4`, `3/4`, `6/8` and `2/4`;
 - add and remove sections, and assign each a canonical section role
   (intro, verse, pre-chorus, chorus, bridge, outro, interlude, solo, tag,
@@ -225,9 +225,9 @@ actions — a dedicated trigger, not part of My notes:
 
 File names are stamped with local time, e.g.
 `harbour-lights-20261109-152304.json`, so downloads never overwrite each other
-and the clock on the device that saved them is what shows in the name. The
-songbook export is the raw stored book (a byte-for-byte backup); the song
-download is the effective song, which is exactly what
+and the clock on the device that saved them is what shows in the name. Both
+downloads are effective: the song export is one effective song and the
+songbook export applies every song's plan. That is exactly what
 `SB.normalizeSongbook` / `build_songbook.py` accept, so an exported file can
 be imported by any build.
 
@@ -585,8 +585,10 @@ exactly `subdiv * felt-beats-per-bar` for its metre. Invalid custom patterns,
 metre mismatches, and wrong slot counts are build errors.
 
 Run the parser/builder tests with `python3 tests/chordpro.py`, the strum
-library mirror guard with `python3 tests/strum.py`, and the dev/prod
-environment guard with `python3 tests/env.py`.
+library mirror guard with `python3 tests/strum.py`, the dev/prod environment
+guard with `python3 tests/env.py`, and the plan/export/sections/editor unit
+suites with `python3 tests/plan.py`, `python3 tests/export.py`,
+`python3 tests/sections.py` and `python3 tests/editor.py`.
 
 ## Builds
 
@@ -664,6 +666,15 @@ unusual:
 ```sh
 python3 -m http.server 8777 &
 
+# parser/builder and JS/Python mirror unit tests
+python3 tests/chordpro.py
+python3 tests/env.py
+python3 tests/strum.py
+python3 tests/plan.py
+python3 tests/export.py
+python3 tests/sections.py
+python3 tests/editor.py
+
 # engine unit tests (voicings, parsing, SVG)
 python3 tests/run_html.py http://localhost:8777/tests/chordkit.html
 
@@ -678,6 +689,13 @@ python3 tests/import.py http://localhost:8777
 
 # tuner: presets, calibration, octave guards, overlay behaviour
 python3 tests/tuner.py  http://localhost:8777
+
+# grid strum lane: strokes, bar controls, metres and held chords
+python3 tests/grid.py http://localhost:8777
+
+# edit mode: plan grid rendering, strum/structure independence, selectors,
+# animated read-only cells and touch targets
+python3 tests/edit.py http://localhost:8777
 
 # full behavior suite: search/filter/sort/fav/notes/scroll/theme/chooser/…
 python3 tests/run_html.py http://localhost:8777/tests/e2e.html

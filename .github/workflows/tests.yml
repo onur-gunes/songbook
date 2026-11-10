@@ -71,10 +71,24 @@ jobs:
       - name: Export serialiser unit tests
         run: python3 tests/export.py
 
+      # Section-role enum/aliases and the chordpro.py <-> js/sections.js
+      # mirror (English and Polish labels alike).
+      - name: Section role unit tests
+        run: python3 tests/sections.py
+
+      # plan.grid rendering and edit-mode structure helpers (issue #109).
+      - name: Structure editor unit tests
+        run: python3 tests/editor.py
+
       # Grid strum lane: strokes per felt beat, beat count, bar/beat strum
       # controls, 4/4 / 3/4 / 6/8 / 2/4 and held chords (beats > 1).
       - name: Grid strum lane browser tests
         run: python3 tests/grid.py "$BASE_URL"
+
+      # Edit mode: structural rendering, strum/structure independence,
+      # selector labels, animated read-only cells and touch targets.
+      - name: Edit mode browser tests
+        run: python3 tests/edit.py "$BASE_URL"
 
       # --- browser suites ---
       - name: Chord engine unit tests

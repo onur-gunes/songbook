@@ -52,18 +52,26 @@
         return !!ChordKit.parse(name);
     }
 
-    /* Deep-copy a grid block array into the editor's working shape. */
+    /* Deep-copy a grid block array into the editor's working shape. Repeat
+     * signs and per-bar `strums` are structure the editor does not change, so
+     * they must survive every structural edit: dropping them here would make
+     * a chord change silently erase strum data (and the issue requires strum
+     * and structure edits to stay independent). */
     function copyBlocks(blocks) {
         return (blocks || []).map(function (block) {
-            return {
+            var out = {
                 label: String(block.label || ''),
                 role: SB.isSectionRole(block.role) ? block.role : 'other',
+                repeat: !!block.repeat,
                 bars: (block.bars || []).map(function (bar) {
-                    return { beats: (bar.beats || []).map(function (seg) {
+                    var copy = { beats: (bar.beats || []).map(function (seg) {
                         return { chord: String(seg.chord || ''), beats: seg.beats || 1 };
                     }) };
+                    if (Array.isArray(bar.strums)) copy.strums = bar.strums.slice();
+                    return copy;
                 })
             };
+            return out;
         });
     }
 
@@ -134,8 +142,11 @@
         plan.beatStrums = newBeat;
     }
 
-    /* Validate every bar of the working grid sums to the metre. Returns null
-     * when valid, else a user-facing message. */
+    /* Validate every bar of the working grid sums to the metre and every chord
+     * is playable. Returns null when valid, else a user-facing message. The
+     * chord check matters because the "+ beat"/"+ bar"/"+ section" actions
+     * start with an empty chord: without this a bar that summed correctly
+     * could be saved (and exported) with an empty chord the build rejects. */
     function validateWorking() {
         if (!working) return null;
         var bpb = beatsPerBar(working.time);
@@ -143,9 +154,15 @@
             var block = working.blocks[bi];
             for (var ri = 0; ri < block.bars.length; ri++) {
                 var total = 0;
-                (block.bars[ri].beats || []).forEach(function (seg) {
+                var beats = block.bars[ri].beats || [];
+                for (var ei = 0; ei < beats.length; ei++) {
+                    var seg = beats[ei];
+                    if (!validChord(seg.chord)) {
+                        return 'Chord ' + String(ei + 1) + ' of bar ' + String(ri + 1) +
+                            ' in "' + (block.label || 'section') + '" is empty or not playable.';
+                    }
                     total += seg.beats || 0;
-                });
+                }
                 if (total !== bpb) {
                     return 'Bar ' + String(ri + 1) + ' of "' +
                         (block.label || 'section') + '" sums to ' + String(total) +
@@ -430,14 +447,7 @@
             var derived = SB.gridBlocksFor(SB.state.currentSong, {
                 grid: null, time: plan.time || SB.state.currentSong.time || SB.DEFAULT_TIME
             });
-            base = derived.map(function (b) {
-                return { label: b.label || '', role: b.role || 'other',
-                    bars: (b.bars || []).map(function (bar) {
-                        return { beats: (bar.beats || []).map(function (seg) {
-                            return { chord: seg.chord, beats: seg.beats };
-                        }) };
-                    }) };
-            });
+            base = copyBlocks(derived);
         }
         var time = plan.time || SB.state.currentSong.time || SB.DEFAULT_TIME;
         working = {

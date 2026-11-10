@@ -325,7 +325,7 @@
      * (plan.grid, Step 6 edit mode), that override wins over the songbook's
      * authored grid: the user's structure is what the chart shows. Each plan
      * block renders as its own section, keyed by its own label/role, so the
-     * editor's add/remove/split/merge edits appear verbatim.
+     * editor's add/remove edits appear verbatim.
      */
     function gridBlocksFor(song, plan) {
         var beatsPerBar = SB.metronomeBeatsPerBar(song.time);
@@ -434,9 +434,16 @@
         }
         if (!song) return roles;
 
-        gridBlocksFor(song).forEach(add);
-        var authored = (plan && plan.grid) || song.grid || [];
-        authored.forEach(add);
+        /* The effective structure is plan.grid when an edit plan carries one,
+         * so a removed/replaced section must not leave a stale selector
+         * behind. Only fall back to the song's authored grid when there is no
+         * structural override (it can hold an instrumental block the sheet
+         * does not cover). */
+        var planGrid = (plan && plan.grid) || null;
+        gridBlocksFor(song, plan).forEach(add);
+        if (!planGrid || !planGrid.length) {
+            (song.grid || []).forEach(add);
+        }
         return roles;
     };
 
@@ -1070,18 +1077,27 @@
             var beat = SB.el('span', 'grid-beat');
             beat.style.left = b.x + 'px';
             beat.style.width = b.w + 'px';
-            beat.setAttribute('role', 'button');
-            beat.setAttribute('tabindex', '0');
+            /* The static grid is editable; the animated view is read-only, so
+             * it must not advertise an editor it will not open (no button
+             * role, no tab stop, no "press Enter" hint). */
+            if (!ctx.animate) {
+                beat.setAttribute('role', 'button');
+                beat.setAttribute('tabindex', '0');
+            }
             beat.setAttribute('data-beat-local', String(b.index));
             beat.setAttribute('data-block', String(spec.blockIdx));
             beat.setAttribute('data-bar', String(spec.barIdx));
             beat.setAttribute('data-strum-source', resolved.source || 'none');
             if (resolved.id) beat.setAttribute('data-strum-id', resolved.id);
             beat.setAttribute('data-subdiv', String(subdiv));
-            beat.setAttribute('aria-label', 'Beat ' + String(b.index + 1) + ' — ' + slots +
-                (resolved.source && resolved.source !== 'none'
-                    ? ' — overridden, press Enter or Space to edit'
-                    : ' — press Enter or Space to edit its strum'));
+            if (!ctx.animate) {
+                beat.setAttribute('aria-label', 'Beat ' + String(b.index + 1) + ' — ' + slots +
+                    (resolved.source && resolved.source !== 'none'
+                        ? ' — overridden, press Enter or Space to edit'
+                        : ' — press Enter or Space to edit its strum'));
+            } else {
+                beat.setAttribute('aria-label', 'Beat ' + String(b.index + 1) + ' — ' + slots);
+            }
 
             // The felt-beat strokes (D U / ↓ ↑ / ·), one cell per subdivision slot.
             var strokes = SB.el('span', 'grid-beat-strokes');
@@ -1252,8 +1268,10 @@
             beatW: Math.max(BEAT_MIN, em * 2.5),
             labelH: Math.ceil(em * 1.35),
             // The beat row holds the felt-beat strokes on their own, so it
-            // only needs room for one line of glyphs and their padding.
-            beatH: Math.ceil(em * 2.2),
+            // only needs room for one line of glyphs and their padding. Keep
+            // at least 44px so the beat cell is a comfortable touch target
+            // (it opens the beat strum editor).
+            beatH: Math.max(44, Math.ceil(em * 2.2)),
             gap: Math.max(10, em * 0.6),
             diagram: diagramBox(SB.state.chordSize),
             animate: animate
@@ -1269,11 +1287,14 @@
         var frag = document.createDocumentFragment();
         var lyricSections = [];
         var measurer = makeMeasurer(wrap);
-        var blocks = gridBlocksFor(song, plan);
-        // The per-song edit plan supplies bar/beat strum overrides; fall back
-        // to an empty plan when there is no active songbook/song.
+        // The per-song edit plan supplies the structural overrides and the
+        // bar/beat strum overrides. It must be loaded *before* the blocks are
+        // built: plan.grid is the authoritative structure in Edit mode, and
+        // reading it after `gridBlocksFor` would silently render the songbook
+        // grid instead of the user's edits.
         var sbId = SB.state.active && SB.state.active.id;
         var plan = sbId ? SB.loadPlan(sbId, song.id) : SB.emptyPlan();
+        var blocks = gridBlocksFor(song, plan);
 
         /* The animated view swaps whole systems into one stage. Build every
          * system now so its width, lyric anchoring and beat range are final;
