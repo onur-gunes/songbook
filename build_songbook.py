@@ -284,11 +284,22 @@ def validate_songbook(book):
             continue
         sid = s.get('id') or '?'
         val = s.get('strum')
-        if chordpro.parse_strum(val) != val:
+        # A song may use one of its own custom patterns as the default. Build
+        # the per-song id -> metre map here so the `strum` check and the
+        # strumPatterns validation below agree on what a real id is.
+        custom_metre = {}
+        raw_patterns = s.get('strumPatterns')
+        if isinstance(raw_patterns, list):
+            for p in raw_patterns:
+                if isinstance(p, dict) and isinstance(p.get('id'), str):
+                    custom_metre[p['id']] = p.get('time')
+        if val not in _strum_metre and val not in custom_metre:
             invalid_strums.append('%s (%r: unknown pattern)' % (sid, val))
-        elif _strum_metre.get(val) != s.get('time'):
-            invalid_strums.append('%s (%r: %s pattern, song time %r)'
-                                  % (sid, val, _strum_metre.get(val), s.get('time')))
+        else:
+            pattern_time = _strum_metre.get(val, custom_metre.get(val))
+            if pattern_time != s.get('time'):
+                invalid_strums.append('%s (%r: %s pattern, song time %r)'
+                                      % (sid, val, pattern_time, s.get('time')))
 
     # strumPatterns: per-song custom pattern definitions. A custom id must be
     # unique, must not shadow a built-in pattern, and its time/subdivision/slots

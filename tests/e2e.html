@@ -128,7 +128,7 @@ async function main() {
     ok('song view shown', $('songView').hidden === false && $('listView').hidden === true);
     ok('song title', $('songTitle').textContent === 'Harbour Lights', $('songTitle').textContent);
     ok('song number', $('songNumber').textContent.startsWith('#'), $('songNumber').textContent);
-    ok('sheet has lines', doc().querySelectorAll('#sheet .line').length > 10, doc().querySelectorAll('#sheet .line').length);
+    ok('sheet has lines', doc().querySelectorAll('#sheet .line').length > 3, doc().querySelectorAll('#sheet .line').length);
     ok('chord strip has items', doc().querySelectorAll('#chordStrip .chord-item').length > 0, doc().querySelectorAll('#chordStrip .chord-item').length);
     const firstChordSrc = doc().querySelector('#chordStrip img') ? doc().querySelector('#chordStrip img').getAttribute('src') : null;
     ok('first chord img src', firstChordSrc === null || firstChordSrc.indexOf('data:image') === 0, firstChordSrc && firstChordSrc.slice(0, 40));
@@ -278,6 +278,11 @@ async function main() {
     ok('scroll resets', scrollLabel() === 'Start auto-scroll', scrollLabel());
 
     // 12b. manual adjust keeps auto-scroll running, re-anchored to the new position
+    // The fixture's Harbour Lights is short; add scroll range so the test can
+    // actually move the page (the retired bundled version was long enough).
+    const sheetPad = $('sheet').style.paddingBottom;
+    $('sheet').style.paddingBottom = '1600px';
+    win().scrollTo(0, 0); await wait(50);
     $('scrollBtn').click(); await wait(200);
     ok('playing before adjust', scrollLabel() === 'Pause auto-scroll', scrollLabel());
     const st = win().songbookTest.scrollState;
@@ -309,6 +314,7 @@ async function main() {
     $('scrollBtn').click(); await wait(50);
     ok('resume after adjust', scrollLabel() === 'Pause auto-scroll', scrollLabel());
     $('scrollReset').click(); await wait(50);
+    $('sheet').style.paddingBottom = sheetPad;
 
     // 12c. speed stepper: fine-grained control with clamps
     const s0 = parseFloat($('speedValue').textContent);
@@ -515,14 +521,13 @@ async function main() {
     doc().querySelector('.chord-mode-btn[data-chord-mode="inline"]').click(); await wait(30);
     win().localStorage.removeItem('songbook:chordMode');
 
-    // 12k. above mode: consecutive chords (instrumental bridge) are space-separated
+    // 12k. above mode: consecutive chords are space-separated
     win().location.hash = '#/krakow-ukulele/lost-on-you';
     await wait(300);
     doc().querySelector('.chord-mode-btn[data-chord-mode="above"]').click(); await wait(30);
     const bridgeUnit = Array.from(doc().querySelectorAll('.sheet .ln-unit'))
-        .find(l => Array.from(l.querySelectorAll('.ln-chords .seg-chord'))
-            .map(c => c.textContent).join(',') === 'Am,D,Em,C');
-    ok('lost-on-you bridge chords present', !!bridgeUnit, '');
+        .find(l => l.querySelectorAll('.ln-chords .seg-chord').length >= 3);
+    ok('consecutive-chord line present', !!bridgeUnit, '');
     if (bridgeUnit) {
         const chordEls = Array.from(bridgeUnit.querySelectorAll('.ln-chords .seg-chord'));
         const px = chordEls.map(c => Math.round(parseFloat(c.style.left)));
@@ -534,8 +539,8 @@ async function main() {
             prevRight = left + c.getBoundingClientRect().width;
             return ok;
         });
-        ok('bridge chords align over the lyric run',
-            chordEls.map(c => c.textContent).join(',') === 'Am,D,Em,C' &&
+        ok('consecutive chords align over the lyric run',
+            chordEls.map(c => c.textContent).join(',') === 'Am,D,Em' &&
             px.every((v, i) => i === 0 || v > px[i - 1]) && noOverlap &&
             exp.every((v, i) => px[i] >= v - 1), px.join(' ') + ' vs ' + exp.join(' '));
     }
@@ -694,6 +699,7 @@ async function main() {
     ok('riff never wraps', preLines.every(l => win().getComputedStyle(l).whiteSpace === 'pre'), win().getComputedStyle(preLines[0]).whiteSpace);
     ok('riff scrolls horizontally', preLines.every(l => win().getComputedStyle(l).overflowX === 'auto'), win().getComputedStyle(preLines[0]).overflowX);
     ok('transpose did not throw', errors.length === 0, errors.join('; '));
+    $('trDown').click(); await wait(50);
 
     // 19a. chords inside preformatted riff/intro blocks stay chords
     win().location.hash = '#/krakow-ukulele/just-like-heaven';
@@ -1899,7 +1905,7 @@ async function main() {
     const gFirstPhraseRow = doc().querySelector('.sheet.chords-grid .grid-lyric');
     ok('grid lyric row holds the whole sheet line',
         !!gFirstBar && !!gFirstPhraseRow &&
-        gFirstPhraseRow.textContent === 'When the night has come',
+        gFirstPhraseRow.textContent === 'Stand by me darling',
         gFirstPhraseRow && gFirstPhraseRow.textContent);
 
     // The cursor is a pure function of the metronome's beat position: one bar
@@ -1927,17 +1933,18 @@ async function main() {
     ok('grid diagrams use the chosen voicing', gVoicingOk, gVoicingDetail);
 
     // A stored per-chord pick must reach the chart, not just the strip.
-    const aShapes = win().songbookTest.ChordKit.voicings('A', gInstr);
+    // G is in this fixture's grid and has more than one voicing.
+    const aShapes = win().songbookTest.ChordKit.voicings('G', gInstr);
     if (aShapes.length > 1) {
-        win().localStorage.setItem('songbook:pick:' + gInstr + ':A', aShapes[1].join(','));
+        win().localStorage.setItem('songbook:pick:' + gInstr + ':G', aShapes[1].join(','));
         win().songbookTest.setChordMode('inline');
         await wait(80);
         win().songbookTest.setChordMode('grid');
         await wait(120);
-        const aImg = doc().querySelector('.sheet.chords-grid .grid-change[data-chord="A"] img');
+        const aImg = doc().querySelector('.sheet.chords-grid .grid-change[data-chord="G"] img');
         ok('stored voicing pick reaches the grid',
             !!aImg && aImg.getAttribute('src') === win().songbookTest.ChordKit.dataUri(gInstr, aShapes[1]));
-        win().localStorage.removeItem('songbook:pick:' + gInstr + ':A');
+        win().localStorage.removeItem('songbook:pick:' + gInstr + ':G');
         win().songbookTest.setChordMode('inline');
         await wait(60);
         win().songbookTest.setChordMode('grid');
@@ -2165,8 +2172,9 @@ async function main() {
          thChanges[0].getBoundingClientRect().left).toFixed(1));
 
     // No-grid fallback: the mode stays set, the button is disabled, and the
-    // normal sheet renders instead of an empty view.
-    win().location.hash = '#/krakow-ukulele/all-apologies';
+    // normal sheet renders instead of an empty view. A song needs no `time`
+    // to have no chart; metered songs get one derived from their sheet.
+    win().location.hash = '#/test-book/no-time-song';
     await wait(350);
     ok('mode stays set on a song with no grid', win().songbookTest.getChordMode() === 'grid',
         win().songbookTest.getChordMode());
@@ -2239,7 +2247,9 @@ async function main() {
     // done
     const fails = log.filter(l => l.startsWith('FAIL'));
     log.push('ERRORS: ' + (errors.join('; ') || 'none'));
-    document.title = 'DONE ' + (log.length - fails.length - 1) + '/' + (log.length - 1);
+    document.title = fails.length
+        ? 'FAILS:' + fails.length + ' ' + (log.length - fails.length - 1) + '/' + (log.length - 1)
+        : 'DONE ' + (log.length - fails.length - 1) + '/' + (log.length - 1);
     emit();
     window.__done = true;
 }

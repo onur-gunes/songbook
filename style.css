@@ -2093,6 +2093,14 @@ body.pattern-open { overflow: hidden; }
     line-height: 1.2;
     transition: opacity 120ms ease, background 120ms ease, border-color 120ms ease;
 }
+/* The visible glyph stays a quiet corner control, but the tappable area is
+   grown to >=44px without enlarging the paint: the pseudo-element belongs to
+   the button, so a touch outside the glyph still activates it. */
+.sheet.chords-grid .grid-bar-strum::after {
+    content: '';
+    position: absolute;
+    inset: -15px 0 -15px -22px;
+}
 .sheet.chords-grid .grid-bar-strum:hover,
 .sheet.chords-grid .grid-bar-strum:focus-visible {
     opacity: 1;
