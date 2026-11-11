@@ -26,6 +26,8 @@
     --easy: #2e7d4f;
     --medium: #9a6409;
     --hard: #ad3434;
+    --neck-tone: #237c6e;
+    --neck-scale: #4a9d8e;
     --topbar-h: 56px;
     --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
@@ -44,6 +46,8 @@
     --easy: #67c08b;
     --medium: #d6a24a;
     --hard: #e07b7b;
+    --neck-tone: #57cbb5;
+    --neck-scale: #3c8f82;
 }
 
 * { box-sizing: border-box; }
@@ -3057,8 +3061,40 @@ body.tuner-open { overflow: hidden; }
 }
 
 .explorer-head { margin-bottom: 22px; }
+.explorer-head-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+.explorer-head-row > div { min-width: 0; }
 .explorer-title { margin: 0 0 6px; font-size: 1.9rem; line-height: 1.15; }
 .explorer-lead { margin: 0; max-width: 58ch; color: var(--muted); font-size: 0.92rem; }
+
+.explorer-tabs {
+    display: inline-flex;
+    flex: none;
+    gap: 3px;
+    padding: 3px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+}
+.explorer-tab {
+    padding: 7px 15px;
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.explorer-tab:hover { color: var(--text); background: var(--surface-2); }
+.explorer-tab[aria-current="page"] {
+    background: var(--accent);
+    color: #fff;
+}
 
 .explorer-layout {
     display: grid;
@@ -3360,6 +3396,280 @@ body.tuner-open { overflow: hidden; }
     text-align: center;
 }
 
+/* ===== neck explorer ===== */
+
+.neck-pane { max-width: 880px; }
+
+.neck-toolbar {
+    display: grid;
+    grid-template-columns: 108px 178px minmax(180px, 1fr) auto;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 16px;
+}
+.neck-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+.neck-field > span {
+    color: var(--muted);
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+.neck-select {
+    width: 100%;
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+}
+.neck-select:focus-visible { border-color: var(--accent); }
+.neck-field-grow { min-width: 0; }
+
+.neck-pill {
+    height: 38px;
+    padding: 0 13px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.neck-pill:hover { color: var(--text); border-color: var(--muted); }
+.neck-pill[aria-pressed="true"] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.neck-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+}
+.neck-chord-id { min-width: 132px; }
+.neck-chord-name {
+    color: var(--accent);
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+}
+.neck-chord-notes {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+.neck-shape-nav { display: flex; align-items: center; gap: 6px; }
+.neck-step {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.neck-step:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.neck-step:disabled { opacity: 0.4; cursor: default; }
+.neck-shape-count {
+    min-width: 62px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+.neck-frets-label {
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+.neck-capo { margin-left: auto; width: 120px; }
+
+.neck-options {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    margin: 12px 0 16px;
+}
+.neck-scale-fields {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+.neck-scale-fields[hidden] { display: none; }
+.neck-scale-fields .neck-field { width: 136px; }
+
+.neck-card {
+    padding: 12px 10px 9px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+    overflow: hidden;
+}
+.neck-diagram { width: 100%; }
+.neck-diagram svg { display: block; width: 100%; height: auto; }
+
+.neck-diagram .neck-string { stroke: var(--muted); stroke-width: 1.1; opacity: 0.5; }
+.neck-diagram .neck-fret { stroke: var(--line); stroke-width: 1.2; }
+.neck-diagram .neck-nut {
+    stroke: var(--text);
+    stroke-width: 5;
+    stroke-linecap: round;
+}
+.neck-diagram .neck-fret-num,
+.neck-diagram .neck-string-label {
+    fill: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    font-variant-numeric: tabular-nums;
+}
+.neck-diagram .neck-string-label { font-size: 10.5px; font-weight: 700; }
+.neck-diagram .neck-inlay { fill: var(--line); }
+.neck-diagram .neck-note-scale { fill: var(--neck-scale); opacity: 0.95; }
+.neck-diagram .neck-note-tone {
+    fill: var(--surface);
+    stroke: var(--neck-tone);
+    stroke-width: 1.8;
+}
+.neck-diagram .neck-note-shape {
+    fill: var(--accent);
+    stroke: var(--surface);
+    stroke-width: 1.5;
+}
+.neck-diagram .neck-note-text {
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+.neck-diagram .neck-note-text-tone {
+    fill: var(--neck-tone);
+    font-size: 9px;
+    font-weight: 700;
+}
+.neck-diagram .neck-note-text-shape {
+    fill: #fff;
+    font-size: 9.5px;
+    font-weight: 700;
+}
+.neck-diagram .neck-note-text-oct { font-size: 7.4px; }
+.neck-diagram .neck-badge {
+    fill: var(--accent);
+    stroke: var(--surface);
+    stroke-width: 1.2;
+}
+.neck-diagram .neck-badge-text {
+    fill: #fff;
+    font-size: 5.5px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+.neck-diagram .neck-muted {
+    fill: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.neck-legend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin: 10px 4px 2px;
+    color: var(--muted);
+    font-size: 0.76rem;
+}
+.neck-key { display: inline-flex; align-items: center; gap: 6px; }
+.neck-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.neck-swatch-shape { background: var(--accent); }
+.neck-swatch-tone {
+    border: 2px solid var(--neck-tone);
+    background: var(--surface);
+}
+.neck-swatch-scale { background: var(--neck-scale); }
+.neck-scale-summary { margin-left: auto; }
+
+.neck-notes { margin-top: 22px; }
+.neck-notes-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.neck-string-notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+    gap: 10px;
+}
+.neck-string-note {
+    padding: 10px 11px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+}
+.neck-string-note.root {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+.neck-string-note-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.neck-string-note-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+.neck-string-degree {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+}
+.neck-string-role { margin-top: 5px; font-size: 0.8rem; }
+.neck-string-pos { margin-top: 2px; color: var(--muted); font-size: 0.72rem; }
+
 @keyframes explorer-rise {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
@@ -3376,6 +3686,9 @@ body.tuner-open { overflow: hidden; }
     }
     .explorer-circle { max-width: 380px; }
     .explorer-find { margin-top: 0; }
+
+    .neck-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .neck-field-grow { grid-column: 1 / -1; }
 }
 
 /* ===== responsive ===== */
@@ -3393,10 +3706,24 @@ body.tuner-open { overflow: hidden; }
 
     .explorer-side { grid-template-columns: 1fr; gap: 20px; }
     .explorer-find { padding-top: 16px; border-top: 1px solid var(--line); }
+    .explorer-head-row { gap: 12px; }
+    .explorer-tabs { width: 100%; justify-content: center; }
     .explorer-title { font-size: 1.6rem; }
     .explorer-chord-name { font-size: 1.7rem; }
     .explorer-shapes { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 9px; }
     .explorer-shape { padding: 10px 5px 7px; }
+
+    .neck-toolbar { grid-template-columns: 1fr 1fr; gap: 9px; }
+    .neck-field-grow { grid-column: 1 / -1; }
+    .neck-summary { gap: 10px 12px; padding: 12px 13px; }
+    .neck-chord-id { flex: 1 1 100%; }
+    .neck-capo { margin-left: 0; width: auto; }
+    .neck-options { gap: 7px; }
+    .neck-scale-fields { width: 100%; }
+    .neck-scale-fields .neck-field { flex: 1; width: auto; }
+    .neck-string-notes { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .neck-string-note { padding: 9px 10px; }
+    .neck-scale-summary { flex-basis: 100%; margin-left: 0; }
 
     .list-rail { gap: 8px 14px; padding: 8px 10px; }
 
@@ -4026,15 +4353,25 @@ button.structure-close,
         </nav>
 
         <header class="explorer-head">
-            <h1 id="explorerTitle" class="explorer-title">Chord explorer</h1>
-            <p class="explorer-lead">
-                Every way to play any chord on
-                <strong id="explorerInstrumentName">ukulele</strong> — pick a root
-                on the circle of fifths, then a chord type.
-            </p>
+            <div class="explorer-head-row">
+                <div>
+                    <h1 id="explorerTitle" class="explorer-title">Chord explorer</h1>
+                    <p class="explorer-lead">
+                        Every way to play any chord on
+                        <strong id="explorerInstrumentName">ukulele</strong> — pick a root
+                        on the circle of fifths, then a chord type. Or switch to
+                        <strong>Neck</strong> to see the shape, chord tones and a scale
+                        across the whole fretboard.
+                    </p>
+                </div>
+                <nav class="explorer-tabs" aria-label="Chord explorer mode">
+                    <a id="explorerTabShapes" class="explorer-tab" href="#/chords" aria-current="page">Shapes</a>
+                    <a id="explorerTabNeck" class="explorer-tab" href="#/chords/neck">Neck</a>
+                </nav>
+            </div>
         </header>
 
-        <div class="explorer-layout">
+        <div id="explorerShapesPane" class="explorer-layout">
 
             <aside class="explorer-side" aria-label="Root and reverse lookup">
                 <div id="explorerCircle" class="explorer-circle"></div>
@@ -4065,6 +4402,75 @@ button.structure-close,
                 </div>
                 <div id="explorerShapes" class="explorer-shapes"></div>
             </div>
+        </div>
+
+        <div id="explorerNeckPane" class="neck-pane" hidden>
+            <div class="neck-toolbar" aria-label="Neck chord controls">
+                <label class="neck-field">
+                    <span>Root</span>
+                    <select id="neckRoot" class="neck-select"></select>
+                </label>
+                <label class="neck-field">
+                    <span>Chord</span>
+                    <select id="neckQuality" class="neck-select"></select>
+                </label>
+                <label class="neck-field neck-field-grow">
+                    <span>Voicing</span>
+                    <select id="neckVoicing" class="neck-select"></select>
+                </label>
+                <button id="neckSpell" class="neck-pill" type="button" hidden></button>
+            </div>
+
+            <div class="neck-summary">
+                <div class="neck-chord-id">
+                    <div id="neckChordName" class="neck-chord-name">C</div>
+                    <div id="neckChordNotes" class="neck-chord-notes"></div>
+                </div>
+                <div class="neck-shape-nav" role="group" aria-label="Chord shape">
+                    <button id="neckPrev" class="neck-step" type="button" aria-label="Previous shape">←</button>
+                    <span id="neckShapeCount" class="neck-shape-count" aria-live="polite">—</span>
+                    <button id="neckNext" class="neck-step" type="button" aria-label="Next shape">→</button>
+                </div>
+                <span id="neckShapeFrets" class="neck-frets-label"></span>
+                <label class="neck-field neck-capo">
+                    <span>Capo</span>
+                    <select id="neckCapo" class="neck-select"></select>
+                </label>
+            </div>
+
+            <div class="neck-options" role="group" aria-label="Neck display">
+                <button id="neckAllTones" class="neck-pill" type="button" aria-pressed="true">All chord tones</button>
+                <button id="neckScaleToggle" class="neck-pill" type="button" aria-pressed="true">Scale</button>
+                <span id="neckScaleFields" class="neck-scale-fields">
+                    <label class="neck-field">
+                        <span>Scale key</span>
+                        <select id="neckScaleRoot" class="neck-select"></select>
+                    </label>
+                    <label class="neck-field">
+                        <span>Scale</span>
+                        <select id="neckScaleType" class="neck-select"></select>
+                    </label>
+                </span>
+                <button id="neckOctaves" class="neck-pill" type="button" aria-pressed="false">Octaves</button>
+            </div>
+
+            <section class="neck-card">
+                <div id="neckDiagram" class="neck-diagram" role="img"></div>
+                <p class="neck-legend">
+                    <span class="neck-key"><i class="neck-swatch neck-swatch-shape"></i>Shape</span>
+                    <span class="neck-key"><i class="neck-swatch neck-swatch-tone"></i>Chord tones</span>
+                    <span class="neck-key"><i class="neck-swatch neck-swatch-scale"></i>Scale</span>
+                    <span id="neckScaleSummary" class="neck-scale-summary"></span>
+                </p>
+            </section>
+
+            <section class="neck-notes" aria-labelledby="neckNotesTitle">
+                <div class="neck-notes-head">
+                    <h2 id="neckNotesTitle" class="explorer-shapes-title">Shape notes, bass to top</h2>
+                    <span id="neckNotesCount" class="explorer-shapes-count"></span>
+                </div>
+                <div id="neckShapeNotes" class="neck-string-notes"></div>
+            </section>
         </div>
     </section>
 
@@ -4305,6 +4711,38 @@ button.structure-close,
     ];
 
     var SUFFIX_ALIASES = { '+': 'aug', 'aug': 'aug', 'm7b5': 'm7\u266d5', 'm7-5': 'm7\u266d5', 'min': 'm', 'mi': 'm' };
+
+    /* Scales are listed as semitone intervals from the root. The degree
+     * labels use the same spelling style as chord tones (\u266d3, \u266d7), so
+     * the neck and the chord explorer can label notes consistently. */
+    var SCALES = [
+        { id: 'major', label: 'Major', intervals: [0, 2, 4, 5, 7, 9, 11], degrees: ['1', '2', '3', '4', '5', '6', '7'] },
+        { id: 'minor', label: 'Natural minor', intervals: [0, 2, 3, 5, 7, 8, 10], degrees: ['1', '2', '\u266d3', '4', '5', '\u266d6', '\u266d7'] },
+        { id: 'majorPent', label: 'Major pentatonic', intervals: [0, 2, 4, 7, 9], degrees: ['1', '2', '3', '5', '6'] },
+        { id: 'minorPent', label: 'Minor pentatonic', intervals: [0, 3, 5, 7, 10], degrees: ['1', '\u266d3', '4', '5', '\u266d7'] },
+        { id: 'blues', label: 'Blues', intervals: [0, 3, 5, 6, 7, 10], degrees: ['1', '\u266d3', '4', '\u266d5', '5', '\u266d7'] },
+        { id: 'dorian', label: 'Dorian', intervals: [0, 2, 3, 5, 7, 9, 10], degrees: ['1', '2', '\u266d3', '4', '5', '6', '\u266d7'] },
+        { id: 'mixolydian', label: 'Mixolydian', intervals: [0, 2, 4, 5, 7, 9, 10], degrees: ['1', '2', '3', '4', '5', '6', '\u266d7'] }
+    ];
+
+    function scaleOf(id) {
+        for (var i = 0; i < SCALES.length; i++) if (SCALES[i].id === id) return SCALES[i];
+        return SCALES[0];
+    }
+
+    /* Spell a scale from its root pitch class, e.g.
+     * scaleNotes(9, 'minorPent', 'sharp') -> A, C, D, E, G. */
+    function scaleNotes(rootPc, scaleId, spelling) {
+        var scale = scaleOf(scaleId);
+        return scale.intervals.map(function (semi, i) {
+            var pc = ((rootPc + semi) % 12 + 12) % 12;
+            return {
+                name: rootName(pc, spelling),
+                degree: scale.degrees[i],
+                pc: pc
+            };
+        });
+    }
 
     function typeOf(id) {
         for (var i = 0; i < TYPES.length; i++) if (TYPES[i].id === id) return TYPES[i];
@@ -4916,9 +5354,12 @@ button.structure-close,
     root.ChordKit = {
         INSTRUMENTS: INSTRUMENTS,
         TYPES: TYPES,
+        SCALES: SCALES,
         instrumentOf: instrumentOf,
         typeOf: typeOf,
         typeForSuffix: typeForSuffix,
+        scaleOf: scaleOf,
+        scaleNotes: scaleNotes,
         parse: parse,
         rootPcOf: rootPcOf,
         rootName: rootName,
@@ -4934,7 +5375,7 @@ button.structure-close,
         diagramSVG: diagramSVG,
         fretLabelsSVG: fretLabelsSVG,
         dataUri: dataUri,
-        version: '1.1.0'
+        version: '1.2.0'
     };
 })(typeof window !== 'undefined' ? window : this);
 
@@ -10026,6 +10467,7 @@ button.structure-close,
         renderShapes();
         renderFindResult();
         renderInstrument();
+        if (SB.renderNeck && SB.neckVisible && SB.neckVisible()) SB.renderNeck();
     }
 
     /* ---------------- wiring ---------------- */
@@ -10080,9 +10522,34 @@ button.structure-close,
         return !!view && !view.hidden;
     };
 
+    SB.neckVisible = function () {
+        var pane = document.getElementById('explorerNeckPane');
+        return !!pane && !pane.hidden;
+    };
+
+    /* The neck's compact root/quality selects live in neck.js, but they edit
+     * the explorer's one chord selection. Going through this function keeps
+     * the shapes tab, circle of fifths and neck in lockstep. */
+    SB.applyExplorerSelection = function (selection) {
+        if (!selection) return;
+        if (selection.spelling === 'sharp' || selection.spelling === 'flat') {
+            state.spelling = selection.spelling;
+        }
+        if (selection.rootPc != null) {
+            state.rootPc = ((Number(selection.rootPc) % 12) + 12) % 12;
+            state.rootName = selection.rootName ||
+                ChordKit.rootName(state.rootPc, state.spelling);
+        }
+        if (selection.quality && ChordKit.typeOf(selection.quality).id === selection.quality) {
+            state.quality = selection.quality;
+        }
+        renderAll();
+    };
+
     SB.explorerState = state;
 
-    SB.openExplorer = function () {
+    SB.openExplorer = function (mode) {
+        mode = mode === 'neck' ? 'neck' : 'shapes';
         if (SB.closeVoicingChooser) SB.closeVoicingChooser();
         if (SB.resetScroll) SB.resetScroll(true);
         if (SB.stopMetronome) SB.stopMetronome();
@@ -10090,6 +10557,17 @@ button.structure-close,
         document.getElementById('listView').hidden = true;
         document.getElementById('songView').hidden = true;
         document.getElementById('explorerView').hidden = false;
+        document.getElementById('explorerShapesPane').hidden = mode === 'neck';
+        document.getElementById('explorerNeckPane').hidden = mode !== 'neck';
+        var tabShapes = document.getElementById('explorerTabShapes');
+        var tabNeck = document.getElementById('explorerTabNeck');
+        if (mode === 'neck') {
+            tabNeck.setAttribute('aria-current', 'page');
+            tabShapes.removeAttribute('aria-current');
+        } else {
+            tabShapes.setAttribute('aria-current', 'page');
+            tabNeck.removeAttribute('aria-current');
+        }
         var link = document.getElementById('explorerLink');
         if (link) link.setAttribute('aria-current', 'page');
         renderAll();
@@ -10099,6 +10577,721 @@ button.structure-close,
     bindOnce();
 
 })(window.SB = window.SB || {});
+</script>
+<script>
+/* Songbook — neck explorer
+ * full fretboard: selected chord shape, all chord tones and a scale layer
+ *
+ * Part of the window.SB namespace. Loaded as a classic script in the order
+ * set by index.html; see js/core.js for the shared state. The neck edits the
+ * same root/quality/spelling as the shapes tab (js/explorer.js) and reads its
+ * voicings from the shared ChordKit engine in chords.js.
+ */
+(function (SB) {
+    'use strict';
+
+    var PREF_KEY = SB.NS + ':neck';
+    var NECK_FRETS = 12;
+    var INLAY_FRETS = { 3: 1, 5: 1, 7: 1, 9: 1, 12: 2 };
+
+    var MINOR_IDS = { m: 1, m7: 1, m6: 1, m9: 1, 'm7b5': 1 };
+
+    var QUALITY_LABELS = {
+        maj: 'Major',
+        m: 'Minor',
+        '7': 'Dominant 7th',
+        maj7: 'Major 7th',
+        m7: 'Minor 7th',
+        sus4: 'Sus4',
+        sus2: 'Sus2',
+        '7sus4': '7sus4',
+        '6': '6th',
+        m6: 'Minor 6th',
+        '9': '9th',
+        m9: 'Minor 9th',
+        maj9: 'Major 9th',
+        add9: 'Add 9',
+        dim: 'Diminished',
+        dim7: 'Diminished 7th',
+        aug: 'Augmented',
+        m7b5: 'Minor 7\u266d5'
+    };
+
+    var DEGREE_LABELS = {
+        root: 'Root',
+        '2': 'Major 2nd',
+        '\u266d2': 'Minor 2nd',
+        '3': 'Major 3rd',
+        '\u266d3': 'Minor 3rd',
+        '4': 'Perfect 4th',
+        '\u266d5': 'Diminished 5th',
+        '5': 'Perfect 5th',
+        '\u266f5': 'Augmented 5th',
+        '6': 'Major 6th',
+        '\u266d6': 'Minor 6th',
+        '\u266d7': 'Minor 7th',
+        '7': 'Major 7th',
+        '9': 'Major 9th',
+        '\u266d\u266d7': 'Diminished 7th'
+    };
+
+    var prefs = readPrefs();
+
+    var state = {
+        shapeIndex: 0,
+        scaleRootPc: null,
+        scaleId: prefs.scaleId || null,
+        scaleTouched: !!prefs.scaleId
+    };
+
+    /* ---------------- preferences ---------------- */
+
+    function readPrefs() {
+        var raw = SB.lsGet(PREF_KEY, {});
+        if (!raw || typeof raw !== 'object') raw = {};
+        var capo = Number(raw.capo);
+        return {
+            allTones: raw.allTones !== false,
+            scaleOn: raw.scaleOn !== false,
+            octaves: raw.octaves === true,
+            capo: capo >= 0 && capo <= 7 ? Math.floor(capo) : 0,
+            scaleId: typeof raw.scaleId === 'string' ? raw.scaleId : null
+        };
+    }
+
+    function savePrefs() {
+        SB.lsSet(PREF_KEY, {
+            allTones: prefs.allTones,
+            scaleOn: prefs.scaleOn,
+            octaves: prefs.octaves,
+            capo: prefs.capo,
+            scaleId: state.scaleId
+        });
+    }
+
+    /* ---------------- shared explorer state ---------------- */
+
+    function exp() { return SB.explorerState; }
+    function inst() { return ChordKit.instrumentOf(SB.state.instrument); }
+    function type() { return ChordKit.typeOf(exp().quality); }
+    function mod12(n) { return ((n % 12) + 12) % 12; }
+    function isMinorQuality() { return !!MINOR_IDS[exp().quality]; }
+
+    function chordName() { return exp().rootName + type().suffix; }
+    function shapeChordName() {
+        return ChordKit.rootName(mod12(exp().rootPc - prefs.capo), exp().spelling) +
+            type().suffix;
+    }
+
+    function defaultScaleId() {
+        return isMinorQuality() ? 'minorPent' : 'major';
+    }
+
+    function scaleId() {
+        return state.scaleId || defaultScaleId();
+    }
+
+    function scaleRootPc() {
+        return state.scaleRootPc == null ? exp().rootPc : state.scaleRootPc;
+    }
+
+    function scaleRootName() {
+        return ChordKit.rootName(scaleRootPc(), exp().spelling);
+    }
+
+    function scaleInfo() {
+        var scale = ChordKit.scaleOf(scaleId());
+        return {
+            id: scale.id,
+            label: scale.label,
+            summary: scaleRootName() + ' ' + scale.label.toLowerCase()
+        };
+    }
+
+    /* ---------------- chord data ---------------- */
+
+    function shapes() {
+        return curateShapes(ChordKit.voicings(shapeChordName(), inst().id) || []);
+    }
+
+    /* The engine returns every playable permutation, which is useful for the
+     * shapes grid but far too many for a neck stepper (Am7 on guitar alone has
+     * over a thousand). For the neck, keep the best-ranked voicing for each
+     * bass note in each hand position: one representative per inversion and
+     * region, so paging moves through distinct shapes rather than variants
+     * that only double a note on another string. */
+    function curateShapes(list) {
+        var guitar = inst();
+        var seen = {};
+        var out = [];
+        list.forEach(function (frets) {
+            var bassMidi = null;
+            var minFret = Infinity;
+            for (var i = 0; i < frets.length; i++) {
+                var fret = frets[i];
+                if (fret < 0) continue;
+                if (fret > 0 && fret < minFret) minFret = fret;
+                var midi = guitar.tuning[i] + prefs.capo + fret;
+                if (bassMidi === null || midi < bassMidi) bassMidi = midi;
+            }
+            if (bassMidi === null) return;
+            var key = mod12(bassMidi) + ':' + region(minFret);
+            if (seen[key]) return;
+            seen[key] = true;
+            out.push(frets);
+        });
+        return out;
+    }
+
+    function region(minFret) {
+        if (minFret === Infinity || minFret === 0) return 0;
+        if (minFret <= 4) return 1;
+        if (minFret <= 8) return 2;
+        return 3;
+    }
+
+    function currentShape(list) {
+        if (!list.length) return null;
+        if (state.shapeIndex < 0) state.shapeIndex = list.length - 1;
+        if (state.shapeIndex >= list.length) state.shapeIndex = 0;
+        return list[state.shapeIndex];
+    }
+
+    function chordMap() {
+        var map = {};
+        ChordKit.chordNotes(chordName()).forEach(function (note) {
+            map[note.pc] = note;
+        });
+        return map;
+    }
+
+    function scaleMap() {
+        var map = {};
+        ChordKit.scaleNotes(scaleRootPc(), scaleId(), exp().spelling)
+            .forEach(function (note) { map[note.pc] = note; });
+        return map;
+    }
+
+    function pitchAt(stringIndex, fret) {
+        var midi = inst().tuning[stringIndex] + prefs.capo + fret;
+        return { midi: midi, pc: mod12(midi) };
+    }
+
+    function noteName(pc, map) {
+        return map[pc] ? map[pc].name : ChordKit.rootName(pc, exp().spelling);
+    }
+
+    function degreeMark(degree) {
+        return degree === 'root' ? 'R' : degree;
+    }
+
+    function voiceLabel(frets, index) {
+        var guitar = inst();
+        var bassMidi = null;
+        var minFret = Infinity;
+        for (var i = 0; i < frets.length; i++) {
+            var fret = frets[i];
+            if (fret < 0) continue;
+            if (fret > 0 && fret < minFret) minFret = fret;
+            var midi = guitar.tuning[i] + prefs.capo + fret;
+            if (bassMidi === null || midi < bassMidi) bassMidi = midi;
+        }
+        if (bassMidi === null) return (index + 1) + '. Muted';
+        var bassPc = mod12(bassMidi);
+        var rootInBass = bassPc === exp().rootPc;
+        var position;
+        if (minFret === Infinity || minFret <= 2) {
+            position = prefs.capo ? 'At capo' : 'Open position';
+        } else if (minFret <= 4) {
+            position = 'Low position';
+        } else if (minFret <= 8) {
+            position = 'Mid position';
+        } else {
+            position = 'High position';
+        }
+        var bass = rootInBass ? 'root' : ChordKit.rootName(bassPc, exp().spelling);
+        return (index + 1) + '. ' + position + ', ' + bass + ' in bass \u00b7 ' +
+            fretsLabel(frets);
+    }
+
+    function fretsLabel(frets) {
+        return frets.map(function (fret) {
+            return fret < 0 ? 'x' : String(fret);
+        }).join(' ');
+    }
+
+    /* ---------------- select builders ---------------- */
+
+    function fillSelect(select, options, value) {
+        select.innerHTML = options.map(function (opt) {
+            return '<option value="' + opt.value + '">' + opt.label + '</option>';
+        }).join('');
+        select.value = String(value);
+    }
+
+    function rootOptions() {
+        var out = [];
+        for (var pc = 0; pc < 12; pc++) {
+            out.push({ value: pc, label: ChordKit.rootName(pc, exp().spelling) });
+        }
+        return out;
+    }
+
+    function qualityOptions() {
+        return ChordKit.TYPES.map(function (item) {
+            return {
+                value: item.id,
+                label: QUALITY_LABELS[item.id] || item.suffix || 'Major'
+            };
+        });
+    }
+
+    function scaleTypeOptions() {
+        return ChordKit.SCALES.map(function (scale) {
+            return { value: scale.id, label: scale.label };
+        });
+    }
+
+    function capoOptions() {
+        var out = [{ value: 0, label: 'No capo' }];
+        for (var n = 1; n <= 7; n++) out.push({ value: n, label: 'Capo ' + n });
+        return out;
+    }
+
+    function renderToolbar() {
+        fillSelect(SB.$('neckRoot'), rootOptions(), exp().rootPc);
+        fillSelect(SB.$('neckQuality'), qualityOptions(), exp().quality);
+        fillSelect(SB.$('neckCapo'), capoOptions(), prefs.capo);
+
+        var scaleKeyOptions = [{ value: '', label: 'Follow chord (' + exp().rootName + ')' }].concat(rootOptions());
+        fillSelect(SB.$('neckScaleRoot'), scaleKeyOptions,
+            state.scaleRootPc == null ? '' : state.scaleRootPc);
+        fillSelect(SB.$('neckScaleType'), scaleTypeOptions(), scaleId());
+
+        var spell = SB.$('neckSpell');
+        var sharp = ChordKit.rootName(exp().rootPc, 'sharp');
+        var flat = ChordKit.rootName(exp().rootPc, 'flat');
+        if (sharp === flat) {
+            spell.hidden = true;
+        } else {
+            spell.hidden = false;
+            spell.textContent = 'Spell as ' + (exp().spelling === 'sharp' ? flat : sharp);
+            spell.setAttribute('aria-label',
+                'Spell the root as ' + (exp().spelling === 'sharp' ? flat : sharp));
+        }
+
+        SB.$('neckAllTones').setAttribute('aria-pressed', prefs.allTones ? 'true' : 'false');
+        SB.$('neckScaleToggle').setAttribute('aria-pressed', prefs.scaleOn ? 'true' : 'false');
+        SB.$('neckOctaves').setAttribute('aria-pressed', prefs.octaves ? 'true' : 'false');
+        SB.$('neckScaleFields').hidden = !prefs.scaleOn;
+    }
+
+    function renderSummary(list) {
+        var notes = ChordKit.chordNotes(chordName());
+        SB.$('neckChordName').textContent = chordName();
+        SB.$('neckChordNotes').textContent = notes.map(function (note) {
+            return note.name;
+        }).join(' \u00b7 ');
+
+        var count = SB.$('neckShapeCount');
+        var next = SB.$('neckNext');
+        var prev = SB.$('neckPrev');
+        var frets = SB.$('neckShapeFrets');
+
+        if (!list.length) {
+            count.textContent = 'No shapes';
+            frets.textContent = '\u2014';
+            next.disabled = true;
+            prev.disabled = true;
+            fillSelect(SB.$('neckVoicing'), [{ value: 0, label: 'No playable shape' }], 0);
+        } else {
+            currentShape(list);
+            count.textContent = (state.shapeIndex + 1) + ' / ' + list.length;
+            frets.textContent = fretsLabel(list[state.shapeIndex]);
+            next.disabled = list.length < 2;
+            prev.disabled = list.length < 2;
+            fillSelect(SB.$('neckVoicing'), list.map(function (frets, index) {
+                return { value: index, label: voiceLabel(frets, index) };
+            }), state.shapeIndex);
+        }
+
+        var summary = scaleInfo();
+        SB.$('neckScaleSummary').textContent = prefs.scaleOn
+            ? 'Scale: ' + summary.summary
+            : 'Scale hidden';
+    }
+
+    /* ---------------- neck drawing ---------------- */
+
+    function noteMarkup(x, y, opts) {
+        if (opts.kind === 'scale') {
+            return '<circle class="neck-note neck-note-scale" cx="' + x +
+                '" cy="' + y + '" r="' + opts.r + '"/>';
+        }
+        var shape = opts.kind === 'shape';
+        var textClass = shape ? 'neck-note-text neck-note-text-shape' : 'neck-note-text neck-note-text-tone';
+        if (opts.octaves) textClass += ' neck-note-text-oct';
+        var out = '<circle class="neck-note ' + (shape ? 'neck-note-shape' : 'neck-note-tone') +
+            '" cx="' + x + '" cy="' + y + '" r="' + opts.r + '"/>' +
+            '<text class="' + textClass + '" x="' + x + '" y="' + (y + 0.5) + '">' +
+            opts.name + '</text>';
+        if (shape && opts.degree) {
+            var bx = x + opts.r * 0.85;
+            var by = y - opts.r * 0.85;
+            out += '<circle class="neck-badge" cx="' + bx + '" cy="' + by + '" r="6"/>' +
+                '<text class="neck-badge-text" x="' + bx + '" y="' + (by + 0.5) + '">' +
+                opts.degree + '</text>';
+        }
+        return out;
+    }
+
+    function mutedMarkup(x, y) {
+        return '<text class="neck-muted" x="' + x + '" y="' + y + '">\u00d7</text>';
+    }
+
+    function markerAt(stringIndex, fret, shape, tones, scales) {
+        var pitch = pitchAt(stringIndex, fret);
+        var shapeFret = shape ? shape[stringIndex] : null;
+
+        if (shapeFret === -1 && fret === 0) return { kind: 'muted' };
+        if (shapeFret === fret) {
+            var note = tones[pitch.pc];
+            return {
+                kind: 'shape',
+                name: noteName(pitch.pc, tones) + (prefs.octaves ? octave(pitch.midi) : ''),
+                degree: note ? degreeMark(note.degree) : ''
+            };
+        }
+        if (prefs.allTones && tones[pitch.pc]) {
+            return {
+                kind: 'tone',
+                name: noteName(pitch.pc, tones) + (prefs.octaves ? octave(pitch.midi) : '')
+            };
+        }
+        if (prefs.scaleOn && scales[pitch.pc]) return { kind: 'scale' };
+        return null;
+    }
+
+    function octave(midi) {
+        return Math.floor(midi / 12) - 1;
+    }
+
+    function addMarker(out, x, y, marker, shapeRadius, toneRadius, scaleRadius) {
+        if (!marker) return;
+        if (marker.kind === 'muted') {
+            out.push(mutedMarkup(x, y));
+            return;
+        }
+        out.push(noteMarkup(x, y, {
+            kind: marker.kind,
+            name: marker.name,
+            degree: marker.degree,
+            octaves: prefs.octaves,
+            r: marker.kind === 'shape' ? shapeRadius :
+                (marker.kind === 'tone' ? toneRadius : scaleRadius)
+        }));
+    }
+
+    function horizontalNeck(instrument, shape, tones, scales) {
+        var num = instrument.tuning.length;
+        var W = 860;
+        var left = 30, openW = 38, right = 18, top = 36, bottom = 18;
+        var rowGap = num === 6 ? 31 : 39;
+        var H = top + (num - 1) * rowGap + bottom;
+        var nutX = left + openW;
+        var fw = (W - nutX - right) / NECK_FRETS;
+        var rowY = function (row) { return top + row * rowGap; };
+        var out = ['<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">'];
+
+        // Fret lines and numbers.
+        for (var f = 0; f <= NECK_FRETS; f++) {
+            var x = nutX + f * fw;
+            var cls = f === 0 ? 'neck-nut' : 'neck-fret';
+            out.push('<line class="' + cls + '" x1="' + x + '" y1="' + (top - 9) +
+                '" x2="' + x + '" y2="' + (top + (num - 1) * rowGap + 9) + '"/>');
+            if (f > 0) {
+                out.push('<text class="neck-fret-num" x="' + (x - fw / 2) +
+                    '" y="' + (top - 17) + '">' + f + '</text>');
+            }
+        }
+
+        // Inlays sit between the two middle string rows.
+        Object.keys(INLAY_FRETS).forEach(function (key) {
+            var fret = Number(key);
+            if (fret > NECK_FRETS) return;
+            var cx = nutX + (fret - 0.5) * fw;
+            var cy = top + ((num - 1) * rowGap) / 2;
+            var dots = INLAY_FRETS[key];
+            if (dots === 2) {
+                out.push('<circle class="neck-inlay" cx="' + cx + '" cy="' + (cy - 9) + '" r="3.2"/>');
+                out.push('<circle class="neck-inlay" cx="' + cx + '" cy="' + (cy + 9) + '" r="3.2"/>');
+            } else {
+                out.push('<circle class="neck-inlay" cx="' + cx + '" cy="' + cy + '" r="3.2"/>');
+            }
+        });
+
+        // Strings, labels and the open-string column.
+        for (var i = 0; i < num; i++) {
+            var row = num - 1 - i;
+            var y = rowY(row);
+            out.push('<line class="neck-string" x1="' + nutX + '" y1="' + y + '" x2="' +
+                (nutX + NECK_FRETS * fw) + '" y2="' + y + '"/>');
+            out.push('<text class="neck-string-label" x="' + (left - 10) + '" y="' + (y + 0.5) +
+                '">' + instrument.strings[i] + '</text>');
+            addMarker(out, left + openW / 2, y, markerAt(i, 0, shape, tones, scales), 11, 9.5, 4.5);
+            for (var fret = 1; fret <= NECK_FRETS; fret++) {
+                addMarker(out, nutX + (fret - 0.5) * fw, y,
+                    markerAt(i, fret, shape, tones, scales), 11, 9.5, 4.5);
+            }
+        }
+
+        out.push('</svg>');
+        return out.join('');
+    }
+
+    function verticalNeck(instrument, shape, tones, scales) {
+        var num = instrument.tuning.length;
+        var W = 340;
+        var left = 34, right = 14, top = 42, bottom = 16;
+        var colW = (W - left - right) / (num - 1);
+        var openY = top;
+        var nutY = top + 26;
+        var fh = 44;
+        var H = nutY + NECK_FRETS * fh + bottom;
+        var colX = function (i) { return left + i * colW; };
+        var out = ['<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">'];
+
+        // String labels above the open row.
+        for (var i = 0; i < num; i++) {
+            out.push('<text class="neck-string-label" x="' + colX(i) + '" y="' + (openY - 17) +
+                '">' + instrument.strings[i] + '</text>');
+        }
+
+        // Fret lines and numbers.
+        for (var f = 0; f <= NECK_FRETS; f++) {
+            var y = nutY + f * fh;
+            var cls = f === 0 ? 'neck-nut' : 'neck-fret';
+            out.push('<line class="' + cls + '" x1="' + (left - 9) + '" y1="' + y + '" x2="' +
+                (W - right + 9) + '" y2="' + y + '"/>');
+            if (f > 0) {
+                out.push('<text class="neck-fret-num" x="' + (left - 18) + '" y="' +
+                    (y - fh / 2 + 3) + '">' + f + '</text>');
+            }
+        }
+
+        // Inlays sit on the centre line between the two middle strings.
+        Object.keys(INLAY_FRETS).forEach(function (key) {
+            var fret = Number(key);
+            if (fret > NECK_FRETS) return;
+            var cy = nutY + (fret - 0.5) * fh;
+            var cx = (left + (W - right)) / 2;
+            var dots = INLAY_FRETS[key];
+            if (dots === 2) {
+                out.push('<circle class="neck-inlay" cx="' + (cx - 10) + '" cy="' + cy + '" r="3.2"/>');
+                out.push('<circle class="neck-inlay" cx="' + (cx + 10) + '" cy="' + cy + '" r="3.2"/>');
+            } else {
+                out.push('<circle class="neck-inlay" cx="' + cx + '" cy="' + cy + '" r="3.2"/>');
+            }
+        });
+
+        // Strings and note markers.
+        for (var s = 0; s < num; s++) {
+            var x = colX(s);
+            out.push('<line class="neck-string" x1="' + x + '" y1="' + nutY + '" x2="' + x +
+                '" y2="' + (nutY + NECK_FRETS * fh) + '"/>');
+            addMarker(out, x, openY, markerAt(s, 0, shape, tones, scales), 13, 11, 5);
+            for (var fret = 1; fret <= NECK_FRETS; fret++) {
+                addMarker(out, x, nutY + (fret - 0.5) * fh,
+                    markerAt(s, fret, shape, tones, scales), 13, 11, 5);
+            }
+        }
+
+        out.push('</svg>');
+        return out.join('');
+    }
+
+    function renderDiagram(list) {
+        var shape = currentShape(list);
+        var tones = chordMap();
+        var scales = prefs.scaleOn ? scaleMap() : {};
+        var vertical = window.matchMedia('(max-width: 640px)').matches;
+        var host = SB.$('neckDiagram');
+        var svg = vertical
+            ? verticalNeck(inst(), shape, tones, scales)
+            : horizontalNeck(inst(), shape, tones, scales);
+        host.innerHTML = svg;
+
+        var desc = chordName();
+        if (shape) {
+            desc += ', shape ' + (state.shapeIndex + 1) + ' of ' + list.length +
+                ', frets ' + fretsLabel(shape);
+        }
+        if (prefs.capo) desc += ', capo ' + prefs.capo;
+        if (prefs.scaleOn) desc += ', ' + scaleInfo().summary;
+        host.setAttribute('aria-label', 'Fretboard: ' + desc);
+    }
+
+    /* ---------------- shape notes ---------------- */
+
+    function renderShapeNotes(list) {
+        var host = SB.$('neckShapeNotes');
+        var count = SB.$('neckNotesCount');
+        var shape = currentShape(list);
+        if (!shape) {
+            host.innerHTML = '<p class="explorer-empty">No playable shape for this chord in the explorer range.</p>';
+            count.textContent = '';
+            return;
+        }
+
+        var tones = chordMap();
+        var notes = [];
+        for (var i = 0; i < shape.length; i++) {
+            var fret = shape[i];
+            if (fret < 0) continue;
+            var pitch = pitchAt(i, fret);
+            var tone = tones[pitch.pc];
+            notes.push({
+                stringIndex: i,
+                fret: fret,
+                midi: pitch.midi,
+                name: noteName(pitch.pc, tones),
+                octave: octave(pitch.midi),
+                degree: tone ? tone.degree : null,
+                role: tone ? (DEGREE_LABELS[tone.degree] || tone.degree) : 'Chord tone'
+            });
+        }
+        notes.sort(function (a, b) { return a.midi - b.midi; });
+
+        host.innerHTML = notes.map(function (note) {
+            var stringNo = inst().tuning.length - note.stringIndex;
+            var at = note.fret === 0
+                ? (prefs.capo ? 'capo' : 'open')
+                : 'fr ' + note.fret;
+            return '<div class="neck-string-note' + (note.degree === 'root' ? ' root' : '') + '">' +
+                '<div class="neck-string-note-top">' +
+                '<span class="neck-string-note-name">' + note.name + note.octave + '</span>' +
+                (note.degree ? '<span class="neck-string-degree">' + degreeMark(note.degree) + '</span>' : '') +
+                '</div>' +
+                '<div class="neck-string-role">' + note.role + '</div>' +
+                '<div class="neck-string-pos">str ' + stringNo + ', ' + at + '</div>' +
+                '</div>';
+        }).join('');
+        count.textContent = notes.length + (notes.length === 1 ? ' note' : ' notes');
+    }
+
+    /* ---------------- render ---------------- */
+
+    function render() {
+        if (!SB.$('neckRoot')) return;
+        var list = shapes();
+        renderToolbar();
+        renderSummary(list);
+        renderDiagram(list);
+        renderShapeNotes(list);
+    }
+
+    /* ---------------- wiring ---------------- */
+
+    function setChordRoot(pc) {
+        SB.applyExplorerSelection({
+            rootPc: pc,
+            rootName: ChordKit.rootName(pc, exp().spelling)
+        });
+    }
+
+    function bindOnce() {
+        var root = SB.$('neckRoot');
+        if (!root || root.dataset.bound) return;
+        root.dataset.bound = '1';
+
+        root.addEventListener('change', function () {
+            state.shapeIndex = 0;
+            setChordRoot(Number(root.value));
+        });
+
+        SB.$('neckQuality').addEventListener('change', function () {
+            state.shapeIndex = 0;
+            if (!state.scaleTouched) state.scaleId = null;
+            SB.applyExplorerSelection({ quality: SB.$('neckQuality').value });
+        });
+
+        SB.$('neckVoicing').addEventListener('change', function () {
+            state.shapeIndex = Number(SB.$('neckVoicing').value) || 0;
+            render();
+        });
+
+        SB.$('neckPrev').addEventListener('click', function () {
+            var list = shapes();
+            if (!list.length) return;
+            state.shapeIndex = (state.shapeIndex - 1 + list.length) % list.length;
+            render();
+        });
+
+        SB.$('neckNext').addEventListener('click', function () {
+            var list = shapes();
+            if (!list.length) return;
+            state.shapeIndex = (state.shapeIndex + 1) % list.length;
+            render();
+        });
+
+        SB.$('neckCapo').addEventListener('change', function () {
+            prefs.capo = Number(SB.$('neckCapo').value) || 0;
+            state.shapeIndex = 0;
+            savePrefs();
+            render();
+        });
+
+        SB.$('neckAllTones').addEventListener('click', function () {
+            prefs.allTones = !prefs.allTones;
+            savePrefs();
+            render();
+        });
+
+        SB.$('neckScaleToggle').addEventListener('click', function () {
+            prefs.scaleOn = !prefs.scaleOn;
+            savePrefs();
+            render();
+        });
+
+        SB.$('neckOctaves').addEventListener('click', function () {
+            prefs.octaves = !prefs.octaves;
+            savePrefs();
+            render();
+        });
+
+        SB.$('neckScaleRoot').addEventListener('change', function () {
+            var value = SB.$('neckScaleRoot').value;
+            state.scaleRootPc = value === '' ? null : Number(value);
+            render();
+        });
+
+        SB.$('neckScaleType').addEventListener('change', function () {
+            state.scaleId = SB.$('neckScaleType').value;
+            state.scaleTouched = true;
+            savePrefs();
+            render();
+        });
+
+        SB.$('neckSpell').addEventListener('click', function () {
+            var next = exp().spelling === 'sharp' ? 'flat' : 'sharp';
+            SB.applyExplorerSelection({ rootPc: exp().rootPc, spelling: next });
+        });
+
+        var media = window.matchMedia('(max-width: 640px)');
+        if (media.addEventListener) {
+            media.addEventListener('change', function () {
+                if (SB.neckVisible && SB.neckVisible()) render();
+            });
+        }
+    }
+
+    SB.renderNeck = render;
+    SB.neckPrefs = prefs;
+
+    bindOnce();
+
+})(window.SB = window.SB || {});
+
 </script>
 <script>
 /* Songbook — list
@@ -13981,9 +15174,11 @@ button.structure-close,
         var h = location.hash || '';
 
         /* The chord explorer is an app-level view, not a songbook, so it is
-         * matched before the #/<songbook>/<song> pattern. */
-        if (h === '#/chords' || h === '#/chords/') {
-            SB.openExplorer();
+         * matched before the #/<songbook>/<song> pattern. The optional mode
+         * segment keeps the Shapes and Neck tabs deep-linkable. */
+        var explorer = h.match(/^#\/chords(?:\/(neck|shapes))?\/?$/);
+        if (explorer) {
+            SB.openExplorer(explorer[1] || 'shapes');
             return;
         }
         var explorerLink = SB.$('explorerLink');

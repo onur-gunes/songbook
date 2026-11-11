@@ -76,6 +76,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/grid.js` | Play-along grid chart: bars, beat slashes, diagrams and the metronome-driven beat cursor |
 | `js/chordstrip.js` | Sticky chord strip and the voicing chooser |
 | `js/explorer.js` | Chord explorer: circle of fifths, chord types, voicing browser and reverse fret lookup |
+| `js/neck.js` | Full-neck explorer tab: selected chord shape, all chord tones and an optional scale layer across the fretboard |
 | `js/list.js` | List view: search, filters, sort, songbook picker |
 | `js/import.js` | Importing songbook JSON from disk (shared parse/validate/persist pipeline) |
 | `js/export.js` | Exporting any songbook (bundled or imported) back to a JSON file |
@@ -106,8 +107,14 @@ attached to `SB`.
   fifths, choose one of 18 chord types, and see every playable voicing with
   fret labels. It also spells out the chord tones (with enharmonic spelling)
   and reverses the lookup: set each string's fret and it names the shape.
-  Everything follows the global instrument toggle, so the same view covers
-  both tunings.
+  The **Neck** tab (`#/chords/neck`) draws the whole fretboard with the
+  selected shape, every chord tone, and an optional scale layer (major,
+  minor, pentatonic, blues, Dorian, Mixolydian). Voicings are curated to one
+  representative per inversion and hand position, so the shape stepper moves
+  through distinct shapes instead of hundreds of note-doubling variants.
+  Capo, octave labels, flats/sharps and the scale key/type are adjustable
+  there. Everything follows the global instrument toggle, so the same view
+  covers both tunings.
 - Live search (title + artist), difficulty filters — multi-select, results OR'd
   across Easy / Medium / Hard, 🔥 New, ⭐ Favorites (localStorage),
   sort Title/Artist — list defaults to alphabetical by name,
@@ -728,11 +735,13 @@ ChordKit.voicings('Am', 'guitar')     // -> [ [-1,0,2,2,1,0], ... ]
 ChordKit.bestVoicing('C', 'ukulele')  // -> [0,0,0,3]
 ChordKit.chordNotes('Cdim7')          // -> [{name:'C',degree:'root'}, ... , {name:'Bbb',...}]
 ChordKit.identify([0,0,0,3], 'ukulele') // -> [{name:'Am7',rootPc:9,...}, ...]
+ChordKit.scaleNotes(9, 'minorPent', 'sharp') // -> [{name:'A',degree:'1'}, ...]
+ChordKit.SCALES                     // -> major, minor, pentatonic, blues, ...
 ChordKit.dataUri('ukulele', frets)    // -> "data:image/svg+xml,..." diagram
 ChordKit.diagramSVG('guitar', frets)  // -> raw <svg> markup
 ```
 
-Instruments and chord types are data-driven (`ChordKit.INSTRUMENTS`,
-`ChordKit.TYPES`), so the same engine powers both tunings. The chord explorer
-is the UI over this API; the songbook itself uses the same voicings and SVG
-renderer for its strip and grid.
+Instruments, chord types and scales are data-driven (`ChordKit.INSTRUMENTS`,
+`ChordKit.TYPES`, `ChordKit.SCALES`), so the same engine powers both tunings.
+The chord explorer is the UI over this API; the neck tab and the songbook
+itself use the same voicings and renderers.
