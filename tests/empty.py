@@ -80,6 +80,15 @@ def main():
            cdp.eval("document.getElementById('emptyImportBtn').offsetParent !== null"))
         ok('top import button is visible',
            cdp.eval("document.getElementById('importBtn').offsetParent !== null"))
+        ok('empty state offers URL import',
+           cdp.eval("document.getElementById('emptyImportUrlBtn').offsetParent !== null"))
+        cdp.eval("document.getElementById('emptyImportUrlBtn').click()")
+        ok('empty state URL form opens with a text input',
+           cdp.eval("document.getElementById('importUrlForm').hidden") is False
+           and cdp.eval("document.getElementById('importUrl').offsetParent !== null"))
+        cdp.eval("document.getElementById('importUrlCancel').click()")
+        ok('URL form closes again',
+           cdp.eval("document.getElementById('importUrlForm').hidden") is True)
         ok('remove button hidden', cdp.eval("document.getElementById('removeSongsBtn').hidden") is True)
         ok('export button hidden', cdp.eval("document.getElementById('exportSongsBtn').hidden") is True)
         ok('picker has no books',

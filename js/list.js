@@ -259,6 +259,66 @@
         });
         SB.$('importBtn').addEventListener('click', function () { SB.$('importFile').click(); });
         SB.$('emptyImportBtn').addEventListener('click', function () { SB.$('importFile').click(); });
+
+        /* The URL form is one shared control: reachable from the bar when a
+         * library already exists and from the empty state on first run. File
+         * import stays the primary action because it has no CORS constraint. */
+        var urlForm = SB.$('importUrlForm');
+        var urlInput = SB.$('importUrl');
+        var urlToggle = SB.$('importUrlToggle');
+        var urlBtn = SB.$('importUrlBtn');
+
+        function setUrlForm(open) {
+            if (!urlForm) return;
+            urlForm.hidden = !open;
+            urlToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open) urlInput.focus();
+            else urlInput.value = '';
+        }
+
+        function reportUrlFailure(err, fallbackName) {
+            window.alert(summarizeImport([{
+                ok: false,
+                name: err.sourceName || fallbackName,
+                reason: err.message
+            }]));
+        }
+
+        urlToggle.addEventListener('click', function () { setUrlForm(urlForm.hidden); });
+        var emptyUrlBtn = SB.$('emptyImportUrlBtn');
+        if (emptyUrlBtn) emptyUrlBtn.addEventListener('click', function () { setUrlForm(true); });
+        SB.$('importUrlCancel').addEventListener('click', function () { setUrlForm(false); });
+
+        urlForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var url = urlInput.value.trim();
+            if (!url) { urlInput.focus(); return; }
+            urlBtn.disabled = true;
+            SB.importSongbookFromUrl(url).then(function (sb) {
+                setUrlForm(false);
+                var hash = SB.routeHash(sb.id);
+                if (location.hash === hash) SB.route();
+                else location.hash = hash;
+            }, function (err) {
+                reportUrlFailure(err, url);
+            }).then(function () { urlBtn.disabled = false; });
+        });
+
+        SB.$('refreshSongsBtn').addEventListener('click', function () {
+            var sb = SB.state.active;
+            if (!sb || !sb.sourceUrl) return;
+            var btn = SB.$('refreshSongsBtn');
+            btn.disabled = true;
+            SB.refreshSongbook(sb).then(function (next) {
+                /* Route through the rebuilt index so state.active and the
+                 * rendered view point at the replaced record, not the old
+                 * object that was just overwritten. */
+                if (SB.state.active && SB.state.active.id === next.id) SB.route();
+            }, function (err) {
+                window.alert('Refresh failed: ' + err.message);
+            }).then(function () { btn.disabled = false; });
+        });
+
         SB.$('importFile').addEventListener('change', function (e) {
             var files = Array.prototype.slice.call(e.target.files || []);
             e.target.value = '';

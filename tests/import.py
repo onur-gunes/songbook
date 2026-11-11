@@ -366,6 +366,115 @@ def main():
            cdp.eval("SB.state.bundled.filter(function (b) {"
                     " return b.id === 'krakow-ukulele'; })[0].name") == bundled_name)
 
+        # --- Phase 4: import from URL ------------------------------------
+        # The URL form is secondary to the file picker and lives in the same
+        # import area; opening it must not trigger a native file dialog.
+        ok('URL form starts hidden',
+           cdp.eval("document.getElementById('importUrlForm').hidden") is True)
+        ok('URL import control is visible next to file import',
+           cdp.eval("document.getElementById('importUrlToggle').offsetParent !== null")
+           and cdp.eval("document.getElementById('importBtn').offsetParent !== null"))
+        cdp.eval("document.getElementById('importUrlToggle').click()")
+        ok('URL control reveals the text input',
+           cdp.eval("document.getElementById('importUrlForm').hidden") is False
+           and cdp.eval("document.getElementById('importUrl').offsetParent !== null"))
+
+        url = BASE + '/tests/fixtures/url-book.json'
+        cdp.eval("document.getElementById('importUrl').value = %s;"
+                 " document.getElementById('importUrlForm').requestSubmit();" % json.dumps(url),
+                 await_promise=False)
+        cdp.wait_js("songbookTest.getActive() &&"
+                    " songbookTest.getActive().id === 'url-book'", timeout=15)
+        ok('URL import adds the fetched songbook',
+           cdp.eval('songbookTest.getActive().name') == 'URL Book')
+        ok('URL import remembers its source URL',
+           cdp.eval('songbookTest.getActive().sourceUrl') == url,
+           cdp.eval('songbookTest.getActive().sourceUrl'))
+        ok('URL import closes and clears the form',
+           cdp.eval("document.getElementById('importUrlForm').hidden") is True
+           and cdp.eval("document.getElementById('importUrl').value") == '')
+        ok('URL import exposes Refresh',
+           cdp.eval("document.getElementById('refreshSongsBtn').hidden") is False)
+        cdp.wait_js("document.querySelectorAll('#songList .song-row').length === 1", timeout=10)
+        ok('URL import renders its songs',
+           cdp.eval("document.querySelectorAll('#songList .song-row').length") == 1
+           and cdp.eval("document.querySelector('#songList .row-title').textContent")
+           == 'Fetched Song')
+
+        # Each failure mode reports what happened instead of "Failed to fetch".
+        def url_error(target):
+            return cdp.eval(
+                "SB.importSongbookFromUrl(%s).then(function () { return 'unexpected success'; },"
+                " function (e) { return e.message; })" % json.dumps(target))
+
+        non_json = url_error(BASE + '/index.html')
+        ok('URL import: non-JSON is named', 'not valid JSON' in non_json, non_json)
+        missing = url_error(BASE + '/definitely-missing-94.json')
+        ok('URL import: 404 is named', '404' in missing, missing)
+        no_url = url_error('')
+        ok('URL import: empty URL is rejected', no_url == 'enter a URL', no_url)
+        cors = url_error('http://127.0.0.1:1/url-book.json')
+        ok('URL import: CORS/network failure names the header',
+           'CORS' in cors and 'Access-Control-Allow-Origin' in cors, cors)
+
+        # sourceUrl is bookkeeping, not songbook content, so it must survive
+        # the normalise-on-boot path as well as the IndexedDB write.
+        cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw#/url-book'})
+        cdp.wait_js("!!(window.songbookTest && songbookTest.getActive()"
+                    " && songbookTest.getActive().id === 'url-book')", timeout=30)
+        ok('URL source survives reload',
+           cdp.eval('songbookTest.getActive().sourceUrl') == url,
+           cdp.eval('songbookTest.getActive().sourceUrl'))
+        ok('Refresh reappears after reload',
+           cdp.eval("document.getElementById('refreshSongsBtn').hidden") is False)
+
+        refreshed = {
+            "id": "url-book",
+            "name": "URL Book v2",
+            "songs": [{
+                "id": "u1",
+                "title": "Refreshed Song",
+                "artist": "Tester",
+                "sheet": [[["c", "[C]"], ["x", " refreshed"]]],
+            }],
+        }
+        cdp.eval("window.__realFetch = window.fetch;"
+                 " window.__confirms = [];"
+                 " window.confirm = function (m) { window.__confirms.push(m); return true; };"
+                 " window.fetch = function () {"
+                 "   return Promise.resolve(new Response(%s, { status: 200,"
+                 "     headers: { 'Content-Type': 'application/json' } }));"
+                 " };" % json.dumps(json.dumps(refreshed)))
+        cdp.eval("document.getElementById('refreshSongsBtn').click()", await_promise=False)
+        cdp.wait_js("songbookTest.getActive().name === 'URL Book v2'", timeout=15)
+        ok('Refresh replaces the stored book',
+           cdp.eval('songbookTest.getActive().songs[0].title') == 'Refreshed Song',
+           cdp.eval('songbookTest.getActive().songs[0].title'))
+        ok('Refresh keeps the source URL',
+           cdp.eval('songbookTest.getActive().sourceUrl') == url)
+        ok('Refresh does not ask to replace',
+           cdp.eval('window.__confirms.length') == 0, cdp.eval('window.__confirms'))
+        ok('Refresh does not duplicate the entry',
+           cdp.eval('songbookTest.allSongbooks().length') == bundled_count + 4,
+           cdp.eval('songbookTest.allSongbooks().length'))
+
+        # A failed refresh must leave the working copy in place.
+        cdp.eval("window.__alerts = [];"
+                 " window.fetch = function () {"
+                 "   return Promise.resolve(new Response('<html>not json</html>',"
+                 "     { status: 200 }));"
+                 " };")
+        cdp.eval("document.getElementById('refreshSongsBtn').click()", await_promise=False)
+        cdp.wait_js('window.__alerts.length === 1', timeout=15)
+        refresh_alert = cdp.eval('window.__alerts[0]')
+        ok('failed Refresh reports the reason',
+           refresh_alert.startswith('Refresh failed:') and 'not valid JSON' in refresh_alert,
+           refresh_alert)
+        ok('failed Refresh keeps the old copy',
+           cdp.eval('songbookTest.getActive().name') == 'URL Book v2'
+           and cdp.eval('songbookTest.getActive().sourceUrl') == url)
+        cdp.eval("window.fetch = window.__realFetch;")
+
         n_fail = 0
         for name, passed, detail in results:
             print(('PASS ' if passed else 'FAIL ') + name + (' | ' + str(detail) if detail != '' else ''))

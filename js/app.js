@@ -100,7 +100,14 @@
         Promise.all([SB.loadBundled(), SB.idbAll().catch(function () { return []; })]).then(function (res) {
             SB.state.bundled = res[0];
             SB.state.imported = res[1].map(function (raw) {
-                try { var sb = SB.normalizeSongbook(raw); sb.imported = true; return sb; }
+                try {
+                    var sb = SB.normalizeSongbook(raw);
+                    sb.imported = true;
+                    /* sourceUrl is storage bookkeeping, not songbook content,
+                     * so normalisation drops it; carry it over by hand. */
+                    if (typeof raw.sourceUrl === 'string' && raw.sourceUrl) sb.sourceUrl = raw.sourceUrl;
+                    return sb;
+                }
                 catch (e) { return null; }
             }).filter(Boolean);
             /* Zero songbooks is a supported first-run state, not a fatal one:

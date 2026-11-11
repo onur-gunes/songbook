@@ -81,7 +81,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/explorer.js` | Chord explorer: circle of fifths, chord types, voicing browser and reverse fret lookup |
 | `js/neck.js` | Full-neck explorer tab: selected chord shape, all chord tones and an optional scale layer across the fretboard |
 | `js/list.js` | List view: search, filters, sort, songbook picker |
-| `js/import.js` | Importing songbook JSON from disk (shared parse/validate/persist pipeline) |
+| `js/import.js` | Importing songbook JSON from disk or a URL (shared parse/validate/persist pipeline) |
 | `js/export.js` | Exporting any songbook (bundled or imported) back to a JSON file |
 | `js/song.js` | Song view and its controls |
 | `js/autoscroll.js` | Auto-scroll, text/chord sizing, pinch zoom |
@@ -98,10 +98,12 @@ attached to `SB`.
 ## Features
 
 - **Multiple songbooks** — a picker switches between the demo book and any
-  imported lists. Import one or more `.json` songbooks from disk; they are
-  saved in **IndexedDB** and restored on reload (remove anytime). Re-importing
-  an id replaces your imported copy; a bundled id stays read-only. Export any
-  songbook, bundled or imported, back out as the same `.json` shape.
+  imported lists. Import one or more `.json` songbooks from disk, or fetch one
+  from a URL; they are saved in **IndexedDB** and restored on reload (remove
+  anytime). A URL import remembers its source and offers **Refresh** to
+  re-fetch and replace it. Re-importing an id replaces your imported copy; a
+  bundled id stays read-only. Export any songbook, bundled or imported, back
+  out as the same `.json` shape.
 - **Global instrument toggle** — Ukulele or Guitar. Chord diagrams and the
   voicing chooser are generated for the selected instrument; the choice is
   remembered.
@@ -251,6 +253,35 @@ be imported by any build.
 
 Export works for bundled and imported songbooks alike; a bundled book stays
 read-only in the app — export is how its content leaves the app.
+
+## Import from a URL
+
+**From URL…** in the songbook bar (or in the empty state on first run) fetches
+a songbook JSON document over HTTP(S) and imports it through the same
+parse/validate/persist path as a file. File import remains the primary action
+because it has no cross-origin constraint.
+
+The URL is stored with the imported book as `sourceUrl`, and **Refresh**
+re-fetches it and replaces the stored copy without asking again. A failed
+refresh leaves the working copy untouched.
+
+The host serving the file must allow cross-origin requests and send:
+
+```
+Access-Control-Allow-Origin: *
+```
+
+(Or the app's exact origin instead of `*`.) The fetch errors name the failure
+explicitly:
+
+- **CORS / network** — `could not fetch (network error or CORS blocked; the
+  host must send Access-Control-Allow-Origin)`;
+- **404** — `not found (404)`;
+- **non-JSON** — `not valid JSON: …` (a host that returns an HTML error page
+  instead of the songbook file lands here).
+
+Everything after the response body is the normal import pipeline, so a URL
+that returns a file the file picker would reject fails for the same reason.
 
 ## Songbook JSON format
 
