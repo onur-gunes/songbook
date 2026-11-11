@@ -20,6 +20,16 @@
 
     SB.route = function () {
         var h = location.hash || '';
+
+        /* The chord explorer is an app-level view, not a songbook, so it is
+         * matched before the #/<songbook>/<song> pattern. */
+        if (h === '#/chords' || h === '#/chords/') {
+            SB.openExplorer();
+            return;
+        }
+        var explorerLink = SB.$('explorerLink');
+        if (explorerLink) explorerLink.removeAttribute('aria-current');
+
         var m = h.match(/^#\/([^\/]+)(?:\/(.+))?$/);
         var sb = null, songId = null;
         if (m) {
@@ -39,6 +49,7 @@
             SB.stopMetronome();
             SB.state.currentSong = null;
             SB.$('songView').hidden = true;
+            SB.$('explorerView').hidden = true;
             SB.$('listView').hidden = false;
             SB.renderEmptyState();
             return;
@@ -48,6 +59,7 @@
 
         if (songId && SB.state.byId[songId]) {
             SB.$('listView').hidden = true;
+            SB.$('explorerView').hidden = true;
             SB.$('songView').hidden = false;
             SB.openSong(songId);
         } else {
@@ -55,6 +67,7 @@
             SB.stopMetronome();
             SB.state.currentSong = null;
             SB.$('songView').hidden = true;
+            SB.$('explorerView').hidden = true;
             SB.$('listView').hidden = false;
             SB.renderList();
             SB.renderRecent();
