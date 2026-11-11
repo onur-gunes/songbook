@@ -1,8 +1,8 @@
 # Songbook (offline PWA)
 
 An instrument-agnostic, offline-first songbook. The repository ships the engine
-and one small **original demo songbook**; your own songbooks are external JSON
-files you import and keep on disk. A global Ukulele/Guitar toggle re-renders
+and one small **public-domain demo songbook**; your own songbooks are external
+JSON files you import and keep on disk. A global Ukulele/Guitar toggle re-renders
 every chord diagram for the chosen instrument.
 
 - **Web app** (served): multi-file app with a service worker → installable PWA.
@@ -33,7 +33,7 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 | `tuner.js` | Microphone tuner: YIN + FFT pitch detection, octave guards, smoothing, ukulele/guitar presets, A4 calibration |
 | `js/` | The app itself, split by concern — search, filters, sort, favorites, notes, transpose, auto-scroll, songbook switching, import, hash routing, service-worker registration (see [App modules](#app-modules)) |
 | `songbooks/index.json` | Manifest of the books bundled into a build (the demo book, by default) |
-| `songbooks/demo.json` | The original demo dataset (generated from `chordpro/demo/` — don't hand-edit) |
+| `songbooks/demo.json` | The bundled demo dataset — twelve public-domain songs (generated from `chordpro/demo/` — don't hand-edit) |
 | `songbooks/original-keys.json` | Curated key/capo metadata from the retired bundled book (ids and keys only, no lyrics); `migrate.py` can merge it into a local legacy archive |
 | `manifest.webmanifest`, `sw.js` | PWA manifest + app-shell service worker |
 | `images/` | Logos (light/dark), favicon/PWA icons, QR code |
@@ -45,9 +45,12 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 | `build_pages.py` | Assembles `_site/` for GitHub Pages |
 | `tests/` | CDP + headless-Chrome test suites |
 
-The app ships no third-party song data. The only bundled book is `demo`, written
-for this project; it exists so a first run is not empty and so Grid, metronome
-and strum controls have something to demonstrate. `.gitignore` blocks
+The app ships no third-party copyrighted song data. The only bundled book is
+`demo`, twelve public-domain songs with chord charts written for this project;
+it exists so a first run is not empty and so Grid, metronome and strum controls
+have something to demonstrate. Every song is public domain in both the US and
+the EU; the provenance table is in
+[`chordpro/demo/PUBLIC-DOMAIN.md`](chordpro/demo/PUBLIC-DOMAIN.md). `.gitignore` blocks
 `songbooks/*.json` (except the manifest, demo and key metadata) and
 `chordpro/*/` (except the demo), so a local book cannot be committed by accident.
 
@@ -659,12 +662,13 @@ the [PolyForm Noncommercial License 1.0.0](LICENSE). You may use, study, modify
 and share it for noncommercial purposes; **commercial use, including selling the
 app or a derivative, is not permitted**.
 
-The repository **ships no third-party song data**. The only bundled book,
-`demo`, was written for this project and is covered by the same license as the
-code. Songbooks you import are your responsibility: lyrics, melodies, chord
-charts and arrangements belong to their respective authors and publishers, and
-importing a file does not relicense it. See [NOTICE.md](NOTICE.md) for the full
-notice.
+The repository **ships no third-party copyrighted song data**. The only bundled
+book, `demo`, contains songs whose words and melodies are in the public domain;
+its chord charts were written for this project and are covered by the same
+license as the code (the underlying compositions stay public domain). Songbooks
+you import are your responsibility: lyrics, melodies, chord charts and
+arrangements belong to their respective authors and publishers, and importing a
+file does not relicense it. See [NOTICE.md](NOTICE.md) for the full notice.
 
 ## Run the tests
 

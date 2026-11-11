@@ -1,0 +1,37 @@
+{title: Scarborough Fair}
+{artist: Traditional}
+{level: Medium}
+{duration: 3.0}
+{key: Am}
+{time: 3/4}
+{tempo: 100}
+{strum: waltz-3-4}
+
+{start_of_grid: Verse}
+| Am | G | C | G |
+| Am | G | C | G |
+{end_of_grid}
+
+{comment: Verse 1}
+[Am]Are you going to [G]Scarborough Fair?
+[C]Parsley, sage, [G]rosemary and thyme
+[Am]Remember me to [G]one who lives there
+[C]For she once was a [G]true love of mine
+
+{comment: Verse 2}
+[Am]Tell her to make me a [G]cambric shirt
+[C]Parsley, sage, [G]rosemary and thyme
+[Am]Without no seams nor [G]needlework
+[C]Then she'll be a [G]true love of mine
+
+{comment: Verse 3}
+[Am]Tell her to find me an [G]acre of land
+[C]Parsley, sage, [G]rosemary and thyme
+[Am]Between the salt water and the [G]sea strand
+[C]Then she'll be a [G]true love of mine
+
+{comment: Verse 4}
+[Am]Tell her to reap it with a [G]sickle of leather
+[C]Parsley, sage, [G]rosemary and thyme
+[Am]And gather it all in a [G]bunch of heather
+[C]Then she'll be a [G]true love of mine

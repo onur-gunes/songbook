@@ -1,0 +1,31 @@
+{title: House of the Rising Sun}
+{artist: Traditional}
+{level: Medium}
+{duration: 3.5}
+{key: Am}
+{time: 6/8}
+{tempo: 96}
+{strum: du-6-8}
+
+{start_of_grid: Verse}
+|: Am | C | D | F |
+| Am | C | E7 | Am :|
+{end_of_grid}
+
+{comment: Verse 1}
+[Am]There is a house in [C]New Orleans
+[D]They call the [F]Rising Sun
+[Am]And it's been the ruin of [C]many a poor boy
+[E7]And God, I [Am]know I'm one
+
+{comment: Verse 2}
+[Am]My mother was a [C]tailor
+[D]She sewed my [F]new blue jeans
+[Am]My father was a [C]gamblin' man
+[E7]Down in [Am]New Orleans
+
+{comment: Verse 3}
+[Am]Now the only thing a [C]gambler needs
+[D]Is a suitcase and a [F]trunk
+[Am]And the only time he's [C]satisfied
+[E7]Is when he's [Am]on a drunk

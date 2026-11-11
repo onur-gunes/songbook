@@ -1,0 +1,40 @@
+{title: Waltzing Matilda}
+{artist: Banjo Paterson}
+{level: Easy}
+{duration: 3.0}
+{key: C}
+{time: 4/4}
+{tempo: 108}
+{strum: dduudu-4-4}
+
+{start_of_grid: Verse}
+| C | G7 | C | G7 | C | F | C | G7 | C |
+{end_of_grid}
+
+{start_of_grid: Chorus}
+| C | G7 | C | G7 | C | F | C | G7 | C |
+{end_of_grid}
+
+{comment: Verse 1}
+[C]Once a jolly swagman camped by a [G7]billabong
+[C]Under the shade of a [G7]coolibah tree
+[C]And he sang as he watched and waited till his [F]billy boiled
+[C]"You'll come a-[G7]waltzing Matilda with [C]me"
+
+{comment: Chorus}
+[C]Waltzing Matilda, [G7]waltzing Matilda
+[C]You'll come a-[G7]waltzing Matilda with me
+[C]And he sang as he watched and waited till his [F]billy boiled
+[C]"You'll come a-[G7]waltzing Matilda with [C]me"
+
+{comment: Verse 2}
+[C]Down came a jumbuck to drink at that [G7]billabong
+[C]Up jumped the swagman and [G7]grabbed him with glee
+[C]And he sang as he shoved that jumbuck in his [F]tucker bag
+[C]"You'll come a-[G7]waltzing Matilda with [C]me"
+
+{comment: Verse 3}
+[C]Up rode the squatter, mounted on his [G7]thoroughbred
+[C]Down came the troopers, [G7]one, two, three
+[C]"Where's that jolly jumbuck you've got in your [F]tucker bag?"
+[C]"You'll come a-[G7]waltzing Matilda with [C]me"

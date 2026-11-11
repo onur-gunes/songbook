@@ -1,28 +1,419 @@
 {
  "id": "demo",
- "name": "Songbook Demo",
- "description": "Three original songs that demonstrate chords, tempo, metre, strumming and the bar/beat grid.",
+ "name": "Public Domain Songbook",
+ "description": "Twelve traditional songs and evergreens in the public domain, arranged to show chords, tempo, metre, strumming and the bar/beat grid.",
  "instrument": "ukulele",
  "songs": [
   {
-   "id": "harbour-lights",
+   "id": "amazing-grace",
    "n": 1,
-   "title": "Harbour Lights",
-   "artist": "Songbook Demo",
+   "title": "Amazing Grace",
+   "artist": "John Newton",
    "level": "Easy",
    "new": false,
-   "dur": 2.6,
+   "dur": 3.0,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "bpm": 72,
+   "time": "3/4",
+   "strum": "waltz-3-4",
+   "chords": [
+    "G",
+    "C",
+    "D"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Amazing grace, how "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "sweet the sound"
+     ]
+    ],
+    [
+     [
+      "x",
+      "That "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "saved a "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "wretch like me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "I once was lost, but "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "now am found"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Was "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "blind, but "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "now I "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "see"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "'Twas grace that taught my "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "heart to fear"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "grace my "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "fears relieved"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "How precious did that "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "grace appear"
+     ]
+    ],
+    [
+     [
+      "x",
+      "The "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "hour I "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "first be"
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "lieved"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 3"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Through "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "many dangers, "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "toils and snares"
+     ]
+    ],
+    [
+     [
+      "x",
+      "I "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "have already "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "come"
+     ]
+    ],
+    [
+     [
+      "x",
+      "'Tis "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "grace hath brought me "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "safe thus far"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "grace will "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "lead me "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "home"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Verse",
+     "role": "verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 1
+        },
+        {
+         "chord": "G",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "auld-lang-syne",
+   "n": 2,
+   "title": "Auld Lang Syne",
+   "artist": "Robert Burns",
+   "level": "Easy",
+   "new": false,
+   "dur": 2.5,
    "key": "C",
    "sheetKey": "C",
    "capo": 0,
-   "bpm": 96,
-   "time": "4/4",
-   "strum": "dduudu-4-4",
+   "bpm": 84,
+   "time": "3/4",
+   "strum": "waltz-3-4",
    "chords": [
     "C",
-    "G",
-    "Am",
-    "F"
+    "C7",
+    "F",
+    "G7"
    ],
    "sheet": [
     [
@@ -38,75 +429,21 @@
      ],
      [
       "x",
-      "Paper boats are "
+      "Should auld acquaintance "
      ],
      [
       "c",
-      "[G]"
+      "[C7]"
      ],
      [
       "x",
-      "sleeping by the "
-     ],
-     [
-      "c",
-      "[Am]"
-     ],
-     [
-      "x",
-      "wall"
+      "be forgot"
      ]
     ],
     [
      [
-      "c",
-      "[F]"
-     ],
-     [
       "x",
-      "Lanterns paint the "
-     ],
-     [
-      "c",
-      "[C]"
-     ],
-     [
-      "x",
-      "water gold and "
-     ],
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "small"
-     ]
-    ],
-    [
-     [
-      "c",
-      "[C]"
-     ],
-     [
-      "x",
-      "Every little "
-     ],
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "window has a "
-     ],
-     [
-      "c",
-      "[Am]"
-     ],
-     [
-      "x",
-      "story it can "
+      "and "
      ],
      [
       "c",
@@ -114,7 +451,15 @@
      ],
      [
       "x",
-      "tell"
+      "never brought to "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "mind?"
      ]
     ],
     [
@@ -124,15 +469,29 @@
      ],
      [
       "x",
-      "Harbour lights are "
+      "Should auld acquaintance "
      ],
      [
       "c",
-      "[G]"
+      "[C7]"
      ],
      [
       "x",
-      "ringing like a "
+      "be forgot"
+     ]
+    ],
+    [
+     [
+      "x",
+      "and "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "auld lang "
      ],
      [
       "c",
@@ -140,10 +499,443 @@
      ],
      [
       "x",
-      "bell"
+      "syne?"
      ]
     ],
     [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "x",
+      "For "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "auld lang syne, my "
+     ],
+     [
+      "c",
+      "[C7]"
+     ],
+     [
+      "x",
+      "dear"
+     ]
+    ],
+    [
+     [
+      "x",
+      "for "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "auld lang "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "syne"
+     ]
+    ],
+    [
+     [
+      "x",
+      "we'll "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "tak' a cup o' "
+     ],
+     [
+      "c",
+      "[C7]"
+     ],
+     [
+      "x",
+      "kindness yet"
+     ]
+    ],
+    [
+     [
+      "x",
+      "for "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "auld lang "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "syne"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "surely ye'll be your "
+     ],
+     [
+      "c",
+      "[C7]"
+     ],
+     [
+      "x",
+      "pint-stowp"
+     ]
+    ],
+    [
+     [
+      "x",
+      "and "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "surely I'll be "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "mine"
+     ]
+    ],
+    [
+     [
+      "x",
+      "and "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "we'll tak' a cup o' "
+     ],
+     [
+      "c",
+      "[C7]"
+     ],
+     [
+      "x",
+      "kindness yet"
+     ]
+    ],
+    [
+     [
+      "x",
+      "for "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "auld lang "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "syne"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Verse",
+     "role": "verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C7",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C7",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 3
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Chorus",
+     "role": "chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C7",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C7",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 3
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "down-by-the-riverside",
+   "n": 3,
+   "title": "Down by the Riverside",
+   "artist": "Traditional spiritual",
+   "level": "Easy",
+   "new": false,
+   "dur": 2.5,
+   "key": "C",
+   "sheetKey": "C",
+   "capo": 0,
+   "bpm": 120,
+   "time": "4/4",
+   "strum": "dduudu-4-4",
+   "chords": [
+    "C",
+    "F",
+    "G"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "I'm gonna lay down my "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "sword and shield"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Down by the "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "riverside"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "I'm gonna lay down my "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "sword and shield"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Down by the "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "riverside"
+     ]
+    ],
     [],
     [
      [
@@ -158,25 +950,7 @@
      ],
      [
       "x",
-      "Hold the night a "
-     ],
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "little longer"
-     ]
-    ],
-    [
-     [
-      "c",
-      "[Am]"
-     ],
-     [
-      "x",
-      "Let the quiet "
+      "I ain't gonna study "
      ],
      [
       "c",
@@ -184,7 +958,7 @@
      ],
      [
       "x",
-      "carry on"
+      "war no more"
      ]
     ],
     [
@@ -194,7 +968,7 @@
      ],
      [
       "x",
-      "Harbour lights are "
+      "Ain't gonna "
      ],
      [
       "c",
@@ -202,17 +976,17 @@
      ],
      [
       "x",
-      "growing stronger"
+      "study war no more"
      ]
     ],
     [
      [
       "c",
-      "[Am]"
+      "[C]"
      ],
      [
       "x",
-      "One more verse be"
+      "I ain't gonna study "
      ],
      [
       "c",
@@ -220,23 +994,112 @@
      ],
      [
       "x",
-      "fore the "
-     ],
+      "war no more"
+     ]
+    ],
+    [
      [
       "c",
       "[C]"
      ],
      [
       "x",
-      "dawn"
+      "Ain't gonna "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "study war no more"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "I'm gonna lay down my "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "heavy load"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Down by the "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "riverside"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "I'm gonna lay down my "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "heavy load"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Down by the "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "riverside"
      ]
     ]
    ],
    "grid": [
     {
-     "label": "Intro",
-     "role": "intro",
-     "repeat": false,
+     "label": "Verse",
+     "role": "verse",
+     "repeat": true,
      "bars": [
       {
        "beats": [
@@ -249,23 +1112,23 @@
       {
        "beats": [
         {
-         "chord": "G",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
-         "chord": "Am",
-         "beats": 4
-        }
-       ]
-      },
-      {
-       "beats": [
-        {
          "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
          "beats": 4
         }
        ]
@@ -288,7 +1151,1797 @@
       {
        "beats": [
         {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
          "chord": "G",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "when-the-saints-go-marching-in",
+   "n": 4,
+   "title": "When the Saints Go Marching In",
+   "artist": "Traditional spiritual",
+   "level": "Easy",
+   "new": false,
+   "dur": 2.5,
+   "key": "C",
+   "sheetKey": "C",
+   "capo": 0,
+   "bpm": 120,
+   "time": "4/4",
+   "strum": "dduudu-4-4",
+   "chords": [
+    "C",
+    "C7",
+    "F",
+    "G7"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Oh, when the saints go "
+     ],
+     [
+      "c",
+      "[C7]"
+     ],
+     [
+      "x",
+      "marching in"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Oh, when the saints go "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "marching in"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "Lord, I want to be in that number"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "When the saints go "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "marching "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "in"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Oh, when the saints go "
+     ],
+     [
+      "c",
+      "[C7]"
+     ],
+     [
+      "x",
+      "marching in"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Oh, when the saints go "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "marching in"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "Lord, I want to be in that number"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "When the saints go "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "marching "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "in"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Verse",
+     "role": "verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C7",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "house-of-the-rising-sun",
+   "n": 5,
+   "title": "House of the Rising Sun",
+   "artist": "Traditional",
+   "level": "Medium",
+   "new": false,
+   "dur": 3.5,
+   "key": "Am",
+   "sheetKey": "Am",
+   "capo": 0,
+   "bpm": 96,
+   "time": "6/8",
+   "strum": "du-6-8",
+   "chords": [
+    "Am",
+    "C",
+    "D",
+    "F",
+    "E7"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "There is a house in "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "New Orleans"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "They call the "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Rising Sun"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "And it's been the ruin of "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "many a poor boy"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E7]"
+     ],
+     [
+      "x",
+      "And God, I "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "know I'm one"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "My mother was a "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "tailor"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "She sewed my "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "new blue jeans"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "My father was a "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "gamblin' man"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E7]"
+     ],
+     [
+      "x",
+      "Down in "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "New Orleans"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 3"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Now the only thing a "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "gambler needs"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "Is a suitcase and a "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "trunk"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "And the only time he's "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "satisfied"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[E7]"
+     ],
+     [
+      "x",
+      "Is when he's "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "on a drunk"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Verse",
+     "role": "verse",
+     "repeat": true,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E7",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "scarborough-fair",
+   "n": 6,
+   "title": "Scarborough Fair",
+   "artist": "Traditional",
+   "level": "Medium",
+   "new": false,
+   "dur": 3.0,
+   "key": "Am",
+   "sheetKey": "Am",
+   "capo": 0,
+   "bpm": 100,
+   "time": "3/4",
+   "strum": "waltz-3-4",
+   "chords": [
+    "Am",
+    "G",
+    "C"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Are you going to "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Scarborough Fair?"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Parsley, sage, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "rosemary and thyme"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Remember me to "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "one who lives there"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "For she once was a "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "true love of mine"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Tell her to make me a "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "cambric shirt"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Parsley, sage, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "rosemary and thyme"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Without no seams nor "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "needlework"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Then she'll be a "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "true love of mine"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 3"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Tell her to find me an "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "acre of land"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Parsley, sage, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "rosemary and thyme"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Between the salt water and the "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "sea strand"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Then she'll be a "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "true love of mine"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 4"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Tell her to reap it with a "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "sickle of leather"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Parsley, sage, "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "rosemary and thyme"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "And gather it all in a "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "bunch of heather"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Then she'll be a "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "true love of mine"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Verse",
+     "role": "verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 3
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "shenandoah",
+   "n": 7,
+   "title": "Shenandoah",
+   "artist": "Traditional",
+   "level": "Medium",
+   "new": false,
+   "dur": 3.0,
+   "key": "C",
+   "sheetKey": "C",
+   "capo": 0,
+   "bpm": 66,
+   "time": "4/4",
+   "strum": "dduudu-4-4",
+   "chords": [
+    "C",
+    "F",
+    "G"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Oh Shenandoah, I "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "long to hear you"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Away, you "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "rolling river"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Oh Shenandoah, I "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "long to hear you"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Away, I'm "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "bound away"
+     ]
+    ],
+    [
+     [
+      "x",
+      "'Cross the "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "wide Mis"
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "souri"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Oh Shenandoah, I "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "love your daughter"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Away, you "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "rolling river"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Oh Shenandoah, I "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "love your daughter"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Away, I'm "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "bound away"
+     ]
+    ],
+    [
+     [
+      "x",
+      "'Cross the "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "wide Mis"
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "souri"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Verse",
+     "role": "verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "danny-boy",
+   "n": 8,
+   "title": "Danny Boy",
+   "artist": "Frederic Weatherly",
+   "level": "Hard",
+   "new": false,
+   "dur": 3.5,
+   "key": "D",
+   "sheetKey": "C",
+   "capo": 2,
+   "bpm": 72,
+   "time": "4/4",
+   "strum": "dduudu-4-4",
+   "chords": [
+    "C",
+    "F",
+    "G",
+    "Dm",
+    "G7",
+    "Am"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Oh Danny Boy, the "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "pipes, the pipes are "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "calling"
+     ]
+    ],
+    [
+     [
+      "x",
+      "From "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "glen to glen, and "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "down the mountain "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "side"
+     ]
+    ],
+    [
+     [
+      "x",
+      "The "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "summer's gone, and "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "all the roses "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "falling"
+     ]
+    ],
+    [
+     [
+      "x",
+      "It's "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "you, it's you must "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "go and I must "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "bide"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "x",
+      "But "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "come ye back when "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "summer's in the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "meadow"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Or when the "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "valley's hushed and "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "white with "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "snow"
+     ]
+    ],
+    [
+     [
+      "x",
+      "It's "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "I'll be here in "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "sunshine or in "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "shadow"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Oh "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "Danny Boy, oh "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "Danny Boy, I "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "love you "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "so"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Verse 1",
+     "role": "verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Dm",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Verse 2",
+     "role": "verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Dm",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
          "beats": 4
         }
        ]
@@ -308,30 +2961,45 @@
          "beats": 4
         }
        ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
       }
      ]
     }
    ]
   },
   {
-   "id": "three-quarter-time",
-   "n": 2,
-   "title": "Three Quarter Time",
-   "artist": "Songbook Demo",
+   "id": "waltzing-matilda",
+   "n": 9,
+   "title": "Waltzing Matilda",
+   "artist": "Banjo Paterson",
    "level": "Easy",
    "new": false,
-   "dur": 2.2,
-   "key": "G",
-   "sheetKey": "G",
+   "dur": 3.0,
+   "key": "C",
+   "sheetKey": "C",
    "capo": 0,
    "bpm": 108,
-   "time": "3/4",
-   "strum": "waltz-3-4",
+   "time": "4/4",
+   "strum": "dduudu-4-4",
    "chords": [
-    "G",
     "C",
-    "D",
-    "Em"
+    "G7",
+    "F"
    ],
    "sheet": [
     [
@@ -343,121 +3011,73 @@
     [
      [
       "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "Count the evening "
-     ],
-     [
-      "c",
       "[C]"
      ],
      [
       "x",
-      "slowly, "
+      "Once a jolly swagman camped by a "
      ],
      [
       "c",
-      "[G]"
+      "[G7]"
      ],
      [
       "x",
-      "one and two and "
-     ],
-     [
-      "c",
-      "[D]"
-     ],
-     [
-      "x",
-      "three"
+      "billabong"
      ]
     ],
     [
      [
       "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "Every quiet "
-     ],
-     [
-      "c",
       "[C]"
      ],
      [
       "x",
-      "corner "
+      "Under the shade of a "
      ],
      [
       "c",
-      "[G]"
+      "[G7]"
      ],
      [
       "x",
-      "keeps a "
-     ],
-     [
-      "c",
-      "[D]"
-     ],
-     [
-      "x",
-      "waltz for "
-     ],
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "me"
+      "coolibah tree"
      ]
     ],
     [
      [
       "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "Take the hand of "
-     ],
-     [
-      "c",
       "[C]"
      ],
      [
       "x",
-      "morning, "
+      "And he sang as he watched and waited till his "
      ],
      [
       "c",
-      "[G]"
+      "[F]"
      ],
      [
       "x",
-      "turn beneath the "
-     ],
-     [
-      "c",
-      "[D]"
-     ],
-     [
-      "x",
-      "sky"
+      "billy boiled"
      ]
     ],
     [
      [
       "c",
-      "[G]"
+      "[C]"
      ],
      [
       "x",
-      "Leave the heavy "
+      "\"You'll come a-"
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "waltzing Matilda with "
      ],
      [
       "c",
@@ -465,31 +3085,7 @@
      ],
      [
       "x",
-      "hours "
-     ],
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "dancing "
-     ],
-     [
-      "c",
-      "[D]"
-     ],
-     [
-      "x",
-      "by and "
-     ],
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "by"
+      "me\""
      ]
     ],
     [],
@@ -506,65 +3102,15 @@
      ],
      [
       "x",
-      "Three quarter "
+      "Waltzing Matilda, "
      ],
      [
       "c",
-      "[G]"
+      "[G7]"
      ],
      [
       "x",
-      "time, "
-     ],
-     [
-      "c",
-      "[C]"
-     ],
-     [
-      "x",
-      "three quarter "
-     ],
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "time"
-     ]
-    ],
-    [
-     [
-      "c",
-      "[Em]"
-     ],
-     [
-      "x",
-      "All of the "
-     ],
-     [
-      "c",
-      "[D]"
-     ],
-     [
-      "x",
-      "world in a "
-     ],
-     [
-      "c",
-      "[C]"
-     ],
-     [
-      "x",
-      "small happy "
-     ],
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "rhyme"
+      "waltzing Matilda"
      ]
     ],
     [
@@ -574,15 +3120,51 @@
      ],
      [
       "x",
-      "Three quarter "
+      "You'll come a-"
      ],
      [
       "c",
-      "[G]"
+      "[G7]"
      ],
      [
       "x",
-      "time, "
+      "waltzing Matilda with me"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "And he sang as he watched and waited till his "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "billy boiled"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "\"You'll come a-"
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "waltzing Matilda with "
      ],
      [
       "c",
@@ -590,165 +3172,14 @@
      ],
      [
       "x",
-      "three quarter "
-     ],
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "time"
-     ]
-    ],
-    [
-     [
-      "c",
-      "[Em]"
-     ],
-     [
-      "x",
-      "Carry me "
-     ],
-     [
-      "c",
-      "[D]"
-     ],
-     [
-      "x",
-      "home when the "
-     ],
-     [
-      "c",
-      "[C]"
-     ],
-     [
-      "x",
-      "bells have gone "
-     ],
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "quiet"
-     ]
-    ]
-   ]
-  },
-  {
-   "id": "river-of-stars",
-   "n": 3,
-   "title": "River of Stars",
-   "artist": "Songbook Demo",
-   "level": "Medium",
-   "new": false,
-   "dur": 3.1,
-   "key": "G",
-   "sheetKey": "G",
-   "capo": 0,
-   "bpm": 60,
-   "time": "6/8",
-   "strum": "du-6-8",
-   "chords": [
-    "G",
-    "D",
-    "Em",
-    "C"
-   ],
-   "sheet": [
-    [
-     [
-      "i",
-      "Verse 1"
-     ]
-    ],
-    [
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "River of stars, carry me "
-     ],
-     [
-      "c",
-      "[D]"
-     ],
-     [
-      "x",
-      "home"
-     ]
-    ],
-    [
-     [
-      "c",
-      "[Em]"
-     ],
-     [
-      "x",
-      "Past every field and the "
-     ],
-     [
-      "c",
-      "[C]"
-     ],
-     [
-      "x",
-      "roads I have known"
-     ]
-    ],
-    [
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "Moon in the reeds and the "
-     ],
-     [
-      "c",
-      "[D]"
-     ],
-     [
-      "x",
-      "wind in the pine"
-     ]
-    ],
-    [
-     [
-      "c",
-      "[Em]"
-     ],
-     [
-      "x",
-      "Sing me to sleep on the "
-     ],
-     [
-      "c",
-      "[C]"
-     ],
-     [
-      "x",
-      "river of "
-     ],
-     [
-      "c",
-      "[G]"
-     ],
-     [
-      "x",
-      "time"
+      "me\""
      ]
     ],
     [],
     [
      [
       "i",
-      "Chorus"
+      "Verse 2"
      ]
     ],
     [
@@ -758,49 +3189,15 @@
      ],
      [
       "x",
-      "Row, row, "
+      "Down came a jumbuck to drink at that "
      ],
      [
       "c",
-      "[G]"
+      "[G7]"
      ],
      [
       "x",
-      "follow the "
-     ],
-     [
-      "c",
-      "[D]"
-     ],
-     [
-      "x",
-      "light"
-     ]
-    ],
-    [
-     [
-      "c",
-      "[Em]"
-     ],
-     [
-      "x",
-      "One small boat in the "
-     ],
-     [
-      "c",
-      "[C]"
-     ],
-     [
-      "x",
-      "wide open "
-     ],
-     [
-      "c",
-      "[D]"
-     ],
-     [
-      "x",
-      "night"
+      "billabong"
      ]
     ],
     [
@@ -810,33 +3207,51 @@
      ],
      [
       "x",
-      "River of stars, "
+      "Up jumped the swagman and "
      ],
      [
       "c",
-      "[G]"
+      "[G7]"
      ],
      [
       "x",
-      "carry me "
-     ],
-     [
-      "c",
-      "[D]"
-     ],
-     [
-      "x",
-      "home"
+      "grabbed him with glee"
      ]
     ],
     [
      [
       "c",
-      "[Em]"
+      "[C]"
      ],
      [
       "x",
-      "Every wave "
+      "And he sang as he shoved that jumbuck in his "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "tucker bag"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "\"You'll come a-"
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "waltzing Matilda with "
      ],
      [
       "c",
@@ -844,23 +3259,94 @@
      ],
      [
       "x",
-      "singing the "
-     ],
+      "me\""
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 3"
+     ]
+    ],
+    [
      [
       "c",
-      "[G]"
+      "[C]"
      ],
      [
       "x",
-      "way I have "
+      "Up rode the squatter, mounted on his "
      ],
      [
       "c",
-      "[D]"
+      "[G7]"
      ],
      [
       "x",
-      "known"
+      "thoroughbred"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Down came the troopers, "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "one, two, three"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "\"Where's that jolly jumbuck you've got in your "
+     ],
+     [
+      "c",
+      "[F]"
+     ],
+     [
+      "x",
+      "tucker bag?\""
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "\"You'll come a-"
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "waltzing Matilda with "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "me\""
      ]
     ]
    ],
@@ -868,21 +3354,556 @@
     {
      "label": "Verse",
      "role": "verse",
-     "repeat": true,
+     "repeat": false,
      "bars": [
       {
        "beats": [
         {
-         "chord": "G",
-         "beats": 2
+         "chord": "C",
+         "beats": 4
         }
        ]
       },
       {
        "beats": [
         {
-         "chord": "D",
-         "beats": 2
+         "chord": "G7",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Chorus",
+     "role": "chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "F",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "the-water-is-wide",
+   "n": 10,
+   "title": "The Water Is Wide",
+   "artist": "Traditional",
+   "level": "Easy",
+   "new": false,
+   "dur": 3.0,
+   "key": "G",
+   "sheetKey": "G",
+   "capo": 0,
+   "bpm": 80,
+   "time": "3/4",
+   "strum": "waltz-3-4",
+   "chords": [
+    "G",
+    "C",
+    "Em",
+    "D"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "The water is wide, I "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "cannot get "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "o'er"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "neither have I "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "wings to fly"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Give "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "me a boat that can "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "carry "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "two"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "both shall row, my "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "love and "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "I"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "A ship there is and "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "she sails the "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "sea"
+     ]
+    ],
+    [
+     [
+      "x",
+      "She's "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "loaded deep as "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "deep can be"
+     ]
+    ],
+    [
+     [
+      "x",
+      "But "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "not so deep as the "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "love I'm "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "in"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And I "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "know not if I "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "sink or "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "swim"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 3"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "Oh love is gentle and "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "love is "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "kind"
+     ]
+    ],
+    [
+     [
+      "x",
+      "The "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "sweetest flower when "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "first it's new"
+     ]
+    ],
+    [
+     [
+      "x",
+      "But "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "love grows old and "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "waxes "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "cold"
+     ]
+    ],
+    [
+     [
+      "x",
+      "And "
+     ],
+     [
+      "c",
+      "[Em]"
+     ],
+     [
+      "x",
+      "fades away like the "
+     ],
+     [
+      "c",
+      "[D]"
+     ],
+     [
+      "x",
+      "morning "
+     ],
+     [
+      "c",
+      "[G]"
+     ],
+     [
+      "x",
+      "dew"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Verse",
+     "role": "verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 3
         }
        ]
       },
@@ -890,6 +3911,891 @@
        "beats": [
         {
          "chord": "Em",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Em",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "D",
+         "beats": 3
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G",
+         "beats": 3
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "wayfaring-stranger",
+   "n": 11,
+   "title": "Wayfaring Stranger",
+   "artist": "Traditional",
+   "level": "Medium",
+   "new": false,
+   "dur": 3.0,
+   "key": "Am",
+   "sheetKey": "Am",
+   "capo": 0,
+   "bpm": 92,
+   "time": "4/4",
+   "strum": "dduudu-4-4",
+   "chords": [
+    "Am",
+    "C",
+    "Dm",
+    "E7"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "I'm just a poor wayfaring "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "stranger"
+     ]
+    ],
+    [
+     [
+      "x",
+      "While "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "traveling through this "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "world of "
+     ],
+     [
+      "c",
+      "[E7]"
+     ],
+     [
+      "x",
+      "woe"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Yet "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "there's no sickness, "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "toil nor danger"
+     ]
+    ],
+    [
+     [
+      "x",
+      "In "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "that bright land to "
+     ],
+     [
+      "c",
+      "[E7]"
+     ],
+     [
+      "x",
+      "which I "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "go"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "I'm going there to see my "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "father"
+     ]
+    ],
+    [
+     [
+      "x",
+      "I'm "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "going there no "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "more to "
+     ],
+     [
+      "c",
+      "[E7]"
+     ],
+     [
+      "x",
+      "roam"
+     ]
+    ],
+    [
+     [
+      "x",
+      "I'm "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "only going "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "over Jordan"
+     ]
+    ],
+    [
+     [
+      "x",
+      "I'm "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "only going "
+     ],
+     [
+      "c",
+      "[E7]"
+     ],
+     [
+      "x",
+      "over "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "home"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 3"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "I know dark clouds will gather "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "'round me"
+     ]
+    ],
+    [
+     [
+      "x",
+      "I "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "know my way is "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "rough and "
+     ],
+     [
+      "c",
+      "[E7]"
+     ],
+     [
+      "x",
+      "steep"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Yet "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "golden fields lie "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "just before me"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Where "
+     ],
+     [
+      "c",
+      "[Dm]"
+     ],
+     [
+      "x",
+      "God's redeemed shall "
+     ],
+     [
+      "c",
+      "[E7]"
+     ],
+     [
+      "x",
+      "ever "
+     ],
+     [
+      "c",
+      "[Am]"
+     ],
+     [
+      "x",
+      "sleep"
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Verse",
+     "role": "verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Dm",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E7",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Dm",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "E7",
+         "beats": 4
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "Am",
+         "beats": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oh-susanna",
+   "n": 12,
+   "title": "Oh! Susanna",
+   "artist": "Stephen Foster",
+   "level": "Easy",
+   "new": false,
+   "dur": 2.5,
+   "key": "C",
+   "sheetKey": "C",
+   "capo": 0,
+   "bpm": 120,
+   "time": "2/4",
+   "strum": "eighths-2-4",
+   "chords": [
+    "C",
+    "G7"
+   ],
+   "sheet": [
+    [
+     [
+      "i",
+      "Verse 1"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "I come from Alabama with my "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "banjo on my knee"
+     ]
+    ],
+    [
+     [
+      "x",
+      "I'm "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "going to Louisiana, my "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "true love for to see"
+     ]
+    ],
+    [
+     [
+      "x",
+      "It "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "rained all night the day I left, the "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "weather it was dry"
+     ]
+    ],
+    [
+     [
+      "x",
+      "The "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "sun so hot I froze to death, Su"
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "sanna, don't you "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "cry"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Chorus"
+     ]
+    ],
+    [
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "Oh, Susanna! Oh, don't you "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "cry for me"
+     ]
+    ],
+    [
+     [
+      "x",
+      "For "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "I come from Alabama with my "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "banjo on my "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "knee"
+     ]
+    ],
+    [],
+    [
+     [
+      "i",
+      "Verse 2"
+     ]
+    ],
+    [
+     [
+      "x",
+      "I "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "had a dream the other night when "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "everything was still"
+     ]
+    ],
+    [
+     [
+      "x",
+      "I "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "thought I saw Susanna dear a-"
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "coming down the hill"
+     ]
+    ],
+    [
+     [
+      "x",
+      "The "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "buckwheat cake was in her mouth, the "
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "tear was in her eye"
+     ]
+    ],
+    [
+     [
+      "x",
+      "Says "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "I, \"I'm coming from the South, Su"
+     ],
+     [
+      "c",
+      "[G7]"
+     ],
+     [
+      "x",
+      "sanna, don't you "
+     ],
+     [
+      "c",
+      "[C]"
+     ],
+     [
+      "x",
+      "cry\""
+     ]
+    ]
+   ],
+   "grid": [
+    {
+     "label": "Verse",
+     "role": "verse",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 2
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Chorus",
+     "role": "chorus",
+     "repeat": false,
+     "bars": [
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "C",
+         "beats": 2
+        }
+       ]
+      },
+      {
+       "beats": [
+        {
+         "chord": "G7",
          "beats": 2
         }
        ]

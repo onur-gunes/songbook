@@ -1,19 +1,27 @@
-# Notice — no third-party song data is bundled
+# Notice — no third-party copyrighted song data is bundled
 
 The PolyForm Noncommercial license in [`LICENSE`](LICENSE) covers the **source
 code** of this project (the app, chord engine, build scripts and tests).
 
-This repository ships **no third-party song data**. It contains the engine and
-one small original demo book. Lyrics, melodies, chord charts, arrangements,
-tabs and transcriptions of songs you import remain the property of their
-respective authors, arrangers and publishers; importing them does not relicense
-them.
+This repository ships **no third-party copyrighted song data**. It contains the
+engine and one small demo book made of public-domain songs. Lyrics, melodies,
+chord charts, arrangements, tabs and transcriptions of songs you import remain
+the property of their respective authors, arrangers and publishers; importing
+them does not relicense them.
 
 ## Demo book
 
-`songbooks/demo.json` (authored in `chordpro/demo/`) contains three short songs
-written for this project. They are original, contain no third-party lyrics or
-melodies, and are covered by the same license as the code.
+`songbooks/demo.json` (authored in `chordpro/demo/`) contains twelve songs whose
+words and melodies are in the public domain in both the United States and the
+European Union. The chord charts are new, simple arrangements written for this
+project — no publisher's transcription or copyrighted arrangement was copied —
+and those charts are covered by the same license as the code.
+
+The song list, authors, death dates and public-domain basis for each entry are
+documented in [`chordpro/demo/PUBLIC-DOMAIN.md`](chordpro/demo/PUBLIC-DOMAIN.md).
+Note that modern recordings and arrangements of these songs (for example The
+Animals' "House of the Rising Sun" or Simon & Garfunkel's "Scarborough Fair")
+can still be protected; only the traditional songs themselves are used here.
 
 ## Imported songbooks
 
