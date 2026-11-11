@@ -41,6 +41,9 @@
             <label class="songbook-label" for="songbookSelect">Songbook</label>
             <select id="songbookSelect" class="songbook-select" aria-label="Choose a songbook"></select>
             <button id="importBtn" class="pill-btn" type="button">Import list…</button>
+            <button id="importUrlToggle" class="link-btn" type="button"
+                    aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
+            <button id="refreshSongsBtn" class="link-btn" type="button" hidden>Refresh</button>
             <button id="removeSongsBtn" class="link-btn" type="button" hidden>Remove</button>
             <button id="exportSongsBtn" class="link-btn" type="button">Export</button>
             <input id="importFile" type="file" accept=".json,application/json" multiple hidden>
@@ -55,6 +58,18 @@
                 <span>Tuner</span>
             </button>
         </div>
+
+        <form id="importUrlForm" class="import-url-bar" hidden>
+            <label class="sr-only" for="importUrl">Songbook URL</label>
+            <input id="importUrl" type="url" inputmode="url" autocomplete="off" spellcheck="false"
+                   placeholder="Paste a songbook JSON URL"
+                   aria-describedby="importUrlHint">
+            <button id="importUrlBtn" class="pill-btn" type="submit">Import</button>
+            <button id="importUrlCancel" class="link-btn" type="button">Cancel</button>
+            <p id="importUrlHint" class="import-url-hint">The host must send
+                <code>Access-Control-Allow-Origin</code> (CORS). File import has no such
+                constraint.</p>
+        </form>
 
         <div id="listControls" class="controls">
             <div class="search-wrap">
@@ -92,6 +107,7 @@
             <h2 class="empty-state-title">No songbooks yet</h2>
             <p class="empty-state-lead">Import a songbook JSON file to start building your library.</p>
             <button id="emptyImportBtn" class="pill-btn accent empty-state-import" type="button">Import a songbook…</button>
+            <button id="emptyImportUrlBtn" class="link-btn empty-state-url" type="button">Import from a URL…</button>
             <p class="empty-state-docs">New to the format? Read the
                 <a href="https://github.com/onur-gunes/songbook#songbook-json-format"
                    target="_blank" rel="noopener noreferrer">songbook format docs</a>.</p>

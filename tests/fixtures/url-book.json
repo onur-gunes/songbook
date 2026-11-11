@@ -1,0 +1,18 @@
+{
+  "id": "url-book",
+  "name": "URL Book",
+  "description": "Served over HTTP for the import-from-URL test",
+  "instrument": "ukulele",
+  "songs": [
+    {
+      "id": "u1",
+      "title": "Fetched Song",
+      "artist": "Tester",
+      "level": "Easy",
+      "chords": ["C", "G"],
+      "sheet": [
+        [["c", "[C]"], ["x", " fetched "], ["c", "[G]"], ["x", " song"]]
+      ]
+    }
+  ]
+}

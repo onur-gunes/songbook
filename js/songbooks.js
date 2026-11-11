@@ -303,6 +303,8 @@
         if (sel) sel.value = sb ? sb.id : '';
         var rm = SB.$('removeSongsBtn');
         if (rm) rm.hidden = !(sb && sb.imported);
+        var rf = SB.$('refreshSongsBtn');
+        if (rf) rf.hidden = !(sb && sb.imported && sb.sourceUrl);
         var ex = SB.$('exportSongsBtn');
         if (ex) ex.hidden = !sb;
         if (SB.applyBrand) SB.applyBrand();

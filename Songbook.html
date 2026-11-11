@@ -713,6 +713,43 @@ main {
 
 .empty-state-docs a { color: var(--accent); }
 
+.empty-state-url {
+    display: block;
+    margin: 10px auto 0;
+}
+
+/* ===== import from URL ===== */
+
+.import-url-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    margin: -4px 0 12px;
+}
+
+.import-url-bar input {
+    flex: 1 1 260px;
+    max-width: 460px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+}
+
+.import-url-hint {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.import-url-hint code {
+    font-size: 0.95em;
+}
+
 /* ===== song view ===== */
 
 .song-nav {
@@ -4080,6 +4117,9 @@ button.structure-close,
             <label class="songbook-label" for="songbookSelect">Songbook</label>
             <select id="songbookSelect" class="songbook-select" aria-label="Choose a songbook"></select>
             <button id="importBtn" class="pill-btn" type="button">Import list…</button>
+            <button id="importUrlToggle" class="link-btn" type="button"
+                    aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
+            <button id="refreshSongsBtn" class="link-btn" type="button" hidden>Refresh</button>
             <button id="removeSongsBtn" class="link-btn" type="button" hidden>Remove</button>
             <button id="exportSongsBtn" class="link-btn" type="button">Export</button>
             <input id="importFile" type="file" accept=".json,application/json" multiple hidden>
@@ -4094,6 +4134,18 @@ button.structure-close,
                 <span>Tuner</span>
             </button>
         </div>
+
+        <form id="importUrlForm" class="import-url-bar" hidden>
+            <label class="sr-only" for="importUrl">Songbook URL</label>
+            <input id="importUrl" type="url" inputmode="url" autocomplete="off" spellcheck="false"
+                   placeholder="Paste a songbook JSON URL"
+                   aria-describedby="importUrlHint">
+            <button id="importUrlBtn" class="pill-btn" type="submit">Import</button>
+            <button id="importUrlCancel" class="link-btn" type="button">Cancel</button>
+            <p id="importUrlHint" class="import-url-hint">The host must send
+                <code>Access-Control-Allow-Origin</code> (CORS). File import has no such
+                constraint.</p>
+        </form>
 
         <div id="listControls" class="controls">
             <div class="search-wrap">
@@ -4131,6 +4183,7 @@ button.structure-close,
             <h2 class="empty-state-title">No songbooks yet</h2>
             <p class="empty-state-lead">Import a songbook JSON file to start building your library.</p>
             <button id="emptyImportBtn" class="pill-btn accent empty-state-import" type="button">Import a songbook…</button>
+            <button id="emptyImportUrlBtn" class="link-btn empty-state-url" type="button">Import from a URL…</button>
             <p class="empty-state-docs">New to the format? Read the
                 <a href="https://github.com/onur-gunes/songbook#songbook-json-format"
                    target="_blank" rel="noopener noreferrer">songbook format docs</a>.</p>
@@ -7326,6 +7379,8 @@ button.structure-close,
         if (sel) sel.value = sb ? sb.id : '';
         var rm = SB.$('removeSongsBtn');
         if (rm) rm.hidden = !(sb && sb.imported);
+        var rf = SB.$('refreshSongsBtn');
+        if (rf) rf.hidden = !(sb && sb.imported && sb.sourceUrl);
         var ex = SB.$('exportSongsBtn');
         if (ex) ex.hidden = !sb;
         if (SB.applyBrand) SB.applyBrand();
@@ -11555,6 +11610,66 @@ button.structure-close,
         });
         SB.$('importBtn').addEventListener('click', function () { SB.$('importFile').click(); });
         SB.$('emptyImportBtn').addEventListener('click', function () { SB.$('importFile').click(); });
+
+        /* The URL form is one shared control: reachable from the bar when a
+         * library already exists and from the empty state on first run. File
+         * import stays the primary action because it has no CORS constraint. */
+        var urlForm = SB.$('importUrlForm');
+        var urlInput = SB.$('importUrl');
+        var urlToggle = SB.$('importUrlToggle');
+        var urlBtn = SB.$('importUrlBtn');
+
+        function setUrlForm(open) {
+            if (!urlForm) return;
+            urlForm.hidden = !open;
+            urlToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open) urlInput.focus();
+            else urlInput.value = '';
+        }
+
+        function reportUrlFailure(err, fallbackName) {
+            window.alert(summarizeImport([{
+                ok: false,
+                name: err.sourceName || fallbackName,
+                reason: err.message
+            }]));
+        }
+
+        urlToggle.addEventListener('click', function () { setUrlForm(urlForm.hidden); });
+        var emptyUrlBtn = SB.$('emptyImportUrlBtn');
+        if (emptyUrlBtn) emptyUrlBtn.addEventListener('click', function () { setUrlForm(true); });
+        SB.$('importUrlCancel').addEventListener('click', function () { setUrlForm(false); });
+
+        urlForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var url = urlInput.value.trim();
+            if (!url) { urlInput.focus(); return; }
+            urlBtn.disabled = true;
+            SB.importSongbookFromUrl(url).then(function (sb) {
+                setUrlForm(false);
+                var hash = SB.routeHash(sb.id);
+                if (location.hash === hash) SB.route();
+                else location.hash = hash;
+            }, function (err) {
+                reportUrlFailure(err, url);
+            }).then(function () { urlBtn.disabled = false; });
+        });
+
+        SB.$('refreshSongsBtn').addEventListener('click', function () {
+            var sb = SB.state.active;
+            if (!sb || !sb.sourceUrl) return;
+            var btn = SB.$('refreshSongsBtn');
+            btn.disabled = true;
+            SB.refreshSongbook(sb).then(function (next) {
+                /* Route through the rebuilt index so state.active and the
+                 * rendered view point at the replaced record, not the old
+                 * object that was just overwritten. */
+                if (SB.state.active && SB.state.active.id === next.id) SB.route();
+            }, function (err) {
+                window.alert('Refresh failed: ' + err.message);
+            }).then(function () { btn.disabled = false; });
+        });
+
         SB.$('importFile').addEventListener('change', function (e) {
             var files = Array.prototype.slice.call(e.target.files || []);
             e.target.value = '';
@@ -11609,7 +11724,7 @@ button.structure-close,
 </script>
 <script>
 /* Songbook — import
- * importing a songbook JSON from disk
+ * importing a songbook JSON from disk or a URL
  *
  * Part of the window.SB namespace. Loaded as a classic script in the
  * order set by index.html; see js/core.js for the shared state.
@@ -11638,10 +11753,15 @@ button.structure-close,
         });
     }
 
-    /* One code path for every source (a chosen file now, a URL later):
-     * parse -> normalize -> persist -> replace or append in memory. It does
-     * not route or alert; the caller decides what to do with a batch result. */
-    SB.importSongbookData = function (raw, sourceName) {
+    /* One code path for every source (a chosen file or a URL): parse ->
+     * normalize -> persist -> replace or append in memory. It does not route
+     * or alert; the caller decides what to do with a batch result.
+     *
+     * `options.sourceUrl` is storage bookkeeping (where a URL import came
+     * from), never part of the normalised songbook. `options.confirmReplace`
+     * is false for a Refresh: the user has already asked to replace. */
+    SB.importSongbookData = function (raw, sourceName, options) {
+        options = options || {};
         return new Promise(function (resolve, reject) {
             var data = raw;
             if (typeof raw === 'string') {
@@ -11670,12 +11790,14 @@ button.structure-close,
             for (var i = 0; i < SB.state.imported.length; i++) {
                 if (SB.state.imported[i].id === sb.id) { existing = SB.state.imported[i]; break; }
             }
-            if (existing && !window.confirm('Replace the imported songbook "' + existing.name + '"?')) {
+            if (existing && options.confirmReplace !== false &&
+                    !window.confirm('Replace the imported songbook "' + existing.name + '"?')) {
                 reject(importError('replace cancelled', sourceName));
                 return;
             }
 
             sb.imported = true;
+            if (options.sourceUrl) sb.sourceUrl = options.sourceUrl;
             SB.idbPut(sb).then(function () {
                 var index = -1;
                 for (var j = 0; j < SB.state.imported.length; j++) {
@@ -11695,6 +11817,52 @@ button.structure-close,
         return readFile(file).then(function (raw) {
             return SB.importSongbookData(raw, file.name);
         });
+    }
+
+    /* ---------------- import from URL ---------------- */
+
+    /* A cross-origin fetch that the host has not opted into fails before any
+     * status exists, and the browser deliberately hides why. Say so in the
+     * error instead of surfacing the opaque "Failed to fetch", and name the
+     * header the host has to send. */
+    var CORS_HINT = 'the host must send Access-Control-Allow-Origin';
+
+    function fetchSongbookText(url) {
+        return fetch(url, { cache: 'no-store' }).then(function (response) {
+            if (response.status === 404) throw importError('not found (404)', url);
+            if (!response.ok) throw importError('server returned HTTP ' + response.status, url);
+            return response.text();
+        }).catch(function (err) {
+            /* Keep the specific status/parse-shaped errors above; only an
+             * opaque fetch or body-read failure gets the CORS explanation. */
+            if (err && err.sourceName) throw err;
+            throw importError('could not fetch (network error or CORS blocked; ' +
+                CORS_HINT + ')', url);
+        });
+    }
+
+    /* fetch -> text -> the same parse/validate/persist path as a file. The
+     * URL is remembered so the songbook can be refreshed later. */
+    SB.importSongbookFromUrl = function (url, options) {
+        var clean = String(url == null ? '' : url).trim();
+        if (!clean) return Promise.reject(importError('enter a URL', ''));
+        return fetchSongbookText(clean).then(function (raw) {
+            var opts = options || {};
+            return SB.importSongbookData(raw, clean, {
+                sourceUrl: clean,
+                confirmReplace: opts.confirmReplace
+            });
+        });
+    }
+
+    /* Re-fetch an imported songbook from the URL it came from and replace the
+     * stored copy. No replace prompt: clicking Refresh is the confirmation. */
+    SB.refreshSongbook = function (sb) {
+        if (!sb || !sb.sourceUrl) {
+            return Promise.reject(importError('this songbook has no source URL',
+                sb ? sb.name : ''));
+        }
+        return SB.importSongbookFromUrl(sb.sourceUrl, { confirmReplace: false });
     }
 
 })(window.SB = window.SB || {});
@@ -15399,7 +15567,14 @@ button.structure-close,
         Promise.all([SB.loadBundled(), SB.idbAll().catch(function () { return []; })]).then(function (res) {
             SB.state.bundled = res[0];
             SB.state.imported = res[1].map(function (raw) {
-                try { var sb = SB.normalizeSongbook(raw); sb.imported = true; return sb; }
+                try {
+                    var sb = SB.normalizeSongbook(raw);
+                    sb.imported = true;
+                    /* sourceUrl is storage bookkeeping, not songbook content,
+                     * so normalisation drops it; carry it over by hand. */
+                    if (typeof raw.sourceUrl === 'string' && raw.sourceUrl) sb.sourceUrl = raw.sourceUrl;
+                    return sb;
+                }
                 catch (e) { return null; }
             }).filter(Boolean);
             /* Zero songbooks is a supported first-run state, not a fatal one:

@@ -700,6 +700,43 @@ main {
 
 .empty-state-docs a { color: var(--accent); }
 
+.empty-state-url {
+    display: block;
+    margin: 10px auto 0;
+}
+
+/* ===== import from URL ===== */
+
+.import-url-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    margin: -4px 0 12px;
+}
+
+.import-url-bar input {
+    flex: 1 1 260px;
+    max-width: 460px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+}
+
+.import-url-hint {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.import-url-hint code {
+    font-size: 0.95em;
+}
+
 /* ===== song view ===== */
 
 .song-nav {
