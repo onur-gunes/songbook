@@ -27,9 +27,9 @@ or copy that one file to a phone. Everything is inlined; no network is used.
 
 | File / folder | Purpose |
 |---|---|
-| `index.html` | App shell (list view + song view in one document) |
+| `index.html` | App shell (list, song and chord-explorer views in one document) |
 | `style.css` | Styling, light/dark themes via `[data-theme]` |
-| `chords.js` | **ChordKit** — the shared chord engine: parse chords, search voicings for ukulele and guitar, render SVG diagrams, expose data URIs |
+| `chords.js` | **ChordKit** — the shared chord engine: parse chords, spell tones, search voicings for ukulele and guitar, identify a fret shape, render SVG diagrams, expose data URIs |
 | `tuner.js` | Microphone tuner: YIN + FFT pitch detection, octave guards, smoothing, ukulele/guitar presets, A4 calibration |
 | `js/` | The app itself, split by concern — search, filters, sort, favorites, notes, transpose, auto-scroll, songbook switching, import, hash routing, service-worker registration (see [App modules](#app-modules)) |
 | `songbooks/index.json` | Manifest of the books bundled into a build (the demo book, by default) |
@@ -75,6 +75,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/sheet.js` | Both sheet renderers (inline chords and chords-above-lyrics) |
 | `js/grid.js` | Play-along grid chart: bars, beat slashes, diagrams and the metronome-driven beat cursor |
 | `js/chordstrip.js` | Sticky chord strip and the voicing chooser |
+| `js/explorer.js` | Chord explorer: circle of fifths, chord types, voicing browser and reverse fret lookup |
 | `js/list.js` | List view: search, filters, sort, songbook picker |
 | `js/import.js` | Importing songbook JSON from disk (shared parse/validate/persist pipeline) |
 | `js/export.js` | Exporting any songbook (bundled or imported) back to a JSON file |
@@ -100,6 +101,13 @@ attached to `SB`.
 - **Global instrument toggle** — Ukulele or Guitar. Chord diagrams and the
   voicing chooser are generated for the selected instrument; the choice is
   remembered.
+- **Chord explorer** (`#/chords`) — the standalone Ukulele and Guitar Chord
+  Explorer apps are now part of the songbook. Pick a root on the circle of
+  fifths, choose one of 18 chord types, and see every playable voicing with
+  fret labels. It also spells out the chord tones (with enharmonic spelling)
+  and reverses the lookup: set each string's fret and it names the shape.
+  Everything follows the global instrument toggle, so the same view covers
+  both tunings.
 - Live search (title + artist), difficulty filters — multi-select, results OR'd
   across Easy / Medium / Hard, 🔥 New, ⭐ Favorites (localStorage),
   sort Title/Artist — list defaults to alphabetical by name,
@@ -678,7 +686,7 @@ python3 tests/editor.py
 # engine unit tests (voicings, parsing, SVG)
 python3 tests/run_html.py http://localhost:8777/tests/chordkit.html
 
-# app smoke: list, routing, instrument toggle, diagrams
+# app smoke: list, routing, instrument toggle, diagrams, chord explorer
 python3 tests/smoke.py  http://localhost:8777
 
 # content-free boot: zero songbooks, import, remove the last book
@@ -718,9 +726,13 @@ full `<pre id="log">`.
 ```js
 ChordKit.voicings('Am', 'guitar')     // -> [ [-1,0,2,2,1,0], ... ]
 ChordKit.bestVoicing('C', 'ukulele')  // -> [0,0,0,3]
+ChordKit.chordNotes('Cdim7')          // -> [{name:'C',degree:'root'}, ... , {name:'Bbb',...}]
+ChordKit.identify([0,0,0,3], 'ukulele') // -> [{name:'Am7',rootPc:9,...}, ...]
 ChordKit.dataUri('ukulele', frets)    // -> "data:image/svg+xml,..." diagram
 ChordKit.diagramSVG('guitar', frets)  // -> raw <svg> markup
 ```
 
 Instruments and chord types are data-driven (`ChordKit.INSTRUMENTS`,
-`ChordKit.TYPES`), so the same engine powers both tunings.
+`ChordKit.TYPES`), so the same engine powers both tunings. The chord explorer
+is the UI over this API; the songbook itself uses the same voicings and SVG
+renderer for its strip and grid.

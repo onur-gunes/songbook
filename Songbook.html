@@ -3022,6 +3022,362 @@ body.tuner-open { overflow: hidden; }
 
 .tuner-attrib a:hover { color: var(--accent); }
 
+/* ===== chord explorer ===== */
+
+.topbar-link {
+    display: inline-flex;
+    align-items: center;
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.topbar-link:hover { background: var(--surface-2); color: var(--text); }
+
+.topbar-link[aria-current="page"] {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+}
+
+.explorer-kicker {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.explorer-head { margin-bottom: 22px; }
+.explorer-title { margin: 0 0 6px; font-size: 1.9rem; line-height: 1.15; }
+.explorer-lead { margin: 0; max-width: 58ch; color: var(--muted); font-size: 0.92rem; }
+
+.explorer-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 370px) minmax(0, 1fr);
+    gap: 30px;
+    align-items: start;
+}
+
+.explorer-side {
+    position: sticky;
+    top: calc(var(--topbar-h) + 14px);
+    min-width: 0;
+}
+
+.explorer-circle svg { display: block; width: 100%; height: auto; }
+
+.explorer-circle .cx-wg {
+    stroke: var(--bg);
+    stroke-width: 2.5;
+    cursor: pointer;
+    transition: fill 0.15s ease;
+}
+.explorer-circle .cx-wmaj { fill: var(--surface-2); }
+.explorer-circle .cx-wmin { fill: var(--surface); }
+.explorer-circle [data-kind]:not(.sel):hover .cx-wg { fill: var(--chip); }
+.explorer-circle [data-kind]:focus { outline: none; }
+.explorer-circle [data-kind]:focus-visible .cx-wg {
+    stroke: var(--accent);
+    stroke-width: 3;
+}
+.explorer-circle .cx-lbl-o {
+    fill: var(--text);
+    font-size: 16px;
+    font-weight: 600;
+    pointer-events: none;
+}
+.explorer-circle .cx-lbl-i {
+    fill: var(--muted);
+    font-size: 12.5px;
+    font-weight: 500;
+    pointer-events: none;
+}
+.explorer-circle .sel .cx-wg { fill: var(--accent); }
+.explorer-circle .sel .cx-lbl-o,
+.explorer-circle .sel .cx-lbl-i {
+    fill: #fff;
+    font-weight: 700;
+}
+.explorer-circle .cx-ctr {
+    fill: var(--surface);
+    stroke: var(--line);
+    stroke-width: 1.5;
+}
+.explorer-circle .cx-ctr-name {
+    fill: var(--text);
+    font-size: 28px;
+    font-weight: 700;
+    text-anchor: middle;
+}
+.explorer-circle .cx-ctr-notes {
+    fill: var(--muted);
+    font-size: 11.5px;
+    letter-spacing: 0.07em;
+    text-anchor: middle;
+}
+.explorer-root { color: var(--accent); }
+.explorer-circle .explorer-root { fill: var(--accent); }
+
+.explorer-hint-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.explorer-acc {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--accent);
+    padding: 5px 11px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.explorer-acc:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+.explorer-find {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+}
+.explorer-label {
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+.explorer-find-strings { display: flex; gap: 8px; }
+.explorer-fstr { flex: 1; min-width: 0; }
+.explorer-fstr span {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-align: center;
+}
+.explorer-fsel {
+    width: 100%;
+    padding: 8px 4px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface-2);
+    text-align: center;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+.explorer-fsel:focus-visible { border-color: var(--accent); }
+.explorer-hint { margin: 9px 0 0; color: var(--muted); font-size: 0.78rem; }
+.explorer-find-out { min-height: 32px; margin-top: 12px; }
+.explorer-find-hit { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+.explorer-find-name {
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    padding: 6px 15px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.explorer-find-name:hover { filter: brightness(1.06); }
+.explorer-find-hint { color: var(--muted); font-size: 0.76rem; }
+.explorer-find-none { color: var(--muted); font-size: 0.84rem; }
+
+.explorer-main { min-width: 0; }
+
+.explorer-chord-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+.explorer-chord-name {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+.explorer-chord-notes {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.explorer-notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 20px;
+}
+.explorer-note {
+    min-width: 58px;
+    padding: 7px 10px 6px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    text-align: center;
+}
+.explorer-note b { display: block; font-size: 1rem; font-weight: 650; }
+.explorer-note.root b { color: var(--accent); }
+.explorer-note span { display: block; margin-top: 2px; color: var(--muted); font-size: 0.68rem; }
+
+.explorer-chips { display: grid; gap: 14px; margin-bottom: 24px; }
+.explorer-chip-label {
+    margin: 0 2px 8px;
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+.explorer-chip-row { display: flex; flex-wrap: wrap; gap: 7px; }
+.explorer-chip {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--muted);
+    padding: 6px 13px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.explorer-chip:hover { color: var(--text); border-color: var(--muted); }
+.explorer-chip.active {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+}
+
+.explorer-shapes-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+}
+.explorer-shapes-title { margin: 0; font-size: 1rem; }
+.explorer-shapes-name { color: var(--accent); }
+.explorer-shapes-count { color: var(--muted); font-size: 0.8rem; white-space: nowrap; }
+.explorer-hard-tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 7px;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    color: var(--accent);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    vertical-align: 2px;
+}
+
+.explorer-shapes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+    gap: 12px;
+}
+.explorer-shape {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 12px 7px 8px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    animation: explorer-rise 0.28s ease backwards;
+}
+.explorer-shape.easy {
+    border-color: var(--accent);
+    outline: 1px dashed var(--accent);
+    outline-offset: 2px;
+}
+.explorer-diagram,
+.explorer-diagram svg { display: block; width: 100%; max-width: 160px; height: auto; }
+.explorer-frets,
+.explorer-frets svg { display: block; width: 100%; max-width: 160px; height: auto; }
+.explorer-easy {
+    color: var(--accent);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.explorer-shape .st { stroke: var(--muted); stroke-width: 1.4; }
+.explorer-shape .fw { stroke: var(--muted); stroke-width: 1.4; opacity: 0.55; }
+.explorer-shape .nut { stroke: var(--text); stroke-width: 4.5; stroke-linecap: round; }
+.explorer-shape .dot,
+.explorer-shape .bar { fill: var(--accent); }
+.explorer-shape .oc { fill: none; stroke: var(--muted); stroke-width: 1.7; }
+.explorer-shape .pos { fill: var(--muted); font-size: 11px; font-weight: 700; }
+.explorer-shape .muted {
+    fill: var(--muted);
+    font-size: 18px;
+    font-weight: 700;
+    dominant-baseline: middle;
+}
+.explorer-frets .snum {
+    fill: var(--muted);
+    font-size: 10.5px;
+    font-weight: 600;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    font-variant-numeric: tabular-nums;
+}
+
+.explorer-empty {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 18px;
+    color: var(--muted);
+    font-size: 0.88rem;
+    text-align: center;
+}
+
+@keyframes explorer-rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 860px) {
+    .explorer-layout { grid-template-columns: 1fr; }
+    .explorer-side {
+        position: static;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 24px;
+        align-items: start;
+    }
+    .explorer-circle { max-width: 380px; }
+    .explorer-find { margin-top: 0; }
+}
+
 /* ===== responsive ===== */
 
 @media (max-width: 640px) {
@@ -3032,6 +3388,15 @@ body.tuner-open { overflow: hidden; }
     main { padding: 16px 12px 40px; }
 
     .brand-name { font-size: 0.9rem; }
+
+    .topbar-link { padding: 0 10px; font-size: 0.78rem; }
+
+    .explorer-side { grid-template-columns: 1fr; gap: 20px; }
+    .explorer-find { padding-top: 16px; border-top: 1px solid var(--line); }
+    .explorer-title { font-size: 1.6rem; }
+    .explorer-chord-name { font-size: 1.7rem; }
+    .explorer-shapes { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 9px; }
+    .explorer-shape { padding: 10px 5px 7px; }
 
     .list-rail { gap: 8px 14px; padding: 8px 10px; }
 
@@ -3368,6 +3733,8 @@ button.structure-close,
             <span class="brand-name">Songbook</span>
         </a>
         <div class="topbar-right">
+            <a id="explorerLink" class="topbar-link" href="#/chords"
+               aria-label="Open the chord explorer" title="Chord explorer">Chords</a>
             <div class="seg-group instrument-toggle" role="group" aria-label="Instrument">
                 <button class="instrument-btn active" data-instrument="ukulele" type="button" aria-pressed="true">Ukulele</button>
                 <button class="instrument-btn" data-instrument="guitar" type="button" aria-pressed="false">Guitar</button>
@@ -3650,6 +4017,57 @@ button.structure-close,
 
     </section>
 
+    <!-- ============ CHORD EXPLORER VIEW ============ -->
+    <section id="explorerView" hidden aria-labelledby="explorerTitle">
+
+        <nav class="song-nav">
+            <a class="back-link" href="#/" id="explorerBack">← All songs</a>
+            <span class="explorer-kicker">Ukulele + guitar chord engine</span>
+        </nav>
+
+        <header class="explorer-head">
+            <h1 id="explorerTitle" class="explorer-title">Chord explorer</h1>
+            <p class="explorer-lead">
+                Every way to play any chord on
+                <strong id="explorerInstrumentName">ukulele</strong> — pick a root
+                on the circle of fifths, then a chord type.
+            </p>
+        </header>
+
+        <div class="explorer-layout">
+
+            <aside class="explorer-side" aria-label="Root and reverse lookup">
+                <div id="explorerCircle" class="explorer-circle"></div>
+
+                <section class="explorer-find" aria-labelledby="explorerFindTitle">
+                    <h2 id="explorerFindTitle" class="explorer-label">Find chord by frets</h2>
+                    <div id="explorerFindStrings" class="explorer-find-strings"></div>
+                    <p class="explorer-hint">Set each string’s fret — the chord is named as you pick.</p>
+                    <div id="explorerFindOut" class="explorer-find-out" role="status" aria-live="polite"></div>
+                </section>
+            </aside>
+
+            <div class="explorer-main">
+                <div class="explorer-chord-head">
+                    <div class="explorer-chord-id">
+                        <div id="explorerChordName" class="explorer-chord-name">C</div>
+                        <div id="explorerChordNotes" class="explorer-chord-notes"></div>
+                    </div>
+                    <button id="explorerSpelling" class="explorer-acc" type="button" hidden></button>
+                </div>
+
+                <div id="explorerNotes" class="explorer-notes" aria-label="Chord tones"></div>
+                <div id="explorerChips" class="explorer-chips" aria-label="Chord types"></div>
+
+                <div class="explorer-shapes-head">
+                    <h2 id="explorerShapesTitle" class="explorer-shapes-title">Ways to play C</h2>
+                    <span id="explorerShapesCount" class="explorer-shapes-count"></span>
+                </div>
+                <div id="explorerShapes" class="explorer-shapes"></div>
+            </div>
+        </div>
+    </section>
+
     <div id="bootMsg" class="boot-msg">Loading songbooks…</div>
 
 </main>
@@ -3906,16 +4324,16 @@ button.structure-close,
     function splitSlash(name) {
         var m = name.match(/^([^/]+)\/(.+)$/);
         if (m) return { head: m[1], bass: m[2] };
-        if (/^[A-G](?:sharp|flat|#|b)?$/.test(name) === false && /^[A-G](?:sharp|flat|#|b)?C$/.test(name)) {
+        if (/^[A-G](?:sharp|flat|#|b|\u266f|\u266d)?$/.test(name) === false && /^[A-G](?:sharp|flat|#|b|\u266f|\u266d)?C$/.test(name)) {
             return { head: name.slice(0, -1), bass: 'C' };
         }
         return { head: name, bass: null };
     }
 
     function rootPcOf(token) {
-        var m = token.match(/^([A-G])(sharp|flat|#|b)?/);
+        var m = token.match(/^([A-G])(sharp|flat|#|b|\u266f|\u266d)?/);
         if (!m) return null;
-        var acc = !m[2] ? 0 : (m[2] === 'sharp' || m[2] === '#') ? 1 : -1;
+        var acc = !m[2] ? 0 : (m[2] === 'sharp' || m[2] === '#' || m[2] === '\u266f') ? 1 : -1;
         return ((LETTER_PC[LETTERS.indexOf(m[1])] + acc) % 12 + 12) % 12;
     }
 
@@ -3924,9 +4342,9 @@ button.structure-close,
         var key = String(name).trim();
         if (!key || key === 'NC' || /^(stop|pause|riff|muted)$/i.test(key)) return null;
         var slash = splitSlash(key);
-        var m = slash.head.match(/^([A-G])(sharp|flat|#|b)?(.*)$/);
+        var m = slash.head.match(/^([A-G])(sharp|flat|#|b|\u266f|\u266d)?(.*)$/);
         if (!m) return null;
-        var acc = !m[2] ? 0 : (m[2] === 'sharp' || m[2] === '#') ? 1 : -1;
+        var acc = !m[2] ? 0 : (m[2] === 'sharp' || m[2] === '#' || m[2] === '\u266f') ? 1 : -1;
         var type = typeForSuffix(m[3]);
         if (!type) return null;
         return {
@@ -3952,6 +4370,113 @@ button.structure-close,
         var list = ENHARMONIC[((rootPc % 12) + 12) % 12];
         if (!list) return PC_LETTER[((rootPc % 12) + 12) % 12] || '';
         return spelling === 'flat' ? list[1] : list[0];
+    }
+
+    // Spell one chord tone from its root letter, so enharmonic notes keep the
+    // degree they actually have (Cdim7: Bbb, not A).
+    function toneName(rootPc, rootLetter, semitones, letterSteps) {
+        var target = ((rootPc + semitones) % 12 + 12) % 12;
+        var letter = (rootLetter + letterSteps) % 7;
+        var diff = target - LETTER_PC[letter];
+        if (diff > 6) diff -= 12;
+        if (diff < -6) diff += 12;
+        return LETTERS[letter] + (ACC_STR[String(diff)] || '');
+    }
+
+    /* Chord tones with conventional spelling, e.g.
+     * chordNotes('Cdim7') -> C, Eb, Gb, Bbb. */
+    function chordNotes(name) {
+        var parsed = parse(name);
+        if (!parsed) return [];
+        var rootLetter = LETTERS.indexOf(parsed.letter);
+        return parsed.type.tones.map(function (tone, i) {
+            return {
+                name: toneName(parsed.rootPc, rootLetter, tone[0], tone[1]),
+                degree: parsed.type.degrees[i],
+                pc: ((parsed.rootPc + tone[0]) % 12 + 12) % 12
+            };
+        });
+    }
+
+    /* ---------------- reverse lookup ---------------- */
+
+    var MINOR_TYPE_IDS = { m: 1, m7: 1, m6: 1, m9: 1, 'm7b5': 1 };
+
+    function pitchClasses(frets, tuning) {
+        var out = [];
+        for (var i = 0; i < frets.length; i++) {
+            if (frets[i] >= 0) out.push(((tuning[i] + frets[i]) % 12 + 12) % 12);
+        }
+        return uniqSorted(out);
+    }
+
+    function matchesType(pcs, type, rootPc) {
+        var tones = type.tones.length > 4
+            ? type.tones.filter(function (_, i) { return i !== 2; })  // drop the 5th first
+            : type.tones;
+        var wanted = uniqSorted(tones.map(function (tone) {
+            return ((rootPc + tone[0]) % 12 + 12) % 12;
+        }));
+        if (wanted.length !== pcs.length) return false;
+        for (var i = 0; i < wanted.length; i++) {
+            if (pcs.indexOf(wanted[i]) < 0) return false;
+        }
+        return true;
+    }
+
+    /* Name a fret shape, e.g. identify([0,0,0,3], 'ukulele') ->
+     * [{ name: 'C', rootPc: 0, type: TYPES[0], ... }].
+     * Candidate roots are ranked the way the explorers did: the minor-family
+     * name first when a shape is ambiguous (Am7/C6), then type order, then a
+     * root in the bass. */
+    function identify(frets, instrumentId) {
+        var inst = instrumentOf(instrumentId);
+        if (!frets || !frets.length) return [];
+        frets = frets.slice(0, inst.tuning.length);
+        var pcs = pitchClasses(frets, inst.tuning);
+        if (!pcs.length) return [];
+
+        var bass = null;
+        for (var i = 0; i < frets.length; i++) {
+            if (frets[i] < 0) continue;
+            var midi = inst.tuning[i] + frets[i];
+            if (bass === null || midi < bass) bass = midi;
+        }
+        var bassPc = bass === null ? null : ((bass % 12) + 12) % 12;
+
+        var found = [];
+        function scan(types) {
+            types.forEach(function (type) {
+                pcs.forEach(function (rootPc) {
+                    if (!matchesType(pcs, type, rootPc)) return;
+                    found.push({
+                        name: rootName(rootPc, 'sharp') + type.suffix,
+                        rootPc: rootPc,
+                        type: type,
+                        bassPc: bassPc,
+                        rootInBass: rootPc === bassPc
+                    });
+                });
+            });
+        }
+
+        // Prefer the compact triads/sevenths. Extended, fifth-less voicings
+        // (9, m9, maj9) are only considered when nothing else matches.
+        scan(TYPES.filter(function (type) { return type.tones.length <= 4; }));
+        if (!found.length) {
+            scan(TYPES.filter(function (type) { return type.tones.length > 4; }));
+        }
+        if (!found.length) return [];
+
+        found.sort(function (a, b) {
+            var ma = MINOR_TYPE_IDS[a.type.id] ? 0 : 1;
+            var mb = MINOR_TYPE_IDS[b.type.id] ? 0 : 1;
+            if (ma !== mb) return ma - mb;
+            var ti = TYPES.indexOf(a.type) - TYPES.indexOf(b.type);
+            if (ti) return ti;
+            return (a.rootInBass ? 0 : 1) - (b.rootInBass ? 0 : 1);
+        });
+        return found;
     }
 
     /* ---------------- voicing search ---------------- */
@@ -4397,6 +4922,8 @@ button.structure-close,
         parse: parse,
         rootPcOf: rootPcOf,
         rootName: rootName,
+        chordNotes: chordNotes,
+        identify: identify,
         chordDifficulty: chordDifficulty,
         scaleDegree: scaleDegree,
         romanNumeral: romanNumeral,
@@ -4407,7 +4934,7 @@ button.structure-close,
         diagramSVG: diagramSVG,
         fretLabelsSVG: fretLabelsSVG,
         dataUri: dataUri,
-        version: '1.0.0'
+        version: '1.1.0'
     };
 })(typeof window !== 'undefined' ? window : this);
 
@@ -6775,6 +7302,9 @@ button.structure-close,
             SB.renderChordStrip(SB.state.currentSong);
             if (SB.isGridMode()) SB.renderSheet(SB.state.currentSong);
         }
+        // The explorer is instrument-agnostic in layout but its voicings,
+        // fret finder and string labels all follow the selected instrument.
+        if (SB.explorerVisible && SB.explorerVisible() && SB.renderExplorer) SB.renderExplorer();
     }
 
 })(window.SB = window.SB || {});
@@ -9149,6 +9679,426 @@ button.structure-close,
 
 })(window.SB = window.SB || {});
 
+</script>
+<script>
+/* Songbook — chord explorer
+ * circle of fifths, chord types, voicing browser and reverse lookup
+ *
+ * Part of the window.SB namespace. The two standalone Chord Explorer apps
+ * (ukulele and guitar) were folded into this view so the songbook is the one
+ * place for both instruments. All voicing search, spelling and SVG drawing
+ * comes from the shared ChordKit engine in chords.js.
+ */
+(function (SB) {
+    'use strict';
+
+    var MINOR_IDS = { m: 1, m7: 1, m6: 1, m9: 1, 'm7b5': 1 };
+
+    var CIRCLE = [
+        { maj: ['C'], min: ['Am'] },
+        { maj: ['G'], min: ['Em'] },
+        { maj: ['D'], min: ['Bm'] },
+        { maj: ['A'], min: ['F\u266fm'] },
+        { maj: ['E'], min: ['C\u266fm'] },
+        { maj: ['B'], min: ['G\u266fm'] },
+        { maj: ['F\u266f', 'G\u266d'], min: ['D\u266fm', 'E\u266dm'] },
+        { maj: ['D\u266d'], min: ['B\u266dm'] },
+        { maj: ['A\u266d'], min: ['Fm'] },
+        { maj: ['E\u266d'], min: ['Cm'] },
+        { maj: ['B\u266d'], min: ['Gm'] },
+        { maj: ['F'], min: ['Dm'] }
+    ];
+
+    var CHIP_GROUPS = [
+        { name: 'Major', ids: ['maj', 'maj7', '7', '6', '9', 'maj9', 'add9', 'aug'] },
+        { name: 'Minor', ids: ['m', 'm7', 'm6', 'm9', 'm7b5', 'dim', 'dim7'] },
+        { name: 'Suspended', ids: ['sus4', 'sus2', '7sus4'] }
+    ];
+
+    var state = {
+        rootPc: 0,
+        rootName: 'C',
+        quality: 'maj',
+        spelling: 'sharp'
+    };
+
+    var findValues = {
+        ukulele: [0, 0, 0, 3],
+        guitar: [-1, 3, 2, 0, 1, 0]
+    };
+
+    var circleKey = null;
+    var finderKey = null;
+    var chipsBuilt = false;
+    var lastFind = null;
+
+    function instrument() { return ChordKit.instrumentOf(SB.state.instrument); }
+    function qualityType() { return ChordKit.typeOf(state.quality); }
+    function isMinorQuality(id) { return !!MINOR_IDS[id || state.quality]; }
+
+    function parsedRootName() { return state.rootName; }
+    function wholeChordName() { return parsedRootName() + qualityType().suffix; }
+
+    function pickName(names) {
+        return names.length === 1 ? names[0] : (state.spelling === 'sharp' ? names[0] : names[1]);
+    }
+
+    var MAJOR_PCS = CIRCLE.map(function (entry) { return ChordKit.parse(entry.maj[0]).rootPc; });
+    var MINOR_PCS = CIRCLE.map(function (entry) { return ChordKit.parse(entry.min[0]).rootPc; });
+
+    /* ---------------- state changes ---------------- */
+
+    function setRootFromCircle(name, minorRing) {
+        var parsed = ChordKit.parse(name);
+        if (!parsed) return;
+        state.rootPc = parsed.rootPc;
+        state.rootName = name.charAt(name.length - 1) === 'm' ? name.slice(0, -1) : name;
+        if (name.indexOf('\u266d') >= 0) state.spelling = 'flat';
+        else if (name.indexOf('\u266f') >= 0) state.spelling = 'sharp';
+
+        // Keep a selected seventh/sixth type when the new ring family still
+        // fits it; only swap between the plain major and minor triad.
+        if (minorRing && !isMinorQuality()) state.quality = 'm';
+        else if (!minorRing && isMinorQuality()) state.quality = 'maj';
+    }
+
+    function toggleSpelling() {
+        state.spelling = state.spelling === 'sharp' ? 'flat' : 'sharp';
+        state.rootName = ChordKit.rootName(state.rootPc, state.spelling);
+    }
+
+    function applyFind(candidate) {
+        state.rootPc = candidate.rootPc;
+        state.rootName = ChordKit.rootName(candidate.rootPc, state.spelling);
+        state.quality = candidate.type.id;
+        renderAll();
+        if (window.matchMedia('(max-width: 860px)').matches) {
+            var main = document.querySelector('.explorer-main');
+            if (main) main.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    /* ---------------- circle of fifths ---------------- */
+
+    function polar(radius, degrees) {
+        var angle = degrees * Math.PI / 180;
+        return [200 + radius * Math.cos(angle), 200 + radius * Math.sin(angle)];
+    }
+
+    function fixed(n) { return n.toFixed(1); }
+
+    function sector(inner, outer, start, end) {
+        var p = polar(outer, start), q = polar(outer, end);
+        var r = polar(inner, end), s = polar(inner, start);
+        return 'M' + fixed(p[0]) + ' ' + fixed(p[1]) +
+            'A' + outer + ' ' + outer + ' 0 0 1 ' + fixed(q[0]) + ' ' + fixed(q[1]) +
+            'L' + fixed(r[0]) + ' ' + fixed(r[1]) +
+            'A' + inner + ' ' + inner + ' 0 0 0 ' + fixed(s[0]) + ' ' + fixed(s[1]) + 'Z';
+    }
+
+    function buildCircle() {
+        var svg = '<svg viewBox="0 0 400 400" role="group" aria-label="Circle of fifths">';
+        CIRCLE.forEach(function (entry, i) {
+            var a1 = -105 + i * 30, a2 = a1 + 30, mid = a1 + 15;
+            var majName = pickName(entry.maj);
+            var minName = pickName(entry.min);
+            var outer = polar(159, mid), inner = polar(103, mid);
+            svg += '<g data-kind="maj" data-i="' + i + '" tabindex="0" role="button"' +
+                ' aria-pressed="false" aria-label="' + majName + ' major">' +
+                '<path class="cx-wg cx-wmaj" d="' + sector(132, 186, a1, a2) + '"/>' +
+                '<text class="cx-lbl-o" x="' + fixed(outer[0]) + '" y="' + fixed(outer[1]) +
+                '" dominant-baseline="middle" text-anchor="middle">' + majName + '</text></g>';
+            svg += '<g data-kind="min" data-i="' + i + '" tabindex="0" role="button"' +
+                ' aria-pressed="false" aria-label="' + minName + ' minor">' +
+                '<path class="cx-wg cx-wmin" d="' + sector(76, 130, a1, a2) + '"/>' +
+                '<text class="cx-lbl-i" x="' + fixed(inner[0]) + '" y="' + fixed(inner[1]) +
+                '" dominant-baseline="middle" text-anchor="middle">' + minName + '</text></g>';
+        });
+        svg += '<circle class="cx-ctr" cx="200" cy="200" r="74"/>' +
+            '<text class="cx-ctr-name" id="explorerCircleName" x="200" y="196"></text>' +
+            '<text class="cx-ctr-notes" id="explorerCircleNotes" x="200" y="221"></text></svg>';
+
+        document.getElementById('explorerCircle').innerHTML =
+            svg +
+            '<div class="explorer-hint-row"><span>Outer ring: major · inner ring: relative minor</span>' +
+            '<button id="explorerSpellInline" class="explorer-acc" type="button"></button></div>';
+    }
+
+    function ensureCircle() {
+        var key = state.spelling;
+        if (circleKey !== key) {
+            buildCircle();
+            circleKey = key;
+        }
+    }
+
+    function updateCircleSelection() {
+        var minor = isMinorQuality();
+        var index = (minor ? MINOR_PCS : MAJOR_PCS).indexOf(state.rootPc);
+        var kind = minor ? 'min' : 'maj';
+        var nodes = document.querySelectorAll('#explorerCircle [data-kind]');
+        for (var i = 0; i < nodes.length; i++) {
+            var node = nodes[i];
+            var on = node.getAttribute('data-kind') === kind &&
+                Number(node.getAttribute('data-i')) === index;
+            node.classList.toggle('sel', on);
+            node.setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+    }
+
+    /* ---------------- reverse lookup controls ---------------- */
+
+    function valuesFor(inst) {
+        if (!findValues[inst.id] || findValues[inst.id].length !== inst.tuning.length) {
+            findValues[inst.id] = inst.tuning.map(function () { return 0; });
+        }
+        return findValues[inst.id];
+    }
+
+    function ensureFinder() {
+        var inst = instrument();
+        if (finderKey === inst.id) return;
+        finderKey = inst.id;
+        var values = valuesFor(inst);
+        var html = inst.strings.map(function (letter, i) {
+            var options = ['<option value="-1"' + (values[i] === -1 ? ' selected' : '') + '>×</option>'];
+            for (var fret = 0; fret <= inst.maxFret; fret++) {
+                options.push('<option value="' + fret + '"' +
+                    (values[i] === fret ? ' selected' : '') + '>' + fret + '</option>');
+            }
+            return '<label class="explorer-fstr"><span>' + letter + '</span>' +
+                '<select class="explorer-fsel" aria-label="' + letter +
+                ' string fret">' + options.join('') + '</select></label>';
+        }).join('');
+        var host = document.getElementById('explorerFindStrings');
+        host.innerHTML = html;
+        var selects = host.querySelectorAll('select');
+        Array.prototype.forEach.call(selects, function (select, i) {
+            select.addEventListener('change', function () {
+                values[i] = Number(select.value);
+                renderFindResult();
+            });
+        });
+    }
+
+    function renderFindResult() {
+        var inst = instrument();
+        var values = valuesFor(inst);
+        var out = document.getElementById('explorerFindOut');
+        var candidates = ChordKit.identify(values.slice(0, inst.tuning.length), inst.id);
+        if (!candidates.length) {
+            lastFind = null;
+            out.innerHTML = '<span class="explorer-find-none">No matching chord</span>';
+            return;
+        }
+        lastFind = candidates[0];
+        var name = ChordKit.rootName(lastFind.rootPc, state.spelling) + lastFind.type.suffix;
+        out.innerHTML = '<div class="explorer-find-hit">' +
+            '<button class="explorer-find-name" type="button">' + name + '</button>' +
+            '<span class="explorer-find-hint">tap to load it below</span></div>';
+        var button = out.querySelector('.explorer-find-name');
+        if (button) {
+            button.addEventListener('click', function () { applyFind(lastFind); });
+        }
+    }
+
+    /* ---------------- main panel ---------------- */
+
+    function renderCenter() {
+        var name = document.getElementById('explorerChordName');
+        var notes = ChordKit.chordNotes(wholeChordName());
+        name.innerHTML = '<span class="explorer-root">' + state.rootName + '</span>' +
+            qualityType().suffix;
+        document.getElementById('explorerChordNotes').textContent =
+            notes.map(function (note) { return note.name; }).join(' · ');
+
+        var circleName = document.getElementById('explorerCircleName');
+        var circleNotes = document.getElementById('explorerCircleNotes');
+        if (circleName) circleName.innerHTML = '<tspan class="explorer-root">' + state.rootName +
+            '</tspan>' + qualityType().suffix;
+        if (circleNotes) {
+            circleNotes.textContent = notes.map(function (note) { return note.name; }).join(' · ');
+        }
+    }
+
+    function renderSpellingButton() {
+        var sharp = ChordKit.rootName(state.rootPc, 'sharp');
+        var flat = ChordKit.rootName(state.rootPc, 'flat');
+        var buttons = [
+            document.getElementById('explorerSpelling'),
+            document.getElementById('explorerSpellInline')
+        ];
+        buttons.forEach(function (button) {
+            if (!button) return;
+            if (sharp === flat) {
+                button.hidden = true;
+                return;
+            }
+            button.hidden = false;
+            button.textContent = 'Spell as ' + (state.spelling === 'sharp' ? flat : sharp);
+            button.setAttribute('aria-label',
+                'Spell the root as ' + (state.spelling === 'sharp' ? flat : sharp));
+        });
+    }
+
+    function renderTones() {
+        var notes = ChordKit.chordNotes(wholeChordName());
+        document.getElementById('explorerNotes').innerHTML = notes.map(function (note) {
+            return '<div class="explorer-note' + (note.degree === 'root' ? ' root' : '') + '">' +
+                '<b>' + note.name + '</b><span>' + note.degree + '</span></div>';
+        }).join('');
+    }
+
+    function buildChips() {
+        if (chipsBuilt) return;
+        chipsBuilt = true;
+        document.getElementById('explorerChips').innerHTML = CHIP_GROUPS.map(function (group) {
+            return '<div class="explorer-chip-group">' +
+                '<div class="explorer-chip-label">' + group.name + '</div>' +
+                '<div class="explorer-chip-row">' +
+                group.ids.map(function (id) {
+                    var type = ChordKit.typeOf(id);
+                    return '<button class="explorer-chip" type="button" data-quality="' + id +
+                        '">' + (type.label || type.suffix || 'major') + '</button>';
+                }).join('') +
+                '</div></div>';
+        }).join('');
+    }
+
+    function renderChips() {
+        buildChips();
+        var chips = document.querySelectorAll('#explorerChips .explorer-chip');
+        for (var i = 0; i < chips.length; i++) {
+            chips[i].classList.toggle('active',
+                chips[i].getAttribute('data-quality') === state.quality);
+        }
+    }
+
+    function renderShapes() {
+        var inst = instrument();
+        var chordName = wholeChordName();
+        var shapes = ChordKit.voicings(chordName, inst.id);
+        var hard = ChordKit.chordDifficulty(chordName) === 'hard';
+
+        var title = document.getElementById('explorerShapesTitle');
+        title.innerHTML = 'Ways to play <span class="explorer-shapes-name">' + chordName + '</span>' +
+            (hard ? '<span class="explorer-hard-tag" title="Barre-heavy chord — the second shape may be an easier muted voicing">hard</span>' : '');
+
+        document.getElementById('explorerShapesCount').textContent =
+            shapes.length + ' ' + (shapes.length === 1 ? 'way' : 'ways') +
+            ' · ' + inst.label.toLowerCase();
+
+        var host = document.getElementById('explorerShapes');
+        if (!shapes.length) {
+            host.innerHTML = '<p class="explorer-empty">No playable voicing found below the ' +
+                (inst.maxFret + 1) + 'th fret.</p>';
+            return;
+        }
+
+        host.innerHTML = shapes.map(function (frets, index) {
+            var easy = hard && index === 1 && frets.indexOf(-1) >= 0;
+            var fretsLabel = frets.map(function (fret) {
+                return fret < 0 ? 'muted' : fret;
+            }).join(' ');
+            return '<div class="explorer-shape' + (easy ? ' easy' : '') + '"' +
+                ' role="img" aria-label="' + chordName + ' voicing: ' + fretsLabel + '"' +
+                ' style="animation-delay:' + Math.min(index * 25, 350) + 'ms">' +
+                '<div class="explorer-diagram">' + ChordKit.diagramSVG(inst.id, frets) + '</div>' +
+                '<div class="explorer-frets">' + ChordKit.fretLabelsSVG(inst.id, frets) + '</div>' +
+                (easy ? '<span class="explorer-easy">easy</span>' : '') +
+                '</div>';
+        }).join('');
+    }
+
+    function renderInstrument() {
+        var label = instrument().label;
+        document.getElementById('explorerInstrumentName').textContent = label.toLowerCase();
+    }
+
+    function renderAll() {
+        ensureCircle();
+        ensureFinder();
+        updateCircleSelection();
+        renderCenter();
+        renderSpellingButton();
+        renderTones();
+        renderChips();
+        renderShapes();
+        renderFindResult();
+        renderInstrument();
+    }
+
+    /* ---------------- wiring ---------------- */
+
+    function pickCircleGroup(group) {
+        var entry = CIRCLE[Number(group.getAttribute('data-i'))];
+        if (!entry) return;
+        var minor = group.getAttribute('data-kind') === 'min';
+        setRootFromCircle(pickName(minor ? entry.min : entry.maj), minor);
+        renderAll();
+    }
+
+    function bindOnce() {
+        var circle = document.getElementById('explorerCircle');
+        circle.addEventListener('click', function (event) {
+            var group = event.target.closest('[data-kind]');
+            if (group) pickCircleGroup(group);
+        });
+        circle.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            var group = event.target.closest('[data-kind]');
+            if (!group) return;
+            event.preventDefault();
+            pickCircleGroup(group);
+        });
+
+        document.getElementById('explorerChips').addEventListener('click', function (event) {
+            var chip = event.target.closest('.explorer-chip');
+            if (!chip) return;
+            state.quality = chip.getAttribute('data-quality');
+            renderAll();
+        });
+
+        document.getElementById('explorerSpelling').addEventListener('click', function () {
+            toggleSpelling();
+            renderAll();
+        });
+
+        // The inline copy lives inside the rebuilt circle markup, so a fresh
+        // listener is attached after every rebuild.
+        circle.addEventListener('click', function (event) {
+            if (event.target.id !== 'explorerSpellInline') return;
+            toggleSpelling();
+            renderAll();
+        });
+
+        SB.renderExplorer = renderAll;
+    }
+
+    SB.explorerVisible = function () {
+        var view = document.getElementById('explorerView');
+        return !!view && !view.hidden;
+    };
+
+    SB.explorerState = state;
+
+    SB.openExplorer = function () {
+        if (SB.closeVoicingChooser) SB.closeVoicingChooser();
+        if (SB.resetScroll) SB.resetScroll(true);
+        if (SB.stopMetronome) SB.stopMetronome();
+        SB.state.currentSong = null;
+        document.getElementById('listView').hidden = true;
+        document.getElementById('songView').hidden = true;
+        document.getElementById('explorerView').hidden = false;
+        var link = document.getElementById('explorerLink');
+        if (link) link.setAttribute('aria-current', 'page');
+        renderAll();
+        window.scrollTo(0, 0);
+    };
+
+    bindOnce();
+
+})(window.SB = window.SB || {});
 </script>
 <script>
 /* Songbook — list
@@ -13029,6 +13979,16 @@ button.structure-close,
 
     SB.route = function () {
         var h = location.hash || '';
+
+        /* The chord explorer is an app-level view, not a songbook, so it is
+         * matched before the #/<songbook>/<song> pattern. */
+        if (h === '#/chords' || h === '#/chords/') {
+            SB.openExplorer();
+            return;
+        }
+        var explorerLink = SB.$('explorerLink');
+        if (explorerLink) explorerLink.removeAttribute('aria-current');
+
         var m = h.match(/^#\/([^\/]+)(?:\/(.+))?$/);
         var sb = null, songId = null;
         if (m) {
@@ -13048,6 +14008,7 @@ button.structure-close,
             SB.stopMetronome();
             SB.state.currentSong = null;
             SB.$('songView').hidden = true;
+            SB.$('explorerView').hidden = true;
             SB.$('listView').hidden = false;
             SB.renderEmptyState();
             return;
@@ -13057,6 +14018,7 @@ button.structure-close,
 
         if (songId && SB.state.byId[songId]) {
             SB.$('listView').hidden = true;
+            SB.$('explorerView').hidden = true;
             SB.$('songView').hidden = false;
             SB.openSong(songId);
         } else {
@@ -13064,6 +14026,7 @@ button.structure-close,
             SB.stopMetronome();
             SB.state.currentSong = null;
             SB.$('songView').hidden = true;
+            SB.$('explorerView').hidden = true;
             SB.$('listView').hidden = false;
             SB.renderList();
             SB.renderRecent();
@@ -13295,6 +14258,10 @@ button.structure-close,
         setChordMode: SB.setChordMode,
         chordLabelWidth: SB.chordLabelWidth,
         chosenVoicing: SB.chosenVoicing,
+        explorerState: SB.explorerState,
+        renderExplorer: function () { if (SB.renderExplorer) SB.renderExplorer(); },
+        openExplorer: function () { if (SB.openExplorer) SB.openExplorer(); },
+        isExplorerVisible: function () { return !!(SB.explorerVisible && SB.explorerVisible()); },
         gridInfo: SB.gridInfo,
         gridBeatAt: SB.gridBeatAt,
         gridSystemAt: SB.gridSystemAt,

@@ -21,6 +21,8 @@
             <span class="brand-name">Songbook</span>
         </a>
         <div class="topbar-right">
+            <a id="explorerLink" class="topbar-link" href="#/chords"
+               aria-label="Open the chord explorer" title="Chord explorer">Chords</a>
             <div class="seg-group instrument-toggle" role="group" aria-label="Instrument">
                 <button class="instrument-btn active" data-instrument="ukulele" type="button" aria-pressed="true">Ukulele</button>
                 <button class="instrument-btn" data-instrument="guitar" type="button" aria-pressed="false">Guitar</button>
@@ -303,6 +305,57 @@
 
     </section>
 
+    <!-- ============ CHORD EXPLORER VIEW ============ -->
+    <section id="explorerView" hidden aria-labelledby="explorerTitle">
+
+        <nav class="song-nav">
+            <a class="back-link" href="#/" id="explorerBack">← All songs</a>
+            <span class="explorer-kicker">Ukulele + guitar chord engine</span>
+        </nav>
+
+        <header class="explorer-head">
+            <h1 id="explorerTitle" class="explorer-title">Chord explorer</h1>
+            <p class="explorer-lead">
+                Every way to play any chord on
+                <strong id="explorerInstrumentName">ukulele</strong> — pick a root
+                on the circle of fifths, then a chord type.
+            </p>
+        </header>
+
+        <div class="explorer-layout">
+
+            <aside class="explorer-side" aria-label="Root and reverse lookup">
+                <div id="explorerCircle" class="explorer-circle"></div>
+
+                <section class="explorer-find" aria-labelledby="explorerFindTitle">
+                    <h2 id="explorerFindTitle" class="explorer-label">Find chord by frets</h2>
+                    <div id="explorerFindStrings" class="explorer-find-strings"></div>
+                    <p class="explorer-hint">Set each string’s fret — the chord is named as you pick.</p>
+                    <div id="explorerFindOut" class="explorer-find-out" role="status" aria-live="polite"></div>
+                </section>
+            </aside>
+
+            <div class="explorer-main">
+                <div class="explorer-chord-head">
+                    <div class="explorer-chord-id">
+                        <div id="explorerChordName" class="explorer-chord-name">C</div>
+                        <div id="explorerChordNotes" class="explorer-chord-notes"></div>
+                    </div>
+                    <button id="explorerSpelling" class="explorer-acc" type="button" hidden></button>
+                </div>
+
+                <div id="explorerNotes" class="explorer-notes" aria-label="Chord tones"></div>
+                <div id="explorerChips" class="explorer-chips" aria-label="Chord types"></div>
+
+                <div class="explorer-shapes-head">
+                    <h2 id="explorerShapesTitle" class="explorer-shapes-title">Ways to play C</h2>
+                    <span id="explorerShapesCount" class="explorer-shapes-count"></span>
+                </div>
+                <div id="explorerShapes" class="explorer-shapes"></div>
+            </div>
+        </div>
+    </section>
+
     <div id="bootMsg" class="boot-msg">Loading songbooks…</div>
 
 </main>
@@ -450,6 +503,7 @@
 <script src="js/sheet.js"></script>
 <script src="js/grid.js"></script>
 <script src="js/chordstrip.js"></script>
+<script src="js/explorer.js"></script>
 <script src="js/list.js"></script>
 <script src="js/import.js"></script>
 <script src="js/export.js"></script>

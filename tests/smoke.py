@@ -116,6 +116,45 @@ def main():
         ok('strip diagram re-rendered', 'data:image/svg' in first_src, first_src)
         cdp.eval("songbookTest.setInstrument('ukulele')")
 
+        # chord explorer: circle, chips, voicings and reverse lookup
+        cdp.eval("location.hash = '#/chords'")
+        cdp.wait_js("document.getElementById('explorerView').hidden === false", timeout=10)
+        ok('chord explorer opens',
+           cdp.eval("songbookTest.isExplorerVisible()") is True)
+        ok('explorer hides list and song views',
+           cdp.eval("document.getElementById('listView').hidden") is True
+           and cdp.eval("document.getElementById('songView').hidden") is True)
+        ok('explorer link marked current',
+           cdp.eval("document.getElementById('explorerLink').getAttribute('aria-current')") == 'page')
+        ok('explorer circle has 24 roots',
+           cdp.eval("document.querySelectorAll('#explorerCircle [data-kind]').length") == 24)
+        ok('explorer has 18 chord types',
+           cdp.eval("document.querySelectorAll('#explorerChips .explorer-chip').length") == 18)
+        ok('explorer shows C voicings',
+           cdp.eval("document.querySelectorAll('#explorerShapes .explorer-shape').length") ==
+           cdp.eval("songbookTest.ChordKit.voicings('C','ukulele').length"),
+           cdp.eval("document.querySelectorAll('#explorerShapes .explorer-shape').length"))
+        cdp.eval("document.querySelector('#explorerChips [data-quality=\"7\"]').click()")
+        time.sleep(0.1)
+        ok('chord type chip selects C7',
+           cdp.eval("songbookTest.explorerState.quality") == '7'
+           and cdp.eval("document.getElementById('explorerChordName').textContent") == 'C7',
+           cdp.eval("document.getElementById('explorerChordName').textContent"))
+
+        # switching instrument re-renders the explorer for six strings
+        cdp.eval("songbookTest.setInstrument('guitar')")
+        time.sleep(0.3)
+        ok('explorer follows instrument to guitar',
+           cdp.eval("document.querySelectorAll('#explorerFindStrings select').length") == 6
+           and cdp.eval("document.getElementById('explorerInstrumentName').textContent") == 'guitar')
+        ok('guitar explorer diagrams have 6 strings',
+           cdp.eval("(document.querySelector('#explorerShapes .explorer-diagram svg')||{innerHTML:''}).innerHTML.split('class=\"st\"').length - 1") == 6)
+        ok('reverse lookup names the default guitar shape',
+           cdp.eval("(document.querySelector('#explorerFindOut .explorer-find-name')||{}).textContent") == 'C',
+           cdp.eval("(document.querySelector('#explorerFindOut .explorer-find-name')||{}).textContent"))
+        cdp.eval("songbookTest.setInstrument('ukulele')")
+        time.sleep(0.3)
+
         # back to list
         cdp.eval("location.hash = ''")
         cdp.wait_js("document.getElementById('listView').hidden === false", timeout=10)

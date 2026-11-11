@@ -123,16 +123,16 @@
     function splitSlash(name) {
         var m = name.match(/^([^/]+)\/(.+)$/);
         if (m) return { head: m[1], bass: m[2] };
-        if (/^[A-G](?:sharp|flat|#|b)?$/.test(name) === false && /^[A-G](?:sharp|flat|#|b)?C$/.test(name)) {
+        if (/^[A-G](?:sharp|flat|#|b|\u266f|\u266d)?$/.test(name) === false && /^[A-G](?:sharp|flat|#|b|\u266f|\u266d)?C$/.test(name)) {
             return { head: name.slice(0, -1), bass: 'C' };
         }
         return { head: name, bass: null };
     }
 
     function rootPcOf(token) {
-        var m = token.match(/^([A-G])(sharp|flat|#|b)?/);
+        var m = token.match(/^([A-G])(sharp|flat|#|b|\u266f|\u266d)?/);
         if (!m) return null;
-        var acc = !m[2] ? 0 : (m[2] === 'sharp' || m[2] === '#') ? 1 : -1;
+        var acc = !m[2] ? 0 : (m[2] === 'sharp' || m[2] === '#' || m[2] === '\u266f') ? 1 : -1;
         return ((LETTER_PC[LETTERS.indexOf(m[1])] + acc) % 12 + 12) % 12;
     }
 
@@ -141,9 +141,9 @@
         var key = String(name).trim();
         if (!key || key === 'NC' || /^(stop|pause|riff|muted)$/i.test(key)) return null;
         var slash = splitSlash(key);
-        var m = slash.head.match(/^([A-G])(sharp|flat|#|b)?(.*)$/);
+        var m = slash.head.match(/^([A-G])(sharp|flat|#|b|\u266f|\u266d)?(.*)$/);
         if (!m) return null;
-        var acc = !m[2] ? 0 : (m[2] === 'sharp' || m[2] === '#') ? 1 : -1;
+        var acc = !m[2] ? 0 : (m[2] === 'sharp' || m[2] === '#' || m[2] === '\u266f') ? 1 : -1;
         var type = typeForSuffix(m[3]);
         if (!type) return null;
         return {
@@ -169,6 +169,113 @@
         var list = ENHARMONIC[((rootPc % 12) + 12) % 12];
         if (!list) return PC_LETTER[((rootPc % 12) + 12) % 12] || '';
         return spelling === 'flat' ? list[1] : list[0];
+    }
+
+    // Spell one chord tone from its root letter, so enharmonic notes keep the
+    // degree they actually have (Cdim7: Bbb, not A).
+    function toneName(rootPc, rootLetter, semitones, letterSteps) {
+        var target = ((rootPc + semitones) % 12 + 12) % 12;
+        var letter = (rootLetter + letterSteps) % 7;
+        var diff = target - LETTER_PC[letter];
+        if (diff > 6) diff -= 12;
+        if (diff < -6) diff += 12;
+        return LETTERS[letter] + (ACC_STR[String(diff)] || '');
+    }
+
+    /* Chord tones with conventional spelling, e.g.
+     * chordNotes('Cdim7') -> C, Eb, Gb, Bbb. */
+    function chordNotes(name) {
+        var parsed = parse(name);
+        if (!parsed) return [];
+        var rootLetter = LETTERS.indexOf(parsed.letter);
+        return parsed.type.tones.map(function (tone, i) {
+            return {
+                name: toneName(parsed.rootPc, rootLetter, tone[0], tone[1]),
+                degree: parsed.type.degrees[i],
+                pc: ((parsed.rootPc + tone[0]) % 12 + 12) % 12
+            };
+        });
+    }
+
+    /* ---------------- reverse lookup ---------------- */
+
+    var MINOR_TYPE_IDS = { m: 1, m7: 1, m6: 1, m9: 1, 'm7b5': 1 };
+
+    function pitchClasses(frets, tuning) {
+        var out = [];
+        for (var i = 0; i < frets.length; i++) {
+            if (frets[i] >= 0) out.push(((tuning[i] + frets[i]) % 12 + 12) % 12);
+        }
+        return uniqSorted(out);
+    }
+
+    function matchesType(pcs, type, rootPc) {
+        var tones = type.tones.length > 4
+            ? type.tones.filter(function (_, i) { return i !== 2; })  // drop the 5th first
+            : type.tones;
+        var wanted = uniqSorted(tones.map(function (tone) {
+            return ((rootPc + tone[0]) % 12 + 12) % 12;
+        }));
+        if (wanted.length !== pcs.length) return false;
+        for (var i = 0; i < wanted.length; i++) {
+            if (pcs.indexOf(wanted[i]) < 0) return false;
+        }
+        return true;
+    }
+
+    /* Name a fret shape, e.g. identify([0,0,0,3], 'ukulele') ->
+     * [{ name: 'C', rootPc: 0, type: TYPES[0], ... }].
+     * Candidate roots are ranked the way the explorers did: the minor-family
+     * name first when a shape is ambiguous (Am7/C6), then type order, then a
+     * root in the bass. */
+    function identify(frets, instrumentId) {
+        var inst = instrumentOf(instrumentId);
+        if (!frets || !frets.length) return [];
+        frets = frets.slice(0, inst.tuning.length);
+        var pcs = pitchClasses(frets, inst.tuning);
+        if (!pcs.length) return [];
+
+        var bass = null;
+        for (var i = 0; i < frets.length; i++) {
+            if (frets[i] < 0) continue;
+            var midi = inst.tuning[i] + frets[i];
+            if (bass === null || midi < bass) bass = midi;
+        }
+        var bassPc = bass === null ? null : ((bass % 12) + 12) % 12;
+
+        var found = [];
+        function scan(types) {
+            types.forEach(function (type) {
+                pcs.forEach(function (rootPc) {
+                    if (!matchesType(pcs, type, rootPc)) return;
+                    found.push({
+                        name: rootName(rootPc, 'sharp') + type.suffix,
+                        rootPc: rootPc,
+                        type: type,
+                        bassPc: bassPc,
+                        rootInBass: rootPc === bassPc
+                    });
+                });
+            });
+        }
+
+        // Prefer the compact triads/sevenths. Extended, fifth-less voicings
+        // (9, m9, maj9) are only considered when nothing else matches.
+        scan(TYPES.filter(function (type) { return type.tones.length <= 4; }));
+        if (!found.length) {
+            scan(TYPES.filter(function (type) { return type.tones.length > 4; }));
+        }
+        if (!found.length) return [];
+
+        found.sort(function (a, b) {
+            var ma = MINOR_TYPE_IDS[a.type.id] ? 0 : 1;
+            var mb = MINOR_TYPE_IDS[b.type.id] ? 0 : 1;
+            if (ma !== mb) return ma - mb;
+            var ti = TYPES.indexOf(a.type) - TYPES.indexOf(b.type);
+            if (ti) return ti;
+            return (a.rootInBass ? 0 : 1) - (b.rootInBass ? 0 : 1);
+        });
+        return found;
     }
 
     /* ---------------- voicing search ---------------- */
@@ -614,6 +721,8 @@
         parse: parse,
         rootPcOf: rootPcOf,
         rootName: rootName,
+        chordNotes: chordNotes,
+        identify: identify,
         chordDifficulty: chordDifficulty,
         scaleDegree: scaleDegree,
         romanNumeral: romanNumeral,
@@ -624,6 +733,6 @@
         diagramSVG: diagramSVG,
         fretLabelsSVG: fretLabelsSVG,
         dataUri: dataUri,
-        version: '1.0.0'
+        version: '1.1.0'
     };
 })(typeof window !== 'undefined' ? window : this);
