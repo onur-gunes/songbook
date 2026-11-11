@@ -155,6 +155,41 @@ def main():
         cdp.eval("songbookTest.setInstrument('ukulele')")
         time.sleep(0.3)
 
+        # neck tab: curated voicings, chord tones and a scale layer
+        cdp.eval("location.hash = '#/chords/neck'")
+        cdp.wait_js("document.getElementById('explorerNeckPane').hidden === false", timeout=10)
+        ok('neck tab opens',
+           cdp.eval("location.hash") == '#/chords/neck'
+           and cdp.eval("document.getElementById('explorerShapesPane').hidden") is True)
+        cdp.eval("(function(){var r=document.getElementById('neckRoot');r.value='9';r.dispatchEvent(new Event('change',{bubbles:true}));})()")
+        cdp.eval("(function(){var q=document.getElementById('neckQuality');q.value='m7';q.dispatchEvent(new Event('change',{bubbles:true}));})()")
+        time.sleep(0.1)
+        ok('neck selects Am7',
+           cdp.eval("document.getElementById('neckChordName').textContent") == 'Am7',
+           cdp.eval("document.getElementById('neckChordName').textContent"))
+        ok('neck uses a curated shape stepper',
+           0 < int(cdp.eval("document.getElementById('neckShapeCount').textContent").split('/')[1].strip())
+           < 100,
+           cdp.eval("document.getElementById('neckShapeCount').textContent"))
+        ok('neck draws the selected shape',
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-note-shape').length") > 0)
+        ok('neck draws the scale layer',
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-note-scale').length") > 0)
+        ok('neck lists shape notes',
+           cdp.eval("document.querySelectorAll('#neckShapeNotes .neck-string-note').length") > 0,
+           cdp.eval("document.querySelectorAll('#neckShapeNotes .neck-string-note').length"))
+        cdp.eval("songbookTest.setInstrument('guitar')")
+        time.sleep(0.3)
+        ok('neck follows the instrument to guitar',
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-string').length") == 6,
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-string').length"))
+        cdp.eval("songbookTest.setInstrument('ukulele')")
+        time.sleep(0.3)
+        cdp.eval("location.hash = '#/chords'")
+        cdp.wait_js("document.getElementById('explorerShapesPane').hidden === false", timeout=10)
+        ok('shapes tab returns',
+           cdp.eval("document.getElementById('explorerNeckPane').hidden") is True)
+
         # back to list
         cdp.eval("location.hash = ''")
         cdp.wait_js("document.getElementById('listView').hidden === false", timeout=10)

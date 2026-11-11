@@ -13,6 +13,8 @@
     --easy: #2e7d4f;
     --medium: #9a6409;
     --hard: #ad3434;
+    --neck-tone: #237c6e;
+    --neck-scale: #4a9d8e;
     --topbar-h: 56px;
     --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
@@ -31,6 +33,8 @@
     --easy: #67c08b;
     --medium: #d6a24a;
     --hard: #e07b7b;
+    --neck-tone: #57cbb5;
+    --neck-scale: #3c8f82;
 }
 
 * { box-sizing: border-box; }
@@ -3044,8 +3048,40 @@ body.tuner-open { overflow: hidden; }
 }
 
 .explorer-head { margin-bottom: 22px; }
+.explorer-head-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+.explorer-head-row > div { min-width: 0; }
 .explorer-title { margin: 0 0 6px; font-size: 1.9rem; line-height: 1.15; }
 .explorer-lead { margin: 0; max-width: 58ch; color: var(--muted); font-size: 0.92rem; }
+
+.explorer-tabs {
+    display: inline-flex;
+    flex: none;
+    gap: 3px;
+    padding: 3px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+}
+.explorer-tab {
+    padding: 7px 15px;
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.explorer-tab:hover { color: var(--text); background: var(--surface-2); }
+.explorer-tab[aria-current="page"] {
+    background: var(--accent);
+    color: #fff;
+}
 
 .explorer-layout {
     display: grid;
@@ -3347,6 +3383,280 @@ body.tuner-open { overflow: hidden; }
     text-align: center;
 }
 
+/* ===== neck explorer ===== */
+
+.neck-pane { max-width: 880px; }
+
+.neck-toolbar {
+    display: grid;
+    grid-template-columns: 108px 178px minmax(180px, 1fr) auto;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 16px;
+}
+.neck-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+.neck-field > span {
+    color: var(--muted);
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+.neck-select {
+    width: 100%;
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+}
+.neck-select:focus-visible { border-color: var(--accent); }
+.neck-field-grow { min-width: 0; }
+
+.neck-pill {
+    height: 38px;
+    padding: 0 13px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.neck-pill:hover { color: var(--text); border-color: var(--muted); }
+.neck-pill[aria-pressed="true"] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.neck-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+}
+.neck-chord-id { min-width: 132px; }
+.neck-chord-name {
+    color: var(--accent);
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+}
+.neck-chord-notes {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+.neck-shape-nav { display: flex; align-items: center; gap: 6px; }
+.neck-step {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.neck-step:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.neck-step:disabled { opacity: 0.4; cursor: default; }
+.neck-shape-count {
+    min-width: 62px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+.neck-frets-label {
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+.neck-capo { margin-left: auto; width: 120px; }
+
+.neck-options {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    margin: 12px 0 16px;
+}
+.neck-scale-fields {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+.neck-scale-fields[hidden] { display: none; }
+.neck-scale-fields .neck-field { width: 136px; }
+
+.neck-card {
+    padding: 12px 10px 9px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+    overflow: hidden;
+}
+.neck-diagram { width: 100%; }
+.neck-diagram svg { display: block; width: 100%; height: auto; }
+
+.neck-diagram .neck-string { stroke: var(--muted); stroke-width: 1.1; opacity: 0.5; }
+.neck-diagram .neck-fret { stroke: var(--line); stroke-width: 1.2; }
+.neck-diagram .neck-nut {
+    stroke: var(--text);
+    stroke-width: 5;
+    stroke-linecap: round;
+}
+.neck-diagram .neck-fret-num,
+.neck-diagram .neck-string-label {
+    fill: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    font-variant-numeric: tabular-nums;
+}
+.neck-diagram .neck-string-label { font-size: 10.5px; font-weight: 700; }
+.neck-diagram .neck-inlay { fill: var(--line); }
+.neck-diagram .neck-note-scale { fill: var(--neck-scale); opacity: 0.95; }
+.neck-diagram .neck-note-tone {
+    fill: var(--surface);
+    stroke: var(--neck-tone);
+    stroke-width: 1.8;
+}
+.neck-diagram .neck-note-shape {
+    fill: var(--accent);
+    stroke: var(--surface);
+    stroke-width: 1.5;
+}
+.neck-diagram .neck-note-text {
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+.neck-diagram .neck-note-text-tone {
+    fill: var(--neck-tone);
+    font-size: 9px;
+    font-weight: 700;
+}
+.neck-diagram .neck-note-text-shape {
+    fill: #fff;
+    font-size: 9.5px;
+    font-weight: 700;
+}
+.neck-diagram .neck-note-text-oct { font-size: 7.4px; }
+.neck-diagram .neck-badge {
+    fill: var(--accent);
+    stroke: var(--surface);
+    stroke-width: 1.2;
+}
+.neck-diagram .neck-badge-text {
+    fill: #fff;
+    font-size: 5.5px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+.neck-diagram .neck-muted {
+    fill: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.neck-legend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin: 10px 4px 2px;
+    color: var(--muted);
+    font-size: 0.76rem;
+}
+.neck-key { display: inline-flex; align-items: center; gap: 6px; }
+.neck-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.neck-swatch-shape { background: var(--accent); }
+.neck-swatch-tone {
+    border: 2px solid var(--neck-tone);
+    background: var(--surface);
+}
+.neck-swatch-scale { background: var(--neck-scale); }
+.neck-scale-summary { margin-left: auto; }
+
+.neck-notes { margin-top: 22px; }
+.neck-notes-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.neck-string-notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+    gap: 10px;
+}
+.neck-string-note {
+    padding: 10px 11px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+}
+.neck-string-note.root {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+.neck-string-note-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.neck-string-note-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+.neck-string-degree {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+}
+.neck-string-role { margin-top: 5px; font-size: 0.8rem; }
+.neck-string-pos { margin-top: 2px; color: var(--muted); font-size: 0.72rem; }
+
 @keyframes explorer-rise {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
@@ -3363,6 +3673,9 @@ body.tuner-open { overflow: hidden; }
     }
     .explorer-circle { max-width: 380px; }
     .explorer-find { margin-top: 0; }
+
+    .neck-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .neck-field-grow { grid-column: 1 / -1; }
 }
 
 /* ===== responsive ===== */
@@ -3380,10 +3693,24 @@ body.tuner-open { overflow: hidden; }
 
     .explorer-side { grid-template-columns: 1fr; gap: 20px; }
     .explorer-find { padding-top: 16px; border-top: 1px solid var(--line); }
+    .explorer-head-row { gap: 12px; }
+    .explorer-tabs { width: 100%; justify-content: center; }
     .explorer-title { font-size: 1.6rem; }
     .explorer-chord-name { font-size: 1.7rem; }
     .explorer-shapes { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 9px; }
     .explorer-shape { padding: 10px 5px 7px; }
+
+    .neck-toolbar { grid-template-columns: 1fr 1fr; gap: 9px; }
+    .neck-field-grow { grid-column: 1 / -1; }
+    .neck-summary { gap: 10px 12px; padding: 12px 13px; }
+    .neck-chord-id { flex: 1 1 100%; }
+    .neck-capo { margin-left: 0; width: auto; }
+    .neck-options { gap: 7px; }
+    .neck-scale-fields { width: 100%; }
+    .neck-scale-fields .neck-field { flex: 1; width: auto; }
+    .neck-string-notes { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .neck-string-note { padding: 9px 10px; }
+    .neck-scale-summary { flex-basis: 100%; margin-left: 0; }
 
     .list-rail { gap: 8px 14px; padding: 8px 10px; }
 

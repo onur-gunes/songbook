@@ -343,6 +343,7 @@
         renderShapes();
         renderFindResult();
         renderInstrument();
+        if (SB.renderNeck && SB.neckVisible && SB.neckVisible()) SB.renderNeck();
     }
 
     /* ---------------- wiring ---------------- */
@@ -397,9 +398,34 @@
         return !!view && !view.hidden;
     };
 
+    SB.neckVisible = function () {
+        var pane = document.getElementById('explorerNeckPane');
+        return !!pane && !pane.hidden;
+    };
+
+    /* The neck's compact root/quality selects live in neck.js, but they edit
+     * the explorer's one chord selection. Going through this function keeps
+     * the shapes tab, circle of fifths and neck in lockstep. */
+    SB.applyExplorerSelection = function (selection) {
+        if (!selection) return;
+        if (selection.spelling === 'sharp' || selection.spelling === 'flat') {
+            state.spelling = selection.spelling;
+        }
+        if (selection.rootPc != null) {
+            state.rootPc = ((Number(selection.rootPc) % 12) + 12) % 12;
+            state.rootName = selection.rootName ||
+                ChordKit.rootName(state.rootPc, state.spelling);
+        }
+        if (selection.quality && ChordKit.typeOf(selection.quality).id === selection.quality) {
+            state.quality = selection.quality;
+        }
+        renderAll();
+    };
+
     SB.explorerState = state;
 
-    SB.openExplorer = function () {
+    SB.openExplorer = function (mode) {
+        mode = mode === 'neck' ? 'neck' : 'shapes';
         if (SB.closeVoicingChooser) SB.closeVoicingChooser();
         if (SB.resetScroll) SB.resetScroll(true);
         if (SB.stopMetronome) SB.stopMetronome();
@@ -407,6 +433,17 @@
         document.getElementById('listView').hidden = true;
         document.getElementById('songView').hidden = true;
         document.getElementById('explorerView').hidden = false;
+        document.getElementById('explorerShapesPane').hidden = mode === 'neck';
+        document.getElementById('explorerNeckPane').hidden = mode !== 'neck';
+        var tabShapes = document.getElementById('explorerTabShapes');
+        var tabNeck = document.getElementById('explorerTabNeck');
+        if (mode === 'neck') {
+            tabNeck.setAttribute('aria-current', 'page');
+            tabShapes.removeAttribute('aria-current');
+        } else {
+            tabShapes.setAttribute('aria-current', 'page');
+            tabNeck.removeAttribute('aria-current');
+        }
         var link = document.getElementById('explorerLink');
         if (link) link.setAttribute('aria-current', 'page');
         renderAll();

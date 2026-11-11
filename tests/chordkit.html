@@ -109,6 +109,15 @@ try {
     ok('tone degrees', ChordKit.chordNotes('Am7').map(n => n.degree).join(',') === 'root,\u266d3,5,\u266d7',
         ChordKit.chordNotes('Am7').map(n => n.degree).join(','));
 
+    // scales share the chord engine's spelling style and pitch classes
+    ok('A minor pentatonic', ChordKit.scaleNotes(9, 'minorPent', 'sharp').map(n => n.name).join(',') === 'A,C,D,E,G',
+        ChordKit.scaleNotes(9, 'minorPent', 'sharp').map(n => n.name).join(','));
+    ok('C major scale', ChordKit.scaleNotes(0, 'major', 'sharp').map(n => n.name).join(',') === 'C,D,E,F,G,A,B',
+        ChordKit.scaleNotes(0, 'major', 'sharp').map(n => n.name).join(','));
+    ok('scale degrees', ChordKit.scaleNotes(9, 'minorPent', 'sharp').map(n => n.degree).join(',') === '1,\u266d3,4,5,\u266d7',
+        ChordKit.scaleNotes(9, 'minorPent', 'sharp').map(n => n.degree).join(','));
+    ok('unknown scale falls back to major', ChordKit.scaleOf('nope').id === 'major');
+
     // reverse lookup: frets -> chord name (minor family first, like the explorers)
     ok('identify uke C shape = C', ChordKit.identify([0, 0, 0, 3], 'ukulele')[0].name === 'C',
         ChordKit.identify([0, 0, 0, 3], 'ukulele').map(c => c.name).join(' '));

@@ -22,9 +22,11 @@
         var h = location.hash || '';
 
         /* The chord explorer is an app-level view, not a songbook, so it is
-         * matched before the #/<songbook>/<song> pattern. */
-        if (h === '#/chords' || h === '#/chords/') {
-            SB.openExplorer();
+         * matched before the #/<songbook>/<song> pattern. The optional mode
+         * segment keeps the Shapes and Neck tabs deep-linkable. */
+        var explorer = h.match(/^#\/chords(?:\/(neck|shapes))?\/?$/);
+        if (explorer) {
+            SB.openExplorer(explorer[1] || 'shapes');
             return;
         }
         var explorerLink = SB.$('explorerLink');

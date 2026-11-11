@@ -105,6 +105,38 @@
 
     var SUFFIX_ALIASES = { '+': 'aug', 'aug': 'aug', 'm7b5': 'm7\u266d5', 'm7-5': 'm7\u266d5', 'min': 'm', 'mi': 'm' };
 
+    /* Scales are listed as semitone intervals from the root. The degree
+     * labels use the same spelling style as chord tones (\u266d3, \u266d7), so
+     * the neck and the chord explorer can label notes consistently. */
+    var SCALES = [
+        { id: 'major', label: 'Major', intervals: [0, 2, 4, 5, 7, 9, 11], degrees: ['1', '2', '3', '4', '5', '6', '7'] },
+        { id: 'minor', label: 'Natural minor', intervals: [0, 2, 3, 5, 7, 8, 10], degrees: ['1', '2', '\u266d3', '4', '5', '\u266d6', '\u266d7'] },
+        { id: 'majorPent', label: 'Major pentatonic', intervals: [0, 2, 4, 7, 9], degrees: ['1', '2', '3', '5', '6'] },
+        { id: 'minorPent', label: 'Minor pentatonic', intervals: [0, 3, 5, 7, 10], degrees: ['1', '\u266d3', '4', '5', '\u266d7'] },
+        { id: 'blues', label: 'Blues', intervals: [0, 3, 5, 6, 7, 10], degrees: ['1', '\u266d3', '4', '\u266d5', '5', '\u266d7'] },
+        { id: 'dorian', label: 'Dorian', intervals: [0, 2, 3, 5, 7, 9, 10], degrees: ['1', '2', '\u266d3', '4', '5', '6', '\u266d7'] },
+        { id: 'mixolydian', label: 'Mixolydian', intervals: [0, 2, 4, 5, 7, 9, 10], degrees: ['1', '2', '3', '4', '5', '6', '\u266d7'] }
+    ];
+
+    function scaleOf(id) {
+        for (var i = 0; i < SCALES.length; i++) if (SCALES[i].id === id) return SCALES[i];
+        return SCALES[0];
+    }
+
+    /* Spell a scale from its root pitch class, e.g.
+     * scaleNotes(9, 'minorPent', 'sharp') -> A, C, D, E, G. */
+    function scaleNotes(rootPc, scaleId, spelling) {
+        var scale = scaleOf(scaleId);
+        return scale.intervals.map(function (semi, i) {
+            var pc = ((rootPc + semi) % 12 + 12) % 12;
+            return {
+                name: rootName(pc, spelling),
+                degree: scale.degrees[i],
+                pc: pc
+            };
+        });
+    }
+
     function typeOf(id) {
         for (var i = 0; i < TYPES.length; i++) if (TYPES[i].id === id) return TYPES[i];
         return TYPES[0];
@@ -715,9 +747,12 @@
     root.ChordKit = {
         INSTRUMENTS: INSTRUMENTS,
         TYPES: TYPES,
+        SCALES: SCALES,
         instrumentOf: instrumentOf,
         typeOf: typeOf,
         typeForSuffix: typeForSuffix,
+        scaleOf: scaleOf,
+        scaleNotes: scaleNotes,
         parse: parse,
         rootPcOf: rootPcOf,
         rootName: rootName,
@@ -733,6 +768,6 @@
         diagramSVG: diagramSVG,
         fretLabelsSVG: fretLabelsSVG,
         dataUri: dataUri,
-        version: '1.1.0'
+        version: '1.2.0'
     };
 })(typeof window !== 'undefined' ? window : this);
