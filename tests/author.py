@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""CDP tests for in-app songbook authoring (Steps 2–4).
+"""CDP tests for in-app songbook authoring (Steps 2–5).
 
 Covers creating an editable songbook from the list and first-run empty state,
 keyboard focus/validation, persistence across reload, unique ids against
 bundled books, the zero-song state, the `chordpro` source round-trip, adding
 songs by pasting ChordPro or selecting files, and the per-song/maintenance
 actions: edit source, reject invalid source, move up/down, remove with
-confirmation, duplicate bundled and authored books, and the empty state.
+confirmation, duplicate bundled and authored books, and the empty state. Also
+covers the authoring accessibility pass (dialog focus containment, announced
+previews, sensible focus return) and an effective export -> re-import -> edit
+round-trip.
 
 Usage: start a server in the project root, then:
     python3 -m http.server 8777 &
@@ -74,6 +77,37 @@ def main():
         ok('name field is focused',
            cdp.eval("document.activeElement && document.activeElement.id") == 'newBookName',
            cdp.eval("document.activeElement && document.activeElement.id"))
+        tab_kept = cdp.eval("""
+            (function () {
+                document.getElementById('newBookCreate').focus();
+                document.dispatchEvent(new KeyboardEvent('keydown', {
+                    key: '/', bubbles: true, cancelable: true
+                }));
+                return document.activeElement.id;
+            })()
+        """)
+        ok('open authoring dialog blocks global shortcuts', tab_kept == 'newBookCreate',
+           tab_kept)
+        tab_wrapped = cdp.eval("""
+            (function () {
+                document.getElementById('newBookCreate').focus();
+                document.dispatchEvent(new KeyboardEvent('keydown', {
+                    key: 'Tab', bubbles: true, cancelable: true
+                }));
+                return document.activeElement.id;
+            })()
+        """)
+        ok('Tab wraps to the first control', tab_wrapped == 'newBookClose', tab_wrapped)
+        tab_back = cdp.eval("""
+            (function () {
+                document.getElementById('newBookClose').focus();
+                document.dispatchEvent(new KeyboardEvent('keydown', {
+                    key: 'Tab', shiftKey: true, bubbles: true, cancelable: true
+                }));
+                return document.activeElement.id;
+            })()
+        """)
+        ok('Shift+Tab wraps to the last control', tab_back == 'newBookCreate', tab_back)
 
         # Empty name is rejected in place, without creating anything.
         cdp.eval("document.getElementById('newBookCreate').click()")
@@ -225,6 +259,19 @@ def main():
            and '4/4' in paste_meta and '92 bpm' in paste_meta
            and '1 section' in paste_meta,
            paste_meta)
+        ok('parse preview is announced',
+           cdp.eval("document.getElementById('addSongPreview').getAttribute('aria-live')")
+           == 'polite')
+        add_tab = cdp.eval("""
+            (function () {
+                document.getElementById('addSongAdd').focus();
+                document.dispatchEvent(new KeyboardEvent('keydown', {
+                    key: 'Tab', bubbles: true, cancelable: true
+                }));
+                return document.activeElement.id;
+            })()
+        """)
+        ok('Tab wraps inside the add dialog', add_tab == 'addSongClose', add_tab)
 
         cdp.eval("document.getElementById('addSongAdd').click()")
         cdp.wait_js("window.__alerts.length === 1", timeout=15)
@@ -395,14 +442,34 @@ def main():
 
         edited = ("{title: Harbour Nights}\n{artist: Me}\n{level: Easy}\n"
                   "{duration: 3}\n{time: 4/4}\n{tempo: 92}\n[Am]Hello [F]world")
+        # Keyboard-only: focus the row action and activate it with Enter.
         cdp.eval("document.querySelector('#songList .song-row[data-id=\"harbour-lights\"]"
-                 " [data-action=\"edit\"]').click()")
+                 " [data-action=\"edit\"]').focus()")
+        for key_type, text in (('keyDown', '\r'), ('keyUp', None)):
+            event = {
+                'type': key_type, 'key': 'Enter', 'code': 'Enter',
+                'windowsVirtualKeyCode': 13, 'nativeVirtualKeyCode': 13,
+            }
+            if text:
+                event['text'] = text
+                event['unmodifiedText'] = text
+            cdp.send('Input.dispatchKeyEvent', event)
         cdp.wait_js("document.getElementById('editSourceOverlay').hidden === false", timeout=10)
         ok('edit dialog is prefilled with the stored source',
            cdp.eval("document.getElementById('editSourceText').value") == paste)
         ok('edit dialog focuses the source',
            cdp.eval("document.activeElement && document.activeElement.id") == 'editSourceText',
            cdp.eval("document.activeElement && document.activeElement.id"))
+        edit_tab = cdp.eval("""
+            (function () {
+                document.getElementById('editSourceSave').focus();
+                document.dispatchEvent(new KeyboardEvent('keydown', {
+                    key: 'Tab', bubbles: true, cancelable: true
+                }));
+                return document.activeElement.id;
+            })()
+        """)
+        ok('Tab wraps inside the edit dialog', edit_tab == 'editSourceClose', edit_tab)
         cdp.eval("document.getElementById('editSourceText').value = %s;"
                  " document.getElementById('editSourceText')"
                  ".dispatchEvent(new Event('input', { bubbles: true }));"
@@ -412,6 +479,9 @@ def main():
         ok('edit preview shows the new title',
            cdp.eval("document.querySelector('#editSourcePreviewList .add-song-item-title')"
                     ".textContent") == 'Harbour Nights')
+        ok('edit preview is announced',
+           cdp.eval("document.getElementById('editSourcePreview').getAttribute('aria-live')")
+           == 'polite')
         cdp.eval("document.getElementById('editSourceSave').click()")
         cdp.wait_js("document.getElementById('editSourceOverlay').hidden === true", timeout=15)
         cdp.wait_js("songbookTest.getActive().songs[0].title === 'Harbour Nights'", timeout=10)
@@ -473,6 +543,12 @@ def main():
         ok('moved row shows its new position',
            cdp.eval("document.querySelector('#songList .song-row[data-id=\"same-2\"]"
                     " .row-num').textContent") == '2')
+        cdp.wait_js("document.activeElement && document.activeElement.dataset.action"
+                    " === 'up'", timeout=10)
+        ok('move returns focus to the moved row',
+           cdp.eval("document.activeElement.closest('.song-row').dataset.id")
+           == 'same-2',
+           cdp.eval("document.activeElement && document.activeElement.outerHTML"))
 
         cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
         cdp.wait_js('!!(window.songbookTest && document.getElementById("bootMsg").hidden)',
@@ -497,6 +573,10 @@ def main():
         ok('duplicate creates an editable copy with a new id and name',
            cdp.eval('songbookTest.getActive().imported') is True
            and cdp.eval('songbookTest.getActive().name') == 'Krakow Ukulele (copy)')
+        cdp.wait_js("document.activeElement && document.activeElement.id"
+                    " === 'songbookSelect'", timeout=10)
+        ok('duplicate returns focus to the songbook picker',
+           cdp.eval("document.activeElement.id") == 'songbookSelect')
         ok('duplicate copies every song and leaves the source untouched',
            cdp.eval('songbookTest.getActive().songs.length') == 15
            and cdp.eval('JSON.stringify(SB.state.bundled[0].songs)') == bundled_json)
@@ -527,6 +607,50 @@ def main():
            and 'Harbour Nights' in cdp.eval(
                "SB.state.active.songs[0].chordpro || ''"))
 
+        # --- effective export -> re-import -> edit keeps the source --------
+        exported = cdp.eval("""
+            (function () {
+                var text = SB.effectiveSongbookJSON(SB.state.active);
+                var book = JSON.parse(text);
+                book.id = 'roundtrip-book';
+                book.name = 'Roundtrip Book';
+                return { text: text, book: JSON.stringify(book) };
+            })()
+        """)
+        ok('effective export carries authored ChordPro sources',
+           '"chordpro"' in exported['text'] and 'Harbour Nights' in exported['text'])
+        imported_id = cdp.eval(
+            "SB.importSongbookData(%s, 'roundtrip.json')"
+            ".then(function (sb) { return sb.id; })" % json.dumps(exported['book']))
+        ok('exported book re-imports as an editable copy',
+           imported_id == 'roundtrip-book', imported_id)
+        cdp.eval("location.hash = '#/roundtrip-book'")
+        cdp.wait_js("songbookTest.getActive() && songbookTest.getActive().id"
+                    " === 'roundtrip-book'", timeout=10)
+        ok('re-imported export keeps its source',
+           'Harbour Nights' in cdp.eval(
+               "songbookTest.getActive().songs[0].chordpro || ''"))
+
+        cdp.eval("document.querySelector('#songList .song-row[data-id=\"harbour-lights\"]"
+                 " [data-action=\"edit\"]').click()")
+        cdp.wait_js("document.getElementById('editSourceOverlay').hidden === false", timeout=10)
+        roundtrip_source = ("{title: Harbour Nights Live}\n{artist: Me}\n"
+                            "{level: Easy}\n{duration: 3}\n{time: 4/4}\n"
+                            "{tempo: 92}\n[Am]Hello [F]world")
+        cdp.eval("document.getElementById('editSourceText').value = %s;"
+                 " document.getElementById('editSourceText')"
+                 ".dispatchEvent(new Event('input', { bubbles: true }));"
+                 % json.dumps(roundtrip_source))
+        cdp.wait_js("document.querySelector('#editSourcePreviewList .add-song-item-title')"
+                    ".textContent === 'Harbour Nights Live'", timeout=10)
+        cdp.eval("document.getElementById('editSourceSave').click()")
+        cdp.wait_js("document.getElementById('editSourceOverlay').hidden === true", timeout=15)
+        cdp.wait_js("songbookTest.getActive().songs[0].title === 'Harbour Nights Live'",
+                    timeout=10)
+        ok('exported -> re-imported song can be edited from source',
+           cdp.eval("songbookTest.getActive().songs[0].id") == 'harbour-lights'
+           and cdp.eval("songbookTest.getActive().songs[0].chordpro") == roundtrip_source)
+
         # --- remove renumbers and the last removal empties the book -------
         cdp.eval("location.hash = '#/my-songs-2'")
         cdp.wait_js("songbookTest.getActive() && songbookTest.getActive().id === 'my-songs-2'",
@@ -546,6 +670,10 @@ def main():
                     " return s.id; }).join(',')") == 'harbour-lights,same-2'
            and cdp.eval("songbookTest.getActive().songs.map(function (s) {"
                         " return s.n; }).join(',')") == '1,2')
+        cdp.wait_js("document.activeElement && document.activeElement.dataset.action"
+                    " === 'remove'", timeout=10)
+        ok('remove returns focus to the neighbouring row',
+           cdp.eval("document.activeElement.closest('.song-row').dataset.id") == 'same-2')
 
         cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
         cdp.wait_js('!!(window.songbookTest && document.getElementById("bootMsg").hidden)',

@@ -16,6 +16,11 @@
             // js/strum.js, and a global Escape would navigate away from the
             // song while the user is editing a pattern.
             if (SB.$('patternOverlay') && !SB.$('patternOverlay').hidden) return;
+            // Authoring dialogs are modal and own their Escape/Tab handling in
+            // js/author.js; global shortcuts must not act on the page behind.
+            if ((SB.$('editSourceOverlay') && !SB.$('editSourceOverlay').hidden) ||
+                    (SB.$('addSongOverlay') && !SB.$('addSongOverlay').hidden) ||
+                    (SB.$('newBookOverlay') && !SB.$('newBookOverlay').hidden)) return;
             // The voicing chooser is a modal: its own Escape closes it and its
             // Space activates the focused option. Letting the global shortcuts
             // run too used to navigate back and start auto-scroll at once.

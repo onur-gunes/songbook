@@ -13,6 +13,44 @@
 
     function overlay() { return SB.$('newBookOverlay'); }
 
+    /* Keep Tab inside the open authoring dialog, like the pattern editor and
+     * the structure editor do. Without this, Tab can land on controls behind
+     * the overlay even though the dialog is marked aria-modal. */
+    function trapFocus(event, sheetId) {
+        if (event.key !== 'Tab') return false;
+        var sheet = SB.$(sheetId);
+        if (!sheet) return false;
+        var focusables = Array.prototype.filter.call(
+            sheet.querySelectorAll(
+                'button, input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+            function (el) {
+                return !el.disabled && !el.hidden && el.offsetParent !== null;
+            });
+        if (!focusables.length) {
+            event.preventDefault();
+            return true;
+        }
+        var first = focusables[0];
+        var last = focusables[focusables.length - 1];
+        var active = document.activeElement;
+        if (!active || active === sheet || !sheet.contains(active)) {
+            event.preventDefault();
+            first.focus();
+            return true;
+        }
+        if (event.shiftKey && active === first) {
+            event.preventDefault();
+            last.focus();
+            return true;
+        }
+        if (!event.shiftKey && active === last) {
+            event.preventDefault();
+            first.focus();
+            return true;
+        }
+        return false;
+    }
+
     function setError(message) {
         var box = SB.$('newBookError');
         if (!box) return;
@@ -613,16 +651,27 @@
         }
 
         document.addEventListener('keydown', function (e) {
-            if (e.key !== 'Escape') return;
             if (editEl && !editEl.hidden) {
-                e.preventDefault();
-                closeEditSource(true);
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeEditSource(true);
+                } else {
+                    trapFocus(e, 'editSourceDialog');
+                }
             } else if (addEl && !addEl.hidden) {
-                e.preventDefault();
-                closeAddSongs(true);
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeAddSongs(true);
+                } else {
+                    trapFocus(e, 'addSongDialog');
+                }
             } else if (el && !el.hidden) {
-                e.preventDefault();
-                close(true);
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    close(true);
+                } else {
+                    trapFocus(e, 'newBookDialog');
+                }
             }
         });
     };
