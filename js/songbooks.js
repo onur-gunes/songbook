@@ -265,6 +265,11 @@
         var strumPatterns = normalizeStrumPatterns(s.strumPatterns);
         if (strumPatterns) song.strumPatterns = strumPatterns;
         if (grid) song.grid = grid;
+        /* Authoring source, kept only when present so JSON-only songs do not
+         * grow an empty field. It is data for the source editor, not content
+         * the renderer reads; `sheet`/`grid` remain the rendered truth. */
+        var chordpro = typeof s.chordpro === 'string' ? s.chordpro.trim() : '';
+        if (chordpro) song.chordpro = chordpro;
         return song;
     }
 
@@ -287,6 +292,53 @@
             songs: raw.songs.map(normalizeSong)
         };
     }
+
+    /* A user-created book is an ordinary imported book, so it uses the same
+     * store, picker and removal path as a JSON import. The id is slugged from
+     * the name and made unique against bundled books too: reusing a bundled
+     * id would shadow shipped content and vanish on the next deploy. */
+    function songbookSlug(name) {
+        var s = String(name == null ? '' : name).normalize('NFKD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\u0142/g, 'l')
+            .toLowerCase();
+        s = s.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        return s.slice(0, 48) || 'songbook';
+    }
+
+    function uniqueSongbookId(base) {
+        var taken = {};
+        SB.allSongbooks().forEach(function (b) { taken[b.id] = true; });
+        if (!taken[base]) return base;
+        var n = 2;
+        while (taken[base + '-' + n]) n += 1;
+        return base + '-' + n;
+    }
+
+    SB.createSongbook = function (fields) {
+        fields = fields || {};
+        var name = String(fields.name == null ? '' : fields.name).trim();
+        if (!name) return Promise.reject(new Error('songbook name is required'));
+        var raw = {
+            id: uniqueSongbookId(songbookSlug(name)),
+            name: name,
+            description: String(fields.description == null ? '' : fields.description).trim(),
+            instrument: fields.instrument === 'guitar' ? 'guitar' : 'ukulele',
+            songs: []
+        };
+        var sb;
+        try { sb = SB.normalizeSongbook(raw); }
+        catch (err) { return Promise.reject(err); }
+        sb.imported = true;
+        return SB.idbPut(sb).then(function () {
+            SB.state.imported.push(sb);
+            SB.rebuildIndex();
+            SB.setActive(sb);
+            SB.renderList();
+            SB.renderRecent();
+            return sb;
+        });
+    };
 
     SB.loadBundled = function () {
         /* An injected empty list is authoritative, not an invitation to fetch:
