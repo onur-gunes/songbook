@@ -80,6 +80,12 @@ jobs:
       - name: Structure editor unit tests
         run: python3 tests/editor.py
 
+      # The browser parser is a second implementation of chordpro.py's subset.
+      # This runs both over the demo/fixture corpus and malformed input and
+      # fails on any difference in the song dict or warning strings.
+      - name: ChordPro parser parity (JS vs Python)
+        run: python3 tests/chordpro_js.py "$BASE_URL"
+
       # Grid strum lane: strokes per felt beat, beat count, bar/beat strum
       # controls, 4/4 / 3/4 / 6/8 / 2/4 and held chords (beats > 1).
       - name: Grid strum lane browser tests

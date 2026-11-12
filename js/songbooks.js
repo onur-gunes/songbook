@@ -24,6 +24,15 @@
      * six eighths, matching how bpm and the strum library count 6/8. */
     var BEATS_PER_BAR = { '4/4': 4, '3/4': 3, '6/8': 2, '2/4': 2 };
 
+    /* Exposed so the ChordPro parser can reuse this one copy of the metre
+     * rules instead of carrying a third mirror. `beatsPerBar` returns null
+     * (not the metronome's 4/4 fallback) for an unknown metre, because a grid
+     * bar cannot be expanded without a real metre. */
+    SB.BPM_MIN = BPM_MIN;
+    SB.BPM_MAX = BPM_MAX;
+    SB.TIME_SIGNATURES = TIME_SIGNATURES;
+    SB.beatsPerBar = function (time) { return BEATS_PER_BAR[time] || null; };
+
     /* Imported songbooks are untrusted JSON, so an out-of-range or non-numeric
      * tempo is dropped to null rather than clamped: clamping "0" to 20 would
      * invent a tempo the song never had and silently drive the metronome at a

@@ -87,6 +87,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/autoscroll.js` | Auto-scroll, text/chord sizing, pinch zoom |
 | `js/metronome.js` | Metronome: lookahead click scheduler and per-song BPM |
 | `js/strum.js` | Strum-pattern row + selector, filtered by `time`, highlighted off the metronome clock |
+| `js/chordpro.js` | Browser ChordPro parser (`SB.parseChordPro`), a parity-tested port of `chordpro.py`'s authoring subset |
 | `js/router.js` | Hash routing |
 | `js/keyboard.js` | Global keyboard shortcuts |
 | `js/app.js` | Entry point: `init()`, service-worker registration, test export |
@@ -453,6 +454,13 @@ appearance order), and ids are slugified from titles and de-duplicated per book.
 differs from first appearance; a mismatch between the override and the sheet
 produces a validation warning.
 
+The same subset is parsed in the browser by `js/chordpro.js`, which exposes
+`SB.parseChordPro(text, { allowTrustedNotes: false })` → `{ song, warnings }`.
+It mirrors `chordpro.py` exactly, including the warning strings, and
+`tests/chordpro_js.py` fails on any difference. `{trusted_note}` stays disabled
+for user input. The parser only produces a song dict; callers still pass it
+through `SB.normalizeSongbook`, the single import validator.
+
 Build one book, or every book under a directory:
 
 ```sh
@@ -633,11 +641,13 @@ number of slots per beat; and `slots` is a `D`/`U`/`-` string whose length is
 exactly `subdiv * felt-beats-per-bar` for its metre. Invalid custom patterns,
 metre mismatches, and wrong slot counts are build errors.
 
-Run the parser/builder tests with `python3 tests/chordpro.py`, the strum
-library mirror guard with `python3 tests/strum.py`, the dev/prod environment
-guard with `python3 tests/env.py`, and the plan/export/sections/editor unit
-suites with `python3 tests/plan.py`, `python3 tests/export.py`,
-`python3 tests/sections.py` and `python3 tests/editor.py`.
+Run the parser/builder tests with `python3 tests/chordpro.py`, the browser
+parser parity suite with `python3 tests/chordpro_js.py` (needs the app server),
+the strum library mirror guard with `python3 tests/strum.py`, the dev/prod
+environment guard with `python3 tests/env.py`, and the
+plan/export/sections/editor unit suites with `python3 tests/plan.py`,
+`python3 tests/export.py`, `python3 tests/sections.py` and
+`python3 tests/editor.py`.
 
 ## Builds
 
