@@ -1,25 +1,11 @@
 {
   "songbooks": [
     {
-      "id": "krakow-ukulele",
-      "name": "Krakow Ukulele Songbook",
-      "description": "198 songs from Krakow Ukulele & Sing Tuesdays.",
+      "id": "demo",
+      "name": "Public Domain Songbook",
+      "description": "Twelve traditional songs and evergreens in the public domain, arranged to show chords, tempo, metre, strumming and the bar/beat grid.",
       "instrument": "ukulele",
-      "file": "krakow-ukulele.json"
-    },
-    {
-      "id": "polska-gurom",
-      "name": "POLSKA GUROM",
-      "description": "Polskie klasyki - na górę z flagą, tam gdzie Polska!",
-      "instrument": "ukulele",
-      "file": "polska-gurom.json"
-    },
-    {
-      "id": "popular",
-      "name": "Popular Songs",
-      "description": "Well-known pop, rock and folk standards — every song with a key, tempo and strum.",
-      "instrument": "ukulele",
-      "file": "popular.json"
+      "file": "demo.json"
     }
   ]
 }

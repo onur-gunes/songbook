@@ -1,0 +1,32 @@
+{title: Danny Boy}
+{artist: Frederic Weatherly}
+{level: Hard}
+{duration: 3.5}
+{key: D}
+{sheetkey: C}
+{capo: 2}
+{time: 4/4}
+{tempo: 72}
+{strum: dduudu-4-4}
+
+{start_of_grid: Verse 1}
+| C | F | C | G | Dm | G |
+| C | F | C | G | G7 | C |
+{end_of_grid}
+
+{start_of_grid: Verse 2}
+| C | F | C | G | Dm | G |
+| C | F | C | Am | F | G | C |
+{end_of_grid}
+
+{comment: Verse 1}
+[C]Oh Danny Boy, the [F]pipes, the pipes are [C]calling
+From [G]glen to glen, and [Dm]down the mountain [G]side
+The [C]summer's gone, and [F]all the roses [C]falling
+It's [G]you, it's you must [G7]go and I must [C]bide
+
+{comment: Verse 2}
+But [C]come ye back when [F]summer's in the [C]meadow
+Or when the [G]valley's hushed and [Dm]white with [G]snow
+It's [C]I'll be here in [F]sunshine or in [C]shadow
+Oh [Am]Danny Boy, oh [F]Danny Boy, I [G]love you [C]so

@@ -80,15 +80,100 @@
                     beats.push({ chord: chord, beats: count });
                 }
                 if (total !== beatsPerBar) return null;
-                bars.push({ beats: beats });
+                /* `strums` is one slot string per felt beat (bar-level strum
+                 * overrides written into the grid at export). Its length must
+                 * match the bar's beat total and every entry must share one
+                 * subdivision; anything else drops the whole grid, matching
+                 * the strict import-boundary treatment of the rest of the grid.
+                 * A null/undefined `strums` is the same as absent, but any
+                 * other non-array value is corrupt data and is not ignored. */
+                var hasStrums = bar.strums !== undefined && bar.strums !== null;
+                if (hasStrums && !Array.isArray(bar.strums)) return null;
+                var barStrums = null;
+                if (hasStrums) {
+                    if (bar.strums.length !== total) return null;
+                    var barSubdiv = null;
+                    for (var vi = 0; vi < bar.strums.length; vi++) {
+                        var entry = bar.strums[vi];
+                        if (typeof entry !== 'string' || !entry || !/^[DU-]+$/.test(entry)) return null;
+                        if (barSubdiv === null) barSubdiv = entry.length;
+                        else if (entry.length !== barSubdiv) return null;
+                    }
+                    barStrums = bar.strums.slice();
+                }
+                var barOut = { beats: beats };
+                if (barStrums) barOut.strums = barStrums;
+                bars.push(barOut);
             }
             blocks.push({
                 label: (typeof block.label === 'string') ? block.label : '',
+                role: normalizeGridRole(block),
                 repeat: !!block.repeat,
                 bars: bars
             });
         }
         return blocks;
+    }
+
+    /* A missing or invalid role is derived from the block's label via the
+     * shared role model (js/sections.js), so every imported grid block carries
+     * a valid role. An explicitly present, valid role is kept as authored. */
+    function normalizeGridRole(block) {
+        var role = block.role;
+        if (typeof role === 'string' && SB.isSectionRole(role)) return role;
+        var label = typeof block.label === 'string' ? block.label : '';
+        return SB.sectionRole(label);
+    }
+
+    /* `sectionStrums` maps a canonical section role to a pattern id. Only
+     * real roles are kept, and only with a non-empty id; the id's metre is
+     * checked against the song at pattern-resolution time (in js/strum.js),
+     * so here we keep the shape clean without the pattern library (which loads
+     * after this module). */
+    function normalizeSectionStrums(value) {
+        if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+        var out = {};
+        var any = false;
+        Object.keys(value).forEach(function (role) {
+            if (!SB.isSectionRole(role)) return;
+            var id = value[role];
+            if (typeof id === 'string' && id) { out[role] = id; any = true; }
+        });
+        return any ? out : null;
+    }
+
+    /* `strumPatterns` are per-song custom pattern definitions (the plan's
+     * customPatterns carried into the songbook). Each entry is validated with
+     * the same invariant the library is built on: a real id that does not
+     * shadow a built-in (that check happens at build time, since the library
+     * lives in js/strum.js), a real metre, a whole-number subdivision, and a
+     * slot string whose length is exactly subdivision * felt-beats-per-bar.
+     * Duplicate ids collapse to the first valid definition. */
+    function normalizeStrumPatterns(value) {
+        if (!Array.isArray(value)) return null;
+        /* Built-ins are immutable. The build also rejects a custom id that
+         * shadows one; at import time strum.js may not have run yet (it loads
+         * after this module), so filter only when its library is available. */
+        var builtIn = {};
+        if (typeof SB.strumPatterns === 'function') {
+            SB.strumPatterns().forEach(function (p) { builtIn[p.id] = true; });
+        }
+        var out = [];
+        var seen = {};
+        value.forEach(function (p) {
+            if (!p || typeof p !== 'object') return;
+            var id = p.id, name = p.name, time = p.time, subdiv = p.subdiv, slots = p.slots;
+            if (typeof id !== 'string' || !id || seen[id] || builtIn[id]) return;
+            if (typeof name !== 'string' || !name.trim()) return;
+            if (TIME_SIGNATURES.indexOf(time) < 0) return;
+            if (typeof subdiv !== 'number' || !isFinite(subdiv) || subdiv < 1 || subdiv !== Math.floor(subdiv)) return;
+            if (typeof slots !== 'string' || !slots || !/^[DU-]+$/.test(slots)) return;
+            var expected = BEATS_PER_BAR[time] * subdiv;
+            if (slots.length !== expected) return;
+            seen[id] = true;
+            out.push({ id: id, name: name.trim(), time: time, subdiv: subdiv, slots: slots });
+        });
+        return out.length ? out : null;
     }
 
     /* The sheet is the only imported field with a nested shape. A missing or
@@ -142,8 +227,12 @@
             }).map(String) : [],
             sheet: normalizeSheet(s.sheet)
         };
-        /* Kept absent on the ~330 songs with no grid, parallel to how bpm/time
-         * are simply omitted, so nothing downstream has to special-case null. */
+        /* Kept absent when there is nothing to carry, so downstream code can
+         * test for the field's presence instead of special-casing null. */
+        var sectionStrums = normalizeSectionStrums(s.sectionStrums);
+        if (sectionStrums) song.sectionStrums = sectionStrums;
+        var strumPatterns = normalizeStrumPatterns(s.strumPatterns);
+        if (strumPatterns) song.strumPatterns = strumPatterns;
         if (grid) song.grid = grid;
         return song;
     }
@@ -169,13 +258,21 @@
     }
 
     SB.loadBundled = function () {
-        if (window.__SONGBOOKS__ && window.__SONGBOOKS__.length) {
+        /* An injected empty list is authoritative, not an invitation to fetch:
+         * the single-file build and the test harness both use this hook to say
+         * "this app has no bundled books", which is now a valid state. */
+        if (Array.isArray(window.__SONGBOOKS__)) {
             return Promise.resolve(window.__SONGBOOKS__.map(SB.normalizeSongbook));
         }
         return fetch('songbooks/index.json', { cache: 'no-cache' }).then(function (r) {
+            /* An absent manifest means a content-free app, not a broken one.
+             * Anything else non-OK (and malformed JSON below) is still a real
+             * error: a 500, or a corrupt manifest, must not be swallowed. */
+            if (r.status === 404) return null;
             if (!r.ok) throw new Error('songbooks/index.json ' + r.status);
             return r.json();
         }).then(function (manifest) {
+            if (!manifest) return [];
             var entries = (manifest && manifest.songbooks) || [];
             return Promise.all(entries.map(function (e) {
                 return fetch('songbooks/' + e.file, { cache: 'no-cache' }).then(function (r) {
@@ -195,6 +292,7 @@
         SB.state.bySb = {};
         SB.allSongbooks().forEach(function (sb) { SB.state.bySb[sb.id] = sb; });
         buildSongbookSelect();
+        SB.renderEmptyState();
     }
 
     SB.setActive = function (sb) {
@@ -202,10 +300,14 @@
         SB.state.byId = {};
         if (sb) sb.songs.forEach(function (s) { SB.state.byId[s.id] = s; });
         var sel = SB.$('songbookSelect');
-        if (sel && sb) sel.value = sb.id;
+        if (sel) sel.value = sb ? sb.id : '';
         var rm = SB.$('removeSongsBtn');
         if (rm) rm.hidden = !(sb && sb.imported);
-        SB.applyBrand();
+        var rf = SB.$('refreshSongsBtn');
+        if (rf) rf.hidden = !(sb && sb.imported && sb.sourceUrl);
+        var ex = SB.$('exportSongsBtn');
+        if (ex) ex.hidden = !sb;
+        if (SB.applyBrand) SB.applyBrand();
     }
 
     function buildSongbookSelect() {

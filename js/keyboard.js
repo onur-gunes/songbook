@@ -12,6 +12,10 @@
     SB.bindKeyboard = function () {
         document.addEventListener('keydown', function (e) {
             if (SB.$('tunerOverlay') && !SB.$('tunerOverlay').hidden) return;
+            // The pattern editor is modal too: its Escape/Tab handling lives in
+            // js/strum.js, and a global Escape would navigate away from the
+            // song while the user is editing a pattern.
+            if (SB.$('patternOverlay') && !SB.$('patternOverlay').hidden) return;
             // The voicing chooser is a modal: its own Escape closes it and its
             // Space activates the focused option. Letting the global shortcuts
             // run too used to navigate back and start auto-scroll at once.

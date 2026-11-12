@@ -154,6 +154,12 @@
          * per-song value. See js/strum.js. */
         strum: { pattern: null, notation: 'arrows' },
 
+        /* structural edit mode (Step 6): off by default. When on, the song's
+         * structure (chords, lengths, bars, beats, metre) can be edited via
+         * the edit panel; strum overrides are a separate layer and stay
+         * untouched. See js/editor.js. */
+        editMode: false,
+
         /* strum row display, matching chordSize/chordPin: size scales the
          * slots, pin keeps the row on screen while the lyrics scroll. Both are
          * global preferences remembered in localStorage. */

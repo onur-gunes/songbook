@@ -10,6 +10,7 @@ import sys
 import time
 
 from cdp import launch_chrome, new_tab, CDP
+from fixture import inject_fixtures
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else 'http://localhost:8777'
 PORT = 9337
@@ -18,9 +19,10 @@ PORT = 9337
 def main():
     proc, _ = launch_chrome(PORT)
     try:
-        target = new_tab(PORT, BASE + '/index.html?nosw')
+        target = new_tab(PORT, 'about:blank')
         cdp = CDP(target['webSocketDebuggerUrl'])
         cdp.enable()
+        inject_fixtures(cdp)
         cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
         cdp.wait_js('!!(window.SongbookTuner && window.songbookTest && songbookTest.getActive())',
                     timeout=30)
@@ -156,14 +158,17 @@ def main():
         cdp.eval("document.getElementById('tunerCalDown').click()")
 
         # --- Escape closes without leaking to the app's keyboard handler ---
-        cdp.eval("location.hash = '#/krakow-ukulele/riptide'")
+        cdp.eval("location.hash = '#/krakow-ukulele/harbour-lights'")
         cdp.wait_js("document.getElementById('songView').hidden === false", timeout=10)
         cdp.eval("document.getElementById('tunerBtn').click()")
         cdp.wait_js("SongbookTuner.isOpen()")
+        # Let the overlay finish showing so the keyboard gate below is active
+        # before we synthesize a key; otherwise a raced key could leak through.
+        cdp.wait_js("!document.getElementById('tunerOverlay').hidden", timeout=10)
         cdp.eval("document.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowLeft', bubbles: true}))")
         time.sleep(0.15)
         ok('arrow keys ignored while tuner open',
-           cdp.eval("location.hash") == '#/krakow-ukulele/riptide')
+           cdp.eval("location.hash") == '#/krakow-ukulele/harbour-lights')
         cdp.eval("document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}))")
         cdp.wait_js("!SongbookTuner.isOpen()", timeout=5)
         ok('Escape closes tuner',

@@ -49,6 +49,96 @@ TIME_SIGNATURES = ('4/4', '3/4', '6/8', '2/4')
 # check); tests/strum.py reuses this copy.
 BEATS_PER_BAR = {'4/4': 4, '3/4': 3, '6/8': 2, '2/4': 2}
 
+# Canonical section roles, shared with js/sections.js. tests/sections.py guards
+# that the two copies cannot drift. Every section label (English or Polish)
+# normalises to one of these stable roles, which is the foundation for
+# per-section strum selectors and for language-independent exported JSON.
+SECTION_ROLES = (
+    'intro', 'verse', 'pre_chorus', 'chorus', 'bridge', 'outro',
+    'interlude', 'solo', 'tag', 'other',
+)
+
+# Normalised label -> canonical role. Keys are produced by _normalise_section;
+# multi-word keys match exactly first, then any single word in the label.
+SECTION_ALIASES = {
+    # canonical roles (self-maps)
+    'intro': 'intro',
+    'verse': 'verse',
+    'pre chorus': 'pre_chorus',
+    'chorus': 'chorus',
+    'bridge': 'bridge',
+    'outro': 'outro',
+    'interlude': 'interlude',
+    'solo': 'solo',
+    'tag': 'tag',
+    'other': 'other',
+    # English variants
+    'introduction': 'intro',
+    'opening': 'intro',
+    'prologue': 'intro',
+    'strophe': 'verse',
+    'prechorus': 'pre_chorus',
+    'refrain': 'chorus',
+    'hook': 'chorus',
+    'ending': 'outro',
+    'coda': 'outro',
+    'instrumental': 'interlude',
+    # Polish
+    'wstep': 'intro',
+    'prolog': 'intro',
+    'zwrotka': 'verse',
+    'wers': 'verse',
+    'przedrefren': 'pre_chorus',
+    'przed refren': 'pre_chorus',
+    'refren': 'chorus',
+    'przyspiew': 'chorus',
+    'most': 'bridge',
+    'mostek': 'bridge',
+    'zakonczenie': 'outro',
+    'koda': 'outro',
+    'przejscie': 'pre_chorus',
+    'instrumentalny': 'interlude',
+    'przerywnik': 'interlude',
+    'solo gitarowe': 'solo',
+}
+
+_POLISH = str.maketrans({
+    'ą': 'a', 'ć': 'c', 'ę': 'e', 'ł': 'l', 'ń': 'n',
+    'ó': 'o', 'ś': 's', 'ź': 'z', 'ż': 'z',
+})
+_SECTION_PUNCT = re.compile(r'[()\[\]{},.;:/\\-]')
+
+
+def _normalise_section(text):
+    """Fold a section label to a canonical lookup key.
+
+    Lowercase, fold Polish diacritics (ą ć ę ł ń ó ś ź ż), turn punctuation
+    and parentheses into spaces, drop trailing numbers ("Verse 2" -> "verse"),
+    and collapse whitespace. "(Chorus)" and "Refren 3" both become "chorus".
+    """
+    s = str(text).strip().lower()
+    s = s.translate(_POLISH)
+    s = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore').decode()
+    s = _SECTION_PUNCT.sub(' ', s)
+    s = re.sub(r'\s+\d+\s*$', '', s)          # trailing verse/chorus numbers
+    return re.sub(r'\s+', ' ', s).strip()
+
+
+def section_role(label):
+    """Return the canonical section role for a label, or 'other' when nothing
+    matches. Bilingual: English and Polish labels resolve to the same role."""
+    key = _normalise_section(label)
+    if not key:
+        return 'other'
+    role = SECTION_ALIASES.get(key)
+    if role:
+        return role
+    for word in key.split():
+        role = SECTION_ALIASES.get(word)
+        if role:
+            return role
+    return 'other'
+
 _DIRECTIVE_RE = re.compile(r'^\s*\{([^{}]*)\}\s*$')
 
 def slugify(text):
@@ -291,7 +381,8 @@ def parse_grid_block(label, body_lines, time_sig):
         raise ValueError('grid block %r: close-repeat must be a single mark at the end' % label)
     repeat = bool(opens or closes)
     bars = [{'beats': _grid_bar_beats(bt, beats_per_bar)} for bt in bar_texts]
-    return {'label': label, 'repeat': repeat, 'bars': bars}
+    return {'label': label, 'role': section_role(label), 'repeat': repeat,
+            'bars': bars}
 
 
 # ---------- strum pattern library ----------
@@ -316,9 +407,11 @@ def parse_grid_block(label, body_lines, time_sig):
 # CAVEAT (stated here in the data, not only in the UI): strum patterns are far
 # less reliably documented than key or bpm, and most real songs change pattern
 # between verse and chorus. A per-song `strum` is one pattern for the whole
-# song and is explicitly an approximation; per-section patterns are a later
-# feature. The per-song field is a single id today but is designed so it can
-# grow to a list without a data migration.
+# song and is explicitly an approximation; songs can additionally carry
+# `sectionStrums` (one pattern per canonical section role, English or Polish
+# labels alike) and per-song custom patterns in `strumPatterns`. The per-song
+# field stays a single id but is designed so it can grow to a list without a
+# data migration.
 STRUM_PATTERNS = (
     # 4/4 — eighths (8 slots)
     {'id': 'downs-4-4', 'name': 'All downs', 'time': '4/4', 'subdiv': 2,

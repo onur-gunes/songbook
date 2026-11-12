@@ -18,6 +18,8 @@ try {
     ok("parse C+ -> aug", ChordKit.parse('C+') && ChordKit.parse('C+').type.id === 'aug');
     ok('parse NC -> null', ChordKit.parse('NC') === null);
     ok('parse Csharp -> C#', ChordKit.parse('Csharp') && ChordKit.parse('Csharp').rootPc === 1, ChordKit.parse('Csharp') && ChordKit.parse('Csharp').rootPc);
+    ok('parse unicode F\u266f -> F#', ChordKit.parse('F\u266f') && ChordKit.parse('F\u266f').rootPc === 6, ChordKit.parse('F\u266f') && ChordKit.parse('F\u266f').rootPc);
+    ok('parse unicode B\u266d -> Bb', ChordKit.parse('B\u266d') && ChordKit.parse('B\u266d').rootPc === 10, ChordKit.parse('B\u266d') && ChordKit.parse('B\u266d').rootPc);
 
     // Roman numerals / scale degrees
     ok('C in C = I', ChordKit.romanNumeral('C', 'C') === 'I');
@@ -96,6 +98,38 @@ try {
     ok('all chart chords resolve on ukulele', missU === 0, missU);
     ok('all chart chords resolve on guitar', missG === 0, missG);
     ok('all voicings correct length', badLen === 0, badLen);
+
+    // chord tones keep their conventional spelling
+    ok('C tones', ChordKit.chordNotes('C').map(n => n.name).join(',') === 'C,E,G',
+        ChordKit.chordNotes('C').map(n => n.name).join(','));
+    ok('Cdim7 spellings', ChordKit.chordNotes('Cdim7').map(n => n.name).join(',') === 'C,E\u266d,G\u266d,B\u266d\u266d',
+        ChordKit.chordNotes('Cdim7').map(n => n.name).join(','));
+    ok('Dbm7 spellings', ChordKit.chordNotes('Dbm7').map(n => n.name).join(',') === 'D\u266d,F\u266d,A\u266d,C\u266d',
+        ChordKit.chordNotes('Dbm7').map(n => n.name).join(','));
+    ok('tone degrees', ChordKit.chordNotes('Am7').map(n => n.degree).join(',') === 'root,\u266d3,5,\u266d7',
+        ChordKit.chordNotes('Am7').map(n => n.degree).join(','));
+
+    // scales share the chord engine's spelling style and pitch classes
+    ok('A minor pentatonic', ChordKit.scaleNotes(9, 'minorPent', 'sharp').map(n => n.name).join(',') === 'A,C,D,E,G',
+        ChordKit.scaleNotes(9, 'minorPent', 'sharp').map(n => n.name).join(','));
+    ok('C major scale', ChordKit.scaleNotes(0, 'major', 'sharp').map(n => n.name).join(',') === 'C,D,E,F,G,A,B',
+        ChordKit.scaleNotes(0, 'major', 'sharp').map(n => n.name).join(','));
+    ok('scale degrees', ChordKit.scaleNotes(9, 'minorPent', 'sharp').map(n => n.degree).join(',') === '1,\u266d3,4,5,\u266d7',
+        ChordKit.scaleNotes(9, 'minorPent', 'sharp').map(n => n.degree).join(','));
+    ok('unknown scale falls back to major', ChordKit.scaleOf('nope').id === 'major');
+
+    // reverse lookup: frets -> chord name (minor family first, like the explorers)
+    ok('identify uke C shape = C', ChordKit.identify([0, 0, 0, 3], 'ukulele')[0].name === 'C',
+        ChordKit.identify([0, 0, 0, 3], 'ukulele').map(c => c.name).join(' '));
+    ok('identify guitar C shape = C', ChordKit.identify([-1, 3, 2, 0, 1, 0], 'guitar')[0].name === 'C',
+        ChordKit.identify([-1, 3, 2, 0, 1, 0], 'guitar').map(c => c.name).join(' '));
+    ok('identify guitar G shape = G', ChordKit.identify([3, 2, 0, 0, 0, 3], 'guitar')[0].name === 'G',
+        ChordKit.identify([3, 2, 0, 0, 0, 3], 'guitar').map(c => c.name).join(' '));
+    ok('identify uke C#m shape = C\u266fm', ChordKit.identify([1, 1, 0, -1], 'ukulele')[0].name === 'C\u266fm',
+        ChordKit.identify([1, 1, 0, -1], 'ukulele').map(c => c.name).join(' '));
+    ok('identify all muted = none', ChordKit.identify([-1, -1, -1, -1], 'ukulele').length === 0);
+    ok('identify a ninth shape', ChordKit.identify([0, 3, 2, 0, 3, 0], 'guitar').length > 0,
+        ChordKit.identify([0, 3, 2, 0, 3, 0], 'guitar').map(c => c.name).join(' '));
 
     // SVG rendering
     const su = ChordKit.diagramSVG('ukulele', ChordKit.bestVoicing('Am', 'ukulele'));

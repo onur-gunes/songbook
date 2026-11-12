@@ -20,6 +20,18 @@
 
     SB.route = function () {
         var h = location.hash || '';
+
+        /* The chord explorer is an app-level view, not a songbook, so it is
+         * matched before the #/<songbook>/<song> pattern. The optional mode
+         * segment keeps the Shapes and Neck tabs deep-linkable. */
+        var explorer = h.match(/^#\/chords(?:\/(neck|shapes))?\/?$/);
+        if (explorer) {
+            SB.openExplorer(explorer[1] || 'shapes');
+            return;
+        }
+        var explorerLink = SB.$('explorerLink');
+        if (explorerLink) explorerLink.removeAttribute('aria-current');
+
         var m = h.match(/^#\/([^\/]+)(?:\/(.+))?$/);
         var sb = null, songId = null;
         if (m) {
@@ -29,12 +41,27 @@
         // A bare "#/" means "back to the song list I'm browsing" — keep the
         // current songbook instead of snapping to the default starter one.
         if (!sb) sb = (SB.state.active && SB.state.bySb[SB.state.active.id]) || SB.defaultSongbook();
-        if (!sb) return;
+        if (!sb) {
+            /* With no books at all there is nothing to route to, but the list
+             * view is still usable: show the empty state instead of leaving
+             * both views hidden. This is also the path after the last book is
+             * removed. */
+            SB.setActive(null);
+            SB.resetScroll(true);
+            SB.stopMetronome();
+            SB.state.currentSong = null;
+            SB.$('songView').hidden = true;
+            SB.$('explorerView').hidden = true;
+            SB.$('listView').hidden = false;
+            SB.renderEmptyState();
+            return;
+        }
 
         SB.setActive(sb);
 
         if (songId && SB.state.byId[songId]) {
             SB.$('listView').hidden = true;
+            SB.$('explorerView').hidden = true;
             SB.$('songView').hidden = false;
             SB.openSong(songId);
         } else {
@@ -42,6 +69,7 @@
             SB.stopMetronome();
             SB.state.currentSong = null;
             SB.$('songView').hidden = true;
+            SB.$('explorerView').hidden = true;
             SB.$('listView').hidden = false;
             SB.renderList();
             SB.renderRecent();

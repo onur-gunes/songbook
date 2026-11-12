@@ -1,0 +1,31 @@
+{title: Amazing Grace}
+{artist: John Newton}
+{level: Easy}
+{duration: 3.0}
+{key: G}
+{time: 3/4}
+{tempo: 72}
+{strum: waltz-3-4}
+
+{start_of_grid: Verse}
+| G | C | G | D |
+| G | C | G | D G . |
+{end_of_grid}
+
+{comment: Verse 1}
+[G]Amazing grace, how [C]sweet the sound
+That [G]saved a [D]wretch like me
+[G]I once was lost, but [C]now am found
+Was [G]blind, but [D]now I [G]see
+
+{comment: Verse 2}
+[G]'Twas grace that taught my [C]heart to fear
+And [G]grace my [D]fears relieved
+[G]How precious did that [C]grace appear
+The [G]hour I [D]first be[G]lieved
+
+{comment: Verse 3}
+Through [G]many dangers, [C]toils and snares
+I [G]have already [D]come
+'Tis [G]grace hath brought me [C]safe thus far
+And [G]grace will [D]lead me [G]home

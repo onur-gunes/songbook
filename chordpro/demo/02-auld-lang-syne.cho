@@ -1,0 +1,36 @@
+{title: Auld Lang Syne}
+{artist: Robert Burns}
+{level: Easy}
+{duration: 2.5}
+{key: C}
+{time: 3/4}
+{tempo: 84}
+{strum: waltz-3-4}
+
+{start_of_grid: Verse}
+| C | C7 | F | G7 |
+| C | C7 | F | C |
+{end_of_grid}
+
+{start_of_grid: Chorus}
+| C | C7 | F | G7 |
+| C | C7 | F | C |
+{end_of_grid}
+
+{comment: Verse 1}
+[C]Should auld acquaintance [C7]be forgot
+and [F]never brought to [G7]mind?
+[C]Should auld acquaintance [C7]be forgot
+and [F]auld lang [C]syne?
+
+{comment: Chorus}
+For [C]auld lang syne, my [C7]dear
+for [F]auld lang [G7]syne
+we'll [C]tak' a cup o' [C7]kindness yet
+for [F]auld lang [C]syne
+
+{comment: Verse 2}
+And [C]surely ye'll be your [C7]pint-stowp
+and [F]surely I'll be [G7]mine
+and [C]we'll tak' a cup o' [C7]kindness yet
+for [F]auld lang [C]syne

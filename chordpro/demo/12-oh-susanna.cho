@@ -1,0 +1,32 @@
+{title: Oh! Susanna}
+{artist: Stephen Foster}
+{level: Easy}
+{duration: 2.5}
+{key: C}
+{time: 2/4}
+{tempo: 120}
+{strum: eighths-2-4}
+
+{start_of_grid: Verse}
+| C | G7 | C | G7 | C | G7 | C | G7 | C |
+{end_of_grid}
+
+{start_of_grid: Chorus}
+| C | G7 | C | G7 | C |
+{end_of_grid}
+
+{comment: Verse 1}
+[C]I come from Alabama with my [G7]banjo on my knee
+I'm [C]going to Louisiana, my [G7]true love for to see
+It [C]rained all night the day I left, the [G7]weather it was dry
+The [C]sun so hot I froze to death, Su[G7]sanna, don't you [C]cry
+
+{comment: Chorus}
+[C]Oh, Susanna! Oh, don't you [G7]cry for me
+For [C]I come from Alabama with my [G7]banjo on my [C]knee
+
+{comment: Verse 2}
+I [C]had a dream the other night when [G7]everything was still
+I [C]thought I saw Susanna dear a-[G7]coming down the hill
+The [C]buckwheat cake was in her mouth, the [G7]tear was in her eye
+Says [C]I, "I'm coming from the South, Su[G7]sanna, don't you [C]cry"

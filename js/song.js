@@ -32,6 +32,11 @@
         // chooser: the old chart is about to be replaced.
         if (SB.gridReset) SB.gridReset();
         SB.stopMetronome();
+        // Leaving a song closes its structure editor: the working copy belongs
+        // to the song that was open.
+        if (SB.state.editMode && SB.closeEditor) SB.closeEditor();
+        SB.state.editMode = false;
+        if (SB.updateEditUi) SB.updateEditUi();
         var song = SB.state.byId[id];
         if (!song) { location.hash = SB.routeHash(SB.state.active ? SB.state.active.id : ''); return; }
         SB.state.currentSong = song;
@@ -64,8 +69,10 @@
         try { note = window.localStorage.getItem(SB.noteKey(SB.state.active.id, id)) || ''; } catch (e) { /* ignore */ }
         SB.$('notesBox').value = note;
         SB.$('notesStatus').classList.remove('show');
+        if (SB.resetExportUi) SB.resetExportUi();
 
         updateNavButtons();
+        SB.updateEditUi();
         SB.$('sheet').focus({ preventScroll: true });
         window.scrollTo(0, 0);
     }

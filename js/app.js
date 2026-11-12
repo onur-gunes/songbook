@@ -80,18 +80,40 @@
 
         SB.bindListControls();
         SB.bindSongControls();
+        if (SB.bindExportControls) SB.bindExportControls();
         SB.bindKeyboard();
         SB.updateSpeedLabel();
+
+        /* Structure editing (Step 6): Edit toggle and Reset button. */
+        var editBtn = SB.$('editBtn');
+        if (editBtn) editBtn.addEventListener('click', SB.toggleEdit);
+        var resetBtn = SB.$('resetBtn');
+        if (resetBtn) resetBtn.addEventListener('click', function () {
+            SB.resetStructure();
+        });
+
+        SB.updateEditUi();
+
         registerServiceWorker();
         window.addEventListener('hashchange', SB.route);
 
         Promise.all([SB.loadBundled(), SB.idbAll().catch(function () { return []; })]).then(function (res) {
             SB.state.bundled = res[0];
             SB.state.imported = res[1].map(function (raw) {
-                try { var sb = SB.normalizeSongbook(raw); sb.imported = true; return sb; }
+                try {
+                    var sb = SB.normalizeSongbook(raw);
+                    sb.imported = true;
+                    /* sourceUrl is storage bookkeeping, not songbook content,
+                     * so normalisation drops it; carry it over by hand. */
+                    if (typeof raw.sourceUrl === 'string' && raw.sourceUrl) sb.sourceUrl = raw.sourceUrl;
+                    return sb;
+                }
                 catch (e) { return null; }
             }).filter(Boolean);
-            if (!SB.state.bundled.length && !SB.state.imported.length) { showFatal('No songbooks available.'); return; }
+            /* Zero songbooks is a supported first-run state, not a fatal one:
+             * keep booting, bind every control, and let the list view show the
+             * empty state with its Import call to action. */
+            if (!SB.state.bundled.length && !SB.state.imported.length) SB.renderEmptyState();
             if (!SB.state.instrument) SB.state.instrument = (SB.defaultSongbook() && SB.defaultSongbook().instrument) || 'ukulele';
             SB.applyInstrumentUi();
             SB.rebuildIndex();
@@ -124,6 +146,12 @@
         allSongbooks: SB.allSongbooks,
         normalizeSongbook: SB.normalizeSongbook,
         songbookJSON: SB.songbookJSON,
+        effectiveSong: SB.effectiveSong,
+        effectiveSongbook: SB.effectiveSongbook,
+        effectiveSongJSON: SB.effectiveSongJSON,
+        effectiveSongbookJSON: SB.effectiveSongbookJSON,
+        exportFilename: SB.exportFilename,
+        exportTimestamp: SB.exportTimestamp,
         getActive: function () { return SB.state.active; },
         getSong: function (id) { return SB.state.byId[id]; },
         setInstrument: SB.setInstrument,
@@ -133,6 +161,10 @@
         setChordMode: SB.setChordMode,
         chordLabelWidth: SB.chordLabelWidth,
         chosenVoicing: SB.chosenVoicing,
+        explorerState: SB.explorerState,
+        renderExplorer: function () { if (SB.renderExplorer) SB.renderExplorer(); },
+        openExplorer: function () { if (SB.openExplorer) SB.openExplorer(); },
+        isExplorerVisible: function () { return !!(SB.explorerVisible && SB.explorerVisible()); },
         gridInfo: SB.gridInfo,
         gridBeatAt: SB.gridBeatAt,
         gridSystemAt: SB.gridSystemAt,
@@ -155,8 +187,27 @@
         strum: SB.state.strum,
         strumPatterns: SB.strumPatterns,
         strumPatternsFor: SB.strumPatternsFor,
+        strumPatternsForSong: SB.strumPatternsForSong,
+        strumPlanFor: SB.strumPlanFor,
+        mainStrumFor: SB.mainStrumFor,
+        sectionStrumFor: SB.sectionStrumFor,
+        songSectionRoles: SB.songSectionRoles,
+        toggleStrumSections: SB.toggleStrumSections,
+        validateCustomPattern: SB.validateCustomPattern,
+        openPatternEditor: SB.openPatternEditor,
+        closePatternEditor: SB.closePatternEditor,
         setStrum: SB.setStrum,
         toggleStrumNotation: SB.toggleStrumNotation,
+        planKey: SB.planKey,
+        planBarKey: SB.planBarKey,
+        planBeatKey: SB.planBeatKey,
+        emptyPlan: SB.emptyPlan,
+        normalizePlan: SB.normalizePlan,
+        loadPlan: SB.loadPlan,
+        savePlan: SB.savePlan,
+        clearPlan: SB.clearPlan,
+        hasLocalEdits: SB.hasLocalEdits,
+        resolveStrumAt: SB.resolveStrumAt,
         // Read through functions: these are numbers/booleans, so unlike the
         // strum object above they cannot be exported by reference.
         getStrumSize: function () { return SB.state.strumSize; },

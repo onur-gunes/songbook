@@ -28,6 +28,9 @@
             SB.renderChordStrip(SB.state.currentSong);
             if (SB.isGridMode()) SB.renderSheet(SB.state.currentSong);
         }
+        // The explorer is instrument-agnostic in layout but its voicings,
+        // fret finder and string labels all follow the selected instrument.
+        if (SB.explorerVisible && SB.explorerVisible() && SB.renderExplorer) SB.renderExplorer();
     }
 
 })(window.SB = window.SB || {});

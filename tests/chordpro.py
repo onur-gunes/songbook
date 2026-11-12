@@ -723,18 +723,18 @@ class BuildTests(unittest.TestCase):
             keys = build_songbook.load_original_keys(tmp)
             self.assertEqual(keys['song'], {'key': 'D'})
 
-    def test_bundled_polish_book_rebuilds_from_chordpro(self):
-        source = os.path.join(ROOT, 'chordpro', 'polska-gurom')
-        committed = os.path.join(ROOT, 'songbooks', 'polska-gurom.json')
+    def test_demo_book_rebuilds_from_chordpro(self):
+        # The demo is the only book committed to the tree, so it carries the
+        # guarantee the old bundled book used to: committed JSON matches its
+        # ChordPro sources byte for byte.
+        source = os.path.join(ROOT, 'chordpro', 'demo')
+        committed = os.path.join(ROOT, 'songbooks', 'demo.json')
         with tempfile.TemporaryDirectory() as tmp:
             result = build_songbook.build_book(
                 source, out_dir=os.path.join(tmp, 'songbooks'),
                 index_path=os.path.join(tmp, 'songbooks', 'index.json'),
-                report_path=os.path.join(tmp, 'report.txt'), chord_check=False,
-                allow_trusted_notes=True)
+                report_path=os.path.join(tmp, 'report.txt'), chord_check=False)
             self.assertEqual(result['errors'], [])
-            self.assertTrue(any('049-love-story.cho: chords override differs' in w
-                                for w in result['warnings']))
             with open(committed, encoding='utf-8') as f:
                 expected = f.read()
             with open(result['output'], encoding='utf-8') as f:
@@ -745,6 +745,158 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(build_songbook.find_book_dirs(FIXTURE), [FIXTURE])
         root = os.path.dirname(FIXTURE)
         self.assertEqual(build_songbook.find_book_dirs(root), [FIXTURE])
+
+
+class StrumStructureTests(unittest.TestCase):
+    """Issue #110: per-song strum and structure fields (role, sectionStrums,
+    strumPatterns, grid bars[].strums). The build validator accepts the
+    exported shape, rejects invalid custom patterns / metre mismatches / wrong
+    slot counts with clear errors, and keeps the documented song default
+    `strum` working. build_songbook writes songs through unchanged, so fields
+    that pass validation are preserved in the built book."""
+
+    BASE = {
+        'id': 's1', 'n': 1, 'title': 'Song', 'artist': 'A',
+        'level': 'Easy', 'new': False, 'dur': 3.0,
+        'time': '4/4', 'chords': ['C'],
+        'sheet': [[['c', '[C]'], ['x', 'x']]],
+    }
+
+    def song(self, **overrides):
+        s = dict(self.BASE)
+        s.update(overrides)
+        return s
+
+    def validate(self, **overrides):
+        book = {'id': 'bk', 'name': 'Book', 'description': '',
+                'instrument': 'ukulele', 'songs': [self.song(**overrides)]}
+        return build_songbook.validate_songbook(book)
+
+    def test_valid_per_song_strum_structure_builds(self):
+        errors, facts = self.validate(
+            strum='dduudu-4-4',
+            sectionStrums={'verse': 'dddudu-4-4', 'chorus': 'downs-4-4'},
+            strumPatterns=[{
+                'id': 'custom-1', 'name': 'Custom One', 'time': '4/4',
+                'subdiv': 2, 'slots': 'DUDUDUDU'}],
+            grid=[{'label': 'Verse', 'role': 'verse',
+                   'bars': [{'beats': [{'chord': 'C', 'beats': 4}],
+                             'strums': ['DU', 'DU', 'DU', 'DU']}]}])
+        self.assertEqual(errors, [], errors)
+        self.assertEqual(facts['with_strum_patterns'], 1)
+        self.assertEqual(facts['with_section_strums'], 1)
+        self.assertEqual(facts['with_strum'], 1)
+
+    def test_grid_bar_strums_one_entry_per_beat(self):
+        errors, _ = self.validate(grid=[{'label': 'V',
+            'bars': [{'beats': [{'chord': 'C', 'beats': 4}],
+                      'strums': ['DU', 'DU', 'DU', 'DU']}]}])
+        self.assertEqual(errors, [], errors)
+
+    def test_grid_bar_strums_wrong_count_is_an_error(self):
+        errors, _ = self.validate(grid=[{'label': 'V',
+            'bars': [{'beats': [{'chord': 'C', 'beats': 4}],
+                      'strums': ['DU', 'DU', 'DU']}]}])
+        self.assertTrue(any('strum entries' in e for e in errors))
+
+    def test_grid_bar_strums_mixed_subdivision_is_an_error(self):
+        errors, _ = self.validate(grid=[{'label': 'V',
+            'bars': [{'beats': [{'chord': 'C', 'beats': 4}],
+                      'strums': ['DU', 'DU', 'DU', 'D']}]}])
+        self.assertTrue(any('subdivision' in e for e in errors))
+
+    def test_grid_bar_strums_bad_characters_is_an_error(self):
+        errors, _ = self.validate(grid=[{'label': 'V',
+            'bars': [{'beats': [{'chord': 'C', 'beats': 4}],
+                      'strums': ['DU', 'DX', 'DU', 'DU']}]}])
+        self.assertTrue(any('slot string' in e for e in errors))
+
+    def test_grid_bar_strums_must_be_a_list(self):
+        errors, _ = self.validate(grid=[{'label': 'V',
+            'bars': [{'beats': [{'chord': 'C', 'beats': 4}],
+                      'strums': 'DUDUDUDU'}]}])
+        self.assertTrue(any('strums is not a list' in e for e in errors))
+
+    def test_grid_role_must_be_canonical(self):
+        errors, _ = self.validate(grid=[{'label': 'V', 'role': 'solo-2',
+            'bars': [{'beats': [{'chord': 'C', 'beats': 4}]}]}])
+        self.assertTrue(any('invalid section role' in e for e in errors))
+
+    def test_custom_pattern_must_not_shadow_built_in(self):
+        errors, _ = self.validate(strumPatterns=[{
+            'id': 'downs-4-4', 'name': 'Shadow', 'time': '4/4',
+            'subdiv': 2, 'slots': 'DUDUDUDU'}])
+        self.assertTrue(any('shadows a built-in' in e for e in errors))
+
+    def test_custom_pattern_ids_must_be_unique(self):
+        errors, _ = self.validate(strumPatterns=[
+            {'id': 'custom-1', 'name': 'One', 'time': '4/4', 'subdiv': 2, 'slots': 'DUDUDUDU'},
+            {'id': 'custom-1', 'name': 'Two', 'time': '4/4', 'subdiv': 2, 'slots': 'DUDUDUDU'}])
+        self.assertTrue(any('duplicate pattern id' in e for e in errors))
+
+    def test_custom_pattern_slot_count_matches_subdivision(self):
+        # 3/4 at 2 slots/beat needs 6 slots; 4 is wrong.
+        errors, _ = self.validate(strumPatterns=[{
+            'id': 'custom-1', 'name': 'Bad', 'time': '3/4', 'subdiv': 2, 'slots': 'DUDU'}])
+        self.assertTrue(any('expected' in e for e in errors))
+
+    def test_custom_pattern_bad_subdiv_and_chars_are_errors(self):
+        errors, _ = self.validate(strumPatterns=[
+            {'id': 'c1', 'name': 'X', 'time': '4/4', 'subdiv': 0, 'slots': 'DUDUDUDU'},
+            {'id': 'c2', 'name': 'Y', 'time': '4/4', 'subdiv': 2, 'slots': 'DUDUDUDX'}])
+        self.assertTrue(any('subdivision' in e for e in errors))
+        self.assertTrue(any('D, U and -' in e for e in errors))
+
+    def test_section_strums_role_and_metre_validated(self):
+        # dddudu-4-4 is a 4/4 pattern on a 3/4 song: metre mismatch.
+        errors, _ = self.validate(time='3/4', sectionStrums={'verse': 'dddudu-4-4'})
+        self.assertTrue(any('on a 3/4 song' in e for e in errors))
+        # Unknown role.
+        errors, _ = self.validate(sectionStrums={'solo-2': 'downs-4-4'})
+        self.assertTrue(any('invalid role' in e for e in errors))
+        # Unknown pattern id.
+        errors, _ = self.validate(sectionStrums={'verse': 'not-a-pattern'})
+        self.assertTrue(any('unknown pattern' in e for e in errors))
+
+    def test_section_strums_can_reference_custom_pattern(self):
+        errors, _ = self.validate(
+            sectionStrums={'verse': 'custom-1'},
+            strumPatterns=[{'id': 'custom-1', 'name': 'C', 'time': '4/4',
+                            'subdiv': 2, 'slots': 'DUDUDUDU'}])
+        self.assertEqual(errors, [], errors)
+
+    def test_section_strums_need_the_song_metre(self):
+        song = self.song(sectionStrums={'verse': 'downs-4-4'})
+        del song['time']
+        errors, _ = build_songbook.validate_songbook({
+            'id': 'bk', 'name': 'Book', 'description': '',
+            'instrument': 'ukulele', 'songs': [song]})
+        self.assertTrue(any('section strums' in e for e in errors), errors)
+
+    def test_song_strum_default_still_works(self):
+        # The single documented `strum` remains the song default and is still
+        # validated against the library and the song's metre.
+        errors, _ = self.validate(strum='dduudu-4-4')
+        self.assertEqual(errors, [], errors)
+        errors, _ = self.validate(strum='not-a-pattern')
+        self.assertTrue(any('unknown pattern' in e for e in errors))
+
+    def test_song_strum_can_reference_its_own_custom_pattern(self):
+        """Export writes a custom pattern chosen as the song default into
+        `strum`; the build must accept it or a normal custom-pattern flow
+        cannot round-trip."""
+        errors, _ = self.validate(
+            strum='custom-1',
+            strumPatterns=[{'id': 'custom-1', 'name': 'Mine', 'time': '4/4',
+                            'subdiv': 2, 'slots': 'DUDUDUDU'}])
+        self.assertEqual(errors, [], errors)
+
+    def test_custom_song_strum_still_needs_the_song_metre(self):
+        errors, _ = self.validate(
+            strum='custom-1',
+            strumPatterns=[{'id': 'custom-1', 'name': 'Mine', 'time': '3/4',
+                            'subdiv': 2, 'slots': 'DUDUDU'}])
+        self.assertTrue(any('song time' in e for e in errors), errors)
 
 
 if __name__ == '__main__':

@@ -1,51 +1,42 @@
-# Notice — song data is not covered by the code license
+# Notice — no third-party copyrighted song data is bundled
 
 The PolyForm Noncommercial license in [`LICENSE`](LICENSE) covers the **source
 code** of this project (the app, chord engine, build scripts and tests).
 
-It does **not** cover the bundled songs. Lyrics, melodies, chord charts,
-arrangements, tabs and transcriptions remain the property of their respective
-authors, arrangers and publishers, or are included here under their own terms.
-They are **not** relicensed by this repository.
+This repository ships **no third-party copyrighted song data**. It contains the
+engine and one small demo book made of public-domain songs. Lyrics, melodies,
+chord charts, arrangements, tabs and transcriptions of songs you import remain
+the property of their respective authors, arrangers and publishers; importing
+them does not relicense them.
 
-## Personal use only
+## Demo book
 
-The bundled song data is included for **personal, non-commercial use** — for
-learning, practising and playing along. It may not be sold, relicensed, or
-redistributed as a collection, and no ownership is claimed over it.
+`songbooks/demo.json` (authored in `chordpro/demo/`) contains twelve songs whose
+words and melodies are in the public domain in both the United States and the
+European Union. The chord charts are new, simple arrangements written for this
+project — no publisher's transcription or copyrighted arrangement was copied —
+and those charts are covered by the same license as the code.
 
-## Krakow Ukulele Songbook
-
-The `krakow-ukulele` songbook (and the archived pages in `legacy/`) is a copy of
-the **Krakow Ukulele Songbook** from <https://ukulelekrakow.pl/>, mirrored with
-`mirror_songbook.py` for offline personal use. Copyright in the individual
-songs and arrangements belongs to their original authors and to the songbook's
-maintainers. This project is not affiliated with or endorsed by them.
-
-## Polish classics
-
-The `polska-gurom` songbook contains Polish songs and classics. Some lyrics or
-melodies may be in the public domain, but specific arrangements, chord charts
-and transcriptions can still be protected. The same personal-use restriction
-applies.
-
-## Popular songs
-
-The `popular` songbook collects well-known pop, rock and folk standards for
-learning and playing along. Unlike the public-domain-leaning Polish classics,
-this material is **current, charting and commercially published**: the lyrics,
-melodies, chord progressions and arrangements are owned by their respective
-songwriters, artists and publishers. Nothing here is licensed or relicensed by
-this project. The chord charts are our own approximations, included solely for
-**personal, non-commercial practice** under the restriction above — they may not
-be sold, relicensed or redistributed as a collection. If you maintain this book,
-keep it to genuine personal use and respond to any takedown request promptly
-(see below).
+The song list, authors, death dates and public-domain basis for each entry are
+documented in [`chordpro/demo/PUBLIC-DOMAIN.md`](chordpro/demo/PUBLIC-DOMAIN.md).
+Note that modern recordings and arrangements of these songs (for example The
+Animals' "House of the Rising Sun" or Simon & Garfunkel's "Scarborough Fair")
+can still be protected; only the traditional songs themselves are used here.
 
 ## Imported songbooks
 
-Songbooks you import are your responsibility. Do not import or redistribute
-material you do not have the rights to use.
+Songbooks you import are **your responsibility**. The app stores imported JSON
+locally in your browser (IndexedDB) and does not upload or redistribute it.
+Only import material you have the rights to use, and do not redistribute it
+unless the rights holder allows it. Some songs may be in the public domain;
+specific arrangements and transcriptions can still be protected.
+
+## Authoring and migration tools
+
+`build_songbook.py`, `chordpro.py` and `migrate.py` are tools, not content.
+`migrate.py` and `mirror_songbook.py` can rebuild or fetch a book from sources
+you provide or host yourself; running them does not make this project the
+publisher of that content, and you are responsible for how you use the result.
 
 ## Third-party code — tuner
 
@@ -76,5 +67,7 @@ material you do not have the rights to use.
 
 ## Takedown
 
-If you hold rights to any content here and want it removed, please open an
-issue and it will be taken down promptly.
+If you hold rights to any content in an imported book and believe it has been
+redistributed improperly, please open an issue and it will be addressed
+promptly. Content that is not part of this repository cannot be removed here,
+but we will help identify where it came from.

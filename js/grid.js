@@ -30,6 +30,9 @@
     var activeGrid = null;      // { song, beatsPerBar, totalBeats, bpm, ... }
     var cursorRaf = null;
     var lastBeat = -1;
+    /* The currently lit strum arrow within the playhead's beat, so the grid
+       lane pulses subdivision-by-subdivision like the top strum row. */
+    var lastStrumEl = null;
 
     /* ---------------- helpers ---------------- */
 
@@ -97,12 +100,12 @@
         return core === 'FC' ? 'F/C' : core;
     }
 
-    /* Sheet section headers are italic lines. Performance directions are
-     * italic too ("quietly", "down-down"), so only section words count. */
+    /* Sheet section headers are italic lines whose label resolves to a real
+     * section role (bilingual: "Zwrotka 2" and "Verse 2" are both verses).
+     * Performance directions ("quietly") and chord-only lines resolve to
+     * `other`, so they stay lyric lines. */
     function isSectionHeader(text) {
-        var t = String(text == null ? '' : text).trim().toLowerCase();
-        if (!t) return false;
-        return /(^|[\s(])(intro|verse|chorus|bridge|pre-?chorus|outro|interlude|instrumental|solo|riff|refrain|hook|coda|tag)([\s):,/]|$)/.test(t);
+        return SB.sectionRole(String(text == null ? '' : text)) !== 'other';
     }
 
     function sheetSections(song) {
@@ -316,12 +319,41 @@
 
     /* Build the complete chart from the sheet. Authored blocks are used as
      * templates where their progression fits the section; every other section
-     * gets an automatic chart, so no song needs a hand-written grid. */
-    function gridBlocksFor(song) {
+     * gets an automatic chart, so no song needs a hand-written grid.
+     *
+     * When a per-song edit plan carries a structural grid override
+     * (plan.grid, Step 6 edit mode), that override wins over the songbook's
+     * authored grid: the user's structure is what the chart shows. Each plan
+     * block renders as its own section, keyed by its own label/role, so the
+     * editor's add/remove edits appear verbatim.
+     */
+    function gridBlocksFor(song, plan) {
         var beatsPerBar = SB.metronomeBeatsPerBar(song.time);
-        var authored = song.grid || [];
         var used = {};
         var out = [];
+
+        var planGrid = (plan && plan.grid) || null;
+        if (planGrid && planGrid.length) {
+            planGrid.forEach(function (block) {
+                var bars = (block.bars || []).map(function (bar) {
+                    var out = { beats: (bar.beats || []).map(function (seg) {
+                        return { chord: seg.chord, beats: seg.beats };
+                    }) };
+                    if (Array.isArray(bar.strums)) out.strums = bar.strums.slice();
+                    return out;
+                });
+                out.push({
+                    label: block.label || '',
+                    role: SB.isSectionRole(block.role) ? block.role : SB.sectionRole(block.label || ''),
+                    bars: bars,
+                    repeat: !!block.repeat,
+                    model: null
+                });
+            });
+            return out;
+        }
+
+        var authored = song.grid || [];
 
         sheetSections(song).forEach(function (section) {
             var model = sectionModel(section);
@@ -333,6 +365,12 @@
                     used[match.index] = true;
                     out.push({
                         label: section.name || match.block.label || '',
+                        // The role belongs to the section the player is in, not
+                        // to whichever authored template happened to fit it:
+                        // a Bridge that reuses the Verse progression is still
+                        // a bridge, and must not be offered as a verse strum
+                        // selector (issue #107).
+                        role: SB.sectionRole(section.name || match.block.label || ''),
                         bars: tiled.bars,
                         repeat: !!match.block.repeat,
                         model: model
@@ -344,6 +382,7 @@
             if (bars.length) {
                 out.push({
                     label: section.name || '',
+                    role: SB.sectionRole(section.name || ''),
                     bars: bars,
                     repeat: false,
                     model: model
@@ -357,6 +396,7 @@
             out = authored.map(function (block) {
                 return {
                     label: block.label || '',
+                    role: SB.sectionRole(block.label || ''),
                     bars: block.bars || [],
                     repeat: !!block.repeat,
                     model: null
@@ -366,6 +406,46 @@
         return out;
     }
     SB.gridBlocksFor = gridBlocksFor;
+
+    /* Every canonical section role the song actually contains, in the order
+     * the player meets them (sheet order, then any authored grid block the
+     * sheet does not cover). The per-section strum selectors are keyed by this
+     * list, not by a fixed menu: a song with no bridge must not offer one.
+     *
+     * Two labels with the same role ("Verse 1", "Verse 2") collapse into one
+     * entry, because section strums are stored per role. `other` is included
+     * when a block carries it, so an unrecognised authored section still gets
+     * a selector rather than silently falling back to the song pattern. */
+    SB.songSectionRoles = function (song, plan) {
+        var roles = [];
+        var seen = {};
+        function add(block) {
+            if (!block) return;
+            var label = block.label || '';
+            var role = SB.isSectionRole(block.role)
+                ? block.role
+                : SB.sectionRole(label);
+            if (!role || seen[role]) return;
+            // An auto-generated block with no label (or an unnamed block) is
+            // just "the rest of the song", not a section worth a selector.
+            if (role === 'other' && !label) return;
+            seen[role] = true;
+            roles.push(role);
+        }
+        if (!song) return roles;
+
+        /* The effective structure is plan.grid when an edit plan carries one,
+         * so a removed/replaced section must not leave a stale selector
+         * behind. Only fall back to the song's authored grid when there is no
+         * structural override (it can hold an instrumental block the sheet
+         * does not cover). */
+        var planGrid = (plan && plan.grid) || null;
+        gridBlocksFor(song, plan).forEach(add);
+        if (!planGrid || !planGrid.length) {
+            (song.grid || []).forEach(add);
+        }
+        return roles;
+    };
 
     /* ---------------- cursor ---------------- */
 
@@ -382,6 +462,10 @@
             if (chord) chord.classList.remove('on');
         }
         lastBeat = -1;
+        if (lastStrumEl) {
+            lastStrumEl.classList.remove('on');
+            lastStrumEl = null;
+        }
         if (activeGrid && activeGrid.wrap) {
             delete activeGrid.wrap.dataset.activeBeat;
         }
@@ -489,6 +573,56 @@
         if (!SB.state.scrollState.playing && !activeGrid.anim) {
             scrollBeatIntoView(activeGrid.beatEls[idx]);
         }
+        // During playback in the static grid, keep the top strum row in step
+        // with the effective pattern for the beat under the playhead.
+        if (!activeGrid.anim) gridFollowStrum(idx);
+    }
+
+    function barStrumsAt(block, bar) {
+        var blockObj = activeGrid && activeGrid.blocks ? activeGrid.blocks[block] : null;
+        var barObj = blockObj && blockObj.bars ? blockObj.bars[bar] : null;
+        return barObj ? barObj.strums : null;
+    }
+
+    function gridFollowStrum(idx) {
+        if (!activeGrid || !activeGrid.song) return;
+        var el = activeGrid.beatEls[idx];
+        if (!el) return;
+        var block = parseInt(el.dataset.block, 10);
+        var bar = parseInt(el.dataset.bar, 10);
+        var beat = parseInt(el.dataset.beatLocal, 10);
+        var resolved = SB.resolveStrumAt(activeGrid.song, {
+            block: block, bar: bar, beat: beat, strums: barStrumsAt(block, bar)
+        }, activeGrid.plan);
+        if (!resolved.pattern) return;
+        var cur = SB.state.strum.pattern;
+        if (cur && cur.id === resolved.pattern.id) return;
+        if (activeGrid._strumSaved == null) activeGrid._strumSaved = cur;
+        activeGrid._strumFollowed = true;
+        SB.strumSetPattern(resolved.pattern);
+    }
+
+    /* Lights the subdivision arrow within the playhead's beat, one slot at a
+       time, exactly as the top strum row pulses each down / up. `chartBeats`
+       is the metronome position in beats (fraction = position within the
+       beat). Only the current beat carries a lit arrow. */
+    function paintStrumSlot(chartBeats) {
+        var idx = Math.floor(chartBeats);
+        var beatEl = activeGrid && activeGrid.beatEls ? activeGrid.beatEls[idx] : null;
+        if (!beatEl) {
+            if (lastStrumEl) { lastStrumEl.classList.remove('on'); lastStrumEl = null; }
+            return;
+        }
+        var subdiv = parseInt(beatEl.dataset.subdiv, 10) || 1;
+        var frac = chartBeats - idx;
+        var slot = Math.floor(frac * subdiv);
+        if (slot < 0) slot = 0;
+        if (slot >= subdiv) slot = subdiv - 1;
+        var slotEl = beatEl.querySelectorAll('.grid-beat-slot')[slot];
+        if (slotEl === lastStrumEl) return;
+        if (lastStrumEl) lastStrumEl.classList.remove('on');
+        lastStrumEl = slotEl;
+        if (slotEl) slotEl.classList.add('on');
     }
 
     /* One repaint loop, driven by the metronome's audio clock. rAF is only a
@@ -528,12 +662,18 @@
             activeGrid.wrap.dataset.gridPhase = 'playing';
         }
         if (idx !== lastBeat) setActive(idx);
+        // Pulse the current strum arrow within the playhead's beat.
+        paintStrumSlot(chartBeats);
         cursorRaf = requestAnimationFrame(cursorFrame);
     }
 
     SB.gridOnMetronomeStart = function () {
         if (!activeGrid || !SB.isGridMode()) return;
         if (cursorRaf === null) cursorRaf = requestAnimationFrame(cursorFrame);
+        // Remember the user's chosen pattern so playback following sections
+        // can restore it when the metronome stops.
+        activeGrid._strumSaved = SB.state.strum.pattern;
+        activeGrid._strumFollowed = false;
     };
 
     SB.gridOnMetronomeStop = function () {
@@ -541,6 +681,12 @@
         // A stopped animated chart returns to the opening system, ready for
         // the next count-in, instead of freezing on a later section.
         if (activeGrid && activeGrid.anim) showAnimSystem(0);
+        // Restore the user's strum pattern if playback followed sections.
+        if (activeGrid && activeGrid._strumFollowed && activeGrid._strumSaved) {
+            SB.strumSetPattern(activeGrid._strumSaved);
+            activeGrid._strumFollowed = false;
+            activeGrid._strumSaved = null;
+        }
     };
 
     /* Pure beat mapping, exposed for the suite. -1 is the count-in, null is
@@ -779,7 +925,7 @@
         return byChange;
     }
 
-    function buildBarSpec(bar, song, ctx, changeState, lyricW) {
+    function buildBarSpec(bar, song, ctx, changeState, lyricW, blockIdx, barIdx) {
         var segments = bar.beats.map(function (seg) {
             var tname = SB.transposeChartName(seg.chord, SB.state.transpose);
             var label = gridLabel(song, seg.chord);
@@ -813,27 +959,68 @@
             };
         });
 
-        var x = BAR_PAD, beatXs = [], changeXs = [];
+        var x = BAR_PAD, beats = [], changeXs = [];
         segments.forEach(function (seg) {
             changeXs.push(x);
+            var beatW = seg.width / seg.beats;
             for (var i = 0; i < seg.beats; i++) {
-                beatXs.push(x + seg.width * (i + 0.5) / seg.beats);
+                beats.push({ x: x + i * beatW, w: beatW, index: i });
             }
             x += seg.width;
         });
 
         return {
             segments: segments,
-            beatXs: beatXs,
+            beats: beats,
             changeXs: changeXs,
+            blockIdx: blockIdx,
+            barIdx: barIdx,
+            strums: bar.strums,
             width: x + BAR_PAD
         };
     }
 
-    function buildBarEl(spec, ctx) {
+    /* One glyph for a strum slot, honouring the global notation preference
+     * (arrows ↓ ↑ · or letters D U ·). Mirrors slotGlyph in js/strum.js so
+     * the grid lane and the top strum row look identical. */
+    function strumGlyph(ch) {
+        if (ch === '-') return '\u00b7';          // middle dot for a rest
+        if (SB.state.strum.notation === 'letters') return ch;   // 'D' / 'U'
+        if (ch === 'D') return '\u2193';          // downward arrow
+        if (ch === 'U') return '\u2191';          // upward arrow
+        return '\u00b7';
+    }
+
+    /* The label shown on a bar's strum button: the overridden pattern's name
+     * when the bar carries a bar-level override, otherwise empty so the
+     * button can fall back to a compact arrow glyph. */
+    function barStrumText(song, plan, blockIdx, barIdx) {
+        var id = (plan && plan.barStrums) ? plan.barStrums[SB.planBarKey(blockIdx, barIdx)] : null;
+        if (!id) return '';
+        var merged = SB.strumPlanFor ? SB.strumPlanFor(song, plan) : plan;
+        var p = SB.strumPatternFor(id, song.time || SB.DEFAULT_TIME, merged);
+        return p ? p.name : id;
+    }
+
+    function updateBarStrumBtn(btn, song, plan, blockIdx, barIdx) {
+        var text = barStrumText(song, plan, blockIdx, barIdx);
+        var overridden = !!text;
+        var label = overridden
+            ? 'Bar strum: ' + text
+            : 'Bar strum: inherit from section/song';
+        btn.textContent = overridden ? text : '\u2193\u2191';
+        btn.setAttribute('aria-label', label);
+        btn.title = label;
+        btn.classList.toggle('grid-bar-strum-overridden', overridden);
+        btn.setAttribute('aria-pressed', overridden ? 'true' : 'false');
+    }
+
+    function buildBarEl(spec, ctx, song, plan) {
         var bar = SB.el('div', 'grid-bar');
         bar.style.width = spec.width + 'px';
         bar.style.height = ctx.barH + 'px';
+        bar.dataset.block = String(spec.blockIdx);
+        bar.dataset.bar = String(spec.barIdx);
 
         spec.segments.forEach(function (seg, i) {
             // A change at the start of a bar is already marked by the bar line
@@ -867,10 +1054,64 @@
             bar.appendChild(change);
         });
 
-        spec.beatXs.forEach(function (x) {
-            var beat = SB.el('span', 'grid-beat', '/');
-            beat.style.left = x + 'px';
-            beat.setAttribute('aria-hidden', 'true');
+        // Bar-level strum control: opens the bar strum editor. Read-only in
+        // the animated view (no editing controls there).
+        if (!ctx.animate) {
+            var barStrum = SB.el('button', 'grid-bar-strum');
+            barStrum.type = 'button';
+            barStrum.setAttribute('aria-label', 'Bar strum');
+            barStrum.dataset.block = String(spec.blockIdx);
+            barStrum.dataset.bar = String(spec.barIdx);
+            updateBarStrumBtn(barStrum, song, plan, spec.blockIdx, spec.barIdx);
+            bar.appendChild(barStrum);
+        }
+
+        spec.beats.forEach(function (b) {
+            var resolved = SB.resolveStrumAt(song, {
+                block: spec.blockIdx, bar: spec.barIdx, beat: b.index,
+                strums: spec.strums
+            }, plan);
+            var slots = resolved.slots || '';
+            var subdiv = resolved.subdiv || 1;
+
+            var beat = SB.el('span', 'grid-beat');
+            beat.style.left = b.x + 'px';
+            beat.style.width = b.w + 'px';
+            /* The static grid is editable; the animated view is read-only, so
+             * it must not advertise an editor it will not open (no button
+             * role, no tab stop, no "press Enter" hint). */
+            if (!ctx.animate) {
+                beat.setAttribute('role', 'button');
+                beat.setAttribute('tabindex', '0');
+            }
+            beat.setAttribute('data-beat-local', String(b.index));
+            beat.setAttribute('data-block', String(spec.blockIdx));
+            beat.setAttribute('data-bar', String(spec.barIdx));
+            beat.setAttribute('data-strum-source', resolved.source || 'none');
+            if (resolved.id) beat.setAttribute('data-strum-id', resolved.id);
+            beat.setAttribute('data-subdiv', String(subdiv));
+            if (!ctx.animate) {
+                beat.setAttribute('aria-label', 'Beat ' + String(b.index + 1) + ' — ' + slots +
+                    (resolved.source && resolved.source !== 'none'
+                        ? ' — overridden, press Enter or Space to edit'
+                        : ' — press Enter or Space to edit its strum'));
+            } else {
+                beat.setAttribute('aria-label', 'Beat ' + String(b.index + 1) + ' — ' + slots);
+            }
+
+            // The felt-beat strokes (D U / ↓ ↑ / ·), one cell per subdivision slot.
+            var strokes = SB.el('span', 'grid-beat-strokes');
+            for (var s = 0; s < slots.length; s++) {
+                var slot = SB.el('span', 'grid-beat-slot', strumGlyph(slots[s]));
+                if (slots[s] === '-') slot.classList.add('rest');
+                strokes.appendChild(slot);
+            }
+            beat.appendChild(strokes);
+
+            // Mark overridden beats with a visible ring (not colour alone).
+            if (resolved.source === 'beat' || resolved.source === 'bar') {
+                beat.classList.add('grid-beat-overridden');
+            }
             bar.appendChild(beat);
         });
 
@@ -1021,11 +1262,19 @@
 
         var em = SB.sheetEmPx();
         var ctx = {
-            beatW: Math.max(BEAT_MIN, em * 2.0),
+            // Wide enough for two (or three) strum glyphs inside one beat,
+            // so the lane under the diagrams stays legible instead of
+            // squeezing its arrows into overlapping specks.
+            beatW: Math.max(BEAT_MIN, em * 2.5),
             labelH: Math.ceil(em * 1.35),
-            beatH: Math.ceil(em * 1.7),
+            // The beat row holds the felt-beat strokes on their own, so it
+            // only needs room for one line of glyphs and their padding. Keep
+            // at least 44px so the beat cell is a comfortable touch target
+            // (it opens the beat strum editor).
+            beatH: Math.max(44, Math.ceil(em * 2.2)),
             gap: Math.max(10, em * 0.6),
-            diagram: diagramBox(SB.state.chordSize)
+            diagram: diagramBox(SB.state.chordSize),
+            animate: animate
         };
         ctx.changeBottom = ctx.beatH + 4;
         ctx.barH = ctx.changeBottom + ctx.diagram.h + ctx.labelH + 4;
@@ -1038,7 +1287,14 @@
         var frag = document.createDocumentFragment();
         var lyricSections = [];
         var measurer = makeMeasurer(wrap);
-        var blocks = gridBlocksFor(song);
+        // The per-song edit plan supplies the structural overrides and the
+        // bar/beat strum overrides. It must be loaded *before* the blocks are
+        // built: plan.grid is the authoritative structure in Edit mode, and
+        // reading it after `gridBlocksFor` would silently render the songbook
+        // grid instead of the user's edits.
+        var sbId = SB.state.active && SB.state.active.id;
+        var plan = sbId ? SB.loadPlan(sbId, song.id) : SB.emptyPlan();
+        var blocks = gridBlocksFor(song, plan);
 
         /* The animated view swaps whole systems into one stage. Build every
          * system now so its width, lyric anchoring and beat range are final;
@@ -1059,13 +1315,14 @@
         var beatEls = [], beatSystem = [], chordAt = [], animSystems = [];
         var lyricCount = 0;
 
-        blocks.forEach(function (block) {
+        blocks.forEach(function (block, blockIdx) {
             var model = block.model;
             if (block.label) lyricSections.push(block.label);
             var lyricW = model ? changeWidths(model, measurer) : {};
             var changeState = { prev: null, index: -1 };
-            var specs = (block.bars || []).map(function (bar) {
-                return buildBarSpec(bar, song, ctx, changeState, lyricW);
+            var specs = (block.bars || []).map(function (bar, barIdx) {
+                return buildBarSpec(bar, song, ctx, changeState, lyricW,
+                    blockIdx, barIdx);
             });
             // Repeat signs are flex items too, so reserve their width before
             // packing or a repeated block overflows its system by 24px.
@@ -1095,7 +1352,7 @@
                     system.appendChild(repeatSign('start', ctx.barH));
                 }
                 bars.forEach(function (spec) {
-                    system.appendChild(buildBarEl(spec, ctx));
+                    system.appendChild(buildBarEl(spec, ctx, song, plan));
                 });
                 if (block.repeat && last) {
                     system.classList.add('has-repeat-end');
@@ -1165,6 +1422,8 @@
 
         activeGrid = {
             song: song,
+            plan: plan,
+            blocks: blocks,
             beatsPerBar: beatsPerBar,
             totalBeats: beatEls.length,
             bpm: bpm,
@@ -1179,7 +1438,11 @@
             animSystems: animate ? animSystems : null,
             animStage: animStage,
             animStatus: animStatus,
-            animSystem: null
+            animSystem: null,
+            // Saved manual strum pattern, restored when playback stops so a
+            // user's choice is not overwritten by playback following sections.
+            _strumSaved: null,
+            _strumFollowed: false
         };
         wrap.dataset.gridPhase = 'idle';
         if (animate) showAnimSystem(0);
@@ -1188,5 +1451,205 @@
     }
 
     SB.renderSheetGrid = renderSheetGrid;
+
+    /* ---------------- grid strum editing (bar / beat overrides) ----------------
+     *
+     * A single fixed-position editor panel edits either a bar's strum (pick a
+     * pattern for the metre, or "Inherit from section/song") or a single beat's
+     * subdivision slots (each slot cycles down → up → rest, plus Inherit). The
+     * animated view stays read-only: it never opens the editor. Edits are
+     * persisted to the per-song edit plan (barStrums / beatStrums) and the grid
+     * is rebuilt so the new strokes show immediately.
+     */
+
+    var gridEditor = null;
+    var gridEditorMode = null;
+    var gridEditorBlock = null;
+    var gridEditorBar = null;
+    var gridEditorBeat = null;
+
+    function gridEditorEl() {
+        if (!gridEditor) {
+            var el = SB.el('div', 'grid-strum-editor');
+            el.setAttribute('hidden', 'true');
+            el.setAttribute('aria-modal', 'true');
+            el.setAttribute('role', 'dialog');
+            el.setAttribute('aria-labelledby', 'gridEditorTitle');
+            var backdrop = SB.el('div', 'grid-strum-backdrop');
+            var sheet = SB.el('div', 'grid-strum-sheet');
+            var head = SB.el('div', 'grid-strum-head');
+            head.appendChild(SB.el('span', 'grid-strum-kicker', 'Strum'));
+            var title = SB.el('h2', 'grid-strum-title');
+            title.id = 'gridEditorTitle';
+            title.textContent = 'Strum';
+            head.appendChild(title);
+            var close = SB.el('button', 'grid-strum-close', '\u00d7');
+            close.type = 'button';
+            close.setAttribute('aria-label', 'Close strum editor');
+            head.appendChild(close);
+            var body = SB.el('div', 'grid-strum-body');
+            sheet.appendChild(head);
+            sheet.appendChild(body);
+            el.appendChild(backdrop);
+            el.appendChild(sheet);
+            document.body.appendChild(el);
+            gridEditor = el;
+            close.addEventListener('click', gridEditorClose);
+            backdrop.addEventListener('click', gridEditorClose);
+        }
+        return gridEditor;
+    }
+
+    function gridEditorClose() {
+        if (!gridEditor) return;
+        gridEditor.setAttribute('hidden', 'true');
+        gridEditorMode = gridEditorBlock = gridEditorBar = gridEditorBeat = null;
+        if (activeGrid) {
+            Array.prototype.forEach.call(activeGrid.wrap.querySelectorAll('.grid-beat.editing'), function (e) {
+                e.classList.remove('editing');
+            });
+        }
+    }
+
+    function gridEditApply(setFn) {
+        var song = activeGrid && activeGrid.song;
+        if (!song) return;
+        setFn();
+        SB.renderSheetGrid(song);
+        // Re-open the editor on the same coordinates so it reflects the new
+        // plan and the edited beat/bar is re-highlighted in the rebuilt grid.
+        if (gridEditorMode != null) {
+            gridEditorShow(gridEditorMode, gridEditorBlock, gridEditorBar, gridEditorBeat);
+        }
+    }
+
+    function gridEditorShow(mode, block, bar, beat) {
+        if (activeGrid && activeGrid.anim) return;   // animated view stays read-only
+        var el = gridEditorEl();
+        var body = el.querySelector('.grid-strum-body');
+        body.textContent = '';
+        gridEditorMode = mode;
+        gridEditorBlock = block;
+        gridEditorBar = bar;
+        gridEditorBeat = beat;
+        gridEditor.removeAttribute('hidden');
+        var song = activeGrid.song;
+        var plan = activeGrid.plan;
+        var sbId = SB.state.active && SB.state.active.id;
+        var title = el.querySelector('.grid-strum-title');
+
+        if (mode === 'bar') {
+            title.textContent = 'Bar ' + String(bar + 1) + ' strum';
+            var cur = (plan && plan.barStrums) ? plan.barStrums[SB.planBarKey(block, bar)] : null;
+            var inherit = SB.el('button', 'grid-editor-option');
+            inherit.type = 'button';
+            inherit.textContent = 'Inherit from section/song';
+            inherit.classList.toggle('grid-editor-option-active', cur == null);
+            inherit.setAttribute('aria-pressed', String(cur == null));
+            inherit.addEventListener('click', function () {
+                gridEditApply(function () { SB.setBarOverride(sbId, song.id, block, bar, null); });
+            });
+            body.appendChild(inherit);
+            var list = SB.strumPatternsForSong(song, plan);
+            list.forEach(function (p) {
+                var btn = SB.el('button', 'grid-editor-option');
+                btn.type = 'button';
+                btn.textContent = p.name;
+                btn.classList.toggle('grid-editor-option-active', cur === p.id);
+                btn.setAttribute('aria-pressed', String(cur === p.id));
+                btn.addEventListener('click', (function (pid) {
+                    return function () { gridEditApply(function () { SB.setBarOverride(sbId, song.id, block, bar, pid); }); };
+                })(p.id));
+                body.appendChild(btn);
+            });
+        } else if (mode === 'beat') {
+            title.textContent = 'Beat ' + String(beat + 1) + ' of bar ' + String(bar + 1);
+            var resolved = SB.resolveStrumAt(song, {
+                block: block, bar: bar, beat: beat, strums: barStrumsAt(block, bar)
+            }, plan);
+            var slots = (resolved.slots || '').split('');
+            var subdiv = resolved.subdiv || 1;
+            while (slots.length < subdiv) slots.push('-');
+            var label = SB.el('span', 'grid-editor-slot-label');
+            label.textContent = 'Slots — tap each to cycle down → up → rest';
+            body.appendChild(label);
+            var slotsWrap = SB.el('div', 'grid-editor-slots');
+            for (var s = 0; s < subdiv; s++) {
+                (function (s2) {
+                    var ch = slots[s2] || '-';
+                    var btn = SB.el('button', 'grid-editor-slot');
+                    btn.type = 'button';
+                    btn.textContent = strumGlyph(ch);
+                    if (ch === '-') btn.classList.add('rest');
+                    btn.dataset.slot = String(s2);
+                    btn.setAttribute('aria-label', 'Slot ' + String(s2 + 1) + ': ' +
+                        (ch === 'D' ? 'down' : (ch === 'U' ? 'up' : 'rest')) +
+                        '. Activate to cycle to ' +
+                        (ch === 'D' ? 'up' : (ch === 'U' ? 'rest' : 'down')) + '.');
+                    btn.addEventListener('click', function () {
+                        var next = ch === 'D' ? 'U' : (ch === 'U' ? '-' : 'D');
+                        var updated = slots.slice();
+                        updated[s2] = next;
+                        gridEditApply(function () {
+                            SB.setBeatOverride(sbId, song.id, block, bar, beat, updated.join(''));
+                        });
+                        ch = next;   // the button text is refreshed by gridEditApply re-opening the editor
+                    });
+                    slotsWrap.appendChild(btn);
+                })(s);
+            }
+            body.appendChild(slotsWrap);
+            var inherit = SB.el('button', 'grid-editor-option');
+            inherit.type = 'button';
+            inherit.textContent = 'Inherit (clear this beat\'s override)';
+            inherit.classList.toggle('grid-editor-option-active', resolved.source !== 'beat');
+            inherit.setAttribute('aria-pressed', String(resolved.source !== 'beat'));
+            inherit.addEventListener('click', function () {
+                gridEditApply(function () { SB.setBeatOverride(sbId, song.id, block, bar, beat, null); });
+            });
+            body.appendChild(inherit);
+            // Highlight the edited beat in the (rebuilt) grid.
+            Array.prototype.forEach.call(activeGrid.wrap.querySelectorAll('.grid-beat'), function (e) {
+                if (parseInt(e.dataset.block, 10) === block &&
+                    parseInt(e.dataset.bar, 10) === bar &&
+                    parseInt(e.dataset.beatLocal, 10) === beat) {
+                    e.classList.add('editing');
+                }
+            });
+        }
+    }
+
+    /* Delegated clicks on the sheet: open the bar strum editor or the beat
+     * editor. The animated view is read-only and ignores these. Guarded so the
+     * module loads under node (tests/plan.py stubs document without
+     * addEventListener). */
+    if (typeof document !== 'undefined' && document.addEventListener) {
+        document.addEventListener('click', function (ev) {
+            if (!activeGrid || activeGrid.anim) return;
+            var btn = ev.target.closest('.grid-bar-strum');
+            if (btn) {
+                ev.preventDefault();
+                gridEditorShow('bar', parseInt(btn.dataset.block, 10), parseInt(btn.dataset.bar, 10), 0);
+                return;
+            }
+            var beat = ev.target.closest('.grid-beat');
+            if (beat) {
+                ev.preventDefault();
+                gridEditorShow('beat', parseInt(beat.dataset.block, 10), parseInt(beat.dataset.bar, 10), parseInt(beat.dataset.beatLocal, 10));
+            }
+        });
+        /* The same beat cell opens from the keyboard: Enter or Space on a
+           beat cell opens its strum editor. Space also scrolls the page,
+           so it is prevented when the target is a beat cell. */
+        document.addEventListener('keydown', function (ev) {
+            if (!activeGrid || activeGrid.anim) return;
+            if (ev.key !== 'Enter' && ev.key !== ' ') return;
+            var beat = ev.target.closest('.grid-beat');
+            if (beat) {
+                ev.preventDefault();
+                gridEditorShow('beat', parseInt(beat.dataset.block, 10), parseInt(beat.dataset.bar, 10), parseInt(beat.dataset.beatLocal, 10));
+            }
+        });
+    }
 
 })(window.SB = window.SB || {});

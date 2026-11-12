@@ -176,6 +176,9 @@ def validate_grid(song):
         if not isinstance(block, dict):
             problems.append('%s: block is not an object' % where)
             continue
+        role = block.get('role')
+        if role is not None and role not in chordpro.SECTION_ROLES:
+            problems.append('%s: invalid section role %r' % (where, role))
         label = block.get('label')
         if label is not None:
             where = '%s %r' % (where, label)
@@ -204,6 +207,29 @@ def validate_grid(song):
             if total != beats_per_bar:
                 problems.append('%s bar %d: %d beats, expected %d for %s'
                                 % (where, ri + 1, total, beats_per_bar, time_sig))
+            # `strums` is one slot string per felt beat (e.g. bar-level strum
+            # overrides written into the grid at export). Its length must match
+            # the bar's beat total and every entry must share one subdivision.
+            strums = bar.get('strums') if isinstance(bar, dict) else None
+            if strums is not None:
+                if not isinstance(strums, list):
+                    problems.append('%s bar %d: strums is not a list' % (where, ri + 1))
+                elif len(strums) != total:
+                    problems.append('%s bar %d: %d strum entries, expected %d (one per felt beat)'
+                                    % (where, ri + 1, len(strums), total))
+                else:
+                    lengths = set()
+                    bad_entry = False
+                    for si, entry in enumerate(strums):
+                        if not isinstance(entry, str) or not entry or not re.fullmatch(r'[DU-]+', entry):
+                            problems.append('%s bar %d: strum entry %d is not a slot string'
+                                            % (where, ri + 1, si + 1))
+                            bad_entry = True
+                        else:
+                            lengths.add(len(entry))
+                    if not bad_entry and len(lengths) != 1:
+                        problems.append('%s bar %d: strum entries must share one subdivision (got %s)'
+                                        % (where, ri + 1, sorted(lengths)))
     return problems
 
 
@@ -258,11 +284,95 @@ def validate_songbook(book):
             continue
         sid = s.get('id') or '?'
         val = s.get('strum')
-        if chordpro.parse_strum(val) != val:
+        # A song may use one of its own custom patterns as the default. Build
+        # the per-song id -> metre map here so the `strum` check and the
+        # strumPatterns validation below agree on what a real id is.
+        custom_metre = {}
+        raw_patterns = s.get('strumPatterns')
+        if isinstance(raw_patterns, list):
+            for p in raw_patterns:
+                if isinstance(p, dict) and isinstance(p.get('id'), str):
+                    custom_metre[p['id']] = p.get('time')
+        if val not in _strum_metre and val not in custom_metre:
             invalid_strums.append('%s (%r: unknown pattern)' % (sid, val))
-        elif _strum_metre.get(val) != s.get('time'):
-            invalid_strums.append('%s (%r: %s pattern, song time %r)'
-                                  % (sid, val, _strum_metre.get(val), s.get('time')))
+        else:
+            pattern_time = _strum_metre.get(val, custom_metre.get(val))
+            if pattern_time != s.get('time'):
+                invalid_strums.append('%s (%r: %s pattern, song time %r)'
+                                      % (sid, val, pattern_time, s.get('time')))
+
+    # strumPatterns: per-song custom pattern definitions. A custom id must be
+    # unique, must not shadow a built-in pattern, and its time/subdivision/slots
+    # must line up with a valid metre (same invariant the library is built on).
+    # The valid custom ids are also what sectionStrums may reference.
+    invalid_strum_patterns = []
+    invalid_section_strums = []
+    for s in songs:
+        sid = s.get('id') or '?'
+        patterns = s.get('strumPatterns')
+        custom_ids = set()
+        custom_times = {}
+        if patterns is not None:
+            if not isinstance(patterns, list):
+                invalid_strum_patterns.append('%s: strumPatterns is not a list' % sid)
+            else:
+                seen = set()
+                for i, p in enumerate(patterns):
+                    where = '%s strumPatterns[%d]' % (sid, i)
+                    if not isinstance(p, dict):
+                        invalid_strum_patterns.append('%s: entry is not an object' % where)
+                        continue
+                    pid = p.get('id')
+                    name = p.get('name')
+                    ptime = p.get('time')
+                    subdiv = p.get('subdiv')
+                    slots = p.get('slots')
+                    if not isinstance(pid, str) or not pid:
+                        invalid_strum_patterns.append('%s: missing pattern id' % where)
+                        continue
+                    if pid in chordpro.STRUM_IDS:
+                        invalid_strum_patterns.append('%s: id %r shadows a built-in pattern' % (where, pid))
+                    if pid in seen:
+                        invalid_strum_patterns.append('%s: duplicate pattern id %r' % (where, pid))
+                    seen.add(pid)
+                    custom_ids.add(pid)
+                    custom_times[pid] = ptime
+                    if not isinstance(name, str) or not name.strip():
+                        invalid_strum_patterns.append('%s: pattern %r needs a name' % (where, pid))
+                    if ptime not in chordpro.TIME_SIGNATURES:
+                        invalid_strum_patterns.append('%s: pattern %r has invalid time %r'
+                                                      % (where, pid, ptime))
+                    if not isinstance(subdiv, int) or isinstance(subdiv, bool) or subdiv < 1:
+                        invalid_strum_patterns.append('%s: pattern %r needs a whole-number subdivision >= 1'
+                                                      % (where, pid))
+                    if not isinstance(slots, str) or not slots or not re.fullmatch(r'[DU-]+', slots):
+                        invalid_strum_patterns.append('%s: pattern %r slots must be a non-empty string of D, U and -'
+                                                      % (where, pid))
+                    elif ptime in chordpro.BEATS_PER_BAR and isinstance(subdiv, int) and not isinstance(subdiv, bool):
+                        expected = chordpro.BEATS_PER_BAR[ptime] * subdiv
+                        if len(slots) != expected:
+                            invalid_strum_patterns.append('%s: pattern %r has %d slots, expected %d for %s at %d per beat'
+                                                          % (where, pid, len(slots), expected, ptime, subdiv))
+
+        section_strums = s.get('sectionStrums')
+        if section_strums is not None:
+            if not isinstance(section_strums, dict):
+                invalid_section_strums.append('%s: sectionStrums is not an object' % sid)
+            else:
+                for role, pid in section_strums.items():
+                    if role not in chordpro.SECTION_ROLES:
+                        invalid_section_strums.append('%s: sectionStrums has invalid role %r' % (sid, role))
+                    elif not isinstance(pid, str) or not pid:
+                        invalid_section_strums.append('%s: sectionStrums[%r] is not a pattern id' % (sid, role))
+                    elif pid not in chordpro.STRUM_IDS and pid not in custom_ids:
+                        invalid_section_strums.append('%s: sectionStrums[%r] uses unknown pattern %r'
+                                                      % (sid, role, pid))
+                    else:
+                        ptime = _strum_metre.get(pid, custom_times.get(pid))
+                        song_time = s.get('time')
+                        if ptime is not None and ptime != song_time:
+                            invalid_section_strums.append('%s: sectionStrums[%r] is a %s pattern on a %s song'
+                                                          % (sid, role, ptime, song_time))
 
     # Grid bars must sum to the metre, carry real chords and balanced repeats;
     # an unusable grid is a build error, exactly like a bad tempo, because a
@@ -324,6 +434,10 @@ def validate_songbook(book):
                       % (', '.join(chordpro.TIME_SIGNATURES), invalid_times))
     if invalid_strums:
         errors.append('invalid strum patterns: %s' % invalid_strums)
+    if invalid_strum_patterns:
+        errors.append('invalid strum patterns: %s' % invalid_strum_patterns)
+    if invalid_section_strums:
+        errors.append('invalid section strums: %s' % invalid_section_strums)
     if bad_shape:
         errors.append('sheet lines are not lists: %s' % bad_shape)
     if bad_blank:
@@ -350,8 +464,12 @@ def validate_songbook(book):
         'with_bpm': sum(1 for s in songs if 'bpm' in s),
         'with_time': sum(1 for s in songs if 'time' in s),
         'with_strum': sum(1 for s in songs if 'strum' in s),
+        'with_strum_patterns': sum(1 for s in songs if s.get('strumPatterns')),
+        'with_section_strums': sum(1 for s in songs if s.get('sectionStrums')),
         'with_grid': sum(1 for s in songs if s.get('grid')),
         'grid_problems': grid_problems,
+        'invalid_strum_patterns': invalid_strum_patterns,
+        'invalid_section_strums': invalid_section_strums,
         'bad_shape': bad_shape,
         'bad_blank': bad_blank,
         'bad_pre': bad_pre,

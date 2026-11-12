@@ -54,7 +54,34 @@
         return out;
     }
 
+    /* The list view has two independent "nothing here" cases: no songbooks at
+     * all (first run, or after removing the last import) and a search/filter
+     * with no matches inside a book. Only the former owns the import call to
+     * action and hides the list toolbar; the latter still needs the toolbar so
+     * the user can clear the search. */
+    SB.renderEmptyState = function () {
+        var empty = SB.allSongbooks().length === 0;
+        var box = SB.$('emptyState');
+        if (box) box.hidden = !empty;
+        var toolbar = SB.$('listControls');
+        if (toolbar) toolbar.hidden = empty;
+        if (!empty) return;
+        var list = SB.$('songList');
+        if (list) list.textContent = '';
+        var result = SB.$('resultCount');
+        if (result) result.textContent = '';
+        var noMatches = SB.$('noMatches');
+        if (noMatches) noMatches.hidden = true;
+    }
+
     SB.renderList = function () {
+        if (!SB.state.active) {
+            SB.$('songList').textContent = '';
+            SB.$('resultCount').textContent = '';
+            SB.$('noMatches').hidden = true;
+            SB.renderEmptyState();
+            return;
+        }
         var songs = SB.filteredSongs();
         var total = SB.activeSongs().length;
         var ul = SB.$('songList');
@@ -92,7 +119,7 @@
         });
         ul.appendChild(frag);
 
-        SB.$('emptyState').hidden = songs.length > 0;
+        SB.$('noMatches').hidden = songs.length > 0;
         SB.$('resultCount').textContent = songs.length === total
             ? total + ' songs'
             : songs.length + ' of ' + total + ' songs';
@@ -155,6 +182,24 @@
         });
     }
 
+    /* A batch gets one report, not one alert per file. A failure carries the
+     * file's own name (sourceName) so the reason reads as "<name> — <why>". */
+    function summarizeImport(results) {
+        var imported = 0;
+        var failed = [];
+        results.forEach(function (r) {
+            if (r.ok) imported++;
+            else failed.push(r);
+        });
+        var msg = imported + ' imported';
+        if (failed.length) {
+            msg += ', ' + failed.length + ' failed: ' + failed.map(function (f) {
+                return f.name + ' — ' + f.reason;
+            }).join('; ');
+        }
+        return msg;
+    }
+
     SB.bindListControls = function () {
         var input = SB.$('search');
         input.addEventListener('input', function () {
@@ -213,10 +258,100 @@
             location.hash = SB.routeHash(this.value);
         });
         SB.$('importBtn').addEventListener('click', function () { SB.$('importFile').click(); });
+        SB.$('emptyImportBtn').addEventListener('click', function () { SB.$('importFile').click(); });
+
+        /* The URL form is one shared control: reachable from the bar when a
+         * library already exists and from the empty state on first run. File
+         * import stays the primary action because it has no CORS constraint. */
+        var urlForm = SB.$('importUrlForm');
+        var urlInput = SB.$('importUrl');
+        var urlToggle = SB.$('importUrlToggle');
+        var urlBtn = SB.$('importUrlBtn');
+
+        function setUrlForm(open) {
+            if (!urlForm) return;
+            urlForm.hidden = !open;
+            urlToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open) urlInput.focus();
+            else urlInput.value = '';
+        }
+
+        function reportUrlFailure(err, fallbackName) {
+            window.alert(summarizeImport([{
+                ok: false,
+                name: err.sourceName || fallbackName,
+                reason: err.message
+            }]));
+        }
+
+        urlToggle.addEventListener('click', function () { setUrlForm(urlForm.hidden); });
+        var emptyUrlBtn = SB.$('emptyImportUrlBtn');
+        if (emptyUrlBtn) emptyUrlBtn.addEventListener('click', function () { setUrlForm(true); });
+        SB.$('importUrlCancel').addEventListener('click', function () { setUrlForm(false); });
+
+        urlForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var url = urlInput.value.trim();
+            if (!url) { urlInput.focus(); return; }
+            urlBtn.disabled = true;
+            SB.importSongbookFromUrl(url).then(function (sb) {
+                setUrlForm(false);
+                var hash = SB.routeHash(sb.id);
+                if (location.hash === hash) SB.route();
+                else location.hash = hash;
+            }, function (err) {
+                reportUrlFailure(err, url);
+            }).then(function () { urlBtn.disabled = false; });
+        });
+
+        SB.$('refreshSongsBtn').addEventListener('click', function () {
+            var sb = SB.state.active;
+            if (!sb || !sb.sourceUrl) return;
+            var btn = SB.$('refreshSongsBtn');
+            btn.disabled = true;
+            SB.refreshSongbook(sb).then(function (next) {
+                /* Route through the rebuilt index so state.active and the
+                 * rendered view point at the replaced record, not the old
+                 * object that was just overwritten. */
+                if (SB.state.active && SB.state.active.id === next.id) SB.route();
+            }, function (err) {
+                window.alert('Refresh failed: ' + err.message);
+            }).then(function () { btn.disabled = false; });
+        });
+
         SB.$('importFile').addEventListener('change', function (e) {
-            var file = e.target.files && e.target.files[0];
-            if (file) SB.importSongbook(file);
+            var files = Array.prototype.slice.call(e.target.files || []);
             e.target.value = '';
+            if (!files.length) return;
+
+            /* Serial, not Promise.all: a later duplicate must see the earlier
+             * file's replace prompt and in-memory entry, and one bad file must
+             * only fail its own slot in the batch. */
+            var results = [];
+            var last = null;
+            function step(i) {
+                if (i >= files.length) {
+                    window.alert(summarizeImport(results));
+                    if (last) {
+                        var hash = SB.routeHash(last.id);
+                        if (location.hash === hash) SB.route();
+                        else location.hash = hash;
+                    }
+                    return;
+                }
+                var file = files[i];
+                SB.importSongbook(file).then(function (sb) {
+                    results.push({ ok: true, sb: sb });
+                    last = sb;
+                }, function (err) {
+                    results.push({
+                        ok: false,
+                        name: err.sourceName || file.name,
+                        reason: err.message
+                    });
+                }).then(function () { step(i + 1); });
+            }
+            step(0);
         });
         SB.$('exportSongsBtn').addEventListener('click', function () {
             if (SB.state.active) SB.exportSongbook(SB.state.active);
