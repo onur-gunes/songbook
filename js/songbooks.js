@@ -54,32 +54,48 @@
      * reach the renderer. A build-time grid is already fully validated; this
      * only has to defend against hand-edited or hostile imported JSON. `time`
      * is the already-normalised metre (null if the song's metre was invalid).
-     * Returns a clean grid array, or null to omit the field entirely. */
-    function normalizeGrid(value, time) {
-        if (!Array.isArray(value) || !value.length) return null;
+     * Returns a clean grid array, or null to omit the field entirely. A dropped
+     * grid is warned about: otherwise a hand-edited import just finds the Grid
+     * button disabled with no explanation. */
+    function normalizeGrid(value, time, songId) {
+        function drop(reason) {
+            var where = (songId == null || songId === '') ? '' : ' for song "' + songId + '"';
+            console.warn('songbook: grid dropped' + where + ' — ' + reason);
+            return null;
+        }
+        if (value === undefined || value === null) return null;
+        if (!Array.isArray(value) || !value.length) return drop('grid must be a non-empty array');
         var beatsPerBar = BEATS_PER_BAR[time];
-        if (!beatsPerBar) return null;           // a grid is meaningless without a metre
+        if (!beatsPerBar) return drop('song has no valid time signature'); // a grid is meaningless without a metre
         var blocks = [];
         for (var bi = 0; bi < value.length; bi++) {
             var block = value[bi];
-            if (!block || typeof block !== 'object' || !Array.isArray(block.bars) || !block.bars.length) return null;
+            if (!block || typeof block !== 'object' || !Array.isArray(block.bars) || !block.bars.length) {
+                return drop('block ' + bi + ' has no bars');
+            }
             var bars = [];
             for (var ri = 0; ri < block.bars.length; ri++) {
                 var bar = block.bars[ri];
-                if (!bar || typeof bar !== 'object' || !Array.isArray(bar.beats) || !bar.beats.length) return null;
+                if (!bar || typeof bar !== 'object' || !Array.isArray(bar.beats) || !bar.beats.length) {
+                    return drop('block ' + bi + ' bar ' + ri + ' has no beats');
+                }
                 var beats = [];
                 var total = 0;
                 for (var si = 0; si < bar.beats.length; si++) {
                     var seg = bar.beats[si];
-                    if (!seg || typeof seg !== 'object') return null;
+                    if (!seg || typeof seg !== 'object') return drop('bar ' + ri + ' has a malformed beat');
                     var chord = seg.chord;
                     var count = seg.beats;
-                    if (typeof chord !== 'string' || !chord) return null;
-                    if (typeof count !== 'number' || !isFinite(count) || count < 1 || count !== Math.floor(count)) return null;
+                    if (typeof chord !== 'string' || !chord) return drop('bar ' + ri + ' has an empty chord');
+                    if (typeof count !== 'number' || !isFinite(count) || count < 1 || count !== Math.floor(count)) {
+                        return drop('bar ' + ri + ' has an invalid beat count');
+                    }
                     total += count;
                     beats.push({ chord: chord, beats: count });
                 }
-                if (total !== beatsPerBar) return null;
+                if (total !== beatsPerBar) {
+                    return drop('bar ' + ri + ' has ' + total + ' beats, expected ' + beatsPerBar);
+                }
                 /* `strums` is one slot string per felt beat (bar-level strum
                  * overrides written into the grid at export). Its length must
                  * match the bar's beat total and every entry must share one
@@ -88,16 +104,22 @@
                  * A null/undefined `strums` is the same as absent, but any
                  * other non-array value is corrupt data and is not ignored. */
                 var hasStrums = bar.strums !== undefined && bar.strums !== null;
-                if (hasStrums && !Array.isArray(bar.strums)) return null;
+                if (hasStrums && !Array.isArray(bar.strums)) return drop('bar ' + ri + ' strums is not an array');
                 var barStrums = null;
                 if (hasStrums) {
-                    if (bar.strums.length !== total) return null;
+                    if (bar.strums.length !== total) {
+                        return drop('bar ' + ri + ' has ' + bar.strums.length + ' strum entries, expected ' + total);
+                    }
                     var barSubdiv = null;
                     for (var vi = 0; vi < bar.strums.length; vi++) {
                         var entry = bar.strums[vi];
-                        if (typeof entry !== 'string' || !entry || !/^[DU-]+$/.test(entry)) return null;
+                        if (typeof entry !== 'string' || !entry || !/^[DU-]+$/.test(entry)) {
+                            return drop('bar ' + ri + ' has a malformed strum entry');
+                        }
                         if (barSubdiv === null) barSubdiv = entry.length;
-                        else if (entry.length !== barSubdiv) return null;
+                        else if (entry.length !== barSubdiv) {
+                            return drop('bar ' + ri + ' strum entries use different subdivisions');
+                        }
                     }
                     barStrums = bar.strums.slice();
                 }
@@ -203,7 +225,7 @@
     function normalizeSong(s, index) {
         if (!s || typeof s !== 'object') throw new Error('bad song entry');
         var time = normalizeTime(s.time);
-        var grid = normalizeGrid(s.grid, time);
+        var grid = normalizeGrid(s.grid, time, s.id);
         var rawId = s.id;
         var id = (typeof rawId === 'string' || typeof rawId === 'number')
             ? String(rawId).trim() : '';

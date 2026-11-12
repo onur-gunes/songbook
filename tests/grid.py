@@ -15,7 +15,7 @@ import sys
 import time
 
 from cdp import launch_chrome, new_tab, CDP
-from fixture import inject_fixtures
+from fixture import inject_fixtures, load_all_fixtures, load_fixture
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else 'http://localhost:8777'
 PORT = 9340
@@ -37,7 +37,7 @@ def main():
         target = new_tab(PORT, 'about:blank')
         cdp = CDP(target['webSocketDebuggerUrl'])
         cdp.enable()
-        inject_fixtures(cdp)
+        inject_fixtures(cdp, load_all_fixtures() + [load_fixture('grid-edge')])
         cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
         cdp.wait_js('!!(window.songbookTest && songbookTest.getActive())', timeout=30)
 
@@ -112,6 +112,23 @@ def main():
         ok('six-eight-song held chords: 8 beats, 3 slots each',
            held['beats'] == 8 and held['allTriplets'])
 
+        # Regression for #77: a section whose first lyric line has no chord
+        # tokens used to synthesise a bar that the next group emitted too,
+        # duplicating the opening bar and inflating totalBeats. The fixture
+        # has two authored bars; the chart must draw two, not three.
+        js("location.hash = '#/grid-edge/leading-lyric-only'")
+        cdp.wait_js("document.getElementById('songView').hidden === false", timeout=10)
+        js("songbookTest.setChordMode('grid')")
+        cdp.wait_js("document.querySelectorAll('.sheet.chords-grid .grid-bar').length > 0", timeout=10)
+        edge = js(
+            "({ bars: document.querySelectorAll('.sheet.chords-grid .grid-bar').length,"
+            "  beats: document.querySelectorAll('.sheet.chords-grid .grid-beat').length,"
+            "  total: songbookTest.gridInfo().totalBeats,"
+            "  bpb: songbookTest.gridInfo().beatsPerBar })")
+        ok('leading lyric-only line does not duplicate the opening bar',
+           edge['bars'] == 2 and edge['beats'] == 8 and edge['total'] == 8,
+           edge)
+
         # The main selector must rebuild the grid lane, not just the top row.
         # grid-song's documented default is downs-4-4; choosing eighths-4-4
         # must reach every beat cell.
@@ -119,6 +136,11 @@ def main():
         cdp.wait_js("document.getElementById('songView').hidden === false", timeout=10)
         js("songbookTest.setChordMode('grid')")
         cdp.wait_js("document.querySelectorAll('.sheet.chords-grid .grid-beat').length > 0", timeout=10)
+        strum_label = js("document.getElementById('strumRow').getAttribute('aria-label')")
+        ok('strum row label carries the pattern name and strokes',
+           bool(strum_label) and 'All downs' in strum_label
+           and 'down rest' in strum_label and 'Strum pattern' in strum_label,
+           strum_label)
         before_ids = js(
             "Array.from(document.querySelectorAll('.sheet.chords-grid .grid-beat'))."
             "map(function(b){ return b.dataset.strumId; })")

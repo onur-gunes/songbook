@@ -1,0 +1,37 @@
+{
+  "id": "grid-edge",
+  "name": "Grid Edge Cases",
+  "description": "Fixture for grid layout edge cases (#77). Injected only by tests/grid.py.",
+  "instrument": "ukulele",
+  "songs": [
+    {
+      "id": "leading-lyric-only",
+      "title": "Leading Lyric Only",
+      "artist": "Fixture Author",
+      "level": "Easy",
+      "key": "C",
+      "sheetKey": "C",
+      "capo": 0,
+      "time": "4/4",
+      "bpm": 100,
+      "strum": "downs-4-4",
+      "chords": ["C", "G"],
+      "sheet": [
+        [["i", "Verse 1"]],
+        [["x", "A line with no chord tokens"]],
+        [["c", "[C]"], ["x", "the first chord "], ["c", "[G]"], ["x", "the second"]]
+      ],
+      "grid": [
+        {
+          "label": "Verse 1",
+          "role": "verse",
+          "repeat": false,
+          "bars": [
+            {"beats": [{"chord": "C", "beats": 4}]},
+            {"beats": [{"chord": "G", "beats": 4}]}
+          ]
+        }
+      ]
+    }
+  ]
+}

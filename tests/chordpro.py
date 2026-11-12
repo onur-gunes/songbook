@@ -611,7 +611,7 @@ class BuildTests(unittest.TestCase):
                            'description': 'x', 'instrument': 'ukulele'}, f)
             with open(os.path.join(book_dir, '01-song.cho'), 'w', encoding='utf-8') as f:
                 f.write('{title: Song}\n{artist: A}\n{level: Easy}\n'
-                        '{duration: 1}\n[C]lyric\n')
+                        '{duration: 1}\n{tempo: 80}\n{time: 3/4}\n[C]lyric\n')
             with open(os.path.join(book_dir, '02-other.cho'), 'w', encoding='utf-8') as f:
                 f.write('{title: Other}\n{artist: A}\n{level: Easy}\n'
                         '{duration: 1}\n[C]lyric\n')
@@ -636,6 +636,10 @@ class BuildTests(unittest.TestCase):
             self.assertNotIn('source', songs['song'])
             self.assertNotIn('bpm', songs['other'])
             self.assertTrue(any('tempo.json: unused ids' in w for w in result['warnings']))
+            # The sidecar still wins, but the dropped ChordPro values are
+            # reported so an authoring mistake is visible (#84).
+            self.assertTrue(any('overrides ChordPro' in w for w in result['warnings']),
+                            result['warnings'])
             self.assertIn('tempo: 1/2 songs with bpm, 1 with time signature',
                           result['report'])
 
@@ -659,6 +663,16 @@ class BuildTests(unittest.TestCase):
     def test_tempo_sidecar_absent_is_empty(self):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(build_songbook.load_tempo(tmp), ({}, []))
+
+    def test_tempo_sidecar_non_object_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, 'tempo.json'), 'w', encoding='utf-8') as f:
+                json.dump([{'bpm': 100}], f)
+            tempo, rejected = build_songbook.load_tempo(tmp)
+
+            self.assertEqual(tempo, {})
+            self.assertEqual(len(rejected), 1)
+            self.assertIn('expected an object', rejected[0])
 
     def test_validation_flags_malformed_sheet(self):
         book = {

@@ -305,7 +305,7 @@ def _grid_bar_beats(bar_text, beats_per_bar):
     return entries
 
 
-def _grid_line_bars(label, line, beats_per_bar):
+def _grid_line_bars(label, line):
     """Split one bar-line-delimited grid line into (seps, bar_texts).
 
     Every line must open and close with a bar line; text outside the outermost
@@ -346,19 +346,15 @@ def parse_grid_block(label, body_lines, time_sig):
     if not lines:
         raise ValueError('grid block %r has no bars' % label)
     # Flatten the block into one separator sequence interleaved with bars:
-    # [sep, bar, sep, bar, ..., sep]. Each line both opens and closes with a
-    # bar line, so the trailing bar line of one line and the leading bar line
-    # of the next are the *same* musical division written twice; the leading
-    # one is dropped so the block reads as a single continuous sequence.
-    # `seps` ends up interleaved with bars as [s0, bar0, s1, bar1, ..., sN]:
-    # N bars have N+1 bar lines around them. Each line both opens and closes
-    # with a bar line, so an interior line's opening bar line is the *same*
-    # division as the previous line's closing one, written twice; the duplicate
-    # is dropped so the block reads as one continuous sequence.
+    # [sep, bar, sep, bar, ..., sep]. N bars have N+1 bar lines around them.
+    # Each line both opens and closes with a bar line, so an interior line's
+    # opening bar line is the *same* musical division as the previous line's
+    # closing one, written twice; the duplicate is dropped so the block reads
+    # as one continuous sequence.
     seps = []
     bar_texts = []
     for i, line in enumerate(lines):
-        line_seps, line_bars = _grid_line_bars(label, line, beats_per_bar)
+        line_seps, line_bars = _grid_line_bars(label, line)
         if i > 0:
             if line_seps[0] != '|' or seps[-1] != '|':
                 # A repeat mark straddling an interior line break is a repeat

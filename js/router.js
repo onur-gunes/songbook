@@ -49,6 +49,7 @@
             SB.setActive(null);
             SB.resetScroll(true);
             SB.stopMetronome();
+            if (SB.gridDeactivate) SB.gridDeactivate();
             SB.state.currentSong = null;
             SB.$('songView').hidden = true;
             SB.$('explorerView').hidden = true;
@@ -67,6 +68,7 @@
         } else {
             SB.resetScroll(true);
             SB.stopMetronome();
+            if (SB.gridDeactivate) SB.gridDeactivate();
             SB.state.currentSong = null;
             SB.$('songView').hidden = true;
             SB.$('explorerView').hidden = true;

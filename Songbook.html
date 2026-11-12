@@ -7168,32 +7168,48 @@ button.structure-close,
      * reach the renderer. A build-time grid is already fully validated; this
      * only has to defend against hand-edited or hostile imported JSON. `time`
      * is the already-normalised metre (null if the song's metre was invalid).
-     * Returns a clean grid array, or null to omit the field entirely. */
-    function normalizeGrid(value, time) {
-        if (!Array.isArray(value) || !value.length) return null;
+     * Returns a clean grid array, or null to omit the field entirely. A dropped
+     * grid is warned about: otherwise a hand-edited import just finds the Grid
+     * button disabled with no explanation. */
+    function normalizeGrid(value, time, songId) {
+        function drop(reason) {
+            var where = (songId == null || songId === '') ? '' : ' for song "' + songId + '"';
+            console.warn('songbook: grid dropped' + where + ' — ' + reason);
+            return null;
+        }
+        if (value === undefined || value === null) return null;
+        if (!Array.isArray(value) || !value.length) return drop('grid must be a non-empty array');
         var beatsPerBar = BEATS_PER_BAR[time];
-        if (!beatsPerBar) return null;           // a grid is meaningless without a metre
+        if (!beatsPerBar) return drop('song has no valid time signature'); // a grid is meaningless without a metre
         var blocks = [];
         for (var bi = 0; bi < value.length; bi++) {
             var block = value[bi];
-            if (!block || typeof block !== 'object' || !Array.isArray(block.bars) || !block.bars.length) return null;
+            if (!block || typeof block !== 'object' || !Array.isArray(block.bars) || !block.bars.length) {
+                return drop('block ' + bi + ' has no bars');
+            }
             var bars = [];
             for (var ri = 0; ri < block.bars.length; ri++) {
                 var bar = block.bars[ri];
-                if (!bar || typeof bar !== 'object' || !Array.isArray(bar.beats) || !bar.beats.length) return null;
+                if (!bar || typeof bar !== 'object' || !Array.isArray(bar.beats) || !bar.beats.length) {
+                    return drop('block ' + bi + ' bar ' + ri + ' has no beats');
+                }
                 var beats = [];
                 var total = 0;
                 for (var si = 0; si < bar.beats.length; si++) {
                     var seg = bar.beats[si];
-                    if (!seg || typeof seg !== 'object') return null;
+                    if (!seg || typeof seg !== 'object') return drop('bar ' + ri + ' has a malformed beat');
                     var chord = seg.chord;
                     var count = seg.beats;
-                    if (typeof chord !== 'string' || !chord) return null;
-                    if (typeof count !== 'number' || !isFinite(count) || count < 1 || count !== Math.floor(count)) return null;
+                    if (typeof chord !== 'string' || !chord) return drop('bar ' + ri + ' has an empty chord');
+                    if (typeof count !== 'number' || !isFinite(count) || count < 1 || count !== Math.floor(count)) {
+                        return drop('bar ' + ri + ' has an invalid beat count');
+                    }
                     total += count;
                     beats.push({ chord: chord, beats: count });
                 }
-                if (total !== beatsPerBar) return null;
+                if (total !== beatsPerBar) {
+                    return drop('bar ' + ri + ' has ' + total + ' beats, expected ' + beatsPerBar);
+                }
                 /* `strums` is one slot string per felt beat (bar-level strum
                  * overrides written into the grid at export). Its length must
                  * match the bar's beat total and every entry must share one
@@ -7202,16 +7218,22 @@ button.structure-close,
                  * A null/undefined `strums` is the same as absent, but any
                  * other non-array value is corrupt data and is not ignored. */
                 var hasStrums = bar.strums !== undefined && bar.strums !== null;
-                if (hasStrums && !Array.isArray(bar.strums)) return null;
+                if (hasStrums && !Array.isArray(bar.strums)) return drop('bar ' + ri + ' strums is not an array');
                 var barStrums = null;
                 if (hasStrums) {
-                    if (bar.strums.length !== total) return null;
+                    if (bar.strums.length !== total) {
+                        return drop('bar ' + ri + ' has ' + bar.strums.length + ' strum entries, expected ' + total);
+                    }
                     var barSubdiv = null;
                     for (var vi = 0; vi < bar.strums.length; vi++) {
                         var entry = bar.strums[vi];
-                        if (typeof entry !== 'string' || !entry || !/^[DU-]+$/.test(entry)) return null;
+                        if (typeof entry !== 'string' || !entry || !/^[DU-]+$/.test(entry)) {
+                            return drop('bar ' + ri + ' has a malformed strum entry');
+                        }
                         if (barSubdiv === null) barSubdiv = entry.length;
-                        else if (entry.length !== barSubdiv) return null;
+                        else if (entry.length !== barSubdiv) {
+                            return drop('bar ' + ri + ' strum entries use different subdivisions');
+                        }
                     }
                     barStrums = bar.strums.slice();
                 }
@@ -7317,7 +7339,7 @@ button.structure-close,
     function normalizeSong(s, index) {
         if (!s || typeof s !== 'object') throw new Error('bad song entry');
         var time = normalizeTime(s.time);
-        var grid = normalizeGrid(s.grid, time);
+        var grid = normalizeGrid(s.grid, time, s.id);
         var rawId = s.id;
         var id = (typeof rawId === 'string' || typeof rawId === 'number')
             ? String(rawId).trim() : '';
@@ -8637,11 +8659,6 @@ button.structure-close,
         return best;
     }
 
-    /* Repeat a progression until it covers the section (a verse that runs the
-     * same four-bar loop twice), collapsing held chords across the join
-     * exactly as the renderer does. Returns null when the section is a
-     * different arrangement, so the caller falls back to a chart built from
-     * the sheet rather than showing the wrong bars. */
     /* The change sequence a list of bars plays, with a chord held across a bar
      * line counted once (the same collapse the renderer uses). */
     function barsToChanges(bars) {
@@ -9185,10 +9202,13 @@ button.structure-close,
      * is stacked under the same system; a group that is still too wide for the
      * screen is split, and the line stays under the first half. */
     function groupSystems(specs, model, avail) {
-        var changeBar = {};
+        var changeBar = {}, maxChangeIndex = -1;
         specs.forEach(function (spec, bi) {
             spec.segments.forEach(function (seg) {
-                if (seg.changeIndex >= 0) changeBar[seg.changeIndex] = bi;
+                if (seg.changeIndex >= 0) {
+                    changeBar[seg.changeIndex] = bi;
+                    if (seg.changeIndex > maxChangeIndex) maxChangeIndex = seg.changeIndex;
+                }
             });
         });
 
@@ -9204,7 +9224,11 @@ button.structure-close,
                 // A lyric-only line, or one that only repeats a chord already
                 // rendered above: keep it under the same bars.
                 if (groups.length) groups[groups.length - 1].lines.push(line);
-                else groups.push({ first: cursor, last: cursor - 1, lines: [line] });
+                // A leading lyric-only line has no bars of its own. Creating a
+                // pseudo-group for it made the loop below synthesise a bar that
+                // the next group also emitted, duplicating the opening bar and
+                // inflating totalBeats. It is still placed on the first system
+                // by assignLineGeometry, which anchors lines by change index.
                 return;
             }
             var prev = groups[groups.length - 1];
@@ -9229,11 +9253,13 @@ button.structure-close,
             var startBar = changeBar[group.first];
             if (startBar == null) startBar = 0;
             var nextBar = specs.length;
-            for (var ci = group.last + 1; ci < group.first + specs.length + 1; ci++) {
+            for (var ci = group.last + 1; ci <= maxChangeIndex; ci++) {
                 if (changeBar[ci] != null) { nextBar = changeBar[ci]; break; }
             }
             var bars = specs.slice(startBar, nextBar);
-            if (!bars.length) bars = specs.slice(startBar, startBar + 1);
+            // A group whose changes all land in a bar already claimed by the
+            // next group owns no bars; emitting a fallback bar duplicated it.
+            if (!bars.length) return;
             var width = bars.reduce(function (n, bar) { return n + bar.width; }, 0);
             // Never split a lyric group across systems: splitting would drop
             // the line's later chord-anchored phrases (only the first
@@ -10646,6 +10672,7 @@ button.structure-close,
         if (SB.closeVoicingChooser) SB.closeVoicingChooser();
         if (SB.resetScroll) SB.resetScroll(true);
         if (SB.stopMetronome) SB.stopMetronome();
+        if (SB.gridDeactivate) SB.gridDeactivate();
         SB.state.currentSong = null;
         document.getElementById('listView').hidden = true;
         document.getElementById('songView').hidden = true;
@@ -13746,6 +13773,7 @@ button.structure-close,
         row.textContent = '';
         var pattern = SB.state.strum.pattern;
         if (!pattern) return;
+        row.setAttribute('aria-label', 'Strum pattern: ' + patternDescription(pattern));
 
         var bar = SB.el('div', 'strum-bar pattern');
         var cells = SB.el('div', 'strum-cells');
@@ -13765,6 +13793,14 @@ button.structure-close,
         lastSlot = -1;
     }
 
+    /* The row is a single image to a screen reader, so its label has to carry
+     * the pattern itself; "Strum pattern" alone hid the content (#86). */
+    function patternDescription(pattern) {
+        var words = [];
+        for (var i = 0; i < pattern.slots.length; i++) words.push(slotWord(pattern.slots[i]));
+        return pattern.name + ' (' + pattern.time + '): ' + words.join(' ');
+    }
+
     /* Swaps the cells between counting you in and showing the pattern. Only the
      * glyphs and the row's phase change — the cells, their order and their
      * data-idx stay put, so the highlight indexes the same grid either way and
@@ -13778,6 +13814,15 @@ button.structure-close,
         var counting = next === 'countin';
         row.dataset.phase = next;
         row.classList.toggle('is-countin', counting);
+        if (counting) {
+            var counts = [];
+            for (var b = 0; b < pattern.slots.length; b += pattern.subdiv) {
+                counts.push(String(b / pattern.subdiv + 1));
+            }
+            row.setAttribute('aria-label', 'Strum count-in: ' + counts.join(' '));
+        } else {
+            row.setAttribute('aria-label', 'Strum pattern: ' + patternDescription(pattern));
+        }
         Array.prototype.forEach.call(row.querySelectorAll('.strum-slot'), function (cell) {
             var i = parseInt(cell.dataset.idx, 10);
             cell.textContent = counting ? countGlyph(pattern, i) : slotGlyph(pattern.slots[i]);
@@ -15407,6 +15452,7 @@ button.structure-close,
             SB.setActive(null);
             SB.resetScroll(true);
             SB.stopMetronome();
+            if (SB.gridDeactivate) SB.gridDeactivate();
             SB.state.currentSong = null;
             SB.$('songView').hidden = true;
             SB.$('explorerView').hidden = true;
@@ -15425,6 +15471,7 @@ button.structure-close,
         } else {
             SB.resetScroll(true);
             SB.stopMetronome();
+            if (SB.gridDeactivate) SB.gridDeactivate();
             SB.state.currentSong = null;
             SB.$('songView').hidden = true;
             SB.$('explorerView').hidden = true;

@@ -261,11 +261,6 @@
         return best;
     }
 
-    /* Repeat a progression until it covers the section (a verse that runs the
-     * same four-bar loop twice), collapsing held chords across the join
-     * exactly as the renderer does. Returns null when the section is a
-     * different arrangement, so the caller falls back to a chart built from
-     * the sheet rather than showing the wrong bars. */
     /* The change sequence a list of bars plays, with a chord held across a bar
      * line counted once (the same collapse the renderer uses). */
     function barsToChanges(bars) {
@@ -809,10 +804,13 @@
      * is stacked under the same system; a group that is still too wide for the
      * screen is split, and the line stays under the first half. */
     function groupSystems(specs, model, avail) {
-        var changeBar = {};
+        var changeBar = {}, maxChangeIndex = -1;
         specs.forEach(function (spec, bi) {
             spec.segments.forEach(function (seg) {
-                if (seg.changeIndex >= 0) changeBar[seg.changeIndex] = bi;
+                if (seg.changeIndex >= 0) {
+                    changeBar[seg.changeIndex] = bi;
+                    if (seg.changeIndex > maxChangeIndex) maxChangeIndex = seg.changeIndex;
+                }
             });
         });
 
@@ -828,7 +826,11 @@
                 // A lyric-only line, or one that only repeats a chord already
                 // rendered above: keep it under the same bars.
                 if (groups.length) groups[groups.length - 1].lines.push(line);
-                else groups.push({ first: cursor, last: cursor - 1, lines: [line] });
+                // A leading lyric-only line has no bars of its own. Creating a
+                // pseudo-group for it made the loop below synthesise a bar that
+                // the next group also emitted, duplicating the opening bar and
+                // inflating totalBeats. It is still placed on the first system
+                // by assignLineGeometry, which anchors lines by change index.
                 return;
             }
             var prev = groups[groups.length - 1];
@@ -853,11 +855,13 @@
             var startBar = changeBar[group.first];
             if (startBar == null) startBar = 0;
             var nextBar = specs.length;
-            for (var ci = group.last + 1; ci < group.first + specs.length + 1; ci++) {
+            for (var ci = group.last + 1; ci <= maxChangeIndex; ci++) {
                 if (changeBar[ci] != null) { nextBar = changeBar[ci]; break; }
             }
             var bars = specs.slice(startBar, nextBar);
-            if (!bars.length) bars = specs.slice(startBar, startBar + 1);
+            // A group whose changes all land in a bar already claimed by the
+            // next group owns no bars; emitting a fallback bar duplicated it.
+            if (!bars.length) return;
             var width = bars.reduce(function (n, bar) { return n + bar.width; }, 0);
             // Never split a lyric group across systems: splitting would drop
             // the line's later chord-anchored phrases (only the first
