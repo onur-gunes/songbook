@@ -1829,6 +1829,115 @@ body.pattern-open { overflow: hidden; }
 .pattern-cancel:hover { border-color: var(--accent); }
 .pattern-save:hover { filter: brightness(1.06); }
 
+/* add songs */
+
+.add-song-sheet { width: min(680px, 100%); }
+
+.add-song-text {
+    min-height: 160px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    resize: vertical;
+}
+
+.add-song-text:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.add-song-files {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+}
+
+.add-song-hint {
+    color: var(--muted);
+    font-size: 0.72rem;
+}
+
+.add-song-preview {
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-2);
+}
+
+.add-song-preview-title {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.add-song-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.add-song-item {
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface);
+}
+
+.add-song-item.is-error {
+    border-color: color-mix(in srgb, var(--hard) 45%, var(--line));
+}
+
+.add-song-item-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin: 0;
+}
+
+.add-song-item-title {
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.add-song-item-artist {
+    color: var(--muted);
+    font-size: 0.76rem;
+}
+
+.add-song-meta {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+}
+
+.add-song-item-error {
+    margin: 3px 0 0;
+    color: var(--hard);
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.add-song-warnings {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    color: var(--muted);
+    font-size: 0.72rem;
+}
+
+.add-song-warnings li { margin: 1px 0; }
+
 /* sheet */
 
 .sheet {

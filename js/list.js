@@ -92,6 +92,8 @@
         var bookEmpty = total === 0;
         var emptyBook = SB.$('emptyBookState');
         if (emptyBook) emptyBook.hidden = !bookEmpty;
+        var emptyAdd = SB.$('emptyAddSongBtn');
+        if (emptyAdd) emptyAdd.hidden = !(bookEmpty && SB.state.active.imported);
         var toolbar = SB.$('listControls');
         if (toolbar) toolbar.hidden = bookEmpty;
         var ul = SB.$('songList');
