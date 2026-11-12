@@ -340,6 +340,66 @@
         });
     };
 
+    /* Append already-parsed songs to an imported book. Each song goes through
+     * normalizeSongbook (the single validator) before it is stored; ids are
+     * de-duplicated within the book and the batch, and `n` continues from the
+     * highest existing position because an imported book need not be
+     * contiguous. One idbPut makes the write atomic: a failure leaves both
+     * memory and storage on the previous version. */
+    SB.addSongsToBook = function (book, songs) {
+        if (!book || !book.imported) {
+            return Promise.reject(new Error('only imported songbooks can be edited'));
+        }
+        var incoming = (songs || []).filter(function (s) {
+            return s && typeof s === 'object';
+        });
+        if (!incoming.length) return Promise.resolve(book);
+
+        var taken = {};
+        book.songs.forEach(function (s) { taken[s.id] = true; });
+        var maxN = book.songs.reduce(function (max, s) {
+            return (typeof s.n === 'number' && isFinite(s.n) && s.n > max) ? s.n : max;
+        }, book.songs.length);
+
+        var appended = [];
+        for (var i = 0; i < incoming.length; i++) {
+            var normalized = SB.normalizeSongbook({
+                id: book.id, name: book.name, songs: [incoming[i]]
+            }).songs[0];
+            var base = normalized.id || 'song';
+            var id = base;
+            var suffix = 2;
+            while (taken[id]) {
+                id = base + '-' + suffix;
+                suffix += 1;
+            }
+            taken[id] = true;
+            normalized.id = id;
+            normalized.n = maxN + i + 1;
+            appended.push(normalized);
+        }
+
+        var next = {};
+        Object.keys(book).forEach(function (key) { next[key] = book[key]; });
+        next.songs = book.songs.concat(appended);
+
+        return SB.idbPut(next).then(function () {
+            var index = -1;
+            for (var j = 0; j < SB.state.imported.length; j++) {
+                if (SB.state.imported[j].id === next.id) { index = j; break; }
+            }
+            if (index >= 0) SB.state.imported[index] = next;
+            else SB.state.imported.push(next);
+            SB.rebuildIndex();
+            if (SB.state.active && SB.state.active.id === next.id) {
+                SB.setActive(next);
+                SB.renderList();
+                SB.renderRecent();
+            }
+            return next;
+        });
+    };
+
     SB.loadBundled = function () {
         /* An injected empty list is authoritative, not an invitation to fetch:
          * the single-file build and the test harness both use this hook to say
@@ -386,6 +446,10 @@
         if (sel) sel.value = sb ? sb.id : '';
         var rm = SB.$('removeSongsBtn');
         if (rm) rm.hidden = !(sb && sb.imported);
+        /* Adding songs is authoring, so it is offered only for imported books;
+         * bundled books stay read-only. */
+        var add = SB.$('addSongBtn');
+        if (add) add.hidden = !(sb && sb.imported);
         var rf = SB.$('refreshSongsBtn');
         if (rf) rf.hidden = !(sb && sb.imported && sb.sourceUrl);
         var ex = SB.$('exportSongsBtn');

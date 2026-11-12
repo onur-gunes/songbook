@@ -83,7 +83,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/list.js` | List view: search, filters, sort, songbook picker |
 | `js/import.js` | Importing songbook JSON from disk or a URL (shared parse/validate/persist pipeline) |
 | `js/export.js` | Exporting any songbook (bundled or imported) back to a JSON file |
-| `js/author.js` | In-app songbook creation (the New songbook dialog); writes only imported books |
+| `js/author.js` | In-app songbook authoring: the New songbook and Add songs dialogs; writes only imported books |
 | `js/song.js` | Song view and its controls |
 | `js/autoscroll.js` | Auto-scroll, text/chord sizing, pinch zoom |
 | `js/metronome.js` | Metronome: lookahead click scheduler and per-song BPM |

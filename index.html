@@ -41,6 +41,7 @@
             <label class="songbook-label" for="songbookSelect">Songbook</label>
             <select id="songbookSelect" class="songbook-select" aria-label="Choose a songbook"></select>
             <button id="newSongbookBtn" class="link-btn" type="button">New songbook</button>
+            <button id="addSongBtn" class="pill-btn" type="button" hidden>Add song…</button>
             <button id="importBtn" class="pill-btn" type="button">Import list…</button>
             <button id="importUrlToggle" class="link-btn" type="button"
                     aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
@@ -127,6 +128,7 @@
         <div id="emptyBookState" class="empty-state empty-state-songs" hidden>
             <h2 class="empty-state-title">No songs yet</h2>
             <p class="empty-state-lead">This songbook is ready. Add a song from ChordPro to start it.</p>
+            <button id="emptyAddSongBtn" class="pill-btn accent empty-state-import" type="button" hidden>Add a song…</button>
         </div>
         <ul id="songList" class="song-list"></ul>
         <p id="noMatches" class="empty-state" hidden>No songs match.</p>
@@ -556,6 +558,47 @@
                 <span class="pattern-spacer"></span>
                 <button id="newBookCancel" class="pattern-cancel" type="button">Cancel</button>
                 <button id="newBookCreate" class="pattern-save" type="submit">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="addSongOverlay" class="pattern-overlay" hidden aria-hidden="true">
+    <div id="addSongDialog" class="pattern-sheet add-song-sheet" role="dialog" aria-modal="true"
+         aria-labelledby="addSongTitle" tabindex="-1">
+        <header class="pattern-head">
+            <div>
+                <span class="pattern-kicker">Songbook</span>
+                <h2 id="addSongTitle">Add songs</h2>
+            </div>
+            <button id="addSongClose" class="pattern-close" type="button"
+                    aria-label="Close add songs dialog">×</button>
+        </header>
+
+        <form id="addSongForm" class="pattern-form" novalidate>
+            <label class="pattern-field" for="addSongText">
+                <span>Paste ChordPro</span>
+                <textarea id="addSongText" class="add-song-text" rows="9" spellcheck="false"
+                          placeholder="{title: My song}&#10;{time: 4/4}&#10;[C]Lyrics…"></textarea>
+            </label>
+
+            <div class="add-song-files">
+                <button id="addSongFileBtn" class="pill-btn" type="button">Choose files…</button>
+                <input id="addSongFile" type="file" accept=".cho,.chordpro,.txt" multiple hidden>
+                <span class="add-song-hint">.cho, .chordpro or .txt — one song per file</span>
+            </div>
+
+            <div id="addSongPreview" class="add-song-preview" aria-live="polite" hidden>
+                <p class="add-song-preview-title">Preview</p>
+                <ul id="addSongPreviewList" class="add-song-list"></ul>
+            </div>
+
+            <p id="addSongError" class="pattern-error" role="alert" tabindex="-1" hidden></p>
+
+            <div class="pattern-actions">
+                <span class="pattern-spacer"></span>
+                <button id="addSongCancel" class="pattern-cancel" type="button">Cancel</button>
+                <button id="addSongAdd" class="pattern-save" type="submit" disabled>Add</button>
             </div>
         </form>
     </div>
