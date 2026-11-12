@@ -507,6 +507,7 @@
         row.textContent = '';
         var pattern = SB.state.strum.pattern;
         if (!pattern) return;
+        row.setAttribute('aria-label', 'Strum pattern: ' + patternDescription(pattern));
 
         var bar = SB.el('div', 'strum-bar pattern');
         var cells = SB.el('div', 'strum-cells');
@@ -526,6 +527,14 @@
         lastSlot = -1;
     }
 
+    /* The row is a single image to a screen reader, so its label has to carry
+     * the pattern itself; "Strum pattern" alone hid the content (#86). */
+    function patternDescription(pattern) {
+        var words = [];
+        for (var i = 0; i < pattern.slots.length; i++) words.push(slotWord(pattern.slots[i]));
+        return pattern.name + ' (' + pattern.time + '): ' + words.join(' ');
+    }
+
     /* Swaps the cells between counting you in and showing the pattern. Only the
      * glyphs and the row's phase change — the cells, their order and their
      * data-idx stay put, so the highlight indexes the same grid either way and
@@ -539,6 +548,15 @@
         var counting = next === 'countin';
         row.dataset.phase = next;
         row.classList.toggle('is-countin', counting);
+        if (counting) {
+            var counts = [];
+            for (var b = 0; b < pattern.slots.length; b += pattern.subdiv) {
+                counts.push(String(b / pattern.subdiv + 1));
+            }
+            row.setAttribute('aria-label', 'Strum count-in: ' + counts.join(' '));
+        } else {
+            row.setAttribute('aria-label', 'Strum pattern: ' + patternDescription(pattern));
+        }
         Array.prototype.forEach.call(row.querySelectorAll('.strum-slot'), function (cell) {
             var i = parseInt(cell.dataset.idx, 10);
             cell.textContent = counting ? countGlyph(pattern, i) : slotGlyph(pattern.slots[i]);

@@ -475,6 +475,27 @@ def main():
            and cdp.eval('songbookTest.getActive().sourceUrl') == url)
         cdp.eval("window.fetch = window.__realFetch;")
 
+        # --- #85: a malformed grid is dropped, but not silently ----------
+        cdp.eval(
+            "window.__warnings = []; window.__realWarn = console.warn;"
+            "console.warn = function () {"
+            "  window.__warnings.push(Array.prototype.join.call(arguments, ' '));"
+            "  window.__realWarn.apply(console, arguments);"
+            "};")
+        dropped = cdp.eval(
+            "(function () {"
+            "  var book = songbookTest.normalizeSongbook({id: 'bad-grid-book', name: 'Bad',"
+            "    songs: [{id: 'bad-grid-song', title: 'Bad Grid', time: '4/4',"
+            "      sheet: [[['c', '[C]'], ['x', 'x']]],"
+            "      grid: [{label: 'Verse', bars: [{beats: [{chord: 'C', beats: 3}]}]}]}]});"
+            "  return book.songs[0].grid === undefined;"
+            "})()")
+        grid_warnings = cdp.eval("window.__warnings.slice()")
+        cdp.eval("console.warn = window.__realWarn;")
+        ok('malformed grid is dropped with an explanatory warning',
+           dropped and any('bad-grid-song' in w and 'grid dropped' in w for w in grid_warnings),
+           grid_warnings)
+
         n_fail = 0
         for name, passed, detail in results:
             print(('PASS ' if passed else 'FAIL ') + name + (' | ' + str(detail) if detail != '' else ''))

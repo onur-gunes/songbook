@@ -113,6 +113,12 @@ def load_tempo(book_dir):
         return {}, []
     with open(path, encoding='utf-8') as f:
         data = json.load(f)
+    if not isinstance(data, dict):
+        # A list or scalar is a broken sidecar, not an empty one. Report it as
+        # a build error instead of letting `data.items()` raise AttributeError
+        # with no file or shape in the message.
+        return {}, ['tempo.json: expected an object mapping song ids to tempos, got %s'
+                    % type(data).__name__]
     out = {}
     rejected = []
     for key, value in data.items():
@@ -704,7 +710,13 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
                 continue
             # The sidecar is the curated source of truth, same as keys: a
             # ChordPro {tempo:} directive is an author's inline note, the
-            # sidecar is the researched value, so the sidecar wins.
+            # sidecar is the researched value, so the sidecar wins. Warn when
+            # the two disagree so an author can see which value was dropped.
+            for field in ('bpm', 'time', 'strum'):
+                if field in entry and field in song and song[field] != entry[field]:
+                    warnings.append(
+                        '%s: tempo.json %s=%r overrides ChordPro %r'
+                        % (song['id'], field, entry[field], song[field]))
             if 'bpm' in entry:
                 song['bpm'] = entry['bpm']
             if 'time' in entry:

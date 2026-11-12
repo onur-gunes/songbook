@@ -2202,6 +2202,18 @@ async function main() {
     ok('mode resumes on the next grid song',
         !!gridSheet() && gridBtn().disabled === false);
 
+    // #87: returning to the list must tear the grid down instead of leaving
+    // the previous song's chart answering metronome queries until the next
+    // song opens.
+    ok('grid is active before returning to the list', !!gridInfo());
+    win().location.hash = '#/';
+    await wait(250);
+    ok('returning to the list deactivates the grid', gridInfo() === null,
+        JSON.stringify(gridInfo()));
+    win().location.hash = '#/popular/complete-song';
+    await wait(300);
+    ok('reopening a grid song reactivates the grid', !!gridInfo());
+
     // leave the suite with no sticky grid state
     win().songbookTest.setChordMode('inline');
     await wait(60);

@@ -429,6 +429,7 @@
         if (SB.closeVoicingChooser) SB.closeVoicingChooser();
         if (SB.resetScroll) SB.resetScroll(true);
         if (SB.stopMetronome) SB.stopMetronome();
+        if (SB.gridDeactivate) SB.gridDeactivate();
         SB.state.currentSong = null;
         document.getElementById('listView').hidden = true;
         document.getElementById('songView').hidden = true;
