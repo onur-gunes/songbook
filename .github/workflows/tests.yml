@@ -109,8 +109,8 @@ jobs:
       - name: Import / IndexedDB tests
         run: python3 tests/import.py "$BASE_URL"
 
-      # Creating an editable songbook from the list and first-run empty state,
-      # keyboard focus/validation, persistence, and the chordpro round-trip.
+      # Creating, adding to, editing, reordering, removing and duplicating
+      # songbooks, keyboard focus/validation, and source export/re-import.
       - name: Songbook authoring tests
         run: python3 tests/author.py "$BASE_URL"
 
