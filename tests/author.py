@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""CDP tests for in-app songbook authoring (Steps 2 and 3).
+"""CDP tests for in-app songbook authoring (Steps 2–4).
 
 Covers creating an editable songbook from the list and first-run empty state,
 keyboard focus/validation, persistence across reload, unique ids against
-bundled books, the zero-song state, the `chordpro` source round-trip, and
-adding songs by pasting ChordPro or selecting files (preview counts, warnings,
-one batch summary, unique ids and bundled read-only behaviour).
+bundled books, the zero-song state, the `chordpro` source round-trip, adding
+songs by pasting ChordPro or selecting files, and the per-song/maintenance
+actions: edit source, reject invalid source, move up/down, remove with
+confirmation, duplicate bundled and authored books, and the empty state.
 
 Usage: start a server in the project root, then:
     python3 -m http.server 8777 &
@@ -361,6 +362,8 @@ def main():
         ok('bundled books hide the Add song action',
            cdp.eval("document.getElementById('addSongBtn').hidden") is True
            and cdp.eval("document.getElementById('emptyAddSongBtn').hidden") is True)
+        ok('bundled books hide per-song editing actions',
+           cdp.eval("document.querySelectorAll('#songList .row-action').length") == 0)
 
         cdp.eval("document.getElementById('newSongbookBtn').click()")
         cdp.wait_js("document.getElementById('newBookOverlay').hidden === false", timeout=10)
@@ -379,6 +382,204 @@ def main():
            bundled_after == bundled_before, bundled_after)
         ok('bundled books stay read-only',
            cdp.eval('SB.state.bundled.every(function (b) { return !b.imported; })') is True)
+
+        # --- per-song editing: source, warnings, persistence --------------
+        cdp.eval("location.hash = '#/my-songs-2'")
+        cdp.wait_js("songbookTest.getActive() && songbookTest.getActive().id === 'my-songs-2'",
+                    timeout=10)
+        ok('authored rows expose per-song actions',
+           cdp.eval("document.querySelectorAll('#songList .song-row.has-actions').length")
+           == 3
+           and cdp.eval("document.querySelectorAll('#songList [data-action=\"edit\"]')"
+                        ".length") == 3)
+
+        edited = ("{title: Harbour Nights}\n{artist: Me}\n{level: Easy}\n"
+                  "{duration: 3}\n{time: 4/4}\n{tempo: 92}\n[Am]Hello [F]world")
+        cdp.eval("document.querySelector('#songList .song-row[data-id=\"harbour-lights\"]"
+                 " [data-action=\"edit\"]').click()")
+        cdp.wait_js("document.getElementById('editSourceOverlay').hidden === false", timeout=10)
+        ok('edit dialog is prefilled with the stored source',
+           cdp.eval("document.getElementById('editSourceText').value") == paste)
+        ok('edit dialog focuses the source',
+           cdp.eval("document.activeElement && document.activeElement.id") == 'editSourceText',
+           cdp.eval("document.activeElement && document.activeElement.id"))
+        cdp.eval("document.getElementById('editSourceText').value = %s;"
+                 " document.getElementById('editSourceText')"
+                 ".dispatchEvent(new Event('input', { bubbles: true }));"
+                 % json.dumps(edited))
+        cdp.wait_js("document.querySelectorAll('#editSourcePreviewList .add-song-item')"
+                    ".length === 1", timeout=10)
+        ok('edit preview shows the new title',
+           cdp.eval("document.querySelector('#editSourcePreviewList .add-song-item-title')"
+                    ".textContent") == 'Harbour Nights')
+        cdp.eval("document.getElementById('editSourceSave').click()")
+        cdp.wait_js("document.getElementById('editSourceOverlay').hidden === true", timeout=15)
+        cdp.wait_js("songbookTest.getActive().songs[0].title === 'Harbour Nights'", timeout=10)
+        ok('edit keeps the song id and position',
+           cdp.eval("songbookTest.getActive().songs[0].id") == 'harbour-lights'
+           and cdp.eval("songbookTest.getActive().songs[0].n") == 1)
+        ok('edit renders the new title in the list',
+           cdp.eval("document.querySelector('#songList .song-row[data-id=\"harbour-lights\"]"
+                    " .row-title').textContent") == 'Harbour Nights')
+        edited_json = cdp.eval('SB.songbookJSON(SB.state.active)')
+        ok('songbookJSON carries the updated source',
+           '"title": "Harbour Nights"' in edited_json
+           and '[Am]Hello [F]world' in edited_json)
+
+        cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
+        cdp.wait_js('!!(window.songbookTest && document.getElementById("bootMsg").hidden)',
+                    timeout=30)
+        cdp.eval("location.hash = '#/my-songs-2'")
+        cdp.wait_js("songbookTest.getActive() && songbookTest.getActive().id === 'my-songs-2'",
+                    timeout=10)
+        ok('edited source survives reload',
+           cdp.eval("songbookTest.getActive().songs[0].title") == 'Harbour Nights'
+           and cdp.eval("songbookTest.getActive().songs[0].chordpro") == edited)
+
+        # --- invalid edit keeps the previous version ----------------------
+        cdp.eval("document.querySelector('#songList .song-row[data-id=\"harbour-lights\"]"
+                 " [data-action=\"edit\"]').click()")
+        cdp.wait_js("document.getElementById('editSourceOverlay').hidden === false", timeout=10)
+        cdp.eval("document.getElementById('editSourceText').value = '[C]no title';"
+                 " document.getElementById('editSourceText')"
+                 ".dispatchEvent(new Event('input', { bubbles: true }));")
+        cdp.wait_js("document.querySelectorAll('#editSourcePreviewList .add-song-item.is-error')"
+                    ".length === 1", timeout=10)
+        cdp.eval("document.getElementById('editSourceSave').click()")
+        cdp.wait_js("document.getElementById('editSourceError').hidden === false", timeout=10)
+        ok('invalid edit is rejected without changing the song',
+           'missing {title}' in cdp.eval(
+               "document.getElementById('editSourceError').textContent")
+           and cdp.eval("document.getElementById('editSourceOverlay').hidden") is False
+           and cdp.eval("songbookTest.getActive().songs[0].title") == 'Harbour Nights'
+           and cdp.eval("songbookTest.getActive().songs[0].chordpro") == edited)
+        cdp.eval("document.getElementById('editSourceCancel').click()")
+        cdp.wait_js("document.getElementById('editSourceOverlay').hidden === true", timeout=10)
+
+        # --- move up/down renumbers the book ------------------------------
+        ok('move buttons disable at the book boundaries',
+           cdp.eval("document.querySelector('#songList .song-row[data-id=\"harbour-lights\"]"
+                    " [data-action=\"up\"]').disabled") is True
+           and cdp.eval("document.querySelector('#songList .song-row[data-id=\"same-2\"]"
+                        " [data-action=\"down\"]').disabled") is True)
+        cdp.eval("document.querySelector('#songList .song-row[data-id=\"same-2\"]"
+                 " [data-action=\"up\"]').click()")
+        cdp.wait_js("songbookTest.getActive().songs[1].id === 'same-2'", timeout=15)
+        ok('move up swaps book order and renumbers n',
+           cdp.eval("songbookTest.getActive().songs.map(function (s) {"
+                    " return s.id; }).join(',')") == 'harbour-lights,same-2,same'
+           and cdp.eval("songbookTest.getActive().songs.map(function (s) {"
+                        " return s.n; }).join(',')") == '1,2,3')
+        ok('moved row shows its new position',
+           cdp.eval("document.querySelector('#songList .song-row[data-id=\"same-2\"]"
+                    " .row-num').textContent") == '2')
+
+        cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
+        cdp.wait_js('!!(window.songbookTest && document.getElementById("bootMsg").hidden)',
+                    timeout=30)
+        cdp.eval("location.hash = '#/my-songs-2'")
+        cdp.wait_js("songbookTest.getActive() && songbookTest.getActive().id === 'my-songs-2'",
+                    timeout=10)
+        ok('reorder survives reload',
+           cdp.eval("songbookTest.getActive().songs.map(function (s) {"
+                    " return s.id; }).join(',')") == 'harbour-lights,same-2,same'
+           and cdp.eval("songbookTest.getActive().songs.map(function (s) {"
+                        " return s.n; }).join(',')") == '1,2,3')
+
+        # --- duplicate a bundled book, then an authored one ---------------
+        cdp.eval("location.hash = SB.routeHash(SB.state.bundled[0].id)")
+        cdp.wait_js('songbookTest.getActive() && !songbookTest.getActive().imported',
+                    timeout=10)
+        bundled_json = cdp.eval('JSON.stringify(SB.state.bundled[0].songs)')
+        cdp.eval("document.getElementById('duplicateBookBtn').click()")
+        cdp.wait_js("songbookTest.getActive() && songbookTest.getActive().id"
+                    " === 'krakow-ukulele-copy'", timeout=15)
+        ok('duplicate creates an editable copy with a new id and name',
+           cdp.eval('songbookTest.getActive().imported') is True
+           and cdp.eval('songbookTest.getActive().name') == 'Krakow Ukulele (copy)')
+        ok('duplicate copies every song and leaves the source untouched',
+           cdp.eval('songbookTest.getActive().songs.length') == 15
+           and cdp.eval('JSON.stringify(SB.state.bundled[0].songs)') == bundled_json)
+
+        cdp.eval("document.querySelector('#songList .song-row:first-child"
+                 " [data-action=\"edit\"]').click()")
+        cdp.wait_js("document.getElementById('editSourceOverlay').hidden === false", timeout=10)
+        ok('JSON-only songs explain that source editing is unavailable',
+           cdp.eval("document.getElementById('editSourceField').hidden") is True
+           and cdp.eval("document.getElementById('editSourceUnavailable').hidden") is False
+           and 'Grid and Strum editors' in cdp.eval(
+               "document.getElementById('editSourceUnavailable').textContent")
+           and cdp.eval("document.getElementById('editSourceSave').hidden") is True)
+        cdp.eval("document.getElementById('editSourceCancel').click()")
+        cdp.wait_js("document.getElementById('editSourceOverlay').hidden === true", timeout=10)
+
+        cdp.eval("location.hash = '#/my-songs-2'")
+        cdp.wait_js("songbookTest.getActive() && songbookTest.getActive().id === 'my-songs-2'",
+                    timeout=10)
+        sources_before = cdp.eval("SB.state.active.songs.map(function (s) {"
+                                  " return s.chordpro || ''; })")
+        cdp.eval("document.getElementById('duplicateBookBtn').click()")
+        cdp.wait_js("songbookTest.getActive() && songbookTest.getActive().id"
+                    " === 'my-songs-copy'", timeout=15)
+        ok('duplicate of an authored book keeps every ChordPro source',
+           cdp.eval("SB.state.active.songs.map(function (s) {"
+                    " return s.chordpro || ''; })") == sources_before
+           and 'Harbour Nights' in cdp.eval(
+               "SB.state.active.songs[0].chordpro || ''"))
+
+        # --- remove renumbers and the last removal empties the book -------
+        cdp.eval("location.hash = '#/my-songs-2'")
+        cdp.wait_js("songbookTest.getActive() && songbookTest.getActive().id === 'my-songs-2'",
+                    timeout=10)
+        cdp.eval("window.__confirms = [];"
+                 " window.confirm = function (m) { window.__confirms.push(String(m));"
+                 " return true; };")
+        cdp.eval("document.querySelector('#songList .song-row[data-id=\"same\"]"
+                 " [data-action=\"remove\"]').click()")
+        cdp.wait_js("songbookTest.getActive().songs.length === 2", timeout=15)
+        ok('remove confirms before deleting',
+           len(cdp.eval('window.__confirms')) == 1
+           and 'Same' in cdp.eval('window.__confirms[0]'),
+           cdp.eval('window.__confirms'))
+        ok('remove deletes the song and renumbers the rest',
+           cdp.eval("songbookTest.getActive().songs.map(function (s) {"
+                    " return s.id; }).join(',')") == 'harbour-lights,same-2'
+           and cdp.eval("songbookTest.getActive().songs.map(function (s) {"
+                        " return s.n; }).join(',')") == '1,2')
+
+        cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
+        cdp.wait_js('!!(window.songbookTest && document.getElementById("bootMsg").hidden)',
+                    timeout=30)
+        cdp.eval("location.hash = '#/my-songs-2'")
+        cdp.wait_js("songbookTest.getActive() && songbookTest.getActive().id === 'my-songs-2'",
+                    timeout=10)
+        ok('remove survives reload',
+           cdp.eval("songbookTest.getActive().songs.map(function (s) {"
+                    " return s.id; }).join(',')") == 'harbour-lights,same-2')
+
+        cdp.eval("window.__confirms = [];"
+                 " window.confirm = function (m) { window.__confirms.push(String(m));"
+                 " return true; };")
+        cdp.eval("document.querySelector('#songList .song-row[data-id=\"same-2\"]"
+                 " [data-action=\"remove\"]').click()")
+        cdp.wait_js("songbookTest.getActive().songs.length === 1", timeout=15)
+        cdp.eval("document.querySelector('#songList .song-row[data-id=\"harbour-lights\"]"
+                 " [data-action=\"remove\"]').click()")
+        cdp.wait_js("songbookTest.getActive().songs.length === 0", timeout=15)
+        ok('removing the last song leaves a usable empty state',
+           cdp.eval("document.getElementById('emptyBookState').hidden") is False
+           and cdp.eval("document.getElementById('emptyAddSongBtn').hidden") is False
+           and cdp.eval("document.querySelectorAll('#songList .song-row').length") == 0)
+
+        cdp.send('Page.navigate', {'url': BASE + '/index.html?nosw'})
+        cdp.wait_js('!!(window.songbookTest && document.getElementById("bootMsg").hidden)',
+                    timeout=30)
+        cdp.eval("location.hash = '#/my-songs-2'")
+        cdp.wait_js("songbookTest.getActive() && songbookTest.getActive().id === 'my-songs-2'",
+                    timeout=10)
+        ok('empty book survives reload',
+           cdp.eval('songbookTest.getActive().songs.length') == 0
+           and cdp.eval("document.getElementById('emptyBookState').hidden") is False)
 
         n_fail = 0
         for name, passed, detail in results:

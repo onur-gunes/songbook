@@ -592,11 +592,17 @@ main {
 .row-level.level-Medium { color: var(--medium); background: color-mix(in srgb, var(--medium) 14%, transparent); }
 .row-level.level-Hard { color: var(--hard); background: color-mix(in srgb, var(--hard) 12%, transparent); }
 
-.star-btn {
+.row-tools {
     position: absolute;
     right: 4px;
     top: 50%;
     transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.star-btn {
     width: 38px;
     height: 38px;
     border: none;
@@ -612,6 +618,39 @@ main {
 
 .star-btn.on { color: var(--accent); }
 
+/* per-song authoring actions (imported books only) */
+
+.song-row.has-actions .song-link { padding-right: 6px; }
+
+.song-row.has-actions .row-tools {
+    position: static;
+    transform: none;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 6px 8px;
+}
+
+.row-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 30px;
+    padding: 0 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.row-action:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+.row-action:disabled { opacity: 0.4; cursor: default; }
+.row-action-remove { color: var(--hard); }
+.row-action-icon { font-size: 0.85rem; line-height: 1; }
+
 /* compact one-line list (like the original site's song index) */
 
 .song-list.is-compact .song-row {
@@ -619,6 +658,24 @@ main {
     align-items: center;
     gap: 4px;
 }
+
+.song-list.is-compact .row-tools,
+.song-list.is-compact .song-row.has-actions .row-tools {
+    position: static;
+    transform: none;
+    flex: none;
+    gap: 2px;
+    padding: 0;
+}
+
+.song-list.is-compact .row-action {
+    width: 30px;
+    min-height: 30px;
+    padding: 0;
+    justify-content: center;
+}
+
+.song-list.is-compact .row-action-label { display: none; }
 
 .song-list.is-compact .song-link {
     flex: 1 1 auto;
@@ -1937,6 +1994,27 @@ body.pattern-open { overflow: hidden; }
 }
 
 .add-song-warnings li { margin: 1px 0; }
+
+/* edit source */
+
+.edit-source-song {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+.edit-source-unavailable {
+    margin: 0;
+    padding: 12px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+.edit-source-unavailable:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* sheet */
 
