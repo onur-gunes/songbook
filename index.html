@@ -40,6 +40,7 @@
         <div class="songbook-bar">
             <label class="songbook-label" for="songbookSelect">Songbook</label>
             <select id="songbookSelect" class="songbook-select" aria-label="Choose a songbook"></select>
+            <button id="newSongbookBtn" class="link-btn" type="button">New songbook</button>
             <button id="importBtn" class="pill-btn" type="button">Import list…</button>
             <button id="importUrlToggle" class="link-btn" type="button"
                     aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
@@ -105,8 +106,9 @@
 
         <div id="emptyState" class="empty-state empty-state-books" hidden>
             <h2 class="empty-state-title">No songbooks yet</h2>
-            <p class="empty-state-lead">Import a songbook JSON file to start building your library.</p>
-            <button id="emptyImportBtn" class="pill-btn accent empty-state-import" type="button">Import a songbook…</button>
+            <p class="empty-state-lead">Create a songbook, or import one from a JSON file.</p>
+            <button id="emptyNewSongbookBtn" class="pill-btn accent empty-state-import" type="button">Create a songbook…</button>
+            <button id="emptyImportBtn" class="pill-btn empty-state-import" type="button">Import a songbook…</button>
             <button id="emptyImportUrlBtn" class="link-btn empty-state-url" type="button">Import from a URL…</button>
             <p class="empty-state-docs">New to the format? Read the
                 <a href="https://github.com/onur-gunes/songbook#songbook-json-format"
@@ -122,6 +124,10 @@
         </div>
 
         <p id="resultCount" class="result-count"></p>
+        <div id="emptyBookState" class="empty-state empty-state-songs" hidden>
+            <h2 class="empty-state-title">No songs yet</h2>
+            <p class="empty-state-lead">This songbook is ready. Add a song from ChordPro to start it.</p>
+        </div>
         <ul id="songList" class="song-list"></ul>
         <p id="noMatches" class="empty-state" hidden>No songs match.</p>
     </section>
@@ -515,6 +521,46 @@
     </div>
 </div>
 
+<div id="newBookOverlay" class="pattern-overlay" hidden aria-hidden="true">
+    <div id="newBookDialog" class="pattern-sheet" role="dialog" aria-modal="true"
+         aria-labelledby="newBookTitle" tabindex="-1">
+        <header class="pattern-head">
+            <div>
+                <span class="pattern-kicker">Songbook</span>
+                <h2 id="newBookTitle">New songbook</h2>
+            </div>
+            <button id="newBookClose" class="pattern-close" type="button"
+                    aria-label="Close new songbook dialog">×</button>
+        </header>
+
+        <form id="newBookForm" class="pattern-form" novalidate>
+            <label class="pattern-field" for="newBookName">
+                <span>Name</span>
+                <input id="newBookName" type="text" maxlength="80" autocomplete="off" required>
+            </label>
+            <label class="pattern-field" for="newBookDescription">
+                <span>Description (optional)</span>
+                <input id="newBookDescription" type="text" maxlength="200" autocomplete="off">
+            </label>
+            <label class="pattern-field" for="newBookInstrument">
+                <span>Instrument</span>
+                <select id="newBookInstrument">
+                    <option value="ukulele">Ukulele</option>
+                    <option value="guitar">Guitar</option>
+                </select>
+            </label>
+
+            <p id="newBookError" class="pattern-error" role="alert" tabindex="-1" hidden></p>
+
+            <div class="pattern-actions">
+                <span class="pattern-spacer"></span>
+                <button id="newBookCancel" class="pattern-cancel" type="button">Cancel</button>
+                <button id="newBookCreate" class="pattern-save" type="submit">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div id="tunerOverlay" class="tuner-overlay" hidden aria-hidden="true">
     <div class="tuner-sheet" role="dialog" aria-modal="true" aria-labelledby="tunerTitle" tabindex="-1">
         <header class="tuner-head">
@@ -603,6 +649,7 @@
 <script src="js/list.js"></script>
 <script src="js/import.js"></script>
 <script src="js/export.js"></script>
+<script src="js/author.js"></script>
 <script src="js/song.js"></script>
 <script src="js/autoscroll.js"></script>
 <script src="js/metronome.js"></script>

@@ -4154,6 +4154,7 @@ button.structure-close,
         <div class="songbook-bar">
             <label class="songbook-label" for="songbookSelect">Songbook</label>
             <select id="songbookSelect" class="songbook-select" aria-label="Choose a songbook"></select>
+            <button id="newSongbookBtn" class="link-btn" type="button">New songbook</button>
             <button id="importBtn" class="pill-btn" type="button">Import list…</button>
             <button id="importUrlToggle" class="link-btn" type="button"
                     aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
@@ -4219,8 +4220,9 @@ button.structure-close,
 
         <div id="emptyState" class="empty-state empty-state-books" hidden>
             <h2 class="empty-state-title">No songbooks yet</h2>
-            <p class="empty-state-lead">Import a songbook JSON file to start building your library.</p>
-            <button id="emptyImportBtn" class="pill-btn accent empty-state-import" type="button">Import a songbook…</button>
+            <p class="empty-state-lead">Create a songbook, or import one from a JSON file.</p>
+            <button id="emptyNewSongbookBtn" class="pill-btn accent empty-state-import" type="button">Create a songbook…</button>
+            <button id="emptyImportBtn" class="pill-btn empty-state-import" type="button">Import a songbook…</button>
             <button id="emptyImportUrlBtn" class="link-btn empty-state-url" type="button">Import from a URL…</button>
             <p class="empty-state-docs">New to the format? Read the
                 <a href="https://github.com/onur-gunes/songbook#songbook-json-format"
@@ -4236,6 +4238,10 @@ button.structure-close,
         </div>
 
         <p id="resultCount" class="result-count"></p>
+        <div id="emptyBookState" class="empty-state empty-state-songs" hidden>
+            <h2 class="empty-state-title">No songs yet</h2>
+            <p class="empty-state-lead">This songbook is ready. Add a song from ChordPro to start it.</p>
+        </div>
         <ul id="songList" class="song-list"></ul>
         <p id="noMatches" class="empty-state" hidden>No songs match.</p>
     </section>
@@ -4624,6 +4630,46 @@ button.structure-close,
                 <span class="pattern-spacer"></span>
                 <button id="patternCancel" class="pattern-cancel" type="button">Cancel</button>
                 <button id="patternSave" class="pattern-save" type="submit">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="newBookOverlay" class="pattern-overlay" hidden aria-hidden="true">
+    <div id="newBookDialog" class="pattern-sheet" role="dialog" aria-modal="true"
+         aria-labelledby="newBookTitle" tabindex="-1">
+        <header class="pattern-head">
+            <div>
+                <span class="pattern-kicker">Songbook</span>
+                <h2 id="newBookTitle">New songbook</h2>
+            </div>
+            <button id="newBookClose" class="pattern-close" type="button"
+                    aria-label="Close new songbook dialog">×</button>
+        </header>
+
+        <form id="newBookForm" class="pattern-form" novalidate>
+            <label class="pattern-field" for="newBookName">
+                <span>Name</span>
+                <input id="newBookName" type="text" maxlength="80" autocomplete="off" required>
+            </label>
+            <label class="pattern-field" for="newBookDescription">
+                <span>Description (optional)</span>
+                <input id="newBookDescription" type="text" maxlength="200" autocomplete="off">
+            </label>
+            <label class="pattern-field" for="newBookInstrument">
+                <span>Instrument</span>
+                <select id="newBookInstrument">
+                    <option value="ukulele">Ukulele</option>
+                    <option value="guitar">Guitar</option>
+                </select>
+            </label>
+
+            <p id="newBookError" class="pattern-error" role="alert" tabindex="-1" hidden></p>
+
+            <div class="pattern-actions">
+                <span class="pattern-spacer"></span>
+                <button id="newBookCancel" class="pattern-cancel" type="button">Cancel</button>
+                <button id="newBookCreate" class="pattern-save" type="submit">Create</button>
             </div>
         </form>
     </div>
@@ -7379,6 +7425,11 @@ button.structure-close,
         var strumPatterns = normalizeStrumPatterns(s.strumPatterns);
         if (strumPatterns) song.strumPatterns = strumPatterns;
         if (grid) song.grid = grid;
+        /* Authoring source, kept only when present so JSON-only songs do not
+         * grow an empty field. It is data for the source editor, not content
+         * the renderer reads; `sheet`/`grid` remain the rendered truth. */
+        var chordpro = typeof s.chordpro === 'string' ? s.chordpro.trim() : '';
+        if (chordpro) song.chordpro = chordpro;
         return song;
     }
 
@@ -7401,6 +7452,53 @@ button.structure-close,
             songs: raw.songs.map(normalizeSong)
         };
     }
+
+    /* A user-created book is an ordinary imported book, so it uses the same
+     * store, picker and removal path as a JSON import. The id is slugged from
+     * the name and made unique against bundled books too: reusing a bundled
+     * id would shadow shipped content and vanish on the next deploy. */
+    function songbookSlug(name) {
+        var s = String(name == null ? '' : name).normalize('NFKD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\u0142/g, 'l')
+            .toLowerCase();
+        s = s.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        return s.slice(0, 48) || 'songbook';
+    }
+
+    function uniqueSongbookId(base) {
+        var taken = {};
+        SB.allSongbooks().forEach(function (b) { taken[b.id] = true; });
+        if (!taken[base]) return base;
+        var n = 2;
+        while (taken[base + '-' + n]) n += 1;
+        return base + '-' + n;
+    }
+
+    SB.createSongbook = function (fields) {
+        fields = fields || {};
+        var name = String(fields.name == null ? '' : fields.name).trim();
+        if (!name) return Promise.reject(new Error('songbook name is required'));
+        var raw = {
+            id: uniqueSongbookId(songbookSlug(name)),
+            name: name,
+            description: String(fields.description == null ? '' : fields.description).trim(),
+            instrument: fields.instrument === 'guitar' ? 'guitar' : 'ukulele',
+            songs: []
+        };
+        var sb;
+        try { sb = SB.normalizeSongbook(raw); }
+        catch (err) { return Promise.reject(err); }
+        sb.imported = true;
+        return SB.idbPut(sb).then(function () {
+            SB.state.imported.push(sb);
+            SB.rebuildIndex();
+            SB.setActive(sb);
+            SB.renderList();
+            SB.renderRecent();
+            return sb;
+        });
+    };
 
     SB.loadBundled = function () {
         /* An injected empty list is authoritative, not an invitation to fetch:
@@ -11497,6 +11595,8 @@ button.structure-close,
         if (result) result.textContent = '';
         var noMatches = SB.$('noMatches');
         if (noMatches) noMatches.hidden = true;
+        var emptyBook = SB.$('emptyBookState');
+        if (emptyBook) emptyBook.hidden = true;
     }
 
     SB.renderList = function () {
@@ -11509,6 +11609,14 @@ button.structure-close,
         }
         var songs = SB.filteredSongs();
         var total = SB.activeSongs().length;
+        /* A zero-song book is a real state (a freshly created book), not an
+         * empty search: show the "No songs yet" block and hide the search and
+         * filter toolbar, which has nothing to act on. */
+        var bookEmpty = total === 0;
+        var emptyBook = SB.$('emptyBookState');
+        if (emptyBook) emptyBook.hidden = !bookEmpty;
+        var toolbar = SB.$('listControls');
+        if (toolbar) toolbar.hidden = bookEmpty;
         var ul = SB.$('songList');
         ul.textContent = '';
         var frag = document.createDocumentFragment();
@@ -11544,10 +11652,10 @@ button.structure-close,
         });
         ul.appendChild(frag);
 
-        SB.$('noMatches').hidden = songs.length > 0;
-        SB.$('resultCount').textContent = songs.length === total
+        SB.$('noMatches').hidden = bookEmpty || songs.length > 0;
+        SB.$('resultCount').textContent = bookEmpty ? '' : (songs.length === total
             ? total + ' songs'
-            : songs.length + ' of ' + total + ' songs';
+            : songs.length + ' of ' + total + ' songs');
         SB.$('searchClear').hidden = !SB.state.state.q;
         applyViewToggle();
     }
@@ -12171,6 +12279,9 @@ button.structure-close,
             chords: (song.chords || []).slice(),
             sheet: copySheet(song.sheet)
         };
+        /* Authoring source travels with the effective song so an exported
+         * book stays editable after re-import. It is not rendered content. */
+        if (song.chordpro) out.chordpro = song.chordpro;
 
         var strum = defaultStrum(song, merged, time);
         if (strum) out.strum = strum;
@@ -12365,6 +12476,128 @@ button.structure-close,
         }
         if (output) output.textContent = '';
         status('');
+    };
+
+})(window.SB = window.SB || {});
+
+</script>
+<script>
+/* Songbook — author
+ * creating editable songbooks from inside the app
+ *
+ * Part of the window.SB namespace. Loaded as a classic script in the order set
+ * by index.html; it depends on SB.createSongbook (js/songbooks.js) and the
+ * routing helpers. Authoring writes only ever target imported books; bundled
+ * books stay read-only.
+ */
+(function (SB) {
+    'use strict';
+
+    var lastFocus = null;
+
+    function overlay() { return SB.$('newBookOverlay'); }
+
+    function setError(message) {
+        var box = SB.$('newBookError');
+        if (!box) return;
+        box.textContent = message || '';
+        box.hidden = !message;
+        if (message) {
+            try { box.focus({ preventScroll: true }); } catch (e) { box.focus(); }
+        }
+    }
+
+    function open() {
+        var el = overlay();
+        if (!el) return;
+        lastFocus = document.activeElement;
+        setError('');
+        var form = SB.$('newBookForm');
+        if (form) form.reset();
+        var instrument = SB.$('newBookInstrument');
+        if (instrument) {
+            instrument.value = SB.state.instrument === 'guitar' ? 'guitar' : 'ukulele';
+        }
+        el.hidden = false;
+        el.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('pattern-open');
+        var name = SB.$('newBookName');
+        if (name) {
+            try { name.focus({ preventScroll: true }); } catch (e) { name.focus(); }
+        }
+    }
+
+    /* `restore` is false after a successful create: the opener may be the
+     * first-run empty state, which is hidden by then, so focus belongs on the
+     * new book's picker instead. */
+    function close(restore) {
+        var el = overlay();
+        if (!el) return;
+        el.hidden = true;
+        el.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('pattern-open');
+        if (restore !== false && lastFocus && lastFocus.focus) {
+            try { lastFocus.focus({ preventScroll: true }); } catch (e) { lastFocus.focus(); }
+        }
+    }
+
+    function submit(event) {
+        event.preventDefault();
+        var nameInput = SB.$('newBookName');
+        var name = nameInput ? nameInput.value.trim() : '';
+        if (!name) {
+            setError('Enter a name for the songbook.');
+            if (nameInput) nameInput.focus();
+            return;
+        }
+        var button = SB.$('newBookCreate');
+        if (button) button.disabled = true;
+        SB.createSongbook({
+            name: name,
+            description: SB.$('newBookDescription').value,
+            instrument: SB.$('newBookInstrument').value
+        }).then(function (sb) {
+            close(false);
+            var hash = SB.routeHash(sb.id);
+            if (location.hash === hash) SB.route();
+            else location.hash = hash;
+            var picker = SB.$('songbookSelect');
+            if (picker) {
+                try { picker.focus({ preventScroll: true }); } catch (e) { picker.focus(); }
+            }
+        }, function (err) {
+            setError(err.message || 'Could not create the songbook.');
+        }).then(function () {
+            if (button) button.disabled = false;
+        });
+    }
+
+    SB.openNewSongbook = open;
+    SB.closeNewSongbook = close;
+
+    SB.bindAuthorControls = function () {
+        var newBtn = SB.$('newSongbookBtn');
+        if (newBtn) newBtn.addEventListener('click', open);
+        var emptyBtn = SB.$('emptyNewSongbookBtn');
+        if (emptyBtn) emptyBtn.addEventListener('click', open);
+
+        var el = overlay();
+        if (!el) return;
+        var closeBtn = SB.$('newBookClose');
+        if (closeBtn) closeBtn.addEventListener('click', function () { close(true); });
+        var cancel = SB.$('newBookCancel');
+        if (cancel) cancel.addEventListener('click', function () { close(true); });
+        var form = SB.$('newBookForm');
+        if (form) form.addEventListener('submit', submit);
+        el.addEventListener('click', function (e) {
+            if (e.target === el) close(true);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !el.hidden) {
+                e.preventDefault();
+                close(true);
+            }
+        });
     };
 
 })(window.SB = window.SB || {});
@@ -16240,6 +16473,7 @@ button.structure-close,
         SB.bindListControls();
         SB.bindSongControls();
         if (SB.bindExportControls) SB.bindExportControls();
+        if (SB.bindAuthorControls) SB.bindAuthorControls();
         SB.bindKeyboard();
         SB.updateSpeedLabel();
 

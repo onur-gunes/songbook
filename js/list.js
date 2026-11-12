@@ -72,6 +72,8 @@
         if (result) result.textContent = '';
         var noMatches = SB.$('noMatches');
         if (noMatches) noMatches.hidden = true;
+        var emptyBook = SB.$('emptyBookState');
+        if (emptyBook) emptyBook.hidden = true;
     }
 
     SB.renderList = function () {
@@ -84,6 +86,14 @@
         }
         var songs = SB.filteredSongs();
         var total = SB.activeSongs().length;
+        /* A zero-song book is a real state (a freshly created book), not an
+         * empty search: show the "No songs yet" block and hide the search and
+         * filter toolbar, which has nothing to act on. */
+        var bookEmpty = total === 0;
+        var emptyBook = SB.$('emptyBookState');
+        if (emptyBook) emptyBook.hidden = !bookEmpty;
+        var toolbar = SB.$('listControls');
+        if (toolbar) toolbar.hidden = bookEmpty;
         var ul = SB.$('songList');
         ul.textContent = '';
         var frag = document.createDocumentFragment();
@@ -119,10 +129,10 @@
         });
         ul.appendChild(frag);
 
-        SB.$('noMatches').hidden = songs.length > 0;
-        SB.$('resultCount').textContent = songs.length === total
+        SB.$('noMatches').hidden = bookEmpty || songs.length > 0;
+        SB.$('resultCount').textContent = bookEmpty ? '' : (songs.length === total
             ? total + ' songs'
-            : songs.length + ' of ' + total + ' songs';
+            : songs.length + ' of ' + total + ' songs');
         SB.$('searchClear').hidden = !SB.state.state.q;
         applyViewToggle();
     }
