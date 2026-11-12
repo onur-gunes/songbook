@@ -1,10 +1,10 @@
 /* Songbook — author
- * creating editable songbooks from inside the app
+ * creating, editing and duplicating songbooks from inside the app
  *
  * Part of the window.SB namespace. Loaded as a classic script in the order set
- * by index.html; it depends on SB.createSongbook (js/songbooks.js) and the
- * routing helpers. Authoring writes only ever target imported books; bundled
- * books stay read-only.
+ * by index.html; it depends on the authoring helpers in js/songbooks.js and on
+ * the routing helpers. Authoring writes only ever target imported books;
+ * bundled books stay read-only unless duplicated into an imported copy.
  */
 (function (SB) {
     'use strict';
@@ -172,23 +172,9 @@
         return parts.join(' · ');
     }
 
-    function renderAddPreview() {
-        var box = SB.$('addSongPreview');
-        var list = SB.$('addSongPreviewList');
-        var button = SB.$('addSongAdd');
-        if (!box || !list) return;
+    function renderSourceList(list, sources) {
         list.textContent = '';
-        if (!addSources.length) {
-            box.hidden = true;
-            if (button) button.disabled = true;
-            return;
-        }
-        box.hidden = false;
-        /* Keep Add enabled even when every source is bad: submitting is how a
-         * keyboard user reaches the announced explanation. */
-        if (button) button.disabled = false;
-
-        addSources.forEach(function (source) {
+        sources.forEach(function (source) {
             var li = SB.el('li', 'add-song-item' + (source.ok ? '' : ' is-error'));
             var head = SB.el('p', 'add-song-item-head');
             head.appendChild(SB.el('span', 'add-song-item-title',
@@ -214,6 +200,24 @@
             }
             list.appendChild(li);
         });
+    }
+
+    function renderAddPreview() {
+        var box = SB.$('addSongPreview');
+        var list = SB.$('addSongPreviewList');
+        var button = SB.$('addSongAdd');
+        if (!box || !list) return;
+        list.textContent = '';
+        if (!addSources.length) {
+            box.hidden = true;
+            if (button) button.disabled = true;
+            return;
+        }
+        box.hidden = false;
+        /* Keep Add enabled even when every source is bad: submitting is how a
+         * keyboard user reaches the announced explanation. */
+        if (button) button.disabled = false;
+        renderSourceList(list, addSources);
     }
 
     function refreshAddPreview() {
@@ -337,6 +341,213 @@
     SB.openAddSongs = openAddSongs;
     SB.closeAddSongs = closeAddSongs;
 
+    /* ---------------- edit source ---------------- */
+
+    var editLastFocus = null;
+    var editSong = null;
+
+    function editOverlay() { return SB.$('editSourceOverlay'); }
+
+    function setEditError(message) {
+        var box = SB.$('editSourceError');
+        if (!box) return;
+        box.textContent = message || '';
+        box.hidden = !message;
+        if (message) {
+            try { box.focus({ preventScroll: true }); } catch (e) { box.focus(); }
+        }
+    }
+
+    function findActiveSong(songId) {
+        var book = SB.state.active;
+        if (!book) return null;
+        for (var i = 0; i < book.songs.length; i++) {
+            if (book.songs[i].id === songId) return book.songs[i];
+        }
+        return null;
+    }
+
+    /* Re-parsing the whole source on every keystroke is the preview: the user
+     * sees exactly the song Save would store, including any warnings. */
+    function refreshEditPreview() {
+        var textarea = SB.$('editSourceText');
+        var box = SB.$('editSourcePreview');
+        var list = SB.$('editSourcePreviewList');
+        if (!textarea || !editSong) return;
+        setEditError('');
+        if (!textarea.value.trim()) {
+            if (box) box.hidden = true;
+            if (list) list.textContent = '';
+            return;
+        }
+        var result = parseAddSource('Source', textarea.value);
+        if (box) box.hidden = false;
+        if (list) renderSourceList(list, [result]);
+    }
+
+    function openEditSource(songId) {
+        var el = editOverlay();
+        if (!el) return;
+        var book = SB.state.active;
+        if (!book || !book.imported) return;
+        var song = findActiveSong(songId);
+        if (!song) return;
+
+        editLastFocus = document.activeElement;
+        editSong = song;
+        setEditError('');
+        var heading = SB.$('editSourceSong');
+        if (heading) {
+            heading.textContent = song.title + (song.artist ? ' — ' + song.artist : '');
+        }
+
+        var hasSource = typeof song.chordpro === 'string' && !!song.chordpro.trim();
+        var field = SB.$('editSourceField');
+        var unavailable = SB.$('editSourceUnavailable');
+        var save = SB.$('editSourceSave');
+        var cancel = SB.$('editSourceCancel');
+        var textarea = SB.$('editSourceText');
+        var preview = SB.$('editSourcePreview');
+        var list = SB.$('editSourcePreviewList');
+
+        if (field) field.hidden = !hasSource;
+        if (unavailable) unavailable.hidden = hasSource;
+        if (save) {
+            save.hidden = !hasSource;
+            save.disabled = false;
+        }
+        if (cancel) cancel.textContent = hasSource ? 'Cancel' : 'Close';
+        if (textarea) textarea.value = hasSource ? song.chordpro : '';
+        if (preview) preview.hidden = true;
+        if (list) list.textContent = '';
+
+        el.hidden = false;
+        el.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('pattern-open');
+        if (hasSource) {
+            refreshEditPreview();
+            if (textarea) {
+                try { textarea.focus({ preventScroll: true }); } catch (e) { textarea.focus(); }
+            }
+        } else if (unavailable) {
+            try { unavailable.focus({ preventScroll: true }); } catch (e) { unavailable.focus(); }
+        }
+    }
+
+    function closeEditSource(restore) {
+        var el = editOverlay();
+        if (!el) return;
+        el.hidden = true;
+        el.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('pattern-open');
+        editSong = null;
+        if (restore !== false && editLastFocus && editLastFocus.focus) {
+            try { editLastFocus.focus({ preventScroll: true }); } catch (e) { editLastFocus.focus(); }
+        }
+    }
+
+    function submitEditSource(event) {
+        event.preventDefault();
+        if (!editSong) return;
+        if (!(typeof editSong.chordpro === 'string' && editSong.chordpro.trim())) return;
+        var textarea = SB.$('editSourceText');
+        var source = textarea ? textarea.value : '';
+        var result = parseAddSource('Source', source);
+        if (!result.ok) {
+            setEditError('Could not save: ' + result.reason);
+            return;
+        }
+        var songId = editSong.id;
+        var button = SB.$('editSourceSave');
+        if (button) button.disabled = true;
+        SB.updateSongInBook(SB.state.active, songId, result.song).then(function () {
+            closeEditSource(false);
+            focusRowAction(songId, 'edit');
+        }, function (err) {
+            setEditError(err.message || 'Could not save the source.');
+            if (button) button.disabled = false;
+        });
+    }
+
+    /* After a re-render the old buttons are gone, so focus is restored by song
+     * id. A disabled target (the first row's Move up, say) falls back to Edit. */
+    function focusRowAction(songId, action) {
+        var rows = document.querySelectorAll('#songList .song-row');
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].dataset.id !== songId) continue;
+            var target = rows[i].querySelector('[data-action="' + action + '"]');
+            if (!target || target.disabled) {
+                target = rows[i].querySelector('[data-action="edit"]');
+            }
+            if (target) {
+                try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+            }
+            return;
+        }
+    }
+
+    SB.editSongSource = openEditSource;
+    SB.closeEditSource = closeEditSource;
+
+    SB.moveSongInList = function (songId, delta) {
+        var book = SB.state.active;
+        if (!book || !book.imported) return;
+        SB.moveSongInBook(book, songId, delta).then(function () {
+            focusRowAction(songId, delta < 0 ? 'up' : 'down');
+        }, function (err) {
+            window.alert('Could not move the song: ' + err.message);
+        });
+    };
+
+    SB.removeSongFromList = function (songId) {
+        var book = SB.state.active;
+        if (!book || !book.imported) return;
+        var song = findActiveSong(songId);
+        if (!song) return;
+        if (!window.confirm('Remove "' + song.title + '" from "' + book.name
+                + '"? This cannot be undone.')) return;
+
+        var index = book.songs.indexOf(song);
+        var neighbor = book.songs[index + 1] || book.songs[index - 1] || null;
+        var last = book.songs.length === 1;
+        SB.removeSongFromBook(book, songId).then(function () {
+            if (last) {
+                var emptyAdd = SB.$('emptyAddSongBtn');
+                var add = SB.$('addSongBtn');
+                var target = (emptyAdd && !emptyAdd.hidden) ? emptyAdd : add;
+                if (target && !target.hidden) {
+                    try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+                }
+            } else if (neighbor) {
+                focusRowAction(neighbor.id, 'remove');
+            }
+        }, function (err) {
+            window.alert('Could not remove the song: ' + err.message);
+        });
+    };
+
+    /* Duplicate works on bundled books too; the new book is imported and the
+     * source is never written. */
+    SB.duplicateActiveSongbook = function () {
+        var book = SB.state.active;
+        if (!book) return;
+        var button = SB.$('duplicateBookBtn');
+        if (button) button.disabled = true;
+        SB.duplicateSongbook(book).then(function (copy) {
+            var hash = SB.routeHash(copy.id);
+            if (location.hash === hash) SB.route();
+            else location.hash = hash;
+            var picker = SB.$('songbookSelect');
+            if (picker) {
+                try { picker.focus({ preventScroll: true }); } catch (e) { picker.focus(); }
+            }
+        }, function (err) {
+            window.alert('Could not duplicate the songbook: ' + err.message);
+        }).then(function () {
+            if (button) button.disabled = false;
+        });
+    };
+
     SB.openNewSongbook = open;
     SB.closeNewSongbook = close;
 
@@ -349,6 +560,8 @@
         if (addBtn) addBtn.addEventListener('click', openAddSongs);
         var emptyAddBtn = SB.$('emptyAddSongBtn');
         if (emptyAddBtn) emptyAddBtn.addEventListener('click', openAddSongs);
+        var duplicateBtn = SB.$('duplicateBookBtn');
+        if (duplicateBtn) duplicateBtn.addEventListener('click', SB.duplicateActiveSongbook);
 
         var el = overlay();
         if (el) {
@@ -384,9 +597,27 @@
             });
         }
 
+        var editEl = editOverlay();
+        if (editEl) {
+            var editClose = SB.$('editSourceClose');
+            if (editClose) editClose.addEventListener('click', function () { closeEditSource(true); });
+            var editCancel = SB.$('editSourceCancel');
+            if (editCancel) editCancel.addEventListener('click', function () { closeEditSource(true); });
+            var editForm = SB.$('editSourceForm');
+            if (editForm) editForm.addEventListener('submit', submitEditSource);
+            var editText = SB.$('editSourceText');
+            if (editText) editText.addEventListener('input', refreshEditPreview);
+            editEl.addEventListener('click', function (e) {
+                if (e.target === editEl) closeEditSource(true);
+            });
+        }
+
         document.addEventListener('keydown', function (e) {
             if (e.key !== 'Escape') return;
-            if (addEl && !addEl.hidden) {
+            if (editEl && !editEl.hidden) {
+                e.preventDefault();
+                closeEditSource(true);
+            } else if (addEl && !addEl.hidden) {
                 e.preventDefault();
                 closeAddSongs(true);
             } else if (el && !el.hidden) {

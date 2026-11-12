@@ -315,6 +315,52 @@
         return base + '-' + n;
     }
 
+    function copyBook(book) {
+        var next = {};
+        Object.keys(book).forEach(function (key) { next[key] = book[key]; });
+        return next;
+    }
+
+    /* Renumber a copy of the array, never the live song objects: a failed
+     * idbPut must leave both the book in memory and its stored version on the
+     * previous revision. */
+    function renumbered(songs) {
+        return songs.map(function (song, index) {
+            var copy = {};
+            Object.keys(song).forEach(function (key) { copy[key] = song[key]; });
+            copy.n = index + 1;
+            return copy;
+        });
+    }
+
+    function songIndex(book, songId) {
+        for (var i = 0; i < book.songs.length; i++) {
+            if (book.songs[i].id === songId) return i;
+        }
+        return -1;
+    }
+
+    /* One storage write for every authoring change. Memory and the picker are
+     * updated only after idbPut succeeds, so a rejected write leaves the book
+     * exactly as it was. */
+    function commitBook(next) {
+        return SB.idbPut(next).then(function () {
+            var index = -1;
+            for (var i = 0; i < SB.state.imported.length; i++) {
+                if (SB.state.imported[i].id === next.id) { index = i; break; }
+            }
+            if (index >= 0) SB.state.imported[index] = next;
+            else SB.state.imported.push(next);
+            SB.rebuildIndex();
+            if (SB.state.active && SB.state.active.id === next.id) {
+                SB.setActive(next);
+                SB.renderList();
+                SB.renderRecent();
+            }
+            return next;
+        });
+    }
+
     SB.createSongbook = function (fields) {
         fields = fields || {};
         var name = String(fields.name == null ? '' : fields.name).trim();
@@ -330,9 +376,7 @@
         try { sb = SB.normalizeSongbook(raw); }
         catch (err) { return Promise.reject(err); }
         sb.imported = true;
-        return SB.idbPut(sb).then(function () {
-            SB.state.imported.push(sb);
-            SB.rebuildIndex();
+        return commitBook(sb).then(function () {
             SB.setActive(sb);
             SB.renderList();
             SB.renderRecent();
@@ -379,24 +423,91 @@
             appended.push(normalized);
         }
 
-        var next = {};
-        Object.keys(book).forEach(function (key) { next[key] = book[key]; });
+        var next = copyBook(book);
         next.songs = book.songs.concat(appended);
+        return commitBook(next);
+    };
 
-        return SB.idbPut(next).then(function () {
-            var index = -1;
-            for (var j = 0; j < SB.state.imported.length; j++) {
-                if (SB.state.imported[j].id === next.id) { index = j; break; }
-            }
-            if (index >= 0) SB.state.imported[index] = next;
-            else SB.state.imported.push(next);
-            SB.rebuildIndex();
-            if (SB.state.active && SB.state.active.id === next.id) {
-                SB.setActive(next);
-                SB.renderList();
-                SB.renderRecent();
-            }
-            return next;
+    /* Replace one song's parsed content from its source, keeping the id and
+     * position the list and export already reference. */
+    SB.updateSongInBook = function (book, songId, song) {
+        if (!book || !book.imported) {
+            return Promise.reject(new Error('only imported songbooks can be edited'));
+        }
+        var index = songIndex(book, songId);
+        if (index < 0) return Promise.reject(new Error('song not found: ' + songId));
+        var normalized;
+        try {
+            normalized = SB.normalizeSongbook({
+                id: book.id, name: book.name, songs: [song]
+            }).songs[0];
+        } catch (err) {
+            return Promise.reject(err);
+        }
+        normalized.id = songId;
+        normalized.n = book.songs[index].n;
+        var songs = book.songs.slice();
+        songs[index] = normalized;
+        var next = copyBook(book);
+        next.songs = songs;
+        return commitBook(next);
+    };
+
+    SB.removeSongFromBook = function (book, songId) {
+        if (!book || !book.imported) {
+            return Promise.reject(new Error('only imported songbooks can be edited'));
+        }
+        var index = songIndex(book, songId);
+        if (index < 0) return Promise.reject(new Error('song not found: ' + songId));
+        var songs = book.songs.filter(function (song) { return song.id !== songId; });
+        var next = copyBook(book);
+        next.songs = renumbered(songs);
+        return commitBook(next);
+    };
+
+    /* Move by one slot in the book's own order, not the list's current sort:
+     * `n` is the authored sequence and must stay contiguous. */
+    SB.moveSongInBook = function (book, songId, delta) {
+        if (!book || !book.imported) {
+            return Promise.reject(new Error('only imported songbooks can be edited'));
+        }
+        var from = songIndex(book, songId);
+        if (from < 0) return Promise.reject(new Error('song not found: ' + songId));
+        var to = from + delta;
+        if (to < 0 || to >= book.songs.length) return Promise.resolve(book);
+        var songs = book.songs.slice();
+        var moved = songs[from];
+        songs[from] = songs[to];
+        songs[to] = moved;
+        var next = copyBook(book);
+        next.songs = renumbered(songs);
+        return commitBook(next);
+    };
+
+    /* A copy is always a normal imported book, so it is editable even when the
+     * source was bundled. `sourceUrl` is deliberately not copied: Refresh must
+     * never overwrite local edits with the original remote file. */
+    SB.duplicateSongbook = function (book) {
+        if (!book) return Promise.reject(new Error('no songbook to duplicate'));
+        var name = String(book.name || 'Songbook').trim() + ' (copy)';
+        var raw = {
+            id: uniqueSongbookId(songbookSlug(name)),
+            name: name,
+            description: book.description || '',
+            instrument: book.instrument,
+            logo: book.logo || '',
+            logoDark: book.logoDark || '',
+            songs: JSON.parse(JSON.stringify(book.songs || []))
+        };
+        var sb;
+        try { sb = SB.normalizeSongbook(raw); }
+        catch (err) { return Promise.reject(err); }
+        sb.imported = true;
+        return commitBook(sb).then(function () {
+            SB.setActive(sb);
+            SB.renderList();
+            SB.renderRecent();
+            return sb;
         });
     };
 
@@ -450,6 +561,10 @@
          * bundled books stay read-only. */
         var add = SB.$('addSongBtn');
         if (add) add.hidden = !(sb && sb.imported);
+        /* Duplicating is allowed for bundled books too: it creates an editable
+         * imported copy and never touches the source. */
+        var dup = SB.$('duplicateBookBtn');
+        if (dup) dup.hidden = !sb;
         var rf = SB.$('refreshSongsBtn');
         if (rf) rf.hidden = !(sb && sb.imported && sb.sourceUrl);
         var ex = SB.$('exportSongsBtn');

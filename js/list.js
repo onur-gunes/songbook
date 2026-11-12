@@ -76,6 +76,17 @@
         if (emptyBook) emptyBook.hidden = true;
     }
 
+    function rowAction(action, icon, label, ariaLabel) {
+        var button = SB.el('button', 'row-action row-action-' + action);
+        button.type = 'button';
+        button.dataset.action = action;
+        button.title = label;
+        button.setAttribute('aria-label', ariaLabel);
+        button.appendChild(SB.el('span', 'row-action-icon', icon));
+        button.appendChild(SB.el('span', 'row-action-label', label));
+        return button;
+    }
+
     SB.renderList = function () {
         if (!SB.state.active) {
             SB.$('songList').textContent = '';
@@ -100,8 +111,10 @@
         ul.textContent = '';
         var frag = document.createDocumentFragment();
         var sbId = SB.state.active ? SB.state.active.id : '';
+        var editable = !!SB.state.active.imported;
+        var bookSongs = SB.state.active.songs;
         songs.forEach(function (s) {
-            var li = SB.el('li', 'song-row');
+            var li = SB.el('li', 'song-row' + (editable ? ' has-actions' : ''));
             li.dataset.id = s.id;
 
             var a = document.createElement('a');
@@ -125,7 +138,50 @@
                 e.stopPropagation();
                 SB.toggleFavorite(sbId, s.id);
             });
-            li.appendChild(star);
+
+            var tools = SB.el('div', 'row-tools');
+            tools.appendChild(star);
+            if (editable) {
+                var pos = bookSongs.indexOf(s);
+                var edit = rowAction('edit', '✎', 'Edit source',
+                    'Edit source for ' + s.title);
+                edit.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    SB.editSongSource(s.id);
+                });
+                tools.appendChild(edit);
+
+                var up = rowAction('up', '↑', 'Move up',
+                    'Move ' + s.title + ' up in the book');
+                up.disabled = pos <= 0;
+                up.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    SB.moveSongInList(s.id, -1);
+                });
+                tools.appendChild(up);
+
+                var down = rowAction('down', '↓', 'Move down',
+                    'Move ' + s.title + ' down in the book');
+                down.disabled = pos < 0 || pos >= bookSongs.length - 1;
+                down.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    SB.moveSongInList(s.id, 1);
+                });
+                tools.appendChild(down);
+
+                var remove = rowAction('remove', '✕', 'Remove',
+                    'Remove ' + s.title + ' from the book');
+                remove.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    SB.removeSongFromList(s.id);
+                });
+                tools.appendChild(remove);
+            }
+            li.appendChild(tools);
 
             frag.appendChild(li);
         });
