@@ -215,7 +215,9 @@ def main():
         run_checks(cdp, 'after reload', expected_after_import)
         ok('after reload: active test-sb', cdp.eval('songbookTest.getActive().id') == 'test-sb')
 
-        # removal
+        # removal (Remove is an edit-mode action)
+        cdp.eval("document.getElementById('editBookBtn').click()")
+        cdp.wait_js("document.getElementById('removeSongsBtn').hidden === false", timeout=10)
         cdp.eval("window.confirm = function(){ return true; };")
         cdp.eval("document.getElementById('removeSongsBtn').click()", await_promise=False)
         cdp.wait_js("songbookTest.allSongbooks().length === %d" % bundled_count, timeout=10)

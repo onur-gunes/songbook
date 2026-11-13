@@ -114,8 +114,11 @@ def main():
            cdp.eval("document.getElementById('listControls').hidden") is False)
         rows = cdp.eval("document.querySelectorAll('#songList .song-row').length")
         ok('import renders every song', rows == len(book['songs']), rows)
-        ok('remove button visible for an import',
-           cdp.eval("document.getElementById('removeSongsBtn').hidden") is False)
+        ok('the read-only bar hides the authoring actions',
+           cdp.eval("document.getElementById('addSongBtn').hidden") is True
+           and cdp.eval("document.getElementById('removeSongsBtn').hidden") is True
+           and cdp.eval("document.getElementById('duplicateBookBtn').hidden") is True
+           and cdp.eval("document.getElementById('editBookBtn').hidden") is False)
         ok('export button visible for an import',
            cdp.eval("document.getElementById('exportSongsBtn').hidden") is False)
 
@@ -157,6 +160,8 @@ def main():
            cdp.eval('songbookTest.gridInfo()'))
 
         # --- removing the last book returns to the empty state ------------
+        cdp.eval("document.getElementById('editBookBtn').click()")
+        cdp.wait_js("document.getElementById('removeSongsBtn').hidden === false", timeout=10)
         cdp.eval("window.confirm = function () { return true; };")
         cdp.eval("document.getElementById('removeSongsBtn').click()", await_promise=False)
         cdp.wait_js('songbookTest.allSongbooks().length === 0', timeout=10)

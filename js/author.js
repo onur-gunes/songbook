@@ -11,6 +11,17 @@
 
     var lastFocus = null;
 
+    /* Authoring outcomes belong on one polite live region, not in a blocking
+     * alert: the batch summary is the primary success feedback for adding
+     * songs, and it should not interrupt a screen reader or steal focus. */
+    function setAuthorStatus(message, isError) {
+        var box = SB.$('authorStatus');
+        if (!box) return;
+        box.textContent = message || '';
+        box.classList.toggle('is-error', !!message && !!isError);
+    }
+    SB.setAuthorStatus = setAuthorStatus;
+
     function overlay() { return SB.$('newBookOverlay'); }
 
     /* Keep Tab inside the open authoring dialog, like the pattern editor and
@@ -106,10 +117,12 @@
         }
         var button = SB.$('newBookCreate');
         if (button) button.disabled = true;
+        var description = SB.$('newBookDescription');
+        var instrument = SB.$('newBookInstrument');
         SB.createSongbook({
             name: name,
-            description: SB.$('newBookDescription').value,
-            instrument: SB.$('newBookInstrument').value
+            description: description ? description.value : '',
+            instrument: instrument ? instrument.value : SB.state.instrument
         }).then(function (sb) {
             close(false);
             var hash = SB.routeHash(sb.id);
@@ -133,6 +146,10 @@
     /* Reading files is async, so a slow read must not paint over a newer
      * preview after the user has changed the textarea or picked other files. */
     var addPreviewSeq = 0;
+    /* True while the current preview is still being read/parsed. Add is
+     * disabled meanwhile: addSources describes the *previous* input until the
+     * batch resolves, so submitting would add the wrong songs. */
+    var addReading = false;
 
     function addOverlay() { return SB.$('addSongOverlay'); }
 
@@ -253,8 +270,9 @@
         }
         box.hidden = false;
         /* Keep Add enabled even when every source is bad: submitting is how a
-         * keyboard user reaches the announced explanation. */
-        if (button) button.disabled = false;
+         * keyboard user reaches the announced explanation. But never while the
+         * batch is still being read — the preview still describes old input. */
+        if (button) button.disabled = addReading;
         renderSourceList(list, addSources);
     }
 
@@ -277,12 +295,17 @@
             }));
         });
         if (!jobs.length) {
+            addReading = false;
             addSources = [];
             renderAddPreview();
             return;
         }
+        addReading = true;
+        var add = SB.$('addSongAdd');
+        if (add) add.disabled = true;
         Promise.all(jobs).then(function (entries) {
             if (seq !== addPreviewSeq) return;
+            addReading = false;
             addSources = entries.map(function (entry) {
                 if (entry.error) return { name: entry.name, ok: false, reason: entry.error };
                 return parseAddSource(entry.name, entry.text);
@@ -298,6 +321,7 @@
         if (!book || !book.imported) return;
         addLastFocus = document.activeElement;
         addSources = [];
+        addReading = false;
         addPreviewSeq += 1;
         setAddError('');
         var form = SB.$('addSongForm');
@@ -318,7 +342,8 @@
     }
 
     /* After a successful add the opener may have been the zero-song empty
-     * state, which is gone by then; focus belongs on the bar's Add button. */
+     * state, which is gone by then; focus belongs on the bar's Add button when
+     * edit mode keeps it visible, and on the edit toggle otherwise. */
     function closeAddSongs(restore) {
         var el = addOverlay();
         if (!el) return;
@@ -326,10 +351,18 @@
         el.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('pattern-open');
         addPreviewSeq += 1;
+        addReading = false;
         if (restore === false) {
+            /* Add is an edit-mode action now, so after adding to a read-only
+             * list the surviving affordance is the edit toggle. */
             var add = SB.$('addSongBtn');
             if (add && !add.hidden) {
                 try { add.focus({ preventScroll: true }); } catch (e) { add.focus(); }
+            } else {
+                var edit = SB.$('editBookBtn');
+                if (edit && !edit.hidden) {
+                    try { edit.focus({ preventScroll: true }); } catch (e) { edit.focus(); }
+                }
             }
             return;
         }
@@ -344,6 +377,10 @@
 
     function submitAddSongs(event) {
         event.preventDefault();
+        if (addReading) {
+            setAddError('Still reading the selected files — try again in a moment.');
+            return;
+        }
         var good = addSources.filter(function (source) { return source.ok; });
         var bad = addSources.filter(function (source) { return !source.ok; });
         if (!addSources.length) {
@@ -369,7 +406,7 @@
                     summary += ', ' + bad.length + ' failed: '
                         + bad.map(describeFailure).join('; ');
                 }
-                window.alert(summary);
+                setAuthorStatus(summary);
             }, function (err) {
                 setAddError(err.message || 'Could not add the songs.');
                 if (button) button.disabled = false;
@@ -501,6 +538,7 @@
         SB.updateSongInBook(SB.state.active, songId, result.song).then(function () {
             closeEditSource(false);
             focusRowAction(songId, 'edit');
+            setAuthorStatus('Updated “' + result.song.title + '”.');
         }, function (err) {
             setEditError(err.message || 'Could not save the source.');
             if (button) button.disabled = false;
@@ -524,31 +562,94 @@
         }
     }
 
-    SB.editSongSource = openEditSource;
+    SB.editSongSource = function (songId) {
+        resetRemoveConfirm();
+        openEditSource(songId);
+    };
     SB.closeEditSource = closeEditSource;
 
     SB.moveSongInList = function (songId, delta) {
         var book = SB.state.active;
         if (!book || !book.imported) return;
+        resetRemoveConfirm();
         SB.moveSongInBook(book, songId, delta).then(function () {
             focusRowAction(songId, delta < 0 ? 'up' : 'down');
         }, function (err) {
-            window.alert('Could not move the song: ' + err.message);
+            setAuthorStatus('Could not move the song: ' + err.message, true);
         });
     };
+
+    /* Removing is destructive and has no undo, but a blocking confirm() would
+     * be the only modal in an otherwise inline authoring flow. The row's own
+     * Remove button asks instead: the first press arms it ("Confirm") and
+     * announces what to do, the second performs the removal. Escape, the
+     * timeout, or any other row action backs out. */
+    var pendingRemove = null;
+    var pendingRemoveTimer = null;
+
+    function removeButton(songId) {
+        var rows = document.querySelectorAll('#songList .song-row');
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].dataset.id === songId) {
+                return rows[i].querySelector('[data-action="remove"]');
+            }
+        }
+        return null;
+    }
+
+    function armRemoveButton(button, on) {
+        if (!button) return;
+        var label = button.querySelector('.row-action-label');
+        if (on) {
+            button.dataset.baseLabel = button.getAttribute('aria-label') || '';
+            button.dataset.baseText = label ? label.textContent : '';
+            button.classList.add('is-confirming');
+            button.setAttribute('aria-label', 'Confirm removing this song from the songbook');
+            if (label) label.textContent = 'Confirm';
+        } else {
+            button.classList.remove('is-confirming');
+            if (button.dataset.baseLabel) {
+                button.setAttribute('aria-label', button.dataset.baseLabel);
+            }
+            if (label && button.dataset.baseText) label.textContent = button.dataset.baseText;
+            delete button.dataset.baseLabel;
+            delete button.dataset.baseText;
+        }
+    }
+
+    function resetRemoveConfirm() {
+        if (pendingRemoveTimer !== null) {
+            window.clearTimeout(pendingRemoveTimer);
+            pendingRemoveTimer = null;
+        }
+        if (pendingRemove === null) return;
+        armRemoveButton(removeButton(pendingRemove), false);
+        pendingRemove = null;
+        setAuthorStatus('');
+    }
 
     SB.removeSongFromList = function (songId) {
         var book = SB.state.active;
         if (!book || !book.imported) return;
         var song = findActiveSong(songId);
         if (!song) return;
-        if (!window.confirm('Remove "' + song.title + '" from "' + book.name
-                + '"? This cannot be undone.')) return;
+        if (pendingRemove !== songId) {
+            resetRemoveConfirm();
+            pendingRemove = songId;
+            armRemoveButton(removeButton(songId), true);
+            setAuthorStatus('Remove “' + song.title + '” from “' + book.name
+                + '”? Its notes, favourite and local edits are removed too.'
+                + ' Press Confirm, or Escape to cancel.');
+            pendingRemoveTimer = window.setTimeout(resetRemoveConfirm, 8000);
+            return;
+        }
+        resetRemoveConfirm();
 
         var index = book.songs.indexOf(song);
         var neighbor = book.songs[index + 1] || book.songs[index - 1] || null;
         var last = book.songs.length === 1;
         SB.removeSongFromBook(book, songId).then(function () {
+            setAuthorStatus('Removed “' + song.title + '” from “' + book.name + '”.');
             if (last) {
                 var emptyAdd = SB.$('emptyAddSongBtn');
                 var add = SB.$('addSongBtn');
@@ -560,13 +661,16 @@
                 focusRowAction(neighbor.id, 'remove');
             }
         }, function (err) {
-            window.alert('Could not remove the song: ' + err.message);
+            setAuthorStatus('Could not remove the song: ' + err.message, true);
         });
     };
+
+    SB.resetRemoveConfirm = resetRemoveConfirm;
 
     /* Duplicate works on bundled books too; the new book is imported and the
      * source is never written. */
     SB.duplicateActiveSongbook = function () {
+        resetRemoveConfirm();
         var book = SB.state.active;
         if (!book) return;
         var button = SB.$('duplicateBookBtn');
@@ -579,8 +683,9 @@
             if (picker) {
                 try { picker.focus({ preventScroll: true }); } catch (e) { picker.focus(); }
             }
+            setAuthorStatus('Duplicated as “' + copy.name + '”.');
         }, function (err) {
-            window.alert('Could not duplicate the songbook: ' + err.message);
+            setAuthorStatus('Could not duplicate the songbook: ' + err.message, true);
         }).then(function () {
             if (button) button.disabled = false;
         });
@@ -600,6 +705,19 @@
         if (emptyAddBtn) emptyAddBtn.addEventListener('click', openAddSongs);
         var duplicateBtn = SB.$('duplicateBookBtn');
         if (duplicateBtn) duplicateBtn.addEventListener('click', SB.duplicateActiveSongbook);
+
+        /* The toggle flips a per-book, session-scoped task mode; renderList
+         * repaints the rows and the button carries the pressed state. */
+        var editBookBtn = SB.$('editBookBtn');
+        if (editBookBtn) editBookBtn.addEventListener('click', function () {
+            var book = SB.state.active;
+            if (!book || !book.imported) return;
+            SB.state.editingBook = SB.isEditingBook() ? null : book.id;
+            SB.renderList();
+            setAuthorStatus(SB.isEditingBook()
+                ? 'Edit mode: rows show book order and their edit, move and remove actions.'
+                : '');
+        });
 
         var el = overlay();
         if (el) {
@@ -671,6 +789,15 @@
                     close(true);
                 } else {
                     trapFocus(e, 'newBookDialog');
+                }
+            } else if (e.key === 'Escape' && pendingRemove !== null) {
+                /* Back out of an armed Remove and keep focus where it was. */
+                var armed = pendingRemove;
+                e.preventDefault();
+                resetRemoveConfirm();
+                var armedButton = removeButton(armed);
+                if (armedButton) {
+                    try { armedButton.focus({ preventScroll: true }); } catch (err) { armedButton.focus(); }
                 }
             }
         });

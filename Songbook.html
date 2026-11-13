@@ -662,7 +662,19 @@ main {
 .row-action:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
 .row-action:disabled { opacity: 0.4; cursor: default; }
 .row-action-remove { color: var(--hard); }
+.row-action-remove.is-confirming {
+    border-color: var(--hard);
+    color: var(--hard);
+    background: color-mix(in srgb, var(--hard) 12%, transparent);
+}
 .row-action-icon { font-size: 0.85rem; line-height: 1; }
+
+/* edit mode is a task mode: tint the list so the mode is visible at a glance
+ * and not only from the bar's pressed button */
+.song-list.is-editing {
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+    border-radius: 10px;
+}
 
 /* compact one-line list (like the original site's song index) */
 
@@ -2757,6 +2769,17 @@ body.pattern-open { overflow: hidden; }
     margin-bottom: 12px;
 }
 
+/* Authoring outcomes (add summary, mode hints, errors) are announced here
+ * instead of in a blocking alert. Empty when there is nothing to say. */
+.author-status {
+    margin: 0;
+    color: var(--easy);
+    font-size: 0.85rem;
+}
+
+.author-status:not(:empty) { margin: 0 0 10px; }
+.author-status.is-error { color: var(--hard); }
+
 .songbook-label {
     color: var(--muted);
     font-size: 0.7rem;
@@ -4345,6 +4368,8 @@ button.structure-close,
             <button id="duplicateBookBtn" class="link-btn" type="button"
                     title="Duplicate this songbook" hidden>Duplicate</button>
             <button id="addSongBtn" class="pill-btn" type="button" hidden>Add song…</button>
+            <button id="editBookBtn" class="link-btn" type="button"
+                    aria-pressed="false" title="Reorder, edit and remove songs" hidden>Edit songbook</button>
             <button id="importBtn" class="pill-btn" type="button">Import list…</button>
             <button id="importUrlToggle" class="link-btn" type="button"
                     aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
@@ -4363,6 +4388,8 @@ button.structure-close,
                 <span>Tuner</span>
             </button>
         </div>
+
+        <p id="authorStatus" class="author-status" role="status" aria-live="polite"></p>
 
         <form id="importUrlForm" class="import-url-bar" hidden>
             <label class="sr-only" for="importUrl">Songbook URL</label>
@@ -7231,6 +7258,11 @@ button.structure-close,
         byId: {},               // active songs by id
         currentSong: null,
 
+        /* List edit mode: the id of the songbook whose authoring row actions
+         * are showing, or null. Session only — never persisted. See
+         * SB.isEditingBook. */
+        editingBook: null,
+
         /* personal data */
         favorites: new Set(SB.lsGetArray(SB.FAV_KEY).filter(function (v) {
             return typeof v === 'string';
@@ -7288,6 +7320,14 @@ button.structure-close,
         chordPin: true,
         chordMode: 'inline',
         showNumbers: false
+    };
+
+    /* Edit mode is a task mode, not a display preference: it is held per
+     * songbook id and never persisted, so switching books — or reopening the
+     * app — always lands in the safe, read-only list. */
+    SB.isEditingBook = function () {
+        return !!(SB.state.active && SB.state.active.imported &&
+            SB.state.editingBook === SB.state.active.id);
     };
 
 })(window.SB = window.SB || {});
@@ -7820,10 +7860,10 @@ button.structure-close,
 
     /* Append already-parsed songs to an imported book. Each song goes through
      * normalizeSongbook (the single validator) before it is stored; ids are
-     * de-duplicated within the book and the batch, and `n` continues from the
-     * highest existing position because an imported book need not be
-     * contiguous. One idbPut makes the write atomic: a failure leaves both
-     * memory and storage on the previous version. */
+     * de-duplicated within the book and the batch. One idbPut makes the write
+     * atomic: a failure leaves both memory and storage on the previous
+     * version. Positions are renumbered contiguously, the same invariant
+     * remove/move maintain, so `n` always matches book order. */
     SB.addSongsToBook = function (book, songs) {
         if (!book || !book.imported) {
             return Promise.reject(new Error('only imported songbooks can be edited'));
@@ -7835,9 +7875,6 @@ button.structure-close,
 
         var taken = {};
         book.songs.forEach(function (s) { taken[s.id] = true; });
-        var maxN = book.songs.reduce(function (max, s) {
-            return (typeof s.n === 'number' && isFinite(s.n) && s.n > max) ? s.n : max;
-        }, book.songs.length);
 
         var appended = [];
         for (var i = 0; i < incoming.length; i++) {
@@ -7853,12 +7890,11 @@ button.structure-close,
             }
             taken[id] = true;
             normalized.id = id;
-            normalized.n = maxN + i + 1;
             appended.push(normalized);
         }
 
         var next = copyBook(book);
-        next.songs = book.songs.concat(appended);
+        next.songs = renumbered(book.songs.concat(appended));
         return commitBook(next);
     };
 
@@ -7884,7 +7920,15 @@ button.structure-close,
         songs[index] = normalized;
         var next = copyBook(book);
         next.songs = songs;
-        return commitBook(next);
+        return commitBook(next).then(function (committed) {
+            /* The local edit plan is indexed against the old structure (bar and
+             * beat positions, the old grid and metre) and plan.grid outranks the
+             * songbook's own grid. Keeping it would make this edit half a no-op
+             * in Grid mode, so a re-parsed source drops the plan. Done after the
+             * write: a rejected edit must leave local edits untouched. */
+            if (SB.clearPlan) SB.clearPlan(book.id, songId);
+            return committed;
+        });
     };
 
     SB.removeSongFromBook = function (book, songId) {
@@ -7896,7 +7940,13 @@ button.structure-close,
         var songs = book.songs.filter(function (song) { return song.id !== songId; });
         var next = copyBook(book);
         next.songs = renumbered(songs);
-        return commitBook(next);
+        return commitBook(next).then(function (committed) {
+            /* The song is gone, so its plan, favourite and notes must go too;
+             * leaving them behind would attach them to an unrelated song that
+             * later happens to reuse the id. */
+            if (SB.clearSongData) SB.clearSongData(book.id, songId);
+            return committed;
+        });
     };
 
     /* Move by one slot in the book's own order, not the list's current sort:
@@ -7938,6 +7988,10 @@ button.structure-close,
         catch (err) { return Promise.reject(err); }
         sb.imported = true;
         return commitBook(sb).then(function () {
+            /* Carry the user's local edits across: a copy keyed by a new book
+             * id would otherwise lose every grid/strum edit, favourite and
+             * note, which is precisely what a bundled-book copy is for. */
+            if (SB.copySongData) SB.copySongData(book.id, sb.id, sb.songs);
             SB.setActive(sb);
             SB.renderList();
             SB.renderRecent();
@@ -7989,16 +8043,22 @@ button.structure-close,
         if (sb) sb.songs.forEach(function (s) { SB.state.byId[s.id] = s; });
         var sel = SB.$('songbookSelect');
         if (sel) sel.value = sb ? sb.id : '';
-        var rm = SB.$('removeSongsBtn');
-        if (rm) rm.hidden = !(sb && sb.imported);
-        /* Adding songs is authoring, so it is offered only for imported books;
-         * bundled books stay read-only. */
-        var add = SB.$('addSongBtn');
-        if (add) add.hidden = !(sb && sb.imported);
-        /* Duplicating is allowed for bundled books too: it creates an editable
-         * imported copy and never touches the source. */
-        var dup = SB.$('duplicateBookBtn');
-        if (dup) dup.hidden = !sb;
+        /* Edit mode belongs to one editable book and is session-scoped.
+         * Clearing the flag here rather than in the toggle means a book switch
+         * can never leave the destructive row actions armed for the book you
+         * land on. An authoring write calls setActive(next) with the same id,
+         * so the mode survives a move/remove/edit. */
+        var edit = SB.$('editBookBtn');
+        if (edit) edit.hidden = !(sb && sb.imported);
+        if (!sb || !sb.imported || SB.state.editingBook !== sb.id) {
+            SB.state.editingBook = null;
+        }
+        /* Add, Duplicate and Remove are edit-mode actions (list.js owns the
+         * rule); this call covers routes that never render the list. */
+        if (SB.syncAuthoringBar) SB.syncAuthoringBar();
+        if (SB.setAuthorStatus) SB.setAuthorStatus('');
+        /* Refresh is URL-import maintenance, not song authoring, and stays in
+         * the bar next to Export. */
         var rf = SB.$('refreshSongsBtn');
         if (rf) rf.hidden = !(sb && sb.imported && sb.sourceUrl);
         var ex = SB.$('exportSongsBtn');
@@ -8344,6 +8404,57 @@ button.structure-close,
     SB.clearPlan = function (sbId, songId) {
         try { window.localStorage.removeItem(SB.planKey(sbId, songId)); } catch (e) { /* ignore */ }
         try { window.localStorage.removeItem(SB.strumKey(sbId, songId)); } catch (e) { /* ignore */ }
+    };
+
+    /* Every per-song key this app writes, so removing a song can clear all of
+     * it and duplicating a book can carry all of it across. Speed and size are
+     * display preferences rather than edits, but they are equally scoped to
+     * the book + song pair and have the same orphan/resurrection problem. */
+    function songDataKeys() {
+        return [SB.planKey, SB.strumKey, SB.noteKey, SB.speedKey, SB.sizeKey, SB.bpmKey];
+    }
+
+    /* A removed song's id stops existing, but its data would not: ids are
+     * slugged from titles, so re-adding the same source later would resurrect
+     * the old plan, favourite and notes. Removing a song therefore removes
+     * everything stored for it, and the row's confirm says so. */
+    SB.clearSongData = function (sbId, songId) {
+        if (!sbId || !songId) return;
+        songDataKeys().forEach(function (key) {
+            try { window.localStorage.removeItem(key(sbId, songId)); } catch (e) { /* ignore */ }
+        });
+        if (SB.state.favorites.delete(SB.compositeId(sbId, songId))) SB.saveFavorites();
+        var recent = SB.state.recent.filter(function (r) {
+            return !(r.sb === sbId && r.id === songId);
+        });
+        if (recent.length !== SB.state.recent.length) {
+            SB.state.recent = recent;
+            SB.lsSet(SB.RECENT_KEY, recent);
+        }
+    };
+
+    /* Duplicating a book is the documented route to making a bundled book
+     * editable, and the user who does that is exactly the one who has
+     * accumulated local edits. Plans, favourites and notes are keyed by
+     * book + song id, so a new book id needs them re-keyed or the copy would
+     * silently start from scratch. */
+    SB.copySongData = function (fromSbId, toSbId, songs) {
+        if (!fromSbId || !toSbId || fromSbId === toSbId) return;
+        var changed = false;
+        (songs || []).forEach(function (song) {
+            if (!song || !song.id) return;
+            songDataKeys().forEach(function (key) {
+                var value = null;
+                try { value = window.localStorage.getItem(key(fromSbId, song.id)); } catch (e) { /* ignore */ }
+                if (value === null) return;
+                try { window.localStorage.setItem(key(toSbId, song.id), value); } catch (e) { /* ignore */ }
+            });
+            if (SB.state.favorites.has(SB.compositeId(fromSbId, song.id))) {
+                SB.state.favorites.add(SB.compositeId(toSbId, song.id));
+                changed = true;
+            }
+        });
+        if (changed) SB.saveFavorites();
     };
 
     function planHasEdits(plan) {
@@ -12019,7 +12130,12 @@ button.structure-close,
             }
             return true;
         });
-        if (SB.state.state.sort === 'artist') {
+        if (SB.isEditingBook()) {
+            /* Move up/down reorder `n`. Sorting by title while they do that
+             * would renumber the badges without moving a row, so edit mode
+             * shows the book's own order instead. */
+            out.sort(function (a, b) { return a.n - b.n; });
+        } else if (SB.state.state.sort === 'artist') {
             out.sort(function (a, b) {
                 var c = a.artist.localeCompare(b.artist, 'en', { sensitivity: 'base' });
                 return c !== 0 ? c : a.n - b.n;
@@ -12063,7 +12179,47 @@ button.structure-close,
         return button;
     }
 
+    /* The bar carries browsing actions by default. Adding songs, duplicating a
+     * book and removing it are authoring/maintenance actions, so they live
+     * inside the per-book edit mode and the read-only bar stays calm.
+     * Duplicate is the exception for a bundled book: bundled books have no
+     * edit mode, and duplication is their only route to an editable copy. */
+    function syncAuthoringBar() {
+        var book = SB.state.active;
+        var editing = SB.isEditingBook();
+        var imported = !!(book && book.imported);
+        function show(id, visible) {
+            var b = SB.$(id);
+            if (b) b.hidden = !visible;
+        }
+        show('addSongBtn', editing && imported);
+        show('removeSongsBtn', editing && imported);
+        show('duplicateBookBtn', !!book && (!imported || editing));
+    }
+    SB.syncAuthoringBar = syncAuthoringBar;
+
+    /* Mirrors applyViewToggle: the button is the mode's only affordance, so it
+     * carries the pressed state and the label. The sort buttons are disabled
+     * because edit mode shows book order, not the chosen title/artist order. */
+    function applyEditToggle() {
+        var editing = SB.isEditingBook();
+        var b = SB.$('editBookBtn');
+        if (b) {
+            b.setAttribute('aria-pressed', editing ? 'true' : 'false');
+            b.textContent = editing ? 'Done' : 'Edit songbook';
+            b.title = editing ? 'Leave edit mode' : 'Reorder, edit and remove songs';
+        }
+        Array.prototype.forEach.call(document.querySelectorAll('.sort-btn'), function (s) {
+            s.disabled = editing;
+            s.title = editing ? 'Rows show book order while editing' : '';
+        });
+        syncAuthoringBar();
+    }
+
     SB.renderList = function () {
+        /* A repaint replaces the buttons, so an armed Remove cannot survive it;
+         * drop the pending state with the DOM rather than leaving a prompt up. */
+        if (SB.resetRemoveConfirm) SB.resetRemoveConfirm();
         if (!SB.state.active) {
             SB.$('songList').textContent = '';
             SB.$('resultCount').textContent = '';
@@ -12085,9 +12241,10 @@ button.structure-close,
         if (toolbar) toolbar.hidden = bookEmpty;
         var ul = SB.$('songList');
         ul.textContent = '';
+        ul.classList.toggle('is-editing', SB.isEditingBook());
         var frag = document.createDocumentFragment();
         var sbId = SB.state.active ? SB.state.active.id : '';
-        var editable = !!SB.state.active.imported;
+        var editable = SB.isEditingBook();
         var bookSongs = SB.state.active.songs;
         songs.forEach(function (s) {
             var li = SB.el('li', 'song-row' + (editable ? ' has-actions' : ''));
@@ -12168,6 +12325,7 @@ button.structure-close,
             ? total + ' songs'
             : songs.length + ' of ' + total + ' songs');
         SB.$('searchClear').hidden = !SB.state.state.q;
+        applyEditToggle();
         applyViewToggle();
     }
 
@@ -13006,6 +13164,17 @@ button.structure-close,
 
     var lastFocus = null;
 
+    /* Authoring outcomes belong on one polite live region, not in a blocking
+     * alert: the batch summary is the primary success feedback for adding
+     * songs, and it should not interrupt a screen reader or steal focus. */
+    function setAuthorStatus(message, isError) {
+        var box = SB.$('authorStatus');
+        if (!box) return;
+        box.textContent = message || '';
+        box.classList.toggle('is-error', !!message && !!isError);
+    }
+    SB.setAuthorStatus = setAuthorStatus;
+
     function overlay() { return SB.$('newBookOverlay'); }
 
     /* Keep Tab inside the open authoring dialog, like the pattern editor and
@@ -13101,10 +13270,12 @@ button.structure-close,
         }
         var button = SB.$('newBookCreate');
         if (button) button.disabled = true;
+        var description = SB.$('newBookDescription');
+        var instrument = SB.$('newBookInstrument');
         SB.createSongbook({
             name: name,
-            description: SB.$('newBookDescription').value,
-            instrument: SB.$('newBookInstrument').value
+            description: description ? description.value : '',
+            instrument: instrument ? instrument.value : SB.state.instrument
         }).then(function (sb) {
             close(false);
             var hash = SB.routeHash(sb.id);
@@ -13128,6 +13299,10 @@ button.structure-close,
     /* Reading files is async, so a slow read must not paint over a newer
      * preview after the user has changed the textarea or picked other files. */
     var addPreviewSeq = 0;
+    /* True while the current preview is still being read/parsed. Add is
+     * disabled meanwhile: addSources describes the *previous* input until the
+     * batch resolves, so submitting would add the wrong songs. */
+    var addReading = false;
 
     function addOverlay() { return SB.$('addSongOverlay'); }
 
@@ -13248,8 +13423,9 @@ button.structure-close,
         }
         box.hidden = false;
         /* Keep Add enabled even when every source is bad: submitting is how a
-         * keyboard user reaches the announced explanation. */
-        if (button) button.disabled = false;
+         * keyboard user reaches the announced explanation. But never while the
+         * batch is still being read — the preview still describes old input. */
+        if (button) button.disabled = addReading;
         renderSourceList(list, addSources);
     }
 
@@ -13272,12 +13448,17 @@ button.structure-close,
             }));
         });
         if (!jobs.length) {
+            addReading = false;
             addSources = [];
             renderAddPreview();
             return;
         }
+        addReading = true;
+        var add = SB.$('addSongAdd');
+        if (add) add.disabled = true;
         Promise.all(jobs).then(function (entries) {
             if (seq !== addPreviewSeq) return;
+            addReading = false;
             addSources = entries.map(function (entry) {
                 if (entry.error) return { name: entry.name, ok: false, reason: entry.error };
                 return parseAddSource(entry.name, entry.text);
@@ -13293,6 +13474,7 @@ button.structure-close,
         if (!book || !book.imported) return;
         addLastFocus = document.activeElement;
         addSources = [];
+        addReading = false;
         addPreviewSeq += 1;
         setAddError('');
         var form = SB.$('addSongForm');
@@ -13313,7 +13495,8 @@ button.structure-close,
     }
 
     /* After a successful add the opener may have been the zero-song empty
-     * state, which is gone by then; focus belongs on the bar's Add button. */
+     * state, which is gone by then; focus belongs on the bar's Add button when
+     * edit mode keeps it visible, and on the edit toggle otherwise. */
     function closeAddSongs(restore) {
         var el = addOverlay();
         if (!el) return;
@@ -13321,10 +13504,18 @@ button.structure-close,
         el.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('pattern-open');
         addPreviewSeq += 1;
+        addReading = false;
         if (restore === false) {
+            /* Add is an edit-mode action now, so after adding to a read-only
+             * list the surviving affordance is the edit toggle. */
             var add = SB.$('addSongBtn');
             if (add && !add.hidden) {
                 try { add.focus({ preventScroll: true }); } catch (e) { add.focus(); }
+            } else {
+                var edit = SB.$('editBookBtn');
+                if (edit && !edit.hidden) {
+                    try { edit.focus({ preventScroll: true }); } catch (e) { edit.focus(); }
+                }
             }
             return;
         }
@@ -13339,6 +13530,10 @@ button.structure-close,
 
     function submitAddSongs(event) {
         event.preventDefault();
+        if (addReading) {
+            setAddError('Still reading the selected files — try again in a moment.');
+            return;
+        }
         var good = addSources.filter(function (source) { return source.ok; });
         var bad = addSources.filter(function (source) { return !source.ok; });
         if (!addSources.length) {
@@ -13364,7 +13559,7 @@ button.structure-close,
                     summary += ', ' + bad.length + ' failed: '
                         + bad.map(describeFailure).join('; ');
                 }
-                window.alert(summary);
+                setAuthorStatus(summary);
             }, function (err) {
                 setAddError(err.message || 'Could not add the songs.');
                 if (button) button.disabled = false;
@@ -13496,6 +13691,7 @@ button.structure-close,
         SB.updateSongInBook(SB.state.active, songId, result.song).then(function () {
             closeEditSource(false);
             focusRowAction(songId, 'edit');
+            setAuthorStatus('Updated “' + result.song.title + '”.');
         }, function (err) {
             setEditError(err.message || 'Could not save the source.');
             if (button) button.disabled = false;
@@ -13519,31 +13715,94 @@ button.structure-close,
         }
     }
 
-    SB.editSongSource = openEditSource;
+    SB.editSongSource = function (songId) {
+        resetRemoveConfirm();
+        openEditSource(songId);
+    };
     SB.closeEditSource = closeEditSource;
 
     SB.moveSongInList = function (songId, delta) {
         var book = SB.state.active;
         if (!book || !book.imported) return;
+        resetRemoveConfirm();
         SB.moveSongInBook(book, songId, delta).then(function () {
             focusRowAction(songId, delta < 0 ? 'up' : 'down');
         }, function (err) {
-            window.alert('Could not move the song: ' + err.message);
+            setAuthorStatus('Could not move the song: ' + err.message, true);
         });
     };
+
+    /* Removing is destructive and has no undo, but a blocking confirm() would
+     * be the only modal in an otherwise inline authoring flow. The row's own
+     * Remove button asks instead: the first press arms it ("Confirm") and
+     * announces what to do, the second performs the removal. Escape, the
+     * timeout, or any other row action backs out. */
+    var pendingRemove = null;
+    var pendingRemoveTimer = null;
+
+    function removeButton(songId) {
+        var rows = document.querySelectorAll('#songList .song-row');
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].dataset.id === songId) {
+                return rows[i].querySelector('[data-action="remove"]');
+            }
+        }
+        return null;
+    }
+
+    function armRemoveButton(button, on) {
+        if (!button) return;
+        var label = button.querySelector('.row-action-label');
+        if (on) {
+            button.dataset.baseLabel = button.getAttribute('aria-label') || '';
+            button.dataset.baseText = label ? label.textContent : '';
+            button.classList.add('is-confirming');
+            button.setAttribute('aria-label', 'Confirm removing this song from the songbook');
+            if (label) label.textContent = 'Confirm';
+        } else {
+            button.classList.remove('is-confirming');
+            if (button.dataset.baseLabel) {
+                button.setAttribute('aria-label', button.dataset.baseLabel);
+            }
+            if (label && button.dataset.baseText) label.textContent = button.dataset.baseText;
+            delete button.dataset.baseLabel;
+            delete button.dataset.baseText;
+        }
+    }
+
+    function resetRemoveConfirm() {
+        if (pendingRemoveTimer !== null) {
+            window.clearTimeout(pendingRemoveTimer);
+            pendingRemoveTimer = null;
+        }
+        if (pendingRemove === null) return;
+        armRemoveButton(removeButton(pendingRemove), false);
+        pendingRemove = null;
+        setAuthorStatus('');
+    }
 
     SB.removeSongFromList = function (songId) {
         var book = SB.state.active;
         if (!book || !book.imported) return;
         var song = findActiveSong(songId);
         if (!song) return;
-        if (!window.confirm('Remove "' + song.title + '" from "' + book.name
-                + '"? This cannot be undone.')) return;
+        if (pendingRemove !== songId) {
+            resetRemoveConfirm();
+            pendingRemove = songId;
+            armRemoveButton(removeButton(songId), true);
+            setAuthorStatus('Remove “' + song.title + '” from “' + book.name
+                + '”? Its notes, favourite and local edits are removed too.'
+                + ' Press Confirm, or Escape to cancel.');
+            pendingRemoveTimer = window.setTimeout(resetRemoveConfirm, 8000);
+            return;
+        }
+        resetRemoveConfirm();
 
         var index = book.songs.indexOf(song);
         var neighbor = book.songs[index + 1] || book.songs[index - 1] || null;
         var last = book.songs.length === 1;
         SB.removeSongFromBook(book, songId).then(function () {
+            setAuthorStatus('Removed “' + song.title + '” from “' + book.name + '”.');
             if (last) {
                 var emptyAdd = SB.$('emptyAddSongBtn');
                 var add = SB.$('addSongBtn');
@@ -13555,13 +13814,16 @@ button.structure-close,
                 focusRowAction(neighbor.id, 'remove');
             }
         }, function (err) {
-            window.alert('Could not remove the song: ' + err.message);
+            setAuthorStatus('Could not remove the song: ' + err.message, true);
         });
     };
+
+    SB.resetRemoveConfirm = resetRemoveConfirm;
 
     /* Duplicate works on bundled books too; the new book is imported and the
      * source is never written. */
     SB.duplicateActiveSongbook = function () {
+        resetRemoveConfirm();
         var book = SB.state.active;
         if (!book) return;
         var button = SB.$('duplicateBookBtn');
@@ -13574,8 +13836,9 @@ button.structure-close,
             if (picker) {
                 try { picker.focus({ preventScroll: true }); } catch (e) { picker.focus(); }
             }
+            setAuthorStatus('Duplicated as “' + copy.name + '”.');
         }, function (err) {
-            window.alert('Could not duplicate the songbook: ' + err.message);
+            setAuthorStatus('Could not duplicate the songbook: ' + err.message, true);
         }).then(function () {
             if (button) button.disabled = false;
         });
@@ -13595,6 +13858,19 @@ button.structure-close,
         if (emptyAddBtn) emptyAddBtn.addEventListener('click', openAddSongs);
         var duplicateBtn = SB.$('duplicateBookBtn');
         if (duplicateBtn) duplicateBtn.addEventListener('click', SB.duplicateActiveSongbook);
+
+        /* The toggle flips a per-book, session-scoped task mode; renderList
+         * repaints the rows and the button carries the pressed state. */
+        var editBookBtn = SB.$('editBookBtn');
+        if (editBookBtn) editBookBtn.addEventListener('click', function () {
+            var book = SB.state.active;
+            if (!book || !book.imported) return;
+            SB.state.editingBook = SB.isEditingBook() ? null : book.id;
+            SB.renderList();
+            setAuthorStatus(SB.isEditingBook()
+                ? 'Edit mode: rows show book order and their edit, move and remove actions.'
+                : '');
+        });
 
         var el = overlay();
         if (el) {
@@ -13666,6 +13942,15 @@ button.structure-close,
                     close(true);
                 } else {
                     trapFocus(e, 'newBookDialog');
+                }
+            } else if (e.key === 'Escape' && pendingRemove !== null) {
+                /* Back out of an armed Remove and keep focus where it was. */
+                var armed = pendingRemove;
+                e.preventDefault();
+                resetRemoveConfirm();
+                var armedButton = removeButton(armed);
+                if (armedButton) {
+                    try { armedButton.focus({ preventScroll: true }); } catch (err) { armedButton.focus(); }
                 }
             }
         });

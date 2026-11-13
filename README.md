@@ -83,7 +83,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/list.js` | List view: search, filters, sort, songbook picker |
 | `js/import.js` | Importing songbook JSON from disk or a URL (shared parse/validate/persist pipeline) |
 | `js/export.js` | Exporting any songbook (bundled or imported) back to a JSON file |
-| `js/author.js` | In-app songbook authoring: create, add, edit source, reorder, remove and duplicate books; writes only imported books |
+| `js/author.js` | In-app songbook authoring: create, add, edit source, reorder, remove and duplicate books behind a per-book **Edit songbook** mode; writes only imported books |
 | `js/song.js` | Song view and its controls |
 | `js/autoscroll.js` | Auto-scroll, text/chord sizing, pinch zoom |
 | `js/metronome.js` | Metronome: lookahead click scheduler and per-song BPM |
@@ -402,30 +402,52 @@ below: both end in the same songbook JSON described in
 1. **Create** — **New songbook** in the list header (or the first-run empty
    state) asks for a name, an optional description and an instrument. The new
    book is imported, empty and editable.
-2. **Add songs** — **Add song…** opens a dialog where you can paste one
-   ChordPro source or choose several `.cho`, `.chordpro` or `.txt` files. The
+2. **Add songs** — in **Edit songbook** mode, **Add song…** opens a dialog
+   where you can paste one ChordPro source or choose several `.cho`,
+   `.chordpro` or `.txt` files. (An empty book offers Add song in its empty
+   state too, so the first song does not need the extra click.) The
    preview parses as you type or select, and shows each song's title, artist,
    metre, tempo, strum, section/bar counts and any parser warnings. **Add**
    stores the valid songs in one batch and reports one summary, listing any
    files that failed.
-3. **Edit** — each row in an imported book has **Edit source**, **Move up**,
-   **Move down** and **Remove**. Edit source re-parses and revalidates the
-   ChordPro, keeps the song's id and position, and previews the result before
-   saving. Removing asks for confirmation and renumbers the remaining songs.
+3. **Edit** — **Edit songbook** in the list header turns on a task mode for
+   that book (session-scoped, cleared when you switch books or reload). While
+   it is on, the bar also exposes **Add song…** and **Remove** (the whole
+   book), rows show **Edit source**, **Move up**, **Move down** and
+   **Remove**, and the list shows the book's own order with the sort buttons
+   disabled, so moving a song moves its row. Edit source re-parses and
+   revalidates the ChordPro, keeps the song's id and position, and previews the
+   result before saving; a saved source also drops that song's local grid/strum
+   plan, because it described the old structure. The first **Remove** press
+   arms **Confirm** (Escape cancels) and a confirmed removal renumbers the
+   remaining songs and clears that song's notes, favourite and local edits.
    Moving keeps `n` contiguous. Removing the last song leaves a usable empty
    book with the Add song action.
 4. **Export** — the song view's **Download songbook JSON** saves the whole
    book with every local edit applied, including the `chordpro` source of each
    authored song. Re-import that file to keep editing it.
 
+The bar outside edit mode is read-only: it keeps **New songbook**, **Import**,
+**From URL**, **Refresh** (URL imports only) and **Export**. **Add song…**,
+**Duplicate** (for imported books) and **Remove** (the whole book) join them
+only while edit mode is on. Bundled books have no edit mode, so their bar keeps
+**Duplicate** as the route to an editable copy.
+
+Authoring outcomes — the add batch summary, update/remove/duplicate results and
+errors — are announced on a polite status line under the songbook bar rather
+than in blocking dialogs.
+
 ### Editable books, sources and read-only books
 
 Only imported books can be edited. Bundled books (the shipped demo) are
-read-only: they offer no Add song or per-song actions. **Duplicate** is
-available for every book, bundled or imported, and creates an editable
-imported copy named `Name (copy)`; the source book is never changed. The copy
-does not inherit `sourceUrl`, so Refresh cannot replace local edits with the
-remote file.
+read-only: they offer no Add song, no Edit songbook and no per-song actions,
+and their bar keeps only the browsing actions plus **Duplicate**, which creates
+an editable imported copy named `Name (copy)`; the source book is never
+changed. Imported books hide **Add song…**, **Duplicate** and **Remove** (the
+whole book) until **Edit songbook** is on, so the default bar stays read-only.
+The copy carries the local edit plans, favourites and notes of its songs across
+to the new book id, but does not inherit `sourceUrl`, so Refresh cannot replace
+local edits with the remote file.
 
 A song added from ChordPro keeps its source in the optional `song.chordpro`
 field. **Edit source** is offered only when that field is present; parsing

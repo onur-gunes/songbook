@@ -386,10 +386,10 @@
 
     /* Append already-parsed songs to an imported book. Each song goes through
      * normalizeSongbook (the single validator) before it is stored; ids are
-     * de-duplicated within the book and the batch, and `n` continues from the
-     * highest existing position because an imported book need not be
-     * contiguous. One idbPut makes the write atomic: a failure leaves both
-     * memory and storage on the previous version. */
+     * de-duplicated within the book and the batch. One idbPut makes the write
+     * atomic: a failure leaves both memory and storage on the previous
+     * version. Positions are renumbered contiguously, the same invariant
+     * remove/move maintain, so `n` always matches book order. */
     SB.addSongsToBook = function (book, songs) {
         if (!book || !book.imported) {
             return Promise.reject(new Error('only imported songbooks can be edited'));
@@ -401,9 +401,6 @@
 
         var taken = {};
         book.songs.forEach(function (s) { taken[s.id] = true; });
-        var maxN = book.songs.reduce(function (max, s) {
-            return (typeof s.n === 'number' && isFinite(s.n) && s.n > max) ? s.n : max;
-        }, book.songs.length);
 
         var appended = [];
         for (var i = 0; i < incoming.length; i++) {
@@ -419,12 +416,11 @@
             }
             taken[id] = true;
             normalized.id = id;
-            normalized.n = maxN + i + 1;
             appended.push(normalized);
         }
 
         var next = copyBook(book);
-        next.songs = book.songs.concat(appended);
+        next.songs = renumbered(book.songs.concat(appended));
         return commitBook(next);
     };
 
@@ -450,7 +446,15 @@
         songs[index] = normalized;
         var next = copyBook(book);
         next.songs = songs;
-        return commitBook(next);
+        return commitBook(next).then(function (committed) {
+            /* The local edit plan is indexed against the old structure (bar and
+             * beat positions, the old grid and metre) and plan.grid outranks the
+             * songbook's own grid. Keeping it would make this edit half a no-op
+             * in Grid mode, so a re-parsed source drops the plan. Done after the
+             * write: a rejected edit must leave local edits untouched. */
+            if (SB.clearPlan) SB.clearPlan(book.id, songId);
+            return committed;
+        });
     };
 
     SB.removeSongFromBook = function (book, songId) {
@@ -462,7 +466,13 @@
         var songs = book.songs.filter(function (song) { return song.id !== songId; });
         var next = copyBook(book);
         next.songs = renumbered(songs);
-        return commitBook(next);
+        return commitBook(next).then(function (committed) {
+            /* The song is gone, so its plan, favourite and notes must go too;
+             * leaving them behind would attach them to an unrelated song that
+             * later happens to reuse the id. */
+            if (SB.clearSongData) SB.clearSongData(book.id, songId);
+            return committed;
+        });
     };
 
     /* Move by one slot in the book's own order, not the list's current sort:
@@ -504,6 +514,10 @@
         catch (err) { return Promise.reject(err); }
         sb.imported = true;
         return commitBook(sb).then(function () {
+            /* Carry the user's local edits across: a copy keyed by a new book
+             * id would otherwise lose every grid/strum edit, favourite and
+             * note, which is precisely what a bundled-book copy is for. */
+            if (SB.copySongData) SB.copySongData(book.id, sb.id, sb.songs);
             SB.setActive(sb);
             SB.renderList();
             SB.renderRecent();
@@ -555,16 +569,22 @@
         if (sb) sb.songs.forEach(function (s) { SB.state.byId[s.id] = s; });
         var sel = SB.$('songbookSelect');
         if (sel) sel.value = sb ? sb.id : '';
-        var rm = SB.$('removeSongsBtn');
-        if (rm) rm.hidden = !(sb && sb.imported);
-        /* Adding songs is authoring, so it is offered only for imported books;
-         * bundled books stay read-only. */
-        var add = SB.$('addSongBtn');
-        if (add) add.hidden = !(sb && sb.imported);
-        /* Duplicating is allowed for bundled books too: it creates an editable
-         * imported copy and never touches the source. */
-        var dup = SB.$('duplicateBookBtn');
-        if (dup) dup.hidden = !sb;
+        /* Edit mode belongs to one editable book and is session-scoped.
+         * Clearing the flag here rather than in the toggle means a book switch
+         * can never leave the destructive row actions armed for the book you
+         * land on. An authoring write calls setActive(next) with the same id,
+         * so the mode survives a move/remove/edit. */
+        var edit = SB.$('editBookBtn');
+        if (edit) edit.hidden = !(sb && sb.imported);
+        if (!sb || !sb.imported || SB.state.editingBook !== sb.id) {
+            SB.state.editingBook = null;
+        }
+        /* Add, Duplicate and Remove are edit-mode actions (list.js owns the
+         * rule); this call covers routes that never render the list. */
+        if (SB.syncAuthoringBar) SB.syncAuthoringBar();
+        if (SB.setAuthorStatus) SB.setAuthorStatus('');
+        /* Refresh is URL-import maintenance, not song authoring, and stays in
+         * the bar next to Export. */
         var rf = SB.$('refreshSongsBtn');
         if (rf) rf.hidden = !(sb && sb.imported && sb.sourceUrl);
         var ex = SB.$('exportSongsBtn');

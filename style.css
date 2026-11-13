@@ -649,7 +649,19 @@ main {
 .row-action:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
 .row-action:disabled { opacity: 0.4; cursor: default; }
 .row-action-remove { color: var(--hard); }
+.row-action-remove.is-confirming {
+    border-color: var(--hard);
+    color: var(--hard);
+    background: color-mix(in srgb, var(--hard) 12%, transparent);
+}
 .row-action-icon { font-size: 0.85rem; line-height: 1; }
+
+/* edit mode is a task mode: tint the list so the mode is visible at a glance
+ * and not only from the bar's pressed button */
+.song-list.is-editing {
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+    border-radius: 10px;
+}
 
 /* compact one-line list (like the original site's song index) */
 
@@ -2743,6 +2755,17 @@ body.pattern-open { overflow: hidden; }
     gap: 8px 10px;
     margin-bottom: 12px;
 }
+
+/* Authoring outcomes (add summary, mode hints, errors) are announced here
+ * instead of in a blocking alert. Empty when there is nothing to say. */
+.author-status {
+    margin: 0;
+    color: var(--easy);
+    font-size: 0.85rem;
+}
+
+.author-status:not(:empty) { margin: 0 0 10px; }
+.author-status.is-error { color: var(--hard); }
 
 .songbook-label {
     color: var(--muted);
