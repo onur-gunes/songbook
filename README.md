@@ -83,10 +83,12 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/list.js` | List view: search, filters, sort, songbook picker |
 | `js/import.js` | Importing songbook JSON from disk or a URL (shared parse/validate/persist pipeline) |
 | `js/export.js` | Exporting any songbook (bundled or imported) back to a JSON file |
+| `js/author.js` | In-app songbook authoring: create, add, edit source, reorder, remove and duplicate books behind a per-book **Edit songbook** mode; writes only imported books |
 | `js/song.js` | Song view and its controls |
 | `js/autoscroll.js` | Auto-scroll, text/chord sizing, pinch zoom |
 | `js/metronome.js` | Metronome: lookahead click scheduler and per-song BPM |
 | `js/strum.js` | Strum-pattern row + selector, filtered by `time`, highlighted off the metronome clock |
+| `js/chordpro.js` | Browser ChordPro parser (`SB.parseChordPro`), a parity-tested port of `chordpro.py`'s authoring subset |
 | `js/router.js` | Hash routing |
 | `js/keyboard.js` | Global keyboard shortcuts |
 | `js/app.js` | Entry point: `init()`, service-worker registration, test export |
@@ -103,7 +105,9 @@ attached to `SB`.
   anytime). A URL import remembers its source and offers **Refresh** to
   re-fetch and replace it. Re-importing an id replaces your imported copy; a
   bundled id stays read-only. Export any songbook, bundled or imported, back
-  out as the same `.json` shape.
+  out as the same `.json` shape. You can also create, fill, edit, reorder and
+  duplicate songbooks entirely in the app — see
+  [Author songs in the app](#author-songs-in-the-app).
 - **Global instrument toggle** — Ukulele or Guitar. Chord diagrams and the
   voicing chooser are generated for the selected instrument; the choice is
   remembered.
@@ -252,7 +256,9 @@ songbook export applies every song's plan. That is exactly what
 be imported by any build.
 
 Export works for bundled and imported songbooks alike; a bundled book stays
-read-only in the app — export is how its content leaves the app.
+read-only in the app — export is how its content leaves the app. Authored songs
+keep their `chordpro` field in both the song and songbook downloads, so an
+exported file can be re-imported and edited from source again.
 
 ## Import from a URL
 
@@ -321,6 +327,7 @@ Song fields:
 | `sectionStrums` | object | Pattern id per section role, e.g. `{ "verse": "dduudu-4-4" }`; keys are canonical roles (see [Per-section strums](#per-section-strums)) |
 | `strumPatterns` | array | Per-song custom pattern definitions, each `{ id, name, time, subdiv, slots }` (see [Per-section strums](#per-section-strums)) |
 | `chords` | string[] | Unique chord tokens; derived by the builder if omitted |
+| `chordpro` | string | Optional authoring source. Kept from an in-app add or edit and preserved by export/re-import; it is not rendered |
 | `sheet` | array | Lyric/chord lines (below) |
 | `grid` | array | Optional bar/beat chart, parallel to `sheet`; each block carries a `role` (derived from its `label`) and each bar may carry `strums`, one slot string per felt beat (see [Bar/beat grid](#barbeat-grid)) |
 
@@ -384,6 +391,82 @@ The retired Krakow archive can still be rebuilt locally with `migrate.py` if
 you keep your own copy of the old `legacy/` pages: it merges
 `songbooks/original-keys.json` and validates the result. Neither the archive nor
 the migrated JSON ships with the repository.
+
+## Author songs in the app
+
+A songbook can be created, filled and maintained from the UI without touching
+the filesystem. This is the in-app counterpart to the ChordPro build path
+below: both end in the same songbook JSON described in
+[Songbook JSON format](#songbook-json-format).
+
+1. **Create** — **New songbook** in the list header (or the first-run empty
+   state) asks for a name, an optional description and an instrument. The new
+   book is imported, empty and editable.
+2. **Add songs** — in **Edit songbook** mode, **Add song…** opens a dialog
+   where you can paste one ChordPro source or choose several `.cho`,
+   `.chordpro` or `.txt` files. (An empty book offers Add song in its empty
+   state too, so the first song does not need the extra click.) The
+   preview parses as you type or select, and shows each song's title, artist,
+   metre, tempo, strum, section/bar counts and any parser warnings. **Add**
+   stores the valid songs in one batch and reports one summary, listing any
+   files that failed.
+3. **Edit** — **Edit songbook** in the list header turns on a task mode for
+   that book (session-scoped, cleared when you switch books or reload). While
+   it is on, the bar also exposes **Add song…** and **Remove** (the whole
+   book), rows show **Edit source**, **Move up**, **Move down** and
+   **Remove**, and the list shows the book's own order with the sort buttons
+   disabled, so moving a song moves its row. Edit source re-parses and
+   revalidates the ChordPro, keeps the song's id and position, and previews the
+   result before saving; a saved source also drops that song's local grid/strum
+   plan, because it described the old structure. The first **Remove** press
+   arms **Confirm** (Escape cancels) and a confirmed removal renumbers the
+   remaining songs and clears that song's notes, favourite and local edits.
+   Moving keeps `n` contiguous. Removing the last song leaves a usable empty
+   book with the Add song action.
+4. **Export** — the song view's **Download songbook JSON** saves the whole
+   book with every local edit applied, including the `chordpro` source of each
+   authored song. Re-import that file to keep editing it.
+
+The bar outside edit mode is read-only: it keeps **New songbook**, **Import**,
+**From URL**, **Refresh** (URL imports only) and **Export**. **Add song…**,
+**Duplicate** (for imported books) and **Remove** (the whole book) join them
+only while edit mode is on. Bundled books have no edit mode, so their bar keeps
+**Duplicate** as the route to an editable copy.
+
+Authoring outcomes — the add batch summary, update/remove/duplicate results and
+errors — are announced on a polite status line under the songbook bar rather
+than in blocking dialogs.
+
+### Editable books, sources and read-only books
+
+Only imported books can be edited. Bundled books (the shipped demo) are
+read-only: they offer no Add song, no Edit songbook and no per-song actions,
+and their bar keeps only the browsing actions plus **Duplicate**, which creates
+an editable imported copy named `Name (copy)`; the source book is never
+changed. Imported books hide **Add song…**, **Duplicate** and **Remove** (the
+whole book) until **Edit songbook** is on, so the default bar stays read-only.
+The copy carries the local edit plans, favourites and notes of its songs across
+to the new book id, but does not inherit `sourceUrl`, so Refresh cannot replace
+local edits with the remote file.
+
+A song added from ChordPro keeps its source in the optional `song.chordpro`
+field. **Edit source** is offered only when that field is present; parsing
+replaces the song's title, chords, sheet and grid while preserving its id and
+`n`. Songs without a source — for example songs copied from a bundled book —
+are JSON-only: the dialog explains this and points at the song view's **Grid**
+and **Strum** editors, which change a local plan rather than the stored song.
+Those local edits are included in exports but never rewrite the songbook.
+
+In-app input supports the same ChordPro subset as the build path below:
+`{title}`/`{t}`, `{artist}`/`{subtitle}`/`{st}`, `{level}`, `{duration}`,
+`{tempo}`/`{bpm}`, `{time}`/`{meter}`, `{strum}`, `{key}`, `{sheetkey}`,
+`{capo}`, `{new}`, `{number}`, `{chords}`, `{comment}`/`{c}`,
+`{start_of_chorus}`/`{end_of_chorus}`, `{start_of_tab}`/`{end_of_tab}` and
+`{start_of_grid}`/`{end_of_grid}`, plus inline `[Am]` chords and escapes. The
+full directive table, body syntax and warning behaviour are under
+[Create a songbook from ChordPro](#create-a-songbook-from-chordpro); the
+authoring specification is [#136](https://github.com/onur-gunes/songbook/issues/136).
+`{trusted_note}` stays disabled for user input.
 
 ## Create a songbook from ChordPro
 
@@ -452,6 +535,13 @@ appearance order), and ids are slugified from titles and de-duplicated per book.
 `{chords: ...}` exists only so legacy books can preserve a curated order that
 differs from first appearance; a mismatch between the override and the sheet
 produces a validation warning.
+
+The same subset is parsed in the browser by `js/chordpro.js`, which exposes
+`SB.parseChordPro(text, { allowTrustedNotes: false })` → `{ song, warnings }`.
+It mirrors `chordpro.py` exactly, including the warning strings, and
+`tests/chordpro_js.py` fails on any difference. `{trusted_note}` stays disabled
+for user input. The parser only produces a song dict; callers still pass it
+through `SB.normalizeSongbook`, the single import validator.
 
 Build one book, or every book under a directory:
 
@@ -633,11 +723,13 @@ number of slots per beat; and `slots` is a `D`/`U`/`-` string whose length is
 exactly `subdiv * felt-beats-per-bar` for its metre. Invalid custom patterns,
 metre mismatches, and wrong slot counts are build errors.
 
-Run the parser/builder tests with `python3 tests/chordpro.py`, the strum
-library mirror guard with `python3 tests/strum.py`, the dev/prod environment
-guard with `python3 tests/env.py`, and the plan/export/sections/editor unit
-suites with `python3 tests/plan.py`, `python3 tests/export.py`,
-`python3 tests/sections.py` and `python3 tests/editor.py`.
+Run the parser/builder tests with `python3 tests/chordpro.py`, the browser
+parser parity suite with `python3 tests/chordpro_js.py` (needs the app server),
+the strum library mirror guard with `python3 tests/strum.py`, the dev/prod
+environment guard with `python3 tests/env.py`, and the
+plan/export/sections/editor unit suites with `python3 tests/plan.py`,
+`python3 tests/export.py`, `python3 tests/sections.py` and
+`python3 tests/editor.py`.
 
 ## Builds
 
@@ -736,6 +828,10 @@ python3 tests/empty.py  http://localhost:8777
 
 # import -> IndexedDB -> reload -> remove; export -> import round-trip
 python3 tests/import.py http://localhost:8777
+
+# in-app authoring: create, add, edit source, reorder, remove, duplicate,
+# keyboard focus and export/re-import of the stored source
+python3 tests/author.py http://localhost:8777
 
 # tuner: presets, calibration, octave guards, overlay behaviour
 python3 tests/tuner.py  http://localhost:8777

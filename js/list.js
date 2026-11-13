@@ -43,7 +43,12 @@
             }
             return true;
         });
-        if (SB.state.state.sort === 'artist') {
+        if (SB.isEditingBook()) {
+            /* Move up/down reorder `n`. Sorting by title while they do that
+             * would renumber the badges without moving a row, so edit mode
+             * shows the book's own order instead. */
+            out.sort(function (a, b) { return a.n - b.n; });
+        } else if (SB.state.state.sort === 'artist') {
             out.sort(function (a, b) {
                 var c = a.artist.localeCompare(b.artist, 'en', { sensitivity: 'base' });
                 return c !== 0 ? c : a.n - b.n;
@@ -72,9 +77,62 @@
         if (result) result.textContent = '';
         var noMatches = SB.$('noMatches');
         if (noMatches) noMatches.hidden = true;
+        var emptyBook = SB.$('emptyBookState');
+        if (emptyBook) emptyBook.hidden = true;
+    }
+
+    function rowAction(action, icon, label, ariaLabel) {
+        var button = SB.el('button', 'row-action row-action-' + action);
+        button.type = 'button';
+        button.dataset.action = action;
+        button.title = label;
+        button.setAttribute('aria-label', ariaLabel);
+        button.appendChild(SB.el('span', 'row-action-icon', icon));
+        button.appendChild(SB.el('span', 'row-action-label', label));
+        return button;
+    }
+
+    /* The bar carries browsing actions by default. Adding songs, duplicating a
+     * book and removing it are authoring/maintenance actions, so they live
+     * inside the per-book edit mode and the read-only bar stays calm.
+     * Duplicate is the exception for a bundled book: bundled books have no
+     * edit mode, and duplication is their only route to an editable copy. */
+    function syncAuthoringBar() {
+        var book = SB.state.active;
+        var editing = SB.isEditingBook();
+        var imported = !!(book && book.imported);
+        function show(id, visible) {
+            var b = SB.$(id);
+            if (b) b.hidden = !visible;
+        }
+        show('addSongBtn', editing && imported);
+        show('removeSongsBtn', editing && imported);
+        show('duplicateBookBtn', !!book && (!imported || editing));
+    }
+    SB.syncAuthoringBar = syncAuthoringBar;
+
+    /* Mirrors applyViewToggle: the button is the mode's only affordance, so it
+     * carries the pressed state and the label. The sort buttons are disabled
+     * because edit mode shows book order, not the chosen title/artist order. */
+    function applyEditToggle() {
+        var editing = SB.isEditingBook();
+        var b = SB.$('editBookBtn');
+        if (b) {
+            b.setAttribute('aria-pressed', editing ? 'true' : 'false');
+            b.textContent = editing ? 'Done' : 'Edit songbook';
+            b.title = editing ? 'Leave edit mode' : 'Reorder, edit and remove songs';
+        }
+        Array.prototype.forEach.call(document.querySelectorAll('.sort-btn'), function (s) {
+            s.disabled = editing;
+            s.title = editing ? 'Rows show book order while editing' : '';
+        });
+        syncAuthoringBar();
     }
 
     SB.renderList = function () {
+        /* A repaint replaces the buttons, so an armed Remove cannot survive it;
+         * drop the pending state with the DOM rather than leaving a prompt up. */
+        if (SB.resetRemoveConfirm) SB.resetRemoveConfirm();
         if (!SB.state.active) {
             SB.$('songList').textContent = '';
             SB.$('resultCount').textContent = '';
@@ -84,12 +142,25 @@
         }
         var songs = SB.filteredSongs();
         var total = SB.activeSongs().length;
+        /* A zero-song book is a real state (a freshly created book), not an
+         * empty search: show the "No songs yet" block and hide the search and
+         * filter toolbar, which has nothing to act on. */
+        var bookEmpty = total === 0;
+        var emptyBook = SB.$('emptyBookState');
+        if (emptyBook) emptyBook.hidden = !bookEmpty;
+        var emptyAdd = SB.$('emptyAddSongBtn');
+        if (emptyAdd) emptyAdd.hidden = !(bookEmpty && SB.state.active.imported);
+        var toolbar = SB.$('listControls');
+        if (toolbar) toolbar.hidden = bookEmpty;
         var ul = SB.$('songList');
         ul.textContent = '';
+        ul.classList.toggle('is-editing', SB.isEditingBook());
         var frag = document.createDocumentFragment();
         var sbId = SB.state.active ? SB.state.active.id : '';
+        var editable = SB.isEditingBook();
+        var bookSongs = SB.state.active.songs;
         songs.forEach(function (s) {
-            var li = SB.el('li', 'song-row');
+            var li = SB.el('li', 'song-row' + (editable ? ' has-actions' : ''));
             li.dataset.id = s.id;
 
             var a = document.createElement('a');
@@ -113,17 +184,61 @@
                 e.stopPropagation();
                 SB.toggleFavorite(sbId, s.id);
             });
-            li.appendChild(star);
+
+            var tools = SB.el('div', 'row-tools');
+            tools.appendChild(star);
+            if (editable) {
+                var pos = bookSongs.indexOf(s);
+                var edit = rowAction('edit', '✎', 'Edit source',
+                    'Edit source for ' + s.title);
+                edit.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    SB.editSongSource(s.id);
+                });
+                tools.appendChild(edit);
+
+                var up = rowAction('up', '↑', 'Move up',
+                    'Move ' + s.title + ' up in the book');
+                up.disabled = pos <= 0;
+                up.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    SB.moveSongInList(s.id, -1);
+                });
+                tools.appendChild(up);
+
+                var down = rowAction('down', '↓', 'Move down',
+                    'Move ' + s.title + ' down in the book');
+                down.disabled = pos < 0 || pos >= bookSongs.length - 1;
+                down.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    SB.moveSongInList(s.id, 1);
+                });
+                tools.appendChild(down);
+
+                var remove = rowAction('remove', '✕', 'Remove',
+                    'Remove ' + s.title + ' from the book');
+                remove.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    SB.removeSongFromList(s.id);
+                });
+                tools.appendChild(remove);
+            }
+            li.appendChild(tools);
 
             frag.appendChild(li);
         });
         ul.appendChild(frag);
 
-        SB.$('noMatches').hidden = songs.length > 0;
-        SB.$('resultCount').textContent = songs.length === total
+        SB.$('noMatches').hidden = bookEmpty || songs.length > 0;
+        SB.$('resultCount').textContent = bookEmpty ? '' : (songs.length === total
             ? total + ' songs'
-            : songs.length + ' of ' + total + ' songs';
+            : songs.length + ' of ' + total + ' songs');
         SB.$('searchClear').hidden = !SB.state.state.q;
+        applyEditToggle();
         applyViewToggle();
     }
 

@@ -81,6 +81,7 @@
         SB.bindListControls();
         SB.bindSongControls();
         if (SB.bindExportControls) SB.bindExportControls();
+        if (SB.bindAuthorControls) SB.bindAuthorControls();
         SB.bindKeyboard();
         SB.updateSpeedLabel();
 

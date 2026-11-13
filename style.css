@@ -592,11 +592,17 @@ main {
 .row-level.level-Medium { color: var(--medium); background: color-mix(in srgb, var(--medium) 14%, transparent); }
 .row-level.level-Hard { color: var(--hard); background: color-mix(in srgb, var(--hard) 12%, transparent); }
 
-.star-btn {
+.row-tools {
     position: absolute;
     right: 4px;
     top: 50%;
     transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.star-btn {
     width: 38px;
     height: 38px;
     border: none;
@@ -612,6 +618,51 @@ main {
 
 .star-btn.on { color: var(--accent); }
 
+/* per-song authoring actions (imported books only) */
+
+.song-row.has-actions .song-link { padding-right: 6px; }
+
+.song-row.has-actions .row-tools {
+    position: static;
+    transform: none;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 6px 8px;
+}
+
+.row-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 30px;
+    padding: 0 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.row-action:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+.row-action:disabled { opacity: 0.4; cursor: default; }
+.row-action-remove { color: var(--hard); }
+.row-action-remove.is-confirming {
+    border-color: var(--hard);
+    color: var(--hard);
+    background: color-mix(in srgb, var(--hard) 12%, transparent);
+}
+.row-action-icon { font-size: 0.85rem; line-height: 1; }
+
+/* edit mode is a task mode: tint the list so the mode is visible at a glance
+ * and not only from the bar's pressed button */
+.song-list.is-editing {
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+    border-radius: 10px;
+}
+
 /* compact one-line list (like the original site's song index) */
 
 .song-list.is-compact .song-row {
@@ -619,6 +670,24 @@ main {
     align-items: center;
     gap: 4px;
 }
+
+.song-list.is-compact .row-tools,
+.song-list.is-compact .song-row.has-actions .row-tools {
+    position: static;
+    transform: none;
+    flex: none;
+    gap: 2px;
+    padding: 0;
+}
+
+.song-list.is-compact .row-action {
+    width: 30px;
+    min-height: 30px;
+    padding: 0;
+    justify-content: center;
+}
+
+.song-list.is-compact .row-action-label { display: none; }
 
 .song-list.is-compact .song-link {
     flex: 1 1 auto;
@@ -1829,6 +1898,136 @@ body.pattern-open { overflow: hidden; }
 .pattern-cancel:hover { border-color: var(--accent); }
 .pattern-save:hover { filter: brightness(1.06); }
 
+/* add songs */
+
+.add-song-sheet { width: min(680px, 100%); }
+
+.add-song-text {
+    min-height: 160px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    resize: vertical;
+}
+
+.add-song-text:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.add-song-files {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+}
+
+.add-song-hint {
+    color: var(--muted);
+    font-size: 0.72rem;
+}
+
+.add-song-preview {
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-2);
+}
+
+.add-song-preview-title {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.add-song-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.add-song-item {
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface);
+}
+
+.add-song-item.is-error {
+    border-color: color-mix(in srgb, var(--hard) 45%, var(--line));
+}
+
+.add-song-item-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin: 0;
+}
+
+.add-song-item-title {
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.add-song-item-artist {
+    color: var(--muted);
+    font-size: 0.76rem;
+}
+
+.add-song-meta {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+}
+
+.add-song-item-error {
+    margin: 3px 0 0;
+    color: var(--hard);
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.add-song-warnings {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    color: var(--muted);
+    font-size: 0.72rem;
+}
+
+.add-song-warnings li { margin: 1px 0; }
+
+/* edit source */
+
+.edit-source-song {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+.edit-source-unavailable {
+    margin: 0;
+    padding: 12px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+.edit-source-unavailable:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
 /* sheet */
 
 .sheet {
@@ -2556,6 +2755,17 @@ body.pattern-open { overflow: hidden; }
     gap: 8px 10px;
     margin-bottom: 12px;
 }
+
+/* Authoring outcomes (add summary, mode hints, errors) are announced here
+ * instead of in a blocking alert. Empty when there is nothing to say. */
+.author-status {
+    margin: 0;
+    color: var(--easy);
+    font-size: 0.85rem;
+}
+
+.author-status:not(:empty) { margin: 0 0 10px; }
+.author-status.is-error { color: var(--hard); }
 
 .songbook-label {
     color: var(--muted);

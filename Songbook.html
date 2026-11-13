@@ -605,11 +605,17 @@ main {
 .row-level.level-Medium { color: var(--medium); background: color-mix(in srgb, var(--medium) 14%, transparent); }
 .row-level.level-Hard { color: var(--hard); background: color-mix(in srgb, var(--hard) 12%, transparent); }
 
-.star-btn {
+.row-tools {
     position: absolute;
     right: 4px;
     top: 50%;
     transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.star-btn {
     width: 38px;
     height: 38px;
     border: none;
@@ -625,6 +631,51 @@ main {
 
 .star-btn.on { color: var(--accent); }
 
+/* per-song authoring actions (imported books only) */
+
+.song-row.has-actions .song-link { padding-right: 6px; }
+
+.song-row.has-actions .row-tools {
+    position: static;
+    transform: none;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 6px 8px;
+}
+
+.row-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 30px;
+    padding: 0 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.row-action:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+.row-action:disabled { opacity: 0.4; cursor: default; }
+.row-action-remove { color: var(--hard); }
+.row-action-remove.is-confirming {
+    border-color: var(--hard);
+    color: var(--hard);
+    background: color-mix(in srgb, var(--hard) 12%, transparent);
+}
+.row-action-icon { font-size: 0.85rem; line-height: 1; }
+
+/* edit mode is a task mode: tint the list so the mode is visible at a glance
+ * and not only from the bar's pressed button */
+.song-list.is-editing {
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+    border-radius: 10px;
+}
+
 /* compact one-line list (like the original site's song index) */
 
 .song-list.is-compact .song-row {
@@ -632,6 +683,24 @@ main {
     align-items: center;
     gap: 4px;
 }
+
+.song-list.is-compact .row-tools,
+.song-list.is-compact .song-row.has-actions .row-tools {
+    position: static;
+    transform: none;
+    flex: none;
+    gap: 2px;
+    padding: 0;
+}
+
+.song-list.is-compact .row-action {
+    width: 30px;
+    min-height: 30px;
+    padding: 0;
+    justify-content: center;
+}
+
+.song-list.is-compact .row-action-label { display: none; }
 
 .song-list.is-compact .song-link {
     flex: 1 1 auto;
@@ -1842,6 +1911,136 @@ body.pattern-open { overflow: hidden; }
 .pattern-cancel:hover { border-color: var(--accent); }
 .pattern-save:hover { filter: brightness(1.06); }
 
+/* add songs */
+
+.add-song-sheet { width: min(680px, 100%); }
+
+.add-song-text {
+    min-height: 160px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    resize: vertical;
+}
+
+.add-song-text:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.add-song-files {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+}
+
+.add-song-hint {
+    color: var(--muted);
+    font-size: 0.72rem;
+}
+
+.add-song-preview {
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-2);
+}
+
+.add-song-preview-title {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.add-song-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.add-song-item {
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface);
+}
+
+.add-song-item.is-error {
+    border-color: color-mix(in srgb, var(--hard) 45%, var(--line));
+}
+
+.add-song-item-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin: 0;
+}
+
+.add-song-item-title {
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.add-song-item-artist {
+    color: var(--muted);
+    font-size: 0.76rem;
+}
+
+.add-song-meta {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+}
+
+.add-song-item-error {
+    margin: 3px 0 0;
+    color: var(--hard);
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.add-song-warnings {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    color: var(--muted);
+    font-size: 0.72rem;
+}
+
+.add-song-warnings li { margin: 1px 0; }
+
+/* edit source */
+
+.edit-source-song {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+.edit-source-unavailable {
+    margin: 0;
+    padding: 12px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+.edit-source-unavailable:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
 /* sheet */
 
 .sheet {
@@ -2569,6 +2768,17 @@ body.pattern-open { overflow: hidden; }
     gap: 8px 10px;
     margin-bottom: 12px;
 }
+
+/* Authoring outcomes (add summary, mode hints, errors) are announced here
+ * instead of in a blocking alert. Empty when there is nothing to say. */
+.author-status {
+    margin: 0;
+    color: var(--easy);
+    font-size: 0.85rem;
+}
+
+.author-status:not(:empty) { margin: 0 0 10px; }
+.author-status.is-error { color: var(--hard); }
 
 .songbook-label {
     color: var(--muted);
@@ -4154,6 +4364,12 @@ button.structure-close,
         <div class="songbook-bar">
             <label class="songbook-label" for="songbookSelect">Songbook</label>
             <select id="songbookSelect" class="songbook-select" aria-label="Choose a songbook"></select>
+            <button id="newSongbookBtn" class="link-btn" type="button">New songbook</button>
+            <button id="duplicateBookBtn" class="link-btn" type="button"
+                    title="Duplicate this songbook" hidden>Duplicate</button>
+            <button id="addSongBtn" class="pill-btn" type="button" hidden>Add song…</button>
+            <button id="editBookBtn" class="link-btn" type="button"
+                    aria-pressed="false" title="Reorder, edit and remove songs" hidden>Edit songbook</button>
             <button id="importBtn" class="pill-btn" type="button">Import list…</button>
             <button id="importUrlToggle" class="link-btn" type="button"
                     aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
@@ -4172,6 +4388,8 @@ button.structure-close,
                 <span>Tuner</span>
             </button>
         </div>
+
+        <p id="authorStatus" class="author-status" role="status" aria-live="polite"></p>
 
         <form id="importUrlForm" class="import-url-bar" hidden>
             <label class="sr-only" for="importUrl">Songbook URL</label>
@@ -4219,8 +4437,9 @@ button.structure-close,
 
         <div id="emptyState" class="empty-state empty-state-books" hidden>
             <h2 class="empty-state-title">No songbooks yet</h2>
-            <p class="empty-state-lead">Import a songbook JSON file to start building your library.</p>
-            <button id="emptyImportBtn" class="pill-btn accent empty-state-import" type="button">Import a songbook…</button>
+            <p class="empty-state-lead">Create a songbook, or import one from a JSON file.</p>
+            <button id="emptyNewSongbookBtn" class="pill-btn accent empty-state-import" type="button">Create a songbook…</button>
+            <button id="emptyImportBtn" class="pill-btn empty-state-import" type="button">Import a songbook…</button>
             <button id="emptyImportUrlBtn" class="link-btn empty-state-url" type="button">Import from a URL…</button>
             <p class="empty-state-docs">New to the format? Read the
                 <a href="https://github.com/onur-gunes/songbook#songbook-json-format"
@@ -4236,6 +4455,11 @@ button.structure-close,
         </div>
 
         <p id="resultCount" class="result-count"></p>
+        <div id="emptyBookState" class="empty-state empty-state-songs" hidden>
+            <h2 class="empty-state-title">No songs yet</h2>
+            <p class="empty-state-lead">This songbook is ready. Add a song from ChordPro to start it.</p>
+            <button id="emptyAddSongBtn" class="pill-btn accent empty-state-import" type="button" hidden>Add a song…</button>
+        </div>
         <ul id="songList" class="song-list"></ul>
         <p id="noMatches" class="empty-state" hidden>No songs match.</p>
     </section>
@@ -4624,6 +4848,129 @@ button.structure-close,
                 <span class="pattern-spacer"></span>
                 <button id="patternCancel" class="pattern-cancel" type="button">Cancel</button>
                 <button id="patternSave" class="pattern-save" type="submit">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="newBookOverlay" class="pattern-overlay" hidden aria-hidden="true">
+    <div id="newBookDialog" class="pattern-sheet" role="dialog" aria-modal="true"
+         aria-labelledby="newBookTitle" tabindex="-1">
+        <header class="pattern-head">
+            <div>
+                <span class="pattern-kicker">Songbook</span>
+                <h2 id="newBookTitle">New songbook</h2>
+            </div>
+            <button id="newBookClose" class="pattern-close" type="button"
+                    aria-label="Close new songbook dialog">×</button>
+        </header>
+
+        <form id="newBookForm" class="pattern-form" novalidate>
+            <label class="pattern-field" for="newBookName">
+                <span>Name</span>
+                <input id="newBookName" type="text" maxlength="80" autocomplete="off" required>
+            </label>
+            <label class="pattern-field" for="newBookDescription">
+                <span>Description (optional)</span>
+                <input id="newBookDescription" type="text" maxlength="200" autocomplete="off">
+            </label>
+            <label class="pattern-field" for="newBookInstrument">
+                <span>Instrument</span>
+                <select id="newBookInstrument">
+                    <option value="ukulele">Ukulele</option>
+                    <option value="guitar">Guitar</option>
+                </select>
+            </label>
+
+            <p id="newBookError" class="pattern-error" role="alert" tabindex="-1" hidden></p>
+
+            <div class="pattern-actions">
+                <span class="pattern-spacer"></span>
+                <button id="newBookCancel" class="pattern-cancel" type="button">Cancel</button>
+                <button id="newBookCreate" class="pattern-save" type="submit">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="addSongOverlay" class="pattern-overlay" hidden aria-hidden="true">
+    <div id="addSongDialog" class="pattern-sheet add-song-sheet" role="dialog" aria-modal="true"
+         aria-labelledby="addSongTitle" tabindex="-1">
+        <header class="pattern-head">
+            <div>
+                <span class="pattern-kicker">Songbook</span>
+                <h2 id="addSongTitle">Add songs</h2>
+            </div>
+            <button id="addSongClose" class="pattern-close" type="button"
+                    aria-label="Close add songs dialog">×</button>
+        </header>
+
+        <form id="addSongForm" class="pattern-form" novalidate>
+            <label class="pattern-field" for="addSongText">
+                <span>Paste ChordPro</span>
+                <textarea id="addSongText" class="add-song-text" rows="9" spellcheck="false"
+                          placeholder="{title: My song}&#10;{time: 4/4}&#10;[C]Lyrics…"></textarea>
+            </label>
+
+            <div class="add-song-files">
+                <button id="addSongFileBtn" class="pill-btn" type="button">Choose files…</button>
+                <input id="addSongFile" type="file" accept=".cho,.chordpro,.txt" multiple hidden>
+                <span class="add-song-hint">.cho, .chordpro or .txt — one song per file</span>
+            </div>
+
+            <div id="addSongPreview" class="add-song-preview" aria-live="polite" hidden>
+                <p class="add-song-preview-title">Preview</p>
+                <ul id="addSongPreviewList" class="add-song-list"></ul>
+            </div>
+
+            <p id="addSongError" class="pattern-error" role="alert" tabindex="-1" hidden></p>
+
+            <div class="pattern-actions">
+                <span class="pattern-spacer"></span>
+                <button id="addSongCancel" class="pattern-cancel" type="button">Cancel</button>
+                <button id="addSongAdd" class="pattern-save" type="submit" disabled>Add</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="editSourceOverlay" class="pattern-overlay" hidden aria-hidden="true">
+    <div id="editSourceDialog" class="pattern-sheet add-song-sheet" role="dialog" aria-modal="true"
+         aria-labelledby="editSourceTitle" tabindex="-1">
+        <header class="pattern-head">
+            <div>
+                <span class="pattern-kicker">Song source</span>
+                <h2 id="editSourceTitle">Edit source</h2>
+            </div>
+            <button id="editSourceClose" class="pattern-close" type="button"
+                    aria-label="Close edit source dialog">×</button>
+        </header>
+
+        <form id="editSourceForm" class="pattern-form" novalidate>
+            <p id="editSourceSong" class="edit-source-song"></p>
+
+            <label class="pattern-field" for="editSourceText" id="editSourceField">
+                <span>ChordPro</span>
+                <textarea id="editSourceText" class="add-song-text" rows="12"
+                          spellcheck="false"></textarea>
+            </label>
+
+            <p id="editSourceUnavailable" class="edit-source-unavailable" tabindex="-1" hidden>
+                This song has no ChordPro source. Use the Grid and Strum editors to change its
+                structure and patterns.
+            </p>
+
+            <div id="editSourcePreview" class="add-song-preview" aria-live="polite" hidden>
+                <p class="add-song-preview-title">Preview</p>
+                <ul id="editSourcePreviewList" class="add-song-list"></ul>
+            </div>
+
+            <p id="editSourceError" class="pattern-error" role="alert" tabindex="-1" hidden></p>
+
+            <div class="pattern-actions">
+                <span class="pattern-spacer"></span>
+                <button id="editSourceCancel" class="pattern-cancel" type="button">Cancel</button>
+                <button id="editSourceSave" class="pattern-save" type="submit">Save</button>
             </div>
         </form>
     </div>
@@ -6911,6 +7258,11 @@ button.structure-close,
         byId: {},               // active songs by id
         currentSong: null,
 
+        /* List edit mode: the id of the songbook whose authoring row actions
+         * are showing, or null. Session only — never persisted. See
+         * SB.isEditingBook. */
+        editingBook: null,
+
         /* personal data */
         favorites: new Set(SB.lsGetArray(SB.FAV_KEY).filter(function (v) {
             return typeof v === 'string';
@@ -6968,6 +7320,14 @@ button.structure-close,
         chordPin: true,
         chordMode: 'inline',
         showNumbers: false
+    };
+
+    /* Edit mode is a task mode, not a display preference: it is held per
+     * songbook id and never persisted, so switching books — or reopening the
+     * app — always lands in the safe, read-only list. */
+    SB.isEditingBook = function () {
+        return !!(SB.state.active && SB.state.active.imported &&
+            SB.state.editingBook === SB.state.active.id);
     };
 
 })(window.SB = window.SB || {});
@@ -7137,6 +7497,15 @@ button.structure-close,
      * bar must sum to this many beats; 6/8 is two dotted-quarter pulses, not
      * six eighths, matching how bpm and the strum library count 6/8. */
     var BEATS_PER_BAR = { '4/4': 4, '3/4': 3, '6/8': 2, '2/4': 2 };
+
+    /* Exposed so the ChordPro parser can reuse this one copy of the metre
+     * rules instead of carrying a third mirror. `beatsPerBar` returns null
+     * (not the metronome's 4/4 fallback) for an unknown metre, because a grid
+     * bar cannot be expanded without a real metre. */
+    SB.BPM_MIN = BPM_MIN;
+    SB.BPM_MAX = BPM_MAX;
+    SB.TIME_SIGNATURES = TIME_SIGNATURES;
+    SB.beatsPerBar = function (time) { return BEATS_PER_BAR[time] || null; };
 
     /* Imported songbooks are untrusted JSON, so an out-of-range or non-numeric
      * tempo is dropped to null rather than clamped: clamping "0" to 20 would
@@ -7370,6 +7739,11 @@ button.structure-close,
         var strumPatterns = normalizeStrumPatterns(s.strumPatterns);
         if (strumPatterns) song.strumPatterns = strumPatterns;
         if (grid) song.grid = grid;
+        /* Authoring source, kept only when present so JSON-only songs do not
+         * grow an empty field. It is data for the source editor, not content
+         * the renderer reads; `sheet`/`grid` remain the rendered truth. */
+        var chordpro = typeof s.chordpro === 'string' ? s.chordpro.trim() : '';
+        if (chordpro) song.chordpro = chordpro;
         return song;
     }
 
@@ -7392,6 +7766,238 @@ button.structure-close,
             songs: raw.songs.map(normalizeSong)
         };
     }
+
+    /* A user-created book is an ordinary imported book, so it uses the same
+     * store, picker and removal path as a JSON import. The id is slugged from
+     * the name and made unique against bundled books too: reusing a bundled
+     * id would shadow shipped content and vanish on the next deploy. */
+    function songbookSlug(name) {
+        var s = String(name == null ? '' : name).normalize('NFKD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\u0142/g, 'l')
+            .toLowerCase();
+        s = s.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        return s.slice(0, 48) || 'songbook';
+    }
+
+    function uniqueSongbookId(base) {
+        var taken = {};
+        SB.allSongbooks().forEach(function (b) { taken[b.id] = true; });
+        if (!taken[base]) return base;
+        var n = 2;
+        while (taken[base + '-' + n]) n += 1;
+        return base + '-' + n;
+    }
+
+    function copyBook(book) {
+        var next = {};
+        Object.keys(book).forEach(function (key) { next[key] = book[key]; });
+        return next;
+    }
+
+    /* Renumber a copy of the array, never the live song objects: a failed
+     * idbPut must leave both the book in memory and its stored version on the
+     * previous revision. */
+    function renumbered(songs) {
+        return songs.map(function (song, index) {
+            var copy = {};
+            Object.keys(song).forEach(function (key) { copy[key] = song[key]; });
+            copy.n = index + 1;
+            return copy;
+        });
+    }
+
+    function songIndex(book, songId) {
+        for (var i = 0; i < book.songs.length; i++) {
+            if (book.songs[i].id === songId) return i;
+        }
+        return -1;
+    }
+
+    /* One storage write for every authoring change. Memory and the picker are
+     * updated only after idbPut succeeds, so a rejected write leaves the book
+     * exactly as it was. */
+    function commitBook(next) {
+        return SB.idbPut(next).then(function () {
+            var index = -1;
+            for (var i = 0; i < SB.state.imported.length; i++) {
+                if (SB.state.imported[i].id === next.id) { index = i; break; }
+            }
+            if (index >= 0) SB.state.imported[index] = next;
+            else SB.state.imported.push(next);
+            SB.rebuildIndex();
+            if (SB.state.active && SB.state.active.id === next.id) {
+                SB.setActive(next);
+                SB.renderList();
+                SB.renderRecent();
+            }
+            return next;
+        });
+    }
+
+    SB.createSongbook = function (fields) {
+        fields = fields || {};
+        var name = String(fields.name == null ? '' : fields.name).trim();
+        if (!name) return Promise.reject(new Error('songbook name is required'));
+        var raw = {
+            id: uniqueSongbookId(songbookSlug(name)),
+            name: name,
+            description: String(fields.description == null ? '' : fields.description).trim(),
+            instrument: fields.instrument === 'guitar' ? 'guitar' : 'ukulele',
+            songs: []
+        };
+        var sb;
+        try { sb = SB.normalizeSongbook(raw); }
+        catch (err) { return Promise.reject(err); }
+        sb.imported = true;
+        return commitBook(sb).then(function () {
+            SB.setActive(sb);
+            SB.renderList();
+            SB.renderRecent();
+            return sb;
+        });
+    };
+
+    /* Append already-parsed songs to an imported book. Each song goes through
+     * normalizeSongbook (the single validator) before it is stored; ids are
+     * de-duplicated within the book and the batch. One idbPut makes the write
+     * atomic: a failure leaves both memory and storage on the previous
+     * version. Positions are renumbered contiguously, the same invariant
+     * remove/move maintain, so `n` always matches book order. */
+    SB.addSongsToBook = function (book, songs) {
+        if (!book || !book.imported) {
+            return Promise.reject(new Error('only imported songbooks can be edited'));
+        }
+        var incoming = (songs || []).filter(function (s) {
+            return s && typeof s === 'object';
+        });
+        if (!incoming.length) return Promise.resolve(book);
+
+        var taken = {};
+        book.songs.forEach(function (s) { taken[s.id] = true; });
+
+        var appended = [];
+        for (var i = 0; i < incoming.length; i++) {
+            var normalized = SB.normalizeSongbook({
+                id: book.id, name: book.name, songs: [incoming[i]]
+            }).songs[0];
+            var base = normalized.id || 'song';
+            var id = base;
+            var suffix = 2;
+            while (taken[id]) {
+                id = base + '-' + suffix;
+                suffix += 1;
+            }
+            taken[id] = true;
+            normalized.id = id;
+            appended.push(normalized);
+        }
+
+        var next = copyBook(book);
+        next.songs = renumbered(book.songs.concat(appended));
+        return commitBook(next);
+    };
+
+    /* Replace one song's parsed content from its source, keeping the id and
+     * position the list and export already reference. */
+    SB.updateSongInBook = function (book, songId, song) {
+        if (!book || !book.imported) {
+            return Promise.reject(new Error('only imported songbooks can be edited'));
+        }
+        var index = songIndex(book, songId);
+        if (index < 0) return Promise.reject(new Error('song not found: ' + songId));
+        var normalized;
+        try {
+            normalized = SB.normalizeSongbook({
+                id: book.id, name: book.name, songs: [song]
+            }).songs[0];
+        } catch (err) {
+            return Promise.reject(err);
+        }
+        normalized.id = songId;
+        normalized.n = book.songs[index].n;
+        var songs = book.songs.slice();
+        songs[index] = normalized;
+        var next = copyBook(book);
+        next.songs = songs;
+        return commitBook(next).then(function (committed) {
+            /* The local edit plan is indexed against the old structure (bar and
+             * beat positions, the old grid and metre) and plan.grid outranks the
+             * songbook's own grid. Keeping it would make this edit half a no-op
+             * in Grid mode, so a re-parsed source drops the plan. Done after the
+             * write: a rejected edit must leave local edits untouched. */
+            if (SB.clearPlan) SB.clearPlan(book.id, songId);
+            return committed;
+        });
+    };
+
+    SB.removeSongFromBook = function (book, songId) {
+        if (!book || !book.imported) {
+            return Promise.reject(new Error('only imported songbooks can be edited'));
+        }
+        var index = songIndex(book, songId);
+        if (index < 0) return Promise.reject(new Error('song not found: ' + songId));
+        var songs = book.songs.filter(function (song) { return song.id !== songId; });
+        var next = copyBook(book);
+        next.songs = renumbered(songs);
+        return commitBook(next).then(function (committed) {
+            /* The song is gone, so its plan, favourite and notes must go too;
+             * leaving them behind would attach them to an unrelated song that
+             * later happens to reuse the id. */
+            if (SB.clearSongData) SB.clearSongData(book.id, songId);
+            return committed;
+        });
+    };
+
+    /* Move by one slot in the book's own order, not the list's current sort:
+     * `n` is the authored sequence and must stay contiguous. */
+    SB.moveSongInBook = function (book, songId, delta) {
+        if (!book || !book.imported) {
+            return Promise.reject(new Error('only imported songbooks can be edited'));
+        }
+        var from = songIndex(book, songId);
+        if (from < 0) return Promise.reject(new Error('song not found: ' + songId));
+        var to = from + delta;
+        if (to < 0 || to >= book.songs.length) return Promise.resolve(book);
+        var songs = book.songs.slice();
+        var moved = songs[from];
+        songs[from] = songs[to];
+        songs[to] = moved;
+        var next = copyBook(book);
+        next.songs = renumbered(songs);
+        return commitBook(next);
+    };
+
+    /* A copy is always a normal imported book, so it is editable even when the
+     * source was bundled. `sourceUrl` is deliberately not copied: Refresh must
+     * never overwrite local edits with the original remote file. */
+    SB.duplicateSongbook = function (book) {
+        if (!book) return Promise.reject(new Error('no songbook to duplicate'));
+        var name = String(book.name || 'Songbook').trim() + ' (copy)';
+        var raw = {
+            id: uniqueSongbookId(songbookSlug(name)),
+            name: name,
+            description: book.description || '',
+            instrument: book.instrument,
+            logo: book.logo || '',
+            logoDark: book.logoDark || '',
+            songs: JSON.parse(JSON.stringify(book.songs || []))
+        };
+        var sb;
+        try { sb = SB.normalizeSongbook(raw); }
+        catch (err) { return Promise.reject(err); }
+        sb.imported = true;
+        return commitBook(sb).then(function () {
+            /* Carry the user's local edits across: a copy keyed by a new book
+             * id would otherwise lose every grid/strum edit, favourite and
+             * note, which is precisely what a bundled-book copy is for. */
+            if (SB.copySongData) SB.copySongData(book.id, sb.id, sb.songs);
+            SB.setActive(sb);
+            SB.renderList();
+            SB.renderRecent();
+            return sb;
+        });
+    };
 
     SB.loadBundled = function () {
         /* An injected empty list is authoritative, not an invitation to fetch:
@@ -7437,8 +8043,22 @@ button.structure-close,
         if (sb) sb.songs.forEach(function (s) { SB.state.byId[s.id] = s; });
         var sel = SB.$('songbookSelect');
         if (sel) sel.value = sb ? sb.id : '';
-        var rm = SB.$('removeSongsBtn');
-        if (rm) rm.hidden = !(sb && sb.imported);
+        /* Edit mode belongs to one editable book and is session-scoped.
+         * Clearing the flag here rather than in the toggle means a book switch
+         * can never leave the destructive row actions armed for the book you
+         * land on. An authoring write calls setActive(next) with the same id,
+         * so the mode survives a move/remove/edit. */
+        var edit = SB.$('editBookBtn');
+        if (edit) edit.hidden = !(sb && sb.imported);
+        if (!sb || !sb.imported || SB.state.editingBook !== sb.id) {
+            SB.state.editingBook = null;
+        }
+        /* Add, Duplicate and Remove are edit-mode actions (list.js owns the
+         * rule); this call covers routes that never render the list. */
+        if (SB.syncAuthoringBar) SB.syncAuthoringBar();
+        if (SB.setAuthorStatus) SB.setAuthorStatus('');
+        /* Refresh is URL-import maintenance, not song authoring, and stays in
+         * the bar next to Export. */
         var rf = SB.$('refreshSongsBtn');
         if (rf) rf.hidden = !(sb && sb.imported && sb.sourceUrl);
         var ex = SB.$('exportSongsBtn');
@@ -7784,6 +8404,57 @@ button.structure-close,
     SB.clearPlan = function (sbId, songId) {
         try { window.localStorage.removeItem(SB.planKey(sbId, songId)); } catch (e) { /* ignore */ }
         try { window.localStorage.removeItem(SB.strumKey(sbId, songId)); } catch (e) { /* ignore */ }
+    };
+
+    /* Every per-song key this app writes, so removing a song can clear all of
+     * it and duplicating a book can carry all of it across. Speed and size are
+     * display preferences rather than edits, but they are equally scoped to
+     * the book + song pair and have the same orphan/resurrection problem. */
+    function songDataKeys() {
+        return [SB.planKey, SB.strumKey, SB.noteKey, SB.speedKey, SB.sizeKey, SB.bpmKey];
+    }
+
+    /* A removed song's id stops existing, but its data would not: ids are
+     * slugged from titles, so re-adding the same source later would resurrect
+     * the old plan, favourite and notes. Removing a song therefore removes
+     * everything stored for it, and the row's confirm says so. */
+    SB.clearSongData = function (sbId, songId) {
+        if (!sbId || !songId) return;
+        songDataKeys().forEach(function (key) {
+            try { window.localStorage.removeItem(key(sbId, songId)); } catch (e) { /* ignore */ }
+        });
+        if (SB.state.favorites.delete(SB.compositeId(sbId, songId))) SB.saveFavorites();
+        var recent = SB.state.recent.filter(function (r) {
+            return !(r.sb === sbId && r.id === songId);
+        });
+        if (recent.length !== SB.state.recent.length) {
+            SB.state.recent = recent;
+            SB.lsSet(SB.RECENT_KEY, recent);
+        }
+    };
+
+    /* Duplicating a book is the documented route to making a bundled book
+     * editable, and the user who does that is exactly the one who has
+     * accumulated local edits. Plans, favourites and notes are keyed by
+     * book + song id, so a new book id needs them re-keyed or the copy would
+     * silently start from scratch. */
+    SB.copySongData = function (fromSbId, toSbId, songs) {
+        if (!fromSbId || !toSbId || fromSbId === toSbId) return;
+        var changed = false;
+        (songs || []).forEach(function (song) {
+            if (!song || !song.id) return;
+            songDataKeys().forEach(function (key) {
+                var value = null;
+                try { value = window.localStorage.getItem(key(fromSbId, song.id)); } catch (e) { /* ignore */ }
+                if (value === null) return;
+                try { window.localStorage.setItem(key(toSbId, song.id), value); } catch (e) { /* ignore */ }
+            });
+            if (SB.state.favorites.has(SB.compositeId(fromSbId, song.id))) {
+                SB.state.favorites.add(SB.compositeId(toSbId, song.id));
+                changed = true;
+            }
+        });
+        if (changed) SB.saveFavorites();
     };
 
     function planHasEdits(plan) {
@@ -11459,7 +12130,12 @@ button.structure-close,
             }
             return true;
         });
-        if (SB.state.state.sort === 'artist') {
+        if (SB.isEditingBook()) {
+            /* Move up/down reorder `n`. Sorting by title while they do that
+             * would renumber the badges without moving a row, so edit mode
+             * shows the book's own order instead. */
+            out.sort(function (a, b) { return a.n - b.n; });
+        } else if (SB.state.state.sort === 'artist') {
             out.sort(function (a, b) {
                 var c = a.artist.localeCompare(b.artist, 'en', { sensitivity: 'base' });
                 return c !== 0 ? c : a.n - b.n;
@@ -11488,9 +12164,62 @@ button.structure-close,
         if (result) result.textContent = '';
         var noMatches = SB.$('noMatches');
         if (noMatches) noMatches.hidden = true;
+        var emptyBook = SB.$('emptyBookState');
+        if (emptyBook) emptyBook.hidden = true;
+    }
+
+    function rowAction(action, icon, label, ariaLabel) {
+        var button = SB.el('button', 'row-action row-action-' + action);
+        button.type = 'button';
+        button.dataset.action = action;
+        button.title = label;
+        button.setAttribute('aria-label', ariaLabel);
+        button.appendChild(SB.el('span', 'row-action-icon', icon));
+        button.appendChild(SB.el('span', 'row-action-label', label));
+        return button;
+    }
+
+    /* The bar carries browsing actions by default. Adding songs, duplicating a
+     * book and removing it are authoring/maintenance actions, so they live
+     * inside the per-book edit mode and the read-only bar stays calm.
+     * Duplicate is the exception for a bundled book: bundled books have no
+     * edit mode, and duplication is their only route to an editable copy. */
+    function syncAuthoringBar() {
+        var book = SB.state.active;
+        var editing = SB.isEditingBook();
+        var imported = !!(book && book.imported);
+        function show(id, visible) {
+            var b = SB.$(id);
+            if (b) b.hidden = !visible;
+        }
+        show('addSongBtn', editing && imported);
+        show('removeSongsBtn', editing && imported);
+        show('duplicateBookBtn', !!book && (!imported || editing));
+    }
+    SB.syncAuthoringBar = syncAuthoringBar;
+
+    /* Mirrors applyViewToggle: the button is the mode's only affordance, so it
+     * carries the pressed state and the label. The sort buttons are disabled
+     * because edit mode shows book order, not the chosen title/artist order. */
+    function applyEditToggle() {
+        var editing = SB.isEditingBook();
+        var b = SB.$('editBookBtn');
+        if (b) {
+            b.setAttribute('aria-pressed', editing ? 'true' : 'false');
+            b.textContent = editing ? 'Done' : 'Edit songbook';
+            b.title = editing ? 'Leave edit mode' : 'Reorder, edit and remove songs';
+        }
+        Array.prototype.forEach.call(document.querySelectorAll('.sort-btn'), function (s) {
+            s.disabled = editing;
+            s.title = editing ? 'Rows show book order while editing' : '';
+        });
+        syncAuthoringBar();
     }
 
     SB.renderList = function () {
+        /* A repaint replaces the buttons, so an armed Remove cannot survive it;
+         * drop the pending state with the DOM rather than leaving a prompt up. */
+        if (SB.resetRemoveConfirm) SB.resetRemoveConfirm();
         if (!SB.state.active) {
             SB.$('songList').textContent = '';
             SB.$('resultCount').textContent = '';
@@ -11500,12 +12229,25 @@ button.structure-close,
         }
         var songs = SB.filteredSongs();
         var total = SB.activeSongs().length;
+        /* A zero-song book is a real state (a freshly created book), not an
+         * empty search: show the "No songs yet" block and hide the search and
+         * filter toolbar, which has nothing to act on. */
+        var bookEmpty = total === 0;
+        var emptyBook = SB.$('emptyBookState');
+        if (emptyBook) emptyBook.hidden = !bookEmpty;
+        var emptyAdd = SB.$('emptyAddSongBtn');
+        if (emptyAdd) emptyAdd.hidden = !(bookEmpty && SB.state.active.imported);
+        var toolbar = SB.$('listControls');
+        if (toolbar) toolbar.hidden = bookEmpty;
         var ul = SB.$('songList');
         ul.textContent = '';
+        ul.classList.toggle('is-editing', SB.isEditingBook());
         var frag = document.createDocumentFragment();
         var sbId = SB.state.active ? SB.state.active.id : '';
+        var editable = SB.isEditingBook();
+        var bookSongs = SB.state.active.songs;
         songs.forEach(function (s) {
-            var li = SB.el('li', 'song-row');
+            var li = SB.el('li', 'song-row' + (editable ? ' has-actions' : ''));
             li.dataset.id = s.id;
 
             var a = document.createElement('a');
@@ -11529,17 +12271,61 @@ button.structure-close,
                 e.stopPropagation();
                 SB.toggleFavorite(sbId, s.id);
             });
-            li.appendChild(star);
+
+            var tools = SB.el('div', 'row-tools');
+            tools.appendChild(star);
+            if (editable) {
+                var pos = bookSongs.indexOf(s);
+                var edit = rowAction('edit', '✎', 'Edit source',
+                    'Edit source for ' + s.title);
+                edit.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    SB.editSongSource(s.id);
+                });
+                tools.appendChild(edit);
+
+                var up = rowAction('up', '↑', 'Move up',
+                    'Move ' + s.title + ' up in the book');
+                up.disabled = pos <= 0;
+                up.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    SB.moveSongInList(s.id, -1);
+                });
+                tools.appendChild(up);
+
+                var down = rowAction('down', '↓', 'Move down',
+                    'Move ' + s.title + ' down in the book');
+                down.disabled = pos < 0 || pos >= bookSongs.length - 1;
+                down.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    SB.moveSongInList(s.id, 1);
+                });
+                tools.appendChild(down);
+
+                var remove = rowAction('remove', '✕', 'Remove',
+                    'Remove ' + s.title + ' from the book');
+                remove.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    SB.removeSongFromList(s.id);
+                });
+                tools.appendChild(remove);
+            }
+            li.appendChild(tools);
 
             frag.appendChild(li);
         });
         ul.appendChild(frag);
 
-        SB.$('noMatches').hidden = songs.length > 0;
-        SB.$('resultCount').textContent = songs.length === total
+        SB.$('noMatches').hidden = bookEmpty || songs.length > 0;
+        SB.$('resultCount').textContent = bookEmpty ? '' : (songs.length === total
             ? total + ' songs'
-            : songs.length + ' of ' + total + ' songs';
+            : songs.length + ' of ' + total + ' songs');
         SB.$('searchClear').hidden = !SB.state.state.q;
+        applyEditToggle();
         applyViewToggle();
     }
 
@@ -12162,6 +12948,9 @@ button.structure-close,
             chords: (song.chords || []).slice(),
             sheet: copySheet(song.sheet)
         };
+        /* Authoring source travels with the effective song so an exported
+         * book stays editable after re-import. It is not rendered content. */
+        if (song.chordpro) out.chordpro = song.chordpro;
 
         var strum = defaultStrum(song, merged, time);
         if (strum) out.strum = strum;
@@ -12356,6 +13145,815 @@ button.structure-close,
         }
         if (output) output.textContent = '';
         status('');
+    };
+
+})(window.SB = window.SB || {});
+
+</script>
+<script>
+/* Songbook — author
+ * creating, editing and duplicating songbooks from inside the app
+ *
+ * Part of the window.SB namespace. Loaded as a classic script in the order set
+ * by index.html; it depends on the authoring helpers in js/songbooks.js and on
+ * the routing helpers. Authoring writes only ever target imported books;
+ * bundled books stay read-only unless duplicated into an imported copy.
+ */
+(function (SB) {
+    'use strict';
+
+    var lastFocus = null;
+
+    /* Authoring outcomes belong on one polite live region, not in a blocking
+     * alert: the batch summary is the primary success feedback for adding
+     * songs, and it should not interrupt a screen reader or steal focus. */
+    function setAuthorStatus(message, isError) {
+        var box = SB.$('authorStatus');
+        if (!box) return;
+        box.textContent = message || '';
+        box.classList.toggle('is-error', !!message && !!isError);
+    }
+    SB.setAuthorStatus = setAuthorStatus;
+
+    function overlay() { return SB.$('newBookOverlay'); }
+
+    /* Keep Tab inside the open authoring dialog, like the pattern editor and
+     * the structure editor do. Without this, Tab can land on controls behind
+     * the overlay even though the dialog is marked aria-modal. */
+    function trapFocus(event, sheetId) {
+        if (event.key !== 'Tab') return false;
+        var sheet = SB.$(sheetId);
+        if (!sheet) return false;
+        var focusables = Array.prototype.filter.call(
+            sheet.querySelectorAll(
+                'button, input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+            function (el) {
+                return !el.disabled && !el.hidden && el.offsetParent !== null;
+            });
+        if (!focusables.length) {
+            event.preventDefault();
+            return true;
+        }
+        var first = focusables[0];
+        var last = focusables[focusables.length - 1];
+        var active = document.activeElement;
+        if (!active || active === sheet || !sheet.contains(active)) {
+            event.preventDefault();
+            first.focus();
+            return true;
+        }
+        if (event.shiftKey && active === first) {
+            event.preventDefault();
+            last.focus();
+            return true;
+        }
+        if (!event.shiftKey && active === last) {
+            event.preventDefault();
+            first.focus();
+            return true;
+        }
+        return false;
+    }
+
+    function setError(message) {
+        var box = SB.$('newBookError');
+        if (!box) return;
+        box.textContent = message || '';
+        box.hidden = !message;
+        if (message) {
+            try { box.focus({ preventScroll: true }); } catch (e) { box.focus(); }
+        }
+    }
+
+    function open() {
+        var el = overlay();
+        if (!el) return;
+        lastFocus = document.activeElement;
+        setError('');
+        var form = SB.$('newBookForm');
+        if (form) form.reset();
+        var instrument = SB.$('newBookInstrument');
+        if (instrument) {
+            instrument.value = SB.state.instrument === 'guitar' ? 'guitar' : 'ukulele';
+        }
+        el.hidden = false;
+        el.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('pattern-open');
+        var name = SB.$('newBookName');
+        if (name) {
+            try { name.focus({ preventScroll: true }); } catch (e) { name.focus(); }
+        }
+    }
+
+    /* `restore` is false after a successful create: the opener may be the
+     * first-run empty state, which is hidden by then, so focus belongs on the
+     * new book's picker instead. */
+    function close(restore) {
+        var el = overlay();
+        if (!el) return;
+        el.hidden = true;
+        el.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('pattern-open');
+        if (restore !== false && lastFocus && lastFocus.focus) {
+            try { lastFocus.focus({ preventScroll: true }); } catch (e) { lastFocus.focus(); }
+        }
+    }
+
+    function submit(event) {
+        event.preventDefault();
+        var nameInput = SB.$('newBookName');
+        var name = nameInput ? nameInput.value.trim() : '';
+        if (!name) {
+            setError('Enter a name for the songbook.');
+            if (nameInput) nameInput.focus();
+            return;
+        }
+        var button = SB.$('newBookCreate');
+        if (button) button.disabled = true;
+        var description = SB.$('newBookDescription');
+        var instrument = SB.$('newBookInstrument');
+        SB.createSongbook({
+            name: name,
+            description: description ? description.value : '',
+            instrument: instrument ? instrument.value : SB.state.instrument
+        }).then(function (sb) {
+            close(false);
+            var hash = SB.routeHash(sb.id);
+            if (location.hash === hash) SB.route();
+            else location.hash = hash;
+            var picker = SB.$('songbookSelect');
+            if (picker) {
+                try { picker.focus({ preventScroll: true }); } catch (e) { picker.focus(); }
+            }
+        }, function (err) {
+            setError(err.message || 'Could not create the songbook.');
+        }).then(function () {
+            if (button) button.disabled = false;
+        });
+    }
+
+    /* ---------------- add songs ---------------- */
+
+    var addLastFocus = null;
+    var addSources = [];
+    /* Reading files is async, so a slow read must not paint over a newer
+     * preview after the user has changed the textarea or picked other files. */
+    var addPreviewSeq = 0;
+    /* True while the current preview is still being read/parsed. Add is
+     * disabled meanwhile: addSources describes the *previous* input until the
+     * batch resolves, so submitting would add the wrong songs. */
+    var addReading = false;
+
+    function addOverlay() { return SB.$('addSongOverlay'); }
+
+    function setAddError(message) {
+        var box = SB.$('addSongError');
+        if (!box) return;
+        box.textContent = message || '';
+        box.hidden = !message;
+        if (message) {
+            try { box.focus({ preventScroll: true }); } catch (e) { box.focus(); }
+        }
+    }
+
+    function readAddFile(file) {
+        return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onload = function () { resolve(String(reader.result)); };
+            reader.onerror = function () { reject(new Error('could not read file')); };
+            reader.readAsText(file);
+        });
+    }
+
+    /* Parsing a source is also its preview: the normalized song is exactly
+     * what will be stored, so the counts the user sees cannot drift from the
+     * chart they get. A blank source or a missing title is fatal because the
+     * build rejects those songs; parser warnings stay warnings. */
+    function parseAddSource(name, text) {
+        var source = String(text == null ? '' : text);
+        if (!source.trim()) return { name: name, ok: false, reason: 'empty file' };
+        var parsed;
+        try {
+            parsed = SB.parseChordPro(source, { number: 1, allowTrustedNotes: false });
+        } catch (err) {
+            return { name: name, ok: false, reason: err.message || 'could not parse ChordPro' };
+        }
+        if (!parsed.song.title || !String(parsed.song.title).trim()) {
+            return { name: name, ok: false, reason: 'missing {title}' };
+        }
+        var song;
+        try {
+            song = SB.normalizeSongbook({
+                id: 'preview', name: 'Preview', songs: [parsed.song]
+            }).songs[0];
+        } catch (err) {
+            return { name: name, ok: false, reason: err.message || 'invalid song' };
+        }
+        song.chordpro = source.trim();
+        return { name: name, ok: true, song: song, warnings: parsed.warnings || [] };
+    }
+
+    function gridCounts(song) {
+        if (!SB.gridBlocksFor) return null;
+        try {
+            var blocks = SB.gridBlocksFor(song, null);
+            var bars = blocks.reduce(function (sum, block) {
+                return sum + (block.bars || []).length;
+            }, 0);
+            return { sections: blocks.length, bars: bars };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function previewMeta(song) {
+        var parts = [
+            song.time || '—',
+            song.bpm ? song.bpm + ' bpm' : '— bpm',
+            song.strum || 'no strum'
+        ];
+        var counts = gridCounts(song);
+        if (counts) {
+            parts.push(counts.sections + (counts.sections === 1 ? ' section' : ' sections'));
+            parts.push(counts.bars + (counts.bars === 1 ? ' bar' : ' bars'));
+        }
+        return parts.join(' · ');
+    }
+
+    function renderSourceList(list, sources) {
+        list.textContent = '';
+        sources.forEach(function (source) {
+            var li = SB.el('li', 'add-song-item' + (source.ok ? '' : ' is-error'));
+            var head = SB.el('p', 'add-song-item-head');
+            head.appendChild(SB.el('span', 'add-song-item-title',
+                source.ok ? source.song.title : source.name));
+            if (source.ok && source.song.artist) {
+                head.appendChild(SB.el('span', 'add-song-item-artist', source.song.artist));
+            } else if (!source.ok) {
+                head.appendChild(SB.el('span', 'add-song-item-artist', source.name));
+            }
+            li.appendChild(head);
+
+            if (!source.ok) {
+                li.appendChild(SB.el('p', 'add-song-item-error', source.reason));
+            } else {
+                li.appendChild(SB.el('p', 'add-song-meta', previewMeta(source.song)));
+                if (source.warnings.length) {
+                    var warnings = SB.el('ul', 'add-song-warnings');
+                    source.warnings.forEach(function (warning) {
+                        warnings.appendChild(SB.el('li', null, warning));
+                    });
+                    li.appendChild(warnings);
+                }
+            }
+            list.appendChild(li);
+        });
+    }
+
+    function renderAddPreview() {
+        var box = SB.$('addSongPreview');
+        var list = SB.$('addSongPreviewList');
+        var button = SB.$('addSongAdd');
+        if (!box || !list) return;
+        list.textContent = '';
+        if (!addSources.length) {
+            box.hidden = true;
+            if (button) button.disabled = true;
+            return;
+        }
+        box.hidden = false;
+        /* Keep Add enabled even when every source is bad: submitting is how a
+         * keyboard user reaches the announced explanation. But never while the
+         * batch is still being read — the preview still describes old input. */
+        if (button) button.disabled = addReading;
+        renderSourceList(list, addSources);
+    }
+
+    function refreshAddPreview() {
+        var seq = ++addPreviewSeq;
+        /* Editing the input clears a previous submit error: it described the
+         * sources as they were, not the ones now in the preview. */
+        setAddError('');
+        var textarea = SB.$('addSongText');
+        var fileInput = SB.$('addSongFile');
+        var text = textarea ? textarea.value : '';
+        var files = fileInput ? Array.prototype.slice.call(fileInput.files || []) : [];
+        var jobs = [];
+        if (text.trim()) jobs.push(Promise.resolve({ name: 'Pasted text', text: text }));
+        files.forEach(function (file) {
+            jobs.push(readAddFile(file).then(function (content) {
+                return { name: file.name, text: content };
+            }, function () {
+                return { name: file.name, error: 'could not read file' };
+            }));
+        });
+        if (!jobs.length) {
+            addReading = false;
+            addSources = [];
+            renderAddPreview();
+            return;
+        }
+        addReading = true;
+        var add = SB.$('addSongAdd');
+        if (add) add.disabled = true;
+        Promise.all(jobs).then(function (entries) {
+            if (seq !== addPreviewSeq) return;
+            addReading = false;
+            addSources = entries.map(function (entry) {
+                if (entry.error) return { name: entry.name, ok: false, reason: entry.error };
+                return parseAddSource(entry.name, entry.text);
+            });
+            renderAddPreview();
+        });
+    }
+
+    function openAddSongs() {
+        var el = addOverlay();
+        if (!el) return;
+        var book = SB.state.active;
+        if (!book || !book.imported) return;
+        addLastFocus = document.activeElement;
+        addSources = [];
+        addReading = false;
+        addPreviewSeq += 1;
+        setAddError('');
+        var form = SB.$('addSongForm');
+        if (form) form.reset();
+        var box = SB.$('addSongPreview');
+        if (box) box.hidden = true;
+        var list = SB.$('addSongPreviewList');
+        if (list) list.textContent = '';
+        var add = SB.$('addSongAdd');
+        if (add) add.disabled = true;
+        el.hidden = false;
+        el.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('pattern-open');
+        var textarea = SB.$('addSongText');
+        if (textarea) {
+            try { textarea.focus({ preventScroll: true }); } catch (e) { textarea.focus(); }
+        }
+    }
+
+    /* After a successful add the opener may have been the zero-song empty
+     * state, which is gone by then; focus belongs on the bar's Add button when
+     * edit mode keeps it visible, and on the edit toggle otherwise. */
+    function closeAddSongs(restore) {
+        var el = addOverlay();
+        if (!el) return;
+        el.hidden = true;
+        el.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('pattern-open');
+        addPreviewSeq += 1;
+        addReading = false;
+        if (restore === false) {
+            /* Add is an edit-mode action now, so after adding to a read-only
+             * list the surviving affordance is the edit toggle. */
+            var add = SB.$('addSongBtn');
+            if (add && !add.hidden) {
+                try { add.focus({ preventScroll: true }); } catch (e) { add.focus(); }
+            } else {
+                var edit = SB.$('editBookBtn');
+                if (edit && !edit.hidden) {
+                    try { edit.focus({ preventScroll: true }); } catch (e) { edit.focus(); }
+                }
+            }
+            return;
+        }
+        if (addLastFocus && addLastFocus.focus) {
+            try { addLastFocus.focus({ preventScroll: true }); } catch (e) { addLastFocus.focus(); }
+        }
+    }
+
+    function describeFailure(source) {
+        return source.name + ' — ' + source.reason;
+    }
+
+    function submitAddSongs(event) {
+        event.preventDefault();
+        if (addReading) {
+            setAddError('Still reading the selected files — try again in a moment.');
+            return;
+        }
+        var good = addSources.filter(function (source) { return source.ok; });
+        var bad = addSources.filter(function (source) { return !source.ok; });
+        if (!addSources.length) {
+            setAddError('Paste ChordPro or choose a file first.');
+            return;
+        }
+        if (!good.length) {
+            setAddError('Nothing added: ' + bad.map(describeFailure).join('; '));
+            return;
+        }
+        var book = SB.state.active;
+        if (!book || !book.imported) {
+            setAddError('Only imported songbooks can be edited.');
+            return;
+        }
+        var button = SB.$('addSongAdd');
+        if (button) button.disabled = true;
+        SB.addSongsToBook(book, good.map(function (source) { return source.song; }))
+            .then(function () {
+                closeAddSongs(false);
+                var summary = good.length + ' added';
+                if (bad.length) {
+                    summary += ', ' + bad.length + ' failed: '
+                        + bad.map(describeFailure).join('; ');
+                }
+                setAuthorStatus(summary);
+            }, function (err) {
+                setAddError(err.message || 'Could not add the songs.');
+                if (button) button.disabled = false;
+            });
+    }
+
+    SB.openAddSongs = openAddSongs;
+    SB.closeAddSongs = closeAddSongs;
+
+    /* ---------------- edit source ---------------- */
+
+    var editLastFocus = null;
+    var editSong = null;
+
+    function editOverlay() { return SB.$('editSourceOverlay'); }
+
+    function setEditError(message) {
+        var box = SB.$('editSourceError');
+        if (!box) return;
+        box.textContent = message || '';
+        box.hidden = !message;
+        if (message) {
+            try { box.focus({ preventScroll: true }); } catch (e) { box.focus(); }
+        }
+    }
+
+    function findActiveSong(songId) {
+        var book = SB.state.active;
+        if (!book) return null;
+        for (var i = 0; i < book.songs.length; i++) {
+            if (book.songs[i].id === songId) return book.songs[i];
+        }
+        return null;
+    }
+
+    /* Re-parsing the whole source on every keystroke is the preview: the user
+     * sees exactly the song Save would store, including any warnings. */
+    function refreshEditPreview() {
+        var textarea = SB.$('editSourceText');
+        var box = SB.$('editSourcePreview');
+        var list = SB.$('editSourcePreviewList');
+        if (!textarea || !editSong) return;
+        setEditError('');
+        if (!textarea.value.trim()) {
+            if (box) box.hidden = true;
+            if (list) list.textContent = '';
+            return;
+        }
+        var result = parseAddSource('Source', textarea.value);
+        if (box) box.hidden = false;
+        if (list) renderSourceList(list, [result]);
+    }
+
+    function openEditSource(songId) {
+        var el = editOverlay();
+        if (!el) return;
+        var book = SB.state.active;
+        if (!book || !book.imported) return;
+        var song = findActiveSong(songId);
+        if (!song) return;
+
+        editLastFocus = document.activeElement;
+        editSong = song;
+        setEditError('');
+        var heading = SB.$('editSourceSong');
+        if (heading) {
+            heading.textContent = song.title + (song.artist ? ' — ' + song.artist : '');
+        }
+
+        var hasSource = typeof song.chordpro === 'string' && !!song.chordpro.trim();
+        var field = SB.$('editSourceField');
+        var unavailable = SB.$('editSourceUnavailable');
+        var save = SB.$('editSourceSave');
+        var cancel = SB.$('editSourceCancel');
+        var textarea = SB.$('editSourceText');
+        var preview = SB.$('editSourcePreview');
+        var list = SB.$('editSourcePreviewList');
+
+        if (field) field.hidden = !hasSource;
+        if (unavailable) unavailable.hidden = hasSource;
+        if (save) {
+            save.hidden = !hasSource;
+            save.disabled = false;
+        }
+        if (cancel) cancel.textContent = hasSource ? 'Cancel' : 'Close';
+        if (textarea) textarea.value = hasSource ? song.chordpro : '';
+        if (preview) preview.hidden = true;
+        if (list) list.textContent = '';
+
+        el.hidden = false;
+        el.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('pattern-open');
+        if (hasSource) {
+            refreshEditPreview();
+            if (textarea) {
+                try { textarea.focus({ preventScroll: true }); } catch (e) { textarea.focus(); }
+            }
+        } else if (unavailable) {
+            try { unavailable.focus({ preventScroll: true }); } catch (e) { unavailable.focus(); }
+        }
+    }
+
+    function closeEditSource(restore) {
+        var el = editOverlay();
+        if (!el) return;
+        el.hidden = true;
+        el.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('pattern-open');
+        editSong = null;
+        if (restore !== false && editLastFocus && editLastFocus.focus) {
+            try { editLastFocus.focus({ preventScroll: true }); } catch (e) { editLastFocus.focus(); }
+        }
+    }
+
+    function submitEditSource(event) {
+        event.preventDefault();
+        if (!editSong) return;
+        if (!(typeof editSong.chordpro === 'string' && editSong.chordpro.trim())) return;
+        var textarea = SB.$('editSourceText');
+        var source = textarea ? textarea.value : '';
+        var result = parseAddSource('Source', source);
+        if (!result.ok) {
+            setEditError('Could not save: ' + result.reason);
+            return;
+        }
+        var songId = editSong.id;
+        var button = SB.$('editSourceSave');
+        if (button) button.disabled = true;
+        SB.updateSongInBook(SB.state.active, songId, result.song).then(function () {
+            closeEditSource(false);
+            focusRowAction(songId, 'edit');
+            setAuthorStatus('Updated “' + result.song.title + '”.');
+        }, function (err) {
+            setEditError(err.message || 'Could not save the source.');
+            if (button) button.disabled = false;
+        });
+    }
+
+    /* After a re-render the old buttons are gone, so focus is restored by song
+     * id. A disabled target (the first row's Move up, say) falls back to Edit. */
+    function focusRowAction(songId, action) {
+        var rows = document.querySelectorAll('#songList .song-row');
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].dataset.id !== songId) continue;
+            var target = rows[i].querySelector('[data-action="' + action + '"]');
+            if (!target || target.disabled) {
+                target = rows[i].querySelector('[data-action="edit"]');
+            }
+            if (target) {
+                try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+            }
+            return;
+        }
+    }
+
+    SB.editSongSource = function (songId) {
+        resetRemoveConfirm();
+        openEditSource(songId);
+    };
+    SB.closeEditSource = closeEditSource;
+
+    SB.moveSongInList = function (songId, delta) {
+        var book = SB.state.active;
+        if (!book || !book.imported) return;
+        resetRemoveConfirm();
+        SB.moveSongInBook(book, songId, delta).then(function () {
+            focusRowAction(songId, delta < 0 ? 'up' : 'down');
+        }, function (err) {
+            setAuthorStatus('Could not move the song: ' + err.message, true);
+        });
+    };
+
+    /* Removing is destructive and has no undo, but a blocking confirm() would
+     * be the only modal in an otherwise inline authoring flow. The row's own
+     * Remove button asks instead: the first press arms it ("Confirm") and
+     * announces what to do, the second performs the removal. Escape, the
+     * timeout, or any other row action backs out. */
+    var pendingRemove = null;
+    var pendingRemoveTimer = null;
+
+    function removeButton(songId) {
+        var rows = document.querySelectorAll('#songList .song-row');
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].dataset.id === songId) {
+                return rows[i].querySelector('[data-action="remove"]');
+            }
+        }
+        return null;
+    }
+
+    function armRemoveButton(button, on) {
+        if (!button) return;
+        var label = button.querySelector('.row-action-label');
+        if (on) {
+            button.dataset.baseLabel = button.getAttribute('aria-label') || '';
+            button.dataset.baseText = label ? label.textContent : '';
+            button.classList.add('is-confirming');
+            button.setAttribute('aria-label', 'Confirm removing this song from the songbook');
+            if (label) label.textContent = 'Confirm';
+        } else {
+            button.classList.remove('is-confirming');
+            if (button.dataset.baseLabel) {
+                button.setAttribute('aria-label', button.dataset.baseLabel);
+            }
+            if (label && button.dataset.baseText) label.textContent = button.dataset.baseText;
+            delete button.dataset.baseLabel;
+            delete button.dataset.baseText;
+        }
+    }
+
+    function resetRemoveConfirm() {
+        if (pendingRemoveTimer !== null) {
+            window.clearTimeout(pendingRemoveTimer);
+            pendingRemoveTimer = null;
+        }
+        if (pendingRemove === null) return;
+        armRemoveButton(removeButton(pendingRemove), false);
+        pendingRemove = null;
+        setAuthorStatus('');
+    }
+
+    SB.removeSongFromList = function (songId) {
+        var book = SB.state.active;
+        if (!book || !book.imported) return;
+        var song = findActiveSong(songId);
+        if (!song) return;
+        if (pendingRemove !== songId) {
+            resetRemoveConfirm();
+            pendingRemove = songId;
+            armRemoveButton(removeButton(songId), true);
+            setAuthorStatus('Remove “' + song.title + '” from “' + book.name
+                + '”? Its notes, favourite and local edits are removed too.'
+                + ' Press Confirm, or Escape to cancel.');
+            pendingRemoveTimer = window.setTimeout(resetRemoveConfirm, 8000);
+            return;
+        }
+        resetRemoveConfirm();
+
+        var index = book.songs.indexOf(song);
+        var neighbor = book.songs[index + 1] || book.songs[index - 1] || null;
+        var last = book.songs.length === 1;
+        SB.removeSongFromBook(book, songId).then(function () {
+            setAuthorStatus('Removed “' + song.title + '” from “' + book.name + '”.');
+            if (last) {
+                var emptyAdd = SB.$('emptyAddSongBtn');
+                var add = SB.$('addSongBtn');
+                var target = (emptyAdd && !emptyAdd.hidden) ? emptyAdd : add;
+                if (target && !target.hidden) {
+                    try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+                }
+            } else if (neighbor) {
+                focusRowAction(neighbor.id, 'remove');
+            }
+        }, function (err) {
+            setAuthorStatus('Could not remove the song: ' + err.message, true);
+        });
+    };
+
+    SB.resetRemoveConfirm = resetRemoveConfirm;
+
+    /* Duplicate works on bundled books too; the new book is imported and the
+     * source is never written. */
+    SB.duplicateActiveSongbook = function () {
+        resetRemoveConfirm();
+        var book = SB.state.active;
+        if (!book) return;
+        var button = SB.$('duplicateBookBtn');
+        if (button) button.disabled = true;
+        SB.duplicateSongbook(book).then(function (copy) {
+            var hash = SB.routeHash(copy.id);
+            if (location.hash === hash) SB.route();
+            else location.hash = hash;
+            var picker = SB.$('songbookSelect');
+            if (picker) {
+                try { picker.focus({ preventScroll: true }); } catch (e) { picker.focus(); }
+            }
+            setAuthorStatus('Duplicated as “' + copy.name + '”.');
+        }, function (err) {
+            setAuthorStatus('Could not duplicate the songbook: ' + err.message, true);
+        }).then(function () {
+            if (button) button.disabled = false;
+        });
+    };
+
+    SB.openNewSongbook = open;
+    SB.closeNewSongbook = close;
+
+    SB.bindAuthorControls = function () {
+        var newBtn = SB.$('newSongbookBtn');
+        if (newBtn) newBtn.addEventListener('click', open);
+        var emptyBtn = SB.$('emptyNewSongbookBtn');
+        if (emptyBtn) emptyBtn.addEventListener('click', open);
+        var addBtn = SB.$('addSongBtn');
+        if (addBtn) addBtn.addEventListener('click', openAddSongs);
+        var emptyAddBtn = SB.$('emptyAddSongBtn');
+        if (emptyAddBtn) emptyAddBtn.addEventListener('click', openAddSongs);
+        var duplicateBtn = SB.$('duplicateBookBtn');
+        if (duplicateBtn) duplicateBtn.addEventListener('click', SB.duplicateActiveSongbook);
+
+        /* The toggle flips a per-book, session-scoped task mode; renderList
+         * repaints the rows and the button carries the pressed state. */
+        var editBookBtn = SB.$('editBookBtn');
+        if (editBookBtn) editBookBtn.addEventListener('click', function () {
+            var book = SB.state.active;
+            if (!book || !book.imported) return;
+            SB.state.editingBook = SB.isEditingBook() ? null : book.id;
+            SB.renderList();
+            setAuthorStatus(SB.isEditingBook()
+                ? 'Edit mode: rows show book order and their edit, move and remove actions.'
+                : '');
+        });
+
+        var el = overlay();
+        if (el) {
+            var closeBtn = SB.$('newBookClose');
+            if (closeBtn) closeBtn.addEventListener('click', function () { close(true); });
+            var cancel = SB.$('newBookCancel');
+            if (cancel) cancel.addEventListener('click', function () { close(true); });
+            var form = SB.$('newBookForm');
+            if (form) form.addEventListener('submit', submit);
+            el.addEventListener('click', function (e) {
+                if (e.target === el) close(true);
+            });
+        }
+
+        var addEl = addOverlay();
+        if (addEl) {
+            var addClose = SB.$('addSongClose');
+            if (addClose) addClose.addEventListener('click', function () { closeAddSongs(true); });
+            var addCancel = SB.$('addSongCancel');
+            if (addCancel) addCancel.addEventListener('click', function () { closeAddSongs(true); });
+            var addForm = SB.$('addSongForm');
+            if (addForm) addForm.addEventListener('submit', submitAddSongs);
+            var addText = SB.$('addSongText');
+            if (addText) addText.addEventListener('input', refreshAddPreview);
+            var addFile = SB.$('addSongFile');
+            if (addFile) addFile.addEventListener('change', refreshAddPreview);
+            var chooseFile = SB.$('addSongFileBtn');
+            if (chooseFile && addFile) {
+                chooseFile.addEventListener('click', function () { addFile.click(); });
+            }
+            addEl.addEventListener('click', function (e) {
+                if (e.target === addEl) closeAddSongs(true);
+            });
+        }
+
+        var editEl = editOverlay();
+        if (editEl) {
+            var editClose = SB.$('editSourceClose');
+            if (editClose) editClose.addEventListener('click', function () { closeEditSource(true); });
+            var editCancel = SB.$('editSourceCancel');
+            if (editCancel) editCancel.addEventListener('click', function () { closeEditSource(true); });
+            var editForm = SB.$('editSourceForm');
+            if (editForm) editForm.addEventListener('submit', submitEditSource);
+            var editText = SB.$('editSourceText');
+            if (editText) editText.addEventListener('input', refreshEditPreview);
+            editEl.addEventListener('click', function (e) {
+                if (e.target === editEl) closeEditSource(true);
+            });
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (editEl && !editEl.hidden) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeEditSource(true);
+                } else {
+                    trapFocus(e, 'editSourceDialog');
+                }
+            } else if (addEl && !addEl.hidden) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeAddSongs(true);
+                } else {
+                    trapFocus(e, 'addSongDialog');
+                }
+            } else if (el && !el.hidden) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    close(true);
+                } else {
+                    trapFocus(e, 'newBookDialog');
+                }
+            } else if (e.key === 'Escape' && pendingRemove !== null) {
+                /* Back out of an armed Remove and keep focus where it was. */
+                var armed = pendingRemove;
+                e.preventDefault();
+                resetRemoveConfirm();
+                var armedButton = removeButton(armed);
+                if (armedButton) {
+                    try { armedButton.focus({ preventScroll: true }); } catch (err) { armedButton.focus(); }
+                }
+            }
+        });
     };
 
 })(window.SB = window.SB || {});
@@ -14851,6 +16449,604 @@ button.structure-close,
 
 </script>
 <script>
+/* Songbook — ChordPro parser
+ * A browser-side port of chordpro.py's authoring subset, so songs can be
+ * pasted or uploaded in the app instead of only built ahead of time.
+ *
+ * Part of the window.SB namespace. Loaded as a classic script in the order set
+ * by index.html; it depends on SB.sectionRole (js/sections.js), the metre and
+ * tempo constants in js/songbooks.js and the pattern ids in js/strum.js, and
+ * must therefore load after all three. tests/chordpro_js.py guards that this
+ * parser and chordpro.py cannot drift.
+ *
+ * This module parses; it does not validate. The result is passed through
+ * SB.normalizeSongbook by the caller, which stays the single trust boundary.
+ */
+(function (SB) {
+    'use strict';
+
+    /* Mirrored from chordpro.py METADATA_DIRECTIVES. Directive names are
+     * lowercased and spaces become underscores before lookup. */
+    var METADATA_DIRECTIVES = {
+        'id': 'id',
+        'title': 'title', 't': 'title',
+        'artist': 'artist', 'subtitle': 'artist', 'st': 'artist',
+        'level': 'level',
+        'duration': 'dur',
+        'tempo': 'bpm', 'bpm': 'bpm',
+        'time': 'time', 'meter': 'time',
+        'strum': 'strum',
+        'key': 'key',
+        'sheetkey': 'sheetKey',
+        'capo': 'capo',
+        'new': 'new',
+        'number': 'n',
+        'chords': 'chords',
+    };
+
+    var LEVELS = ['Easy', 'Medium', 'Hard'];
+
+    /* Python's str.splitlines() boundaries. String.split() only knows \n and
+     * \r\n, and a line break it misses would leak into a lyric or a grid. */
+    var LINE_BREAK = /\r\n|[\n\r\v\f\x1c-\x1e\x85\u2028\u2029]/;
+    var LINE_BREAK_END = /[\n\r\v\f\x1c-\x1e\x85\u2028\u2029]$/;
+
+    function splitLines(text) {
+        if (!text) return [];
+        var lines = text.split(LINE_BREAK);
+        // splitlines() does not add an empty line after a trailing break.
+        if (lines.length && lines[lines.length - 1] === '' && LINE_BREAK_END.test(text)) {
+            lines.pop();
+        }
+        return lines;
+    }
+
+    /* Warning text is part of the parity contract: the Python builder prints
+     * these strings, so the browser must produce the same wording, including
+     * the repr() quoting of offending values. */
+    function pyRepr(value) {
+        var s = String(value);
+        var quote = (s.indexOf("'") >= 0 && s.indexOf('"') < 0) ? '"' : "'";
+        var out = quote;
+        for (var i = 0; i < s.length; i++) {
+            var ch = s.charAt(i);
+            if (ch === '\\') out += '\\\\';
+            else if (ch === quote) out += '\\' + quote;
+            else if (ch === '\n') out += '\\n';
+            else if (ch === '\r') out += '\\r';
+            else if (ch === '\t') out += '\\t';
+            else {
+                var code = s.charCodeAt(i);
+                out += (code < 32 || code === 127) ? '\\x' + (code < 16 ? '0' : '') + code.toString(16) : ch;
+            }
+        }
+        return out + quote;
+    }
+
+    function reprList(list) {
+        return '[' + list.map(pyRepr).join(', ') + ']';
+    }
+
+    /* Mirrors chordpro.slugify: NFKD-decompose, drop everything non-ASCII
+     * (the build's encode('ascii', 'ignore')), then hyphenate. */
+    function slugify(text) {
+        var s = String(text == null ? '' : text).normalize('NFKD').replace(/[^\x00-\x7f]/g, '');
+        s = s.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+        return s.slice(0, 48) || 'song';
+    }
+
+    /* Return [key, value] for a {key: value} line, else null. */
+    function directive(line) {
+        var m = /^\s*\{([^{}]*)\}\s*$/.exec(line);
+        if (!m) return null;
+        var body = m[1];
+        var key, value;
+        var colon = body.indexOf(':');
+        if (colon >= 0) {
+            key = body.slice(0, colon);
+            value = body.slice(colon + 1);
+        } else {
+            key = body;
+            value = '';
+        }
+        key = key.trim().toLowerCase().replace(/ /g, '_');
+        value = value.trim();
+        if (value.length >= 2 && value.charAt(0) === value.charAt(value.length - 1)
+            && (value.charAt(0) === '"' || value.charAt(0) === "'")) {
+            value = value.slice(1, -1).trim();
+        }
+        return [key, value];
+    }
+
+    /* Tokenize one lyric line. Chords keep their brackets, text is verbatim,
+     * and a backslash escapes a literal bracket or backslash. A blank line is
+     * an empty list, never a single empty text token. */
+    function parseLine(line) {
+        if (!line || !line.trim()) return [];
+        var tokens = [];
+        var buf = [];
+        var pos = 0;
+        while (pos < line.length) {
+            var ch = line.charAt(pos);
+            if (ch === '\\' && pos + 1 < line.length
+                && (line.charAt(pos + 1) === '[' || line.charAt(pos + 1) === ']'
+                    || line.charAt(pos + 1) === '\\')) {
+                buf.push(line.charAt(pos + 1));
+                pos += 2;
+            } else if (ch === '[') {
+                var end = line.indexOf(']', pos + 1);
+                if (end < 0) {
+                    buf.push(line.slice(pos));
+                    break;
+                }
+                var chord = line.slice(pos + 1, end).trim();
+                if (!chord) {
+                    buf.push(line.slice(pos, end + 1));
+                    pos = end + 1;
+                    continue;
+                }
+                if (buf.length) {
+                    tokens.push(['x', buf.join('')]);
+                    buf = [];
+                }
+                tokens.push(['c', '[' + chord + ']']);
+                pos = end + 1;
+            } else {
+                buf.push(ch);
+                pos += 1;
+            }
+        }
+        if (buf.length) tokens.push(['x', buf.join('')]);
+        return tokens;
+    }
+
+    function asBool(value) {
+        var v = String(value).trim().toLowerCase();
+        if (v === '1' || v === 'true' || v === 'yes' || v === 'y' || v === 'on') return true;
+        if (v === '0' || v === 'false' || v === 'no' || v === 'n' || v === 'off' || v === '') return false;
+        return null;
+    }
+
+    /* Python float() for the values that can appear in a directive: strict,
+     * so "92bpm" is invalid rather than parseFloat's 92. */
+    function toFloat(value) {
+        if (typeof value === 'number') return isFinite(value) ? value : null;
+        var s = String(value == null ? '' : value).trim();
+        if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(s)) return null;
+        return Number(s);
+    }
+
+    /* Python int() for a directive value; "2.5" is a ValueError, not 2. */
+    function toInt(value) {
+        var s = String(value == null ? '' : value).trim();
+        return /^[+-]?\d+$/.test(s) ? parseInt(s, 10) : null;
+    }
+
+    /* Python's round() is half-to-even, unlike Math.round's half-up. Tempo is
+     * compared against the same bounds as the build, so the rounding mode is
+     * observable ("92.5" is 92 there and 93 here otherwise). */
+    function pyRound(n) {
+        var floor = Math.floor(n);
+        var diff = n - floor;
+        if (diff > 0.5) return floor + 1;
+        if (diff < 0.5) return floor;
+        return (floor % 2 === 0) ? floor : floor + 1;
+    }
+
+    function parseBpm(value) {
+        var number = toFloat(value);
+        if (number === null) return null;
+        number = pyRound(number);
+        if (number < SB.BPM_MIN || number > SB.BPM_MAX) return null;
+        return number;
+    }
+
+    function parseTime(value) {
+        var text = String(value == null ? '' : value).trim().replace(/ /g, '');
+        return SB.TIME_SIGNATURES.indexOf(text) >= 0 ? text : null;
+    }
+
+    function strumIds() {
+        var ids = Object.create(null);
+        SB.strumPatterns().forEach(function (p) { ids[p.id] = true; });
+        return ids;
+    }
+
+    function parseStrum(value, ids) {
+        var text = String(value == null ? '' : value).trim();
+        return ids[text] ? text : null;
+    }
+
+    function deriveChords(sheet) {
+        var chords = [];
+        sheet.forEach(function (line) {
+            line.forEach(function (seg) {
+                if (seg[0] !== 'c') return;
+                var name = seg[1];
+                if (name.charAt(0) === '[' && name.charAt(name.length - 1) === ']') {
+                    name = name.slice(1, -1).trim();
+                }
+                if (name && chords.indexOf(name) < 0) chords.push(name);
+            });
+        });
+        return chords;
+    }
+
+    /* ---------------- bar/beat grid ---------------- */
+
+    var BARLINE = /(\|:|:\||\|)/;
+
+    /* Parse one bar's text into [{chord, beats}]. A lone chord fills the bar;
+     * otherwise each chord gets one beat plus one per trailing dot. */
+    function gridBarBeats(barText, beatsPerBar) {
+        var entries = [];
+        var tokens = barText.trim() ? barText.trim().split(/\s+/) : [];
+        tokens.forEach(function (tok) {
+            if (/^\.+$/.test(tok)) {
+                if (!entries.length) throw new Error("'.' with no preceding chord");
+                entries[entries.length - 1].beats += tok.length;
+            } else {
+                entries.push({ chord: tok, beats: 1 });
+            }
+        });
+        if (!entries.length) throw new Error('empty bar');
+        if (beatsPerBar !== null && entries.length === 1 && entries[0].beats === 1) {
+            entries[0].beats = beatsPerBar;
+        }
+        return entries;
+    }
+
+    /* Split one bar-line-delimited line into (seps, barTexts). Text outside
+     * the outermost bar lines, or an empty interior bar, is an error. */
+    function gridLineBars(label, line) {
+        var parts = line.split(BARLINE);
+        var pre = parts[0].trim();
+        if (pre) throw new Error('grid block ' + pyRepr(label) + ': text before first bar line: ' + pyRepr(pre));
+        // split() interleaves [pre, sep, bar, sep, bar, ..., sep, post].
+        var seps = [];
+        var contents = [];
+        for (var i = 1; i < parts.length; i += 2) seps.push(parts[i]);
+        for (var j = 2; j < parts.length; j += 2) contents.push(parts[j]);
+        if (!seps.length) throw new Error('grid block ' + pyRepr(label) + ': a line has no bar lines');
+        var post = contents.length ? contents[contents.length - 1].trim() : '';
+        if (post) throw new Error('grid block ' + pyRepr(label) + ': text after last bar line: ' + pyRepr(post));
+        var barTexts = contents.slice(0, -1);
+        if (!barTexts.length) throw new Error('grid block ' + pyRepr(label) + ': a line has no bars');
+        return [seps, barTexts];
+    }
+
+    function parseGridBlock(label, bodyLines, timeSig) {
+        var beatsPerBar = SB.beatsPerBar(timeSig);
+        var lines = bodyLines.map(function (l) { return l.trim(); })
+            .filter(function (l) { return !!l; });
+        if (!lines.length) throw new Error('grid block ' + pyRepr(label) + ' has no bars');
+
+        /* Each line opens and closes with a bar line, so an interior line's
+         * opening bar line duplicates the previous line's closing one. Drop
+         * the duplicate so the block is one continuous bar sequence. */
+        var seps = [];
+        var barTexts = [];
+        lines.forEach(function (line, i) {
+            var parsed = gridLineBars(label, line);
+            var lineSeps = parsed[0];
+            if (i > 0) {
+                if (lineSeps[0] !== '|' || seps[seps.length - 1] !== '|') {
+                    throw new Error('grid block ' + pyRepr(label)
+                        + ': repeat mark on an interior line break');
+                }
+                lineSeps = lineSeps.slice(1);
+            }
+            seps = seps.concat(lineSeps);
+            barTexts = barTexts.concat(parsed[1]);
+        });
+
+        /* Repeats are a balanced pair at the block's edges only: one `|:` at
+         * the start and/or one `:|` at the end. A lone trailing `:|` repeats
+         * from the block start, so it is balanced on its own. */
+        var opens = [];
+        var closes = [];
+        seps.forEach(function (s, i) {
+            if (s === '|:') opens.push(i);
+            if (s === ':|') closes.push(i);
+        });
+        if (opens.some(function (i) { return i !== 0; }) || opens.length > 1) {
+            throw new Error('grid block ' + pyRepr(label)
+                + ': open-repeat must be a single mark at the start');
+        }
+        if (closes.some(function (i) { return i !== seps.length - 1; }) || closes.length > 1) {
+            throw new Error('grid block ' + pyRepr(label)
+                + ': close-repeat must be a single mark at the end');
+        }
+
+        return {
+            label: label,
+            role: SB.sectionRole(label),
+            repeat: !!(opens.length || closes.length),
+            bars: barTexts.map(function (bt) {
+                return { beats: gridBarBeats(bt, beatsPerBar) };
+            }),
+        };
+    }
+
+    /* ---------------- song ---------------- */
+
+    function has(obj, key) {
+        return Object.prototype.hasOwnProperty.call(obj, key);
+    }
+
+    function get(obj, key, fallback) {
+        return has(obj, key) ? obj[key] : fallback;
+    }
+
+    function parseSong(text, options) {
+        options = options || {};
+        if (typeof text !== 'string') throw new Error('ChordPro source must be a string');
+        if (text.charAt(0) === '\ufeff') text = text.slice(1);
+
+        var warnings = [];
+        var allowTrustedNotes = !!options.allowTrustedNotes;
+        var number = (typeof options.number === 'number' && isFinite(options.number)) ? options.number : 1;
+        var meta = Object.create(null);
+        var sheet = [];
+        var inTab = false;
+        /* Grid blocks are collected raw and parsed after `time` is known: a
+         * lone bare chord's beat count depends on the metre. */
+        var rawGrids = [];
+        var gridLabel = null;
+        var gridLines = null;
+
+        splitLines(text).forEach(function (raw) {
+            var d = directive(raw);
+            if (d !== null) {
+                var key = d[0], value = d[1];
+                if (gridLines !== null && key !== 'end_of_grid' && key !== 'eog') {
+                    // A grid is line-scoped like a tab; a directive inside it
+                    // is almost certainly a missing {end_of_grid}.
+                    warnings.push('directive {' + key + '} inside grid block '
+                        + pyRepr(gridLabel) + ': did you forget {end_of_grid}?');
+                }
+                if (has(METADATA_DIRECTIVES, key)) {
+                    meta[METADATA_DIRECTIVES[key]] = value;
+                } else if (key === 'start_of_chorus' || key === 'soc') {
+                    sheet.push([['i', '(Chorus)']]);
+                } else if (key === 'end_of_chorus' || key === 'eoc') {
+                    // no-op: the chorus marker is the start line
+                } else if (key === 'start_of_tab' || key === 'sot') {
+                    inTab = true;
+                } else if (key === 'end_of_tab' || key === 'eot') {
+                    inTab = false;
+                } else if (key === 'start_of_grid' || key === 'sog') {
+                    gridLabel = value;
+                    gridLines = [];
+                } else if (key === 'end_of_grid' || key === 'eog') {
+                    if (gridLines !== null) rawGrids.push([gridLabel, gridLines]);
+                    gridLabel = null;
+                    gridLines = null;
+                } else if (key === 'comment' || key === 'c') {
+                    if (value) sheet.push([['i', value]]);
+                } else if (key === 'trusted_note') {
+                    // Rendered through innerHTML; never trust user input.
+                    if (!allowTrustedNotes) {
+                        warnings.push('trusted_note ignored: book does not allow trusted notes');
+                    } else if (value) {
+                        sheet.push([['y', value]]);
+                    }
+                }
+                // Other directives are intentionally ignored: the authoring
+                // subset is deliberately small.
+                return;
+            }
+
+            if (gridLines !== null) {
+                if (raw.replace(/^\s+/, '').charAt(0) !== '#') gridLines.push(raw);
+                return;
+            }
+
+            if (raw.replace(/^\s+/, '').charAt(0) === '#') return;
+
+            if (inTab) {
+                if (raw.trim()) sheet.push([['p', raw.replace(/\s+$/, '')]]);
+                else sheet.push([]);
+                return;
+            }
+
+            sheet.push(parseLine(raw));
+        });
+
+        if (gridLines !== null) {
+            // Unterminated block: parse what we have rather than drop it.
+            warnings.push('grid block ' + pyRepr(gridLabel) + ' is missing {end_of_grid}');
+            rawGrids.push([gridLabel, gridLines]);
+        }
+
+        while (sheet.length && !sheet[0].length) sheet.shift();
+        while (sheet.length && !sheet[sheet.length - 1].length) sheet.pop();
+
+        var title = String(get(meta, 'title', '')).trim();
+        var artist = String(get(meta, 'artist', '')).trim();
+
+        var level = String(get(meta, 'level', '')).trim();
+        if (!level) {
+            warnings.push('missing level, defaulting to Medium');
+            level = 'Medium';
+        } else {
+            level = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
+            if (LEVELS.indexOf(level) < 0) {
+                warnings.push('invalid level ' + pyRepr(get(meta, 'level', ''))
+                    + ', defaulting to Medium');
+                level = 'Medium';
+            }
+        }
+
+        var durRaw = String(get(meta, 'dur', '')).trim();
+        var dur;
+        if (!durRaw) {
+            warnings.push('missing duration, defaulting to 3');
+            dur = 3.0;
+        } else {
+            var parsedDur = toFloat(durRaw);
+            if (parsedDur === null) {
+                warnings.push('invalid duration ' + pyRepr(durRaw) + ', defaulting to 3');
+                dur = 3.0;
+            } else {
+                dur = parsedDur;
+            }
+        }
+
+        var n = number;
+        if (has(meta, 'n')) {
+            var parsedN = toInt(meta.n);
+            if (parsedN === null) warnings.push('invalid number ' + pyRepr(meta.n));
+            else n = parsedN;
+        }
+
+        var isNew = false;
+        if (has(meta, 'new')) {
+            var parsedNew = asBool(meta.new);
+            if (parsedNew === null) {
+                warnings.push('invalid new value ' + pyRepr(meta.new) + ', defaulting to false');
+            } else {
+                isNew = parsedNew;
+            }
+        }
+
+        var rawId = String(get(meta, 'id', '')).trim();
+        var songId = slugify(title);
+        if (rawId) {
+            if (/^[a-z0-9-]+$/.test(rawId)) {
+                songId = rawId;
+            } else {
+                warnings.push('invalid id ' + pyRepr(rawId) + ', slugifying');
+                songId = slugify(rawId) || songId;
+            }
+        }
+
+        var song = {
+            id: songId,
+            n: n,
+            title: title,
+            artist: artist,
+            level: level,
+            new: isNew,
+            dur: dur,
+        };
+
+        var keySig = String(get(meta, 'key', '')).trim();
+        var sheetKey = String(get(meta, 'sheetKey', '')).trim();
+        if (keySig) {
+            song.key = keySig;
+            song.sheetKey = sheetKey || keySig;
+        } else if (sheetKey) {
+            song.sheetKey = sheetKey;
+        }
+        if (has(meta, 'capo')) {
+            var capo = toInt(meta.capo);
+            if (capo === null) {
+                warnings.push('invalid capo ' + pyRepr(meta.capo) + ', defaulting to 0');
+                song.capo = 0;
+            } else {
+                song.capo = capo;
+            }
+        } else if (keySig || sheetKey) {
+            song.capo = 0;
+        }
+
+        /* An unparseable tempo/time/strum is kept verbatim and warned about,
+         * mirroring the build: a typo must fail validation rather than be
+         * silently guessed into a different tempo or pattern. */
+        var bpmRaw = String(get(meta, 'bpm', '')).trim();
+        if (bpmRaw) {
+            var bpm = parseBpm(bpmRaw);
+            if (bpm === null) {
+                warnings.push('invalid tempo ' + pyRepr(bpmRaw) + ' (expected '
+                    + SB.BPM_MIN + '-' + SB.BPM_MAX + ' bpm)');
+                song.bpm = bpmRaw;
+            } else {
+                song.bpm = bpm;
+            }
+        }
+
+        var timeRaw = String(get(meta, 'time', '')).trim();
+        if (timeRaw) {
+            var timeSig = parseTime(timeRaw);
+            if (timeSig === null) {
+                warnings.push('invalid time signature ' + pyRepr(timeRaw) + ' (expected '
+                    + SB.TIME_SIGNATURES.join(', ') + ')');
+                song.time = timeRaw;
+            } else {
+                song.time = timeSig;
+            }
+        }
+
+        var strumRaw = String(get(meta, 'strum', '')).trim();
+        if (strumRaw) {
+            var ids = strumIds();
+            var strumId = parseStrum(strumRaw, ids);
+            if (strumId === null) {
+                warnings.push('invalid strum ' + pyRepr(strumRaw) + ' (expected one of '
+                    + Object.keys(ids).sort().join(', ') + ')');
+                song.strum = strumRaw;
+            } else {
+                song.strum = strumId;
+            }
+        }
+
+        song.chords = deriveChords(sheet);
+        var chordsRaw = String(get(meta, 'chords', '')).trim();
+        if (chordsRaw) {
+            var overridden = chordsRaw.split(',').map(function (name) {
+                return name.trim();
+            }).filter(function (name) { return !!name; });
+            if (overridden.length) {
+                var missing = song.chords.filter(function (c) {
+                    return overridden.indexOf(c) < 0;
+                }).sort();
+                var unused = overridden.filter(function (c) {
+                    return song.chords.indexOf(c) < 0;
+                }).sort();
+                if (missing.length || unused.length) {
+                    warnings.push('chords override differs from sheet (missing: '
+                        + (missing.length ? reprList(missing) : 'none')
+                        + ', unused: ' + (unused.length ? reprList(unused) : 'none') + ')');
+                }
+                song.chords = overridden;
+            }
+        }
+        song.sheet = sheet;
+
+        /* Grids last: a lone bare chord's beat count depends on the metre. A
+         * malformed block is dropped with a warning rather than emitted half
+         * valid; the build validates beat totals against `time` later. */
+        if (rawGrids.length) {
+            var validTime = parseTime(String(get(meta, 'time', '')).trim());
+            var grid = [];
+            rawGrids.forEach(function (entry) {
+                try {
+                    grid.push(parseGridBlock(entry[0], entry[1], validTime));
+                } catch (err) {
+                    warnings.push('dropped grid block: ' + err.message);
+                }
+            });
+            if (grid.length) song.grid = grid;
+        }
+
+        return { song: song, warnings: warnings };
+    }
+
+    /* options:
+     *   number           default song order, matching parse_song's `number`
+     *   allowTrustedNotes keep {trusted_note} as the legacy innerHTML kind
+     * Malformed content is warned about and dropped exactly as chordpro.py
+     * does (a bad grid block must not abort the song); only a non-string
+     * argument throws. */
+    SB.parseChordPro = function (text, options) {
+        return parseSong(text, options);
+    };
+
+})(window.SB = window.SB || {});
+
+</script>
+<script>
 /* Songbook — editor
  * Step 6: structural edit mode for chords, lengths, beats, time signature,
  * bar/section structure, plus Reset.
@@ -15504,6 +17700,11 @@ button.structure-close,
             // js/strum.js, and a global Escape would navigate away from the
             // song while the user is editing a pattern.
             if (SB.$('patternOverlay') && !SB.$('patternOverlay').hidden) return;
+            // Authoring dialogs are modal and own their Escape/Tab handling in
+            // js/author.js; global shortcuts must not act on the page behind.
+            if ((SB.$('editSourceOverlay') && !SB.$('editSourceOverlay').hidden) ||
+                    (SB.$('addSongOverlay') && !SB.$('addSongOverlay').hidden) ||
+                    (SB.$('newBookOverlay') && !SB.$('newBookOverlay').hidden)) return;
             // The voicing chooser is a modal: its own Escape closes it and its
             // Space activates the focused option. Letting the global shortcuts
             // run too used to navigate back and start auto-scroll at once.
@@ -15633,6 +17834,7 @@ button.structure-close,
         SB.bindListControls();
         SB.bindSongControls();
         if (SB.bindExportControls) SB.bindExportControls();
+        if (SB.bindAuthorControls) SB.bindAuthorControls();
         SB.bindKeyboard();
         SB.updateSpeedLabel();
 

@@ -11,6 +11,7 @@ and assert that:
     felt beat, with a canonical role on every block;
   - a song with no authored grid gets the same auto-generated grid the chart
     shows;
+  - an authored `chordpro` source survives both exports and re-import;
   - downloaded names end with YYYYMMDD-HHMMSS;
   - the exported song passes the Step 7 build validator and normalizeSongbook,
     including the auto-generated grid case.
@@ -307,6 +308,29 @@ class EffectiveSongTests(unittest.TestCase):
         self.assertEqual(got['grid'][0]['role'], 'verse')
         self.assertEqual(got['grid'][0]['bars'][0]['strums'],
                          ['D-', 'UU', 'DU', 'DU'])
+
+    def test_chordpro_source_survives_export_and_reimport(self):
+        song = dict(SONG)
+        source = '{title: Harbour Lights}\n{artist: The Artist}\n[C]la'
+        song['chordpro'] = source
+        got = run_js('''
+            var song = %s;
+            var eff = SB.effectiveSong(song, %s);
+            var raw = JSON.parse(SB.songbookJSON({
+                id: 'demo', name: 'Demo', songs: [song]
+            }));
+            var book = SB.normalizeSongbook({
+                id: 'demo', name: 'Demo', songs: [eff]
+            });
+            console.log(JSON.stringify({
+                raw: raw.songs[0].chordpro,
+                effective: eff.chordpro,
+                reimported: book.songs[0].chordpro
+            }));
+        ''' % (json.dumps(song), json.dumps(PLAN)))
+        self.assertEqual(got['raw'], source)
+        self.assertEqual(got['effective'], source)
+        self.assertEqual(got['reimported'], source)
 
     def test_songbook_export_applies_every_songs_plan(self):
         second = dict(AUTO_SONG)

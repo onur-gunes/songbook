@@ -207,6 +207,57 @@
         try { window.localStorage.removeItem(SB.strumKey(sbId, songId)); } catch (e) { /* ignore */ }
     };
 
+    /* Every per-song key this app writes, so removing a song can clear all of
+     * it and duplicating a book can carry all of it across. Speed and size are
+     * display preferences rather than edits, but they are equally scoped to
+     * the book + song pair and have the same orphan/resurrection problem. */
+    function songDataKeys() {
+        return [SB.planKey, SB.strumKey, SB.noteKey, SB.speedKey, SB.sizeKey, SB.bpmKey];
+    }
+
+    /* A removed song's id stops existing, but its data would not: ids are
+     * slugged from titles, so re-adding the same source later would resurrect
+     * the old plan, favourite and notes. Removing a song therefore removes
+     * everything stored for it, and the row's confirm says so. */
+    SB.clearSongData = function (sbId, songId) {
+        if (!sbId || !songId) return;
+        songDataKeys().forEach(function (key) {
+            try { window.localStorage.removeItem(key(sbId, songId)); } catch (e) { /* ignore */ }
+        });
+        if (SB.state.favorites.delete(SB.compositeId(sbId, songId))) SB.saveFavorites();
+        var recent = SB.state.recent.filter(function (r) {
+            return !(r.sb === sbId && r.id === songId);
+        });
+        if (recent.length !== SB.state.recent.length) {
+            SB.state.recent = recent;
+            SB.lsSet(SB.RECENT_KEY, recent);
+        }
+    };
+
+    /* Duplicating a book is the documented route to making a bundled book
+     * editable, and the user who does that is exactly the one who has
+     * accumulated local edits. Plans, favourites and notes are keyed by
+     * book + song id, so a new book id needs them re-keyed or the copy would
+     * silently start from scratch. */
+    SB.copySongData = function (fromSbId, toSbId, songs) {
+        if (!fromSbId || !toSbId || fromSbId === toSbId) return;
+        var changed = false;
+        (songs || []).forEach(function (song) {
+            if (!song || !song.id) return;
+            songDataKeys().forEach(function (key) {
+                var value = null;
+                try { value = window.localStorage.getItem(key(fromSbId, song.id)); } catch (e) { /* ignore */ }
+                if (value === null) return;
+                try { window.localStorage.setItem(key(toSbId, song.id), value); } catch (e) { /* ignore */ }
+            });
+            if (SB.state.favorites.has(SB.compositeId(fromSbId, song.id))) {
+                SB.state.favorites.add(SB.compositeId(toSbId, song.id));
+                changed = true;
+            }
+        });
+        if (changed) SB.saveFavorites();
+    };
+
     function planHasEdits(plan) {
         if (!plan || typeof plan !== 'object') return false;
         return !!(plan.songStrum || plan.time ||

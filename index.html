@@ -40,6 +40,12 @@
         <div class="songbook-bar">
             <label class="songbook-label" for="songbookSelect">Songbook</label>
             <select id="songbookSelect" class="songbook-select" aria-label="Choose a songbook"></select>
+            <button id="newSongbookBtn" class="link-btn" type="button">New songbook</button>
+            <button id="duplicateBookBtn" class="link-btn" type="button"
+                    title="Duplicate this songbook" hidden>Duplicate</button>
+            <button id="addSongBtn" class="pill-btn" type="button" hidden>Add song…</button>
+            <button id="editBookBtn" class="link-btn" type="button"
+                    aria-pressed="false" title="Reorder, edit and remove songs" hidden>Edit songbook</button>
             <button id="importBtn" class="pill-btn" type="button">Import list…</button>
             <button id="importUrlToggle" class="link-btn" type="button"
                     aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
@@ -58,6 +64,8 @@
                 <span>Tuner</span>
             </button>
         </div>
+
+        <p id="authorStatus" class="author-status" role="status" aria-live="polite"></p>
 
         <form id="importUrlForm" class="import-url-bar" hidden>
             <label class="sr-only" for="importUrl">Songbook URL</label>
@@ -105,8 +113,9 @@
 
         <div id="emptyState" class="empty-state empty-state-books" hidden>
             <h2 class="empty-state-title">No songbooks yet</h2>
-            <p class="empty-state-lead">Import a songbook JSON file to start building your library.</p>
-            <button id="emptyImportBtn" class="pill-btn accent empty-state-import" type="button">Import a songbook…</button>
+            <p class="empty-state-lead">Create a songbook, or import one from a JSON file.</p>
+            <button id="emptyNewSongbookBtn" class="pill-btn accent empty-state-import" type="button">Create a songbook…</button>
+            <button id="emptyImportBtn" class="pill-btn empty-state-import" type="button">Import a songbook…</button>
             <button id="emptyImportUrlBtn" class="link-btn empty-state-url" type="button">Import from a URL…</button>
             <p class="empty-state-docs">New to the format? Read the
                 <a href="https://github.com/onur-gunes/songbook#songbook-json-format"
@@ -122,6 +131,11 @@
         </div>
 
         <p id="resultCount" class="result-count"></p>
+        <div id="emptyBookState" class="empty-state empty-state-songs" hidden>
+            <h2 class="empty-state-title">No songs yet</h2>
+            <p class="empty-state-lead">This songbook is ready. Add a song from ChordPro to start it.</p>
+            <button id="emptyAddSongBtn" class="pill-btn accent empty-state-import" type="button" hidden>Add a song…</button>
+        </div>
         <ul id="songList" class="song-list"></ul>
         <p id="noMatches" class="empty-state" hidden>No songs match.</p>
     </section>
@@ -515,6 +529,129 @@
     </div>
 </div>
 
+<div id="newBookOverlay" class="pattern-overlay" hidden aria-hidden="true">
+    <div id="newBookDialog" class="pattern-sheet" role="dialog" aria-modal="true"
+         aria-labelledby="newBookTitle" tabindex="-1">
+        <header class="pattern-head">
+            <div>
+                <span class="pattern-kicker">Songbook</span>
+                <h2 id="newBookTitle">New songbook</h2>
+            </div>
+            <button id="newBookClose" class="pattern-close" type="button"
+                    aria-label="Close new songbook dialog">×</button>
+        </header>
+
+        <form id="newBookForm" class="pattern-form" novalidate>
+            <label class="pattern-field" for="newBookName">
+                <span>Name</span>
+                <input id="newBookName" type="text" maxlength="80" autocomplete="off" required>
+            </label>
+            <label class="pattern-field" for="newBookDescription">
+                <span>Description (optional)</span>
+                <input id="newBookDescription" type="text" maxlength="200" autocomplete="off">
+            </label>
+            <label class="pattern-field" for="newBookInstrument">
+                <span>Instrument</span>
+                <select id="newBookInstrument">
+                    <option value="ukulele">Ukulele</option>
+                    <option value="guitar">Guitar</option>
+                </select>
+            </label>
+
+            <p id="newBookError" class="pattern-error" role="alert" tabindex="-1" hidden></p>
+
+            <div class="pattern-actions">
+                <span class="pattern-spacer"></span>
+                <button id="newBookCancel" class="pattern-cancel" type="button">Cancel</button>
+                <button id="newBookCreate" class="pattern-save" type="submit">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="addSongOverlay" class="pattern-overlay" hidden aria-hidden="true">
+    <div id="addSongDialog" class="pattern-sheet add-song-sheet" role="dialog" aria-modal="true"
+         aria-labelledby="addSongTitle" tabindex="-1">
+        <header class="pattern-head">
+            <div>
+                <span class="pattern-kicker">Songbook</span>
+                <h2 id="addSongTitle">Add songs</h2>
+            </div>
+            <button id="addSongClose" class="pattern-close" type="button"
+                    aria-label="Close add songs dialog">×</button>
+        </header>
+
+        <form id="addSongForm" class="pattern-form" novalidate>
+            <label class="pattern-field" for="addSongText">
+                <span>Paste ChordPro</span>
+                <textarea id="addSongText" class="add-song-text" rows="9" spellcheck="false"
+                          placeholder="{title: My song}&#10;{time: 4/4}&#10;[C]Lyrics…"></textarea>
+            </label>
+
+            <div class="add-song-files">
+                <button id="addSongFileBtn" class="pill-btn" type="button">Choose files…</button>
+                <input id="addSongFile" type="file" accept=".cho,.chordpro,.txt" multiple hidden>
+                <span class="add-song-hint">.cho, .chordpro or .txt — one song per file</span>
+            </div>
+
+            <div id="addSongPreview" class="add-song-preview" aria-live="polite" hidden>
+                <p class="add-song-preview-title">Preview</p>
+                <ul id="addSongPreviewList" class="add-song-list"></ul>
+            </div>
+
+            <p id="addSongError" class="pattern-error" role="alert" tabindex="-1" hidden></p>
+
+            <div class="pattern-actions">
+                <span class="pattern-spacer"></span>
+                <button id="addSongCancel" class="pattern-cancel" type="button">Cancel</button>
+                <button id="addSongAdd" class="pattern-save" type="submit" disabled>Add</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="editSourceOverlay" class="pattern-overlay" hidden aria-hidden="true">
+    <div id="editSourceDialog" class="pattern-sheet add-song-sheet" role="dialog" aria-modal="true"
+         aria-labelledby="editSourceTitle" tabindex="-1">
+        <header class="pattern-head">
+            <div>
+                <span class="pattern-kicker">Song source</span>
+                <h2 id="editSourceTitle">Edit source</h2>
+            </div>
+            <button id="editSourceClose" class="pattern-close" type="button"
+                    aria-label="Close edit source dialog">×</button>
+        </header>
+
+        <form id="editSourceForm" class="pattern-form" novalidate>
+            <p id="editSourceSong" class="edit-source-song"></p>
+
+            <label class="pattern-field" for="editSourceText" id="editSourceField">
+                <span>ChordPro</span>
+                <textarea id="editSourceText" class="add-song-text" rows="12"
+                          spellcheck="false"></textarea>
+            </label>
+
+            <p id="editSourceUnavailable" class="edit-source-unavailable" tabindex="-1" hidden>
+                This song has no ChordPro source. Use the Grid and Strum editors to change its
+                structure and patterns.
+            </p>
+
+            <div id="editSourcePreview" class="add-song-preview" aria-live="polite" hidden>
+                <p class="add-song-preview-title">Preview</p>
+                <ul id="editSourcePreviewList" class="add-song-list"></ul>
+            </div>
+
+            <p id="editSourceError" class="pattern-error" role="alert" tabindex="-1" hidden></p>
+
+            <div class="pattern-actions">
+                <span class="pattern-spacer"></span>
+                <button id="editSourceCancel" class="pattern-cancel" type="button">Cancel</button>
+                <button id="editSourceSave" class="pattern-save" type="submit">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div id="tunerOverlay" class="tuner-overlay" hidden aria-hidden="true">
     <div class="tuner-sheet" role="dialog" aria-modal="true" aria-labelledby="tunerTitle" tabindex="-1">
         <header class="tuner-head">
@@ -603,10 +740,12 @@
 <script src="js/list.js"></script>
 <script src="js/import.js"></script>
 <script src="js/export.js"></script>
+<script src="js/author.js"></script>
 <script src="js/song.js"></script>
 <script src="js/autoscroll.js"></script>
 <script src="js/metronome.js"></script>
 <script src="js/strum.js"></script>
+<script src="js/chordpro.js"></script>
 <script src="js/editor.js"></script>
 <script src="js/router.js"></script>
 <script src="js/keyboard.js"></script>

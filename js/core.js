@@ -114,6 +114,11 @@
         byId: {},               // active songs by id
         currentSong: null,
 
+        /* List edit mode: the id of the songbook whose authoring row actions
+         * are showing, or null. Session only — never persisted. See
+         * SB.isEditingBook. */
+        editingBook: null,
+
         /* personal data */
         favorites: new Set(SB.lsGetArray(SB.FAV_KEY).filter(function (v) {
             return typeof v === 'string';
@@ -171,6 +176,14 @@
         chordPin: true,
         chordMode: 'inline',
         showNumbers: false
+    };
+
+    /* Edit mode is a task mode, not a display preference: it is held per
+     * songbook id and never persisted, so switching books — or reopening the
+     * app — always lands in the safe, read-only list. */
+    SB.isEditingBook = function () {
+        return !!(SB.state.active && SB.state.active.imported &&
+            SB.state.editingBook === SB.state.active.id);
     };
 
 })(window.SB = window.SB || {});
