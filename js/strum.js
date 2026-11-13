@@ -667,13 +667,14 @@
         var differ = roles.length > 0 && sectionsDiffer(song, plan || SB.emptyPlan(), roles);
         var collapsedDiff = !sectionsOpen && differ;
         if (summary) {
-            // Keep the control down to its chevron unless there is something
-            // to report: "multiple patterns" when sections disagree, or a
-            // short notice when there are no sections to choose from.
-            var note = collapsedDiff ? 'Multiple patterns'
-                : (!sectionsOpen && !roles.length ? 'No sections' : '');
-            summary.textContent = note;
-            summary.hidden = !note;
+            // The control keeps a visible word so it never collapses to a
+            // lone chevron: the chevron says "expand", the word says what is
+            // being expanded. State replaces the word only when it changes
+            // the meaning ("Mixed" = section patterns disagree, "None" = the
+            // song has no sections to assign).
+            summary.textContent = collapsedDiff ? 'Mixed'
+                : (!sectionsOpen && !roles.length ? 'None' : 'Sections');
+            summary.hidden = false;
         }
         btn.classList.toggle('is-multiple', collapsedDiff);
         btn.setAttribute('aria-expanded', sectionsOpen ? 'true' : 'false');

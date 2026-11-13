@@ -1190,11 +1190,11 @@ main {
 
 /* song tools */
 
+/* The card holds two layers: the controls used on every song, and a
+ * disclosure with the ones that change layout or drive practice. The card
+ * itself is not a flex row any more — each layer lays out its own groups, so
+ * opening the advanced layer does not re-flow the basic row. */
 .song-tools {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px 22px;
     padding: 12px 16px;
     margin-bottom: 20px;
     border: 1px solid var(--line);
@@ -1202,11 +1202,77 @@ main {
     background: var(--surface-2);
 }
 
+.song-tools-basic,
+.song-tools-advanced {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 22px;
+}
+
+.song-tools-advanced {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+}
+
 .song-tools .tool-label {
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.09em;
     text-transform: uppercase;
+}
+
+/* A quiet disclosure, not a sixth control group: it sits at the end of the
+ * basic row and borrows the same pill language as the bar. */
+.song-tools-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 32px;
+    margin-left: auto;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.song-tools-more:hover,
+.song-tools-more:focus-visible {
+    border-color: var(--accent);
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.song-tools-more[aria-expanded="true"] {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+}
+
+.song-tools-more-chevron {
+    font-size: 0.9rem;
+    line-height: 1;
+    transition: transform 0.15s ease;
+}
+
+.song-tools-more[aria-expanded="true"] .song-tools-more-chevron {
+    transform: rotate(180deg);
+}
+
+.song-tools-more.is-playing::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
 .tool-group {
@@ -2771,14 +2837,13 @@ body.pattern-open { overflow: hidden; }
 
 /* Three tiers, each with a stable job:
  *   picker    — which book am I in, and can it be edited
- *   actions   — add a book / add its songs / open the tuner
- *   utilities — file-level maintenance (URL, refresh, duplicate, export)
+ *   actions   — every way to add or play: new, import, URL, tuner
+ *   utilities — file-level maintenance (refresh, duplicate, export)
  *
- * Keeping the tiers apart is what stops the bar from becoming one long,
- * same-weight row of pills whose contents change with the book type. The
- * utilities sit on their own quieter line, so the two primary actions never
- * lose their place, and Tuner no longer needs `margin-left:auto` to reach a
- * corner — which is what used to push it onto a line of its own mid-wrap. */
+ * Every tier speaks the same button language: one pill geometry, with rank
+ * carried by fill and colour instead of by switching some actions to
+ * borderless text. The file actions stay on their own line so the primary
+ * row never becomes an undifferentiated strip that changes with the book. */
 .songbook-bar {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -2803,9 +2868,10 @@ body.pattern-open { overflow: hidden; }
 .songbook-actions {
     grid-area: actions;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
-    gap: 6px;
+    gap: 8px;
     min-width: 0;
 }
 
@@ -2815,9 +2881,35 @@ body.pattern-open { overflow: hidden; }
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-start;
-    gap: 2px;
+    gap: 8px;
     min-width: 0;
 }
+
+.bar-util-label {
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+/* One geometry for every action in the bar. Emphasis, not shape, carries
+ * rank: filled accent for New, normal text for Import, muted outlines for
+ * the secondary routes and file actions. */
+.songbook-actions .pill-btn,
+.songbook-actions .link-btn,
+.songbook-utilities .link-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+
+.songbook-utilities .link-btn { color: var(--muted); }
 
 /* Authoring outcomes (add summary, mode hints, errors) are announced here
  * instead of in a blocking alert. Empty when there is nothing to say. */
@@ -2859,6 +2951,9 @@ body.pattern-open { overflow: hidden; }
 .edit-book-btn {
     grid-area: edit;
     flex: none;
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 0.82rem;
 }
 
 /* A mode toggle, not a call to action: the banner below already carries the
@@ -2869,25 +2964,12 @@ body.pattern-open { overflow: hidden; }
     color: var(--accent);
 }
 
-.songbook-utilities .link-btn {
-    border-color: transparent;
-    background: transparent;
-    padding: 4px 8px;
-    font-size: 0.78rem;
-    color: var(--muted);
-}
-
-.songbook-utilities .link-btn:hover {
-    border-color: transparent;
-    background: var(--surface-2);
-    color: var(--text);
-}
-
-/* First run: no select to show and no file actions to offer. The entry
- * actions stay (they are the bar's contribution to the empty state), while
- * the rest of the library bar steps aside for the welcome card. */
+/* First run: no select to show, no URL route (the welcome card owns it) and
+ * no file actions. The entry actions stay (they are the bar's contribution to
+ * the empty state), while the rest of the library bar steps aside. */
 .songbook-bar.is-empty .songbook-picker,
-.songbook-bar.is-empty .songbook-utilities { display: none; }
+.songbook-bar.is-empty .songbook-utilities,
+.songbook-bar.is-empty #importUrlToggle { display: none; }
 
 .songbook-bar.is-empty { grid-template-areas: "actions actions"; }
 .songbook-bar.is-empty .songbook-actions { justify-content: flex-start; }
@@ -4141,20 +4223,25 @@ body.tuner-open { overflow: hidden; }
 
     .edit-book-btn {
         justify-self: end;
-        min-height: 30px;
-        padding: 4px 12px;
+        min-height: 34px;
+        padding: 0 12px;
         font-size: 0.8rem;
     }
 
     .songbook-actions {
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         justify-content: flex-start;
     }
-
-    .songbook-actions .tuner-open-btn { margin-left: auto; }
+    .songbook-actions .pill-btn,
+    .songbook-actions .link-btn { width: 100%; padding: 0 10px; }
+    /* With no book there are only three entry actions; keep them on one line
+     * instead of leaving the fourth grid cell empty. */
+    .songbook-bar.is-empty .songbook-actions { display: flex; }
+    .songbook-bar.is-empty .songbook-actions .pill-btn,
+    .songbook-bar.is-empty .songbook-actions .link-btn { width: auto; }
 
     .songbook-utilities { justify-content: flex-start; }
-    .songbook-utilities .link-btn { padding: 5px 9px; }
 
     .edit-mode-bar { padding: 8px 10px; }
     .edit-mode-text { flex: 1 1 auto; }
@@ -4229,14 +4316,6 @@ body.tuner-open { overflow: hidden; }
      * phone has the vertical room for it — this panel scrolls away — and it
      * buys back the horizontal room these controls actually need. */
     .song-tools {
-        display: flex;
-        flex-direction: column;
-        /* The base rule's `align-items: center` centres the cross axis, which
-         * in a column is the horizontal one: each row would shrink-wrap its
-         * contents and float in the middle, so no two labels or steppers would
-         * line up — the thing this layout exists to fix. */
-        align-items: stretch;
-        gap: 8px;
         padding: 10px 12px;
         /* On a phone the panel starts above the fold and runs under the fixed
          * auto-scroll pill, so the two always meet at the top of a song. The
@@ -4245,6 +4324,24 @@ body.tuner-open { overflow: hidden; }
          * panel scrolls away. */
         position: relative;
         z-index: 1101;
+    }
+    /* A single column inside each layer: every group is one row, labels share
+     * one left edge and controls one right edge. `align-items: stretch` keeps
+     * each row full-width instead of shrinking to its contents. */
+    .song-tools-basic,
+    .song-tools-advanced {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    .song-tools-advanced {
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+    .song-tools-more {
+        width: 100%;
+        margin-left: 0;
+        min-height: 34px;
     }
     .tool-group {
         justify-content: space-between;

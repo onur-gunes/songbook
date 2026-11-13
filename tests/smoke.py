@@ -56,6 +56,20 @@ def main():
            cdp.eval("document.getElementById('origKeyValue').textContent"))
         ok('capo shown', cdp.eval("document.getElementById('capoValue').textContent") == 'Capo 1',
            cdp.eval("document.getElementById('capoValue').textContent"))
+
+        # Song tools: layout, practice and structure controls sit behind one
+        # disclosure, so the basic reading row does not grow with every song.
+        ok('advanced song controls start collapsed',
+           cdp.eval("document.getElementById('songToolsAdvanced').hidden") is True)
+        cdp.eval("document.getElementById('songToolsMoreBtn').click()")
+        ok('More controls reveals tempo, strum, diagram and structure',
+           cdp.eval("document.getElementById('songToolsAdvanced').hidden") is False
+           and cdp.eval("document.getElementById('songToolsMoreBtn').getAttribute('aria-expanded')") == 'true'
+           and cdp.eval("document.getElementById('metronomeGroup').hidden") is False)
+        cdp.eval("document.getElementById('songToolsMoreBtn').click()")
+        ok('More controls collapses again',
+           cdp.eval("document.getElementById('songToolsAdvanced').hidden") is True)
+
         cdp.eval("document.getElementById('trUp').click()")
         time.sleep(0.1)
         ok('capo follows transpose (+1 -> no capo)',
