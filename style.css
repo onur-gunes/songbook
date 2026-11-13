@@ -625,34 +625,55 @@ main {
 .song-row.has-actions .row-tools {
     position: static;
     transform: none;
+    display: flex;
+    align-items: center;
     justify-content: flex-end;
-    flex-wrap: wrap;
     gap: 6px;
     padding: 0 6px 8px;
+}
+
+/* One dock per row instead of four free-floating pills. The four actions are
+ * one control (edit, reorder, remove), so they read as one object, the
+ * destructive one sits at the edge, and every row keeps the same baseline
+ * whether or not its neighbours can move. */
+.row-actions {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    overflow: hidden;
 }
 
 .row-action {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 5px;
-    min-height: 30px;
-    padding: 0 9px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--surface);
+    min-height: 34px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
     color: var(--muted);
     font-size: 0.72rem;
     font-weight: 600;
+    white-space: nowrap;
     cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.row-action:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
-.row-action:disabled { opacity: 0.4; cursor: default; }
+.row-action + .row-action { border-left: 1px solid var(--line); }
+.row-action:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+.row-action:disabled { opacity: 0.35; cursor: default; }
 .row-action-remove { color: var(--hard); }
-.row-action-remove.is-confirming {
-    border-color: var(--hard);
+.row-action-remove:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--hard) 10%, transparent);
     color: var(--hard);
-    background: color-mix(in srgb, var(--hard) 12%, transparent);
+}
+.row-action-remove.is-confirming {
+    color: var(--hard);
+    background: color-mix(in srgb, var(--hard) 16%, transparent);
 }
 .row-action-icon { font-size: 0.85rem; line-height: 1; }
 
@@ -2748,12 +2769,54 @@ body.pattern-open { overflow: hidden; }
 
 /* ===== songbook picker ===== */
 
+/* Three tiers, each with a stable job:
+ *   picker    — which book am I in, and can it be edited
+ *   actions   — add a book / add its songs / open the tuner
+ *   utilities — file-level maintenance (URL, refresh, duplicate, export)
+ *
+ * Keeping the tiers apart is what stops the bar from becoming one long,
+ * same-weight row of pills whose contents change with the book type. The
+ * utilities sit on their own quieter line, so the two primary actions never
+ * lose their place, and Tuner no longer needs `margin-left:auto` to reach a
+ * corner — which is what used to push it onto a line of its own mid-wrap. */
 .songbook-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "picker actions"
+        "utils  utils";
+    align-items: center;
+    gap: 6px 12px;
+    margin-bottom: 12px;
+}
+
+.songbook-picker {
+    grid-area: picker;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "label select edit";
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.songbook-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    min-width: 0;
+}
+
+.songbook-utilities {
+    grid-area: utils;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px 10px;
-    margin-bottom: 12px;
+    justify-content: flex-start;
+    gap: 2px;
+    min-width: 0;
 }
 
 /* Authoring outcomes (add summary, mode hints, errors) are announced here
@@ -2766,8 +2829,12 @@ body.pattern-open { overflow: hidden; }
 
 .author-status:not(:empty) { margin: 0 0 10px; }
 .author-status.is-error { color: var(--hard); }
+/* Mode guidance, not an outcome: "rows show book order…" is a hint, so it
+ * stays muted. Green is reserved for completed work ("1 added"). */
+.author-status.is-hint { color: var(--muted); }
 
 .songbook-label {
+    grid-area: label;
     color: var(--muted);
     font-size: 0.7rem;
     font-weight: 700;
@@ -2776,8 +2843,10 @@ body.pattern-open { overflow: hidden; }
 }
 
 .songbook-select {
-    flex: 1 1 220px;
+    grid-area: select;
+    width: 100%;
     max-width: 360px;
+    min-width: 0;
     border: 1px solid var(--line);
     background: var(--surface);
     border-radius: 10px;
@@ -2787,19 +2856,97 @@ body.pattern-open { overflow: hidden; }
     cursor: pointer;
 }
 
-.pill-btn {
-    border: 1px solid var(--line);
-    background: var(--surface);
-    color: var(--text);
-    border-radius: 999px;
-    padding: 8px 14px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: border-color 0.15s ease;
+.edit-book-btn {
+    grid-area: edit;
+    flex: none;
 }
 
-.pill-btn:hover { border-color: var(--accent); }
+/* A mode toggle, not a call to action: the banner below already carries the
+ * accent, so a filled Done would compete with New songbook for the eye. */
+.edit-book-btn[aria-pressed="true"] {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: var(--accent);
+}
+
+.songbook-utilities .link-btn {
+    border-color: transparent;
+    background: transparent;
+    padding: 4px 8px;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+.songbook-utilities .link-btn:hover {
+    border-color: transparent;
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+/* First run: no select to show and no file actions to offer. The entry
+ * actions stay (they are the bar's contribution to the empty state), while
+ * the rest of the library bar steps aside for the welcome card. */
+.songbook-bar.is-empty .songbook-picker,
+.songbook-bar.is-empty .songbook-utilities { display: none; }
+
+.songbook-bar.is-empty { grid-template-areas: "actions actions"; }
+.songbook-bar.is-empty .songbook-actions { justify-content: flex-start; }
+
+/* Edit mode is a task mode, so it gets a banner of its own rather than
+ * changing the shape of the browsing bar under the cursor. The banner owns
+ * the task's two actions (add a song, remove the book); the bar keeps the
+ * browsing actions where they were. */
+.edit-mode-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    margin: 0 0 10px;
+    padding: 8px 12px;
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line));
+    border-radius: 12px;
+    background: var(--accent-soft);
+}
+
+.edit-mode-dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.edit-mode-text {
+    min-width: 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+.edit-mode-text strong {
+    display: inline-block;
+    max-width: 34ch;
+    overflow: hidden;
+    vertical-align: bottom;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text);
+}
+
+.edit-mode-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.link-btn.danger { color: var(--hard); }
+.link-btn.danger:hover {
+    border-color: var(--hard);
+    background: color-mix(in srgb, var(--hard) 10%, transparent);
+    color: var(--hard);
+}
 
 .chord-item.no-diagram .missing { opacity: 0.85; }
 
@@ -2820,7 +2967,6 @@ body.pattern-open { overflow: hidden; }
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    margin-left: auto;
 }
 
 .tuner-open-btn svg {
@@ -3972,6 +4118,62 @@ body.tuner-open { overflow: hidden; }
 
     main { padding: 16px 12px 40px; }
 
+    /* The picker owns a full row: label and Edit on top, the select below.
+     * Everything else falls into two stable lines — entry actions, then the
+     * quiet file actions — instead of re-flowing around whichever buttons the
+     * current book happens to expose. */
+    .songbook-bar {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "picker" "actions" "utils";
+        gap: 8px;
+    }
+
+    .songbook-picker {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: "label edit" "select select";
+        gap: 5px 8px;
+    }
+
+    .songbook-select {
+        width: 100%;
+        max-width: none;
+    }
+
+    .edit-book-btn {
+        justify-self: end;
+        min-height: 30px;
+        padding: 4px 12px;
+        font-size: 0.8rem;
+    }
+
+    .songbook-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .songbook-actions .tuner-open-btn { margin-left: auto; }
+
+    .songbook-utilities { justify-content: flex-start; }
+    .songbook-utilities .link-btn { padding: 5px 9px; }
+
+    .edit-mode-bar { padding: 8px 10px; }
+    .edit-mode-text { flex: 1 1 auto; }
+    .edit-mode-text strong { max-width: 20ch; }
+    .edit-mode-actions { margin-left: 0; }
+
+    /* Icons carry the row actions on a phone; the accessible name and title
+     * stay on the button, and the arm-to-confirm label still shows because
+     * "Confirm" is the one word that must be visible. */
+    .song-row.has-actions .row-action-label { display: none; }
+    .song-row.has-actions .row-action-remove.is-confirming .row-action-label {
+        display: inline;
+    }
+    .song-row.has-actions .row-action {
+        min-width: 36px;
+        padding: 0 8px;
+    }
+    .song-row.has-actions .row-action-icon { font-size: 0.95rem; }
+
     .brand-name { font-size: 0.9rem; }
 
     .topbar-link { padding: 0 10px; font-size: 0.78rem; }
@@ -4036,6 +4238,13 @@ body.tuner-open { overflow: hidden; }
         align-items: stretch;
         gap: 8px;
         padding: 10px 12px;
+        /* On a phone the panel starts above the fold and runs under the fixed
+         * auto-scroll pill, so the two always meet at the top of a song. The
+         * panel is the interactive surface and wins: covering Edit with a
+         * floating button is worse than the pill appearing as soon as the
+         * panel scrolls away. */
+        position: relative;
+        z-index: 1101;
     }
     .tool-group {
         justify-content: space-between;

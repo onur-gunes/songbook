@@ -38,31 +38,44 @@
     <section id="listView" hidden>
 
         <div class="songbook-bar">
-            <label class="songbook-label" for="songbookSelect">Songbook</label>
-            <select id="songbookSelect" class="songbook-select" aria-label="Choose a songbook"></select>
-            <button id="newSongbookBtn" class="link-btn" type="button">New songbook</button>
-            <button id="duplicateBookBtn" class="link-btn" type="button"
-                    title="Duplicate this songbook" hidden>Duplicate</button>
-            <button id="addSongBtn" class="pill-btn" type="button" hidden>Add song…</button>
-            <button id="editBookBtn" class="link-btn" type="button"
-                    aria-pressed="false" title="Reorder, edit and remove songs" hidden>Edit songbook</button>
-            <button id="importBtn" class="pill-btn" type="button">Import list…</button>
-            <button id="importUrlToggle" class="link-btn" type="button"
-                    aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
-            <button id="refreshSongsBtn" class="link-btn" type="button" hidden>Refresh</button>
-            <button id="removeSongsBtn" class="link-btn" type="button" hidden>Remove</button>
-            <button id="exportSongsBtn" class="link-btn" type="button">Export</button>
-            <input id="importFile" type="file" accept=".json,application/json" multiple hidden>
-            <button id="tunerBtn" class="pill-btn tuner-open-btn" type="button"
-                    aria-haspopup="dialog" title="Open tuner">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                     stroke-linecap="round" aria-hidden="true">
-                    <path d="M9 3v6.5a3 3 0 0 0 6 0V3"/>
-                    <path d="M12 12.5V21"/>
-                    <path d="M8 3h2M14 3h2"/>
-                </svg>
-                <span>Tuner</span>
-            </button>
+            <div class="songbook-picker">
+                <label class="songbook-label" for="songbookSelect">Songbook</label>
+                <select id="songbookSelect" class="songbook-select" aria-label="Choose a songbook"></select>
+                <button id="editBookBtn" class="link-btn edit-book-btn" type="button"
+                        aria-pressed="false" title="Reorder, edit and remove songs" hidden>Edit songbook</button>
+            </div>
+            <div class="songbook-actions">
+                <button id="newSongbookBtn" class="pill-btn accent" type="button">New songbook</button>
+                <button id="importBtn" class="pill-btn" type="button">Import list…</button>
+                <input id="importFile" type="file" accept=".json,application/json" multiple hidden>
+                <button id="tunerBtn" class="link-btn tuner-open-btn" type="button"
+                        aria-haspopup="dialog" title="Open tuner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" aria-hidden="true">
+                        <path d="M9 3v6.5a3 3 0 0 0 6 0V3"/>
+                        <path d="M12 12.5V21"/>
+                        <path d="M8 3h2M14 3h2"/>
+                    </svg>
+                    <span>Tuner</span>
+                </button>
+            </div>
+            <div class="songbook-utilities" role="group" aria-label="Songbook file actions">
+                <button id="importUrlToggle" class="link-btn" type="button"
+                        aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
+                <button id="refreshSongsBtn" class="link-btn" type="button" hidden>Refresh</button>
+                <button id="duplicateBookBtn" class="link-btn" type="button"
+                        title="Duplicate this songbook" hidden>Duplicate</button>
+                <button id="exportSongsBtn" class="link-btn" type="button">Export</button>
+            </div>
+        </div>
+
+        <div id="editModeBar" class="edit-mode-bar" hidden>
+            <span class="edit-mode-dot" aria-hidden="true"></span>
+            <span class="edit-mode-text">Editing <strong id="editModeName">songbook</strong></span>
+            <div class="edit-mode-actions">
+                <button id="addSongBtn" class="pill-btn accent" type="button" hidden>Add song…</button>
+                <button id="removeSongsBtn" class="link-btn danger" type="button" hidden>Remove songbook</button>
+            </div>
         </div>
 
         <p id="authorStatus" class="author-status" role="status" aria-live="polite"></p>
@@ -211,6 +224,18 @@
                     </div>
                 </div>
             </div>
+            <div class="tool-group" role="group" aria-label="Chord diagram size">
+                <span class="tool-label">Diagram</span>
+                <div class="tool-controls">
+                    <div class="stepper">
+                        <button id="chordSizeDown" class="step-btn" type="button" aria-label="Smaller chord diagrams">−</button>
+                        <span id="chordSizeValue" class="step-value" aria-live="polite">100%</span>
+                        <button id="chordSizeUp" class="step-btn" type="button" aria-label="Bigger chord diagrams">+</button>
+                        <span class="step-divider" role="separator"></span>
+                        <button id="chordPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
+                    </div>
+                </div>
+            </div>
             <div id="metronomeGroup" class="tool-group" role="group" aria-label="Metronome" hidden>
                 <span class="tool-label">Tempo</span>
                 <div class="tool-controls">
@@ -263,18 +288,6 @@
                     This song has no sections — the strum above applies to the whole song.
                 </p>
                 <div id="strumSectionsList" class="strum-sections-list"></div>
-            </div>
-            <div class="tool-group" role="group" aria-label="Chord diagram size">
-                <span class="tool-label">Diagram</span>
-                <div class="tool-controls">
-                    <div class="stepper">
-                        <button id="chordSizeDown" class="step-btn" type="button" aria-label="Smaller chord diagrams">−</button>
-                        <span id="chordSizeValue" class="step-value" aria-live="polite">100%</span>
-                        <button id="chordSizeUp" class="step-btn" type="button" aria-label="Bigger chord diagrams">+</button>
-                        <span class="step-divider" role="separator"></span>
-                        <button id="chordPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
-                    </div>
-                </div>
             </div>
             <div id="editGroup" class="tool-group" role="group" aria-label="Structure editing">
                 <span class="tool-label">Structure</span>

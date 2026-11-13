@@ -411,11 +411,11 @@ below: both end in the same songbook JSON described in
    stores the valid songs in one batch and reports one summary, listing any
    files that failed.
 3. **Edit** — **Edit songbook** in the list header turns on a task mode for
-   that book (session-scoped, cleared when you switch books or reload). While
-   it is on, the bar also exposes **Add song…** and **Remove** (the whole
-   book), rows show **Edit source**, **Move up**, **Move down** and
-   **Remove**, and the list shows the book's own order with the sort buttons
-   disabled, so moving a song moves its row. Edit source re-parses and
+   that book (session-scoped, cleared when you switch books or reload). A
+   banner naming the book then exposes **Add song…** and **Remove songbook**
+   (the whole book), rows show a compact **Edit source / Move up / Move down /
+   Remove** action dock, and the list shows the book's own order with the sort
+   buttons disabled, so moving a song moves its row. Edit source re-parses and
    revalidates the ChordPro, keeps the song's id and position, and previews the
    result before saving; a saved source also drops that song's local grid/strum
    plan, because it described the old structure. The first **Remove** press
@@ -427,11 +427,14 @@ below: both end in the same songbook JSON described in
    book with every local edit applied, including the `chordpro` source of each
    authored song. Re-import that file to keep editing it.
 
-The bar outside edit mode is read-only: it keeps **New songbook**, **Import**,
-**From URL**, **Refresh** (URL imports only) and **Export**. **Add song…**,
-**Duplicate** (for imported books) and **Remove** (the whole book) join them
-only while edit mode is on. Bundled books have no edit mode, so their bar keeps
-**Duplicate** as the route to an editable copy.
+The bar outside edit mode is read-only. Its first line holds the book picker,
+**Edit songbook** (imported books only), **New songbook**, **Import list…** and
+**Tuner**; a quieter second line holds the file actions **From URL…**,
+**Refresh** (URL imports only), **Duplicate** (bundled books) and **Export**.
+**Add song…** and **Remove songbook** live in the edit-mode banner, and
+**Duplicate** also becomes available for an imported book while editing.
+Bundled books have no edit mode, so their bar keeps **Duplicate** as the route
+to an editable copy.
 
 Authoring outcomes — the add batch summary, update/remove/duplicate results and
 errors — are announced on a polite status line under the songbook bar rather
