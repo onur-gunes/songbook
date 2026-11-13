@@ -70,6 +70,12 @@
         if (box) box.hidden = !empty;
         var toolbar = SB.$('listControls');
         if (toolbar) toolbar.hidden = empty;
+        /* With no books there is nothing to pick, refresh or export. Keep the
+         * entry actions (New/Import) in place for the test-visible "top import"
+         * affordance, but drop the picker and file row so the first-run card is
+         * the only thing asking for a decision. */
+        var bar = document.querySelector('.songbook-bar');
+        if (bar) bar.classList.toggle('is-empty', empty);
         if (!empty) return;
         var list = SB.$('songList');
         if (list) list.textContent = '';
@@ -121,6 +127,18 @@
             b.setAttribute('aria-pressed', editing ? 'true' : 'false');
             b.textContent = editing ? 'Done' : 'Edit songbook';
             b.title = editing ? 'Leave edit mode' : 'Reorder, edit and remove songs';
+        }
+        /* The banner, not the browsing bar, is where the task mode lives. It
+         * names the book being edited so a row action can never be mistaken
+         * for a change to some other book, and it keeps Add/Remove in one
+         * stable place instead of inserting them among New/Import on toggle. */
+        var banner = SB.$('editModeBar');
+        if (banner) {
+            banner.hidden = !editing;
+            if (editing && SB.state.active) {
+                var name = SB.$('editModeName');
+                if (name) name.textContent = SB.state.active.name;
+            }
         }
         Array.prototype.forEach.call(document.querySelectorAll('.sort-btn'), function (s) {
             s.disabled = editing;
@@ -188,7 +206,12 @@
             var tools = SB.el('div', 'row-tools');
             tools.appendChild(star);
             if (editable) {
+                /* The four authoring actions are one dock, not four separate
+                 * pills: the row stays a row, and Remove sits at the edge
+                 * where a destructive action belongs. */
+                var actions = SB.el('div', 'row-actions');
                 var pos = bookSongs.indexOf(s);
+
                 var edit = rowAction('edit', '✎', 'Edit source',
                     'Edit source for ' + s.title);
                 edit.addEventListener('click', function (e) {
@@ -196,7 +219,7 @@
                     e.stopPropagation();
                     SB.editSongSource(s.id);
                 });
-                tools.appendChild(edit);
+                actions.appendChild(edit);
 
                 var up = rowAction('up', '↑', 'Move up',
                     'Move ' + s.title + ' up in the book');
@@ -206,7 +229,7 @@
                     e.stopPropagation();
                     SB.moveSongInList(s.id, -1);
                 });
-                tools.appendChild(up);
+                actions.appendChild(up);
 
                 var down = rowAction('down', '↓', 'Move down',
                     'Move ' + s.title + ' down in the book');
@@ -216,7 +239,7 @@
                     e.stopPropagation();
                     SB.moveSongInList(s.id, 1);
                 });
-                tools.appendChild(down);
+                actions.appendChild(down);
 
                 var remove = rowAction('remove', '✕', 'Remove',
                     'Remove ' + s.title + ' from the book');
@@ -225,7 +248,9 @@
                     e.stopPropagation();
                     SB.removeSongFromList(s.id);
                 });
-                tools.appendChild(remove);
+                actions.appendChild(remove);
+
+                tools.appendChild(actions);
             }
             li.appendChild(tools);
 
