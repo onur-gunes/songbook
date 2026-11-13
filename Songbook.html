@@ -1203,11 +1203,11 @@ main {
 
 /* song tools */
 
+/* The card holds two layers: the controls used on every song, and a
+ * disclosure with the ones that change layout or drive practice. The card
+ * itself is not a flex row any more — each layer lays out its own groups, so
+ * opening the advanced layer does not re-flow the basic row. */
 .song-tools {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px 22px;
     padding: 12px 16px;
     margin-bottom: 20px;
     border: 1px solid var(--line);
@@ -1215,11 +1215,77 @@ main {
     background: var(--surface-2);
 }
 
+.song-tools-basic,
+.song-tools-advanced {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 22px;
+}
+
+.song-tools-advanced {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+}
+
 .song-tools .tool-label {
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.09em;
     text-transform: uppercase;
+}
+
+/* A quiet disclosure, not a sixth control group: it sits at the end of the
+ * basic row and borrows the same pill language as the bar. */
+.song-tools-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 32px;
+    margin-left: auto;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.song-tools-more:hover,
+.song-tools-more:focus-visible {
+    border-color: var(--accent);
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.song-tools-more[aria-expanded="true"] {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+}
+
+.song-tools-more-chevron {
+    font-size: 0.9rem;
+    line-height: 1;
+    transition: transform 0.15s ease;
+}
+
+.song-tools-more[aria-expanded="true"] .song-tools-more-chevron {
+    transform: rotate(180deg);
+}
+
+.song-tools-more.is-playing::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
 .tool-group {
@@ -2784,14 +2850,13 @@ body.pattern-open { overflow: hidden; }
 
 /* Three tiers, each with a stable job:
  *   picker    — which book am I in, and can it be edited
- *   actions   — add a book / add its songs / open the tuner
- *   utilities — file-level maintenance (URL, refresh, duplicate, export)
+ *   actions   — every way to add or play: new, import, URL, tuner
+ *   utilities — file-level maintenance (refresh, duplicate, export)
  *
- * Keeping the tiers apart is what stops the bar from becoming one long,
- * same-weight row of pills whose contents change with the book type. The
- * utilities sit on their own quieter line, so the two primary actions never
- * lose their place, and Tuner no longer needs `margin-left:auto` to reach a
- * corner — which is what used to push it onto a line of its own mid-wrap. */
+ * Every tier speaks the same button language: one pill geometry, with rank
+ * carried by fill and colour instead of by switching some actions to
+ * borderless text. The file actions stay on their own line so the primary
+ * row never becomes an undifferentiated strip that changes with the book. */
 .songbook-bar {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -2816,9 +2881,10 @@ body.pattern-open { overflow: hidden; }
 .songbook-actions {
     grid-area: actions;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
-    gap: 6px;
+    gap: 8px;
     min-width: 0;
 }
 
@@ -2828,9 +2894,35 @@ body.pattern-open { overflow: hidden; }
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-start;
-    gap: 2px;
+    gap: 8px;
     min-width: 0;
 }
+
+.bar-util-label {
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+/* One geometry for every action in the bar. Emphasis, not shape, carries
+ * rank: filled accent for New, normal text for Import, muted outlines for
+ * the secondary routes and file actions. */
+.songbook-actions .pill-btn,
+.songbook-actions .link-btn,
+.songbook-utilities .link-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+
+.songbook-utilities .link-btn { color: var(--muted); }
 
 /* Authoring outcomes (add summary, mode hints, errors) are announced here
  * instead of in a blocking alert. Empty when there is nothing to say. */
@@ -2872,6 +2964,9 @@ body.pattern-open { overflow: hidden; }
 .edit-book-btn {
     grid-area: edit;
     flex: none;
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 0.82rem;
 }
 
 /* A mode toggle, not a call to action: the banner below already carries the
@@ -2882,25 +2977,12 @@ body.pattern-open { overflow: hidden; }
     color: var(--accent);
 }
 
-.songbook-utilities .link-btn {
-    border-color: transparent;
-    background: transparent;
-    padding: 4px 8px;
-    font-size: 0.78rem;
-    color: var(--muted);
-}
-
-.songbook-utilities .link-btn:hover {
-    border-color: transparent;
-    background: var(--surface-2);
-    color: var(--text);
-}
-
-/* First run: no select to show and no file actions to offer. The entry
- * actions stay (they are the bar's contribution to the empty state), while
- * the rest of the library bar steps aside for the welcome card. */
+/* First run: no select to show, no URL route (the welcome card owns it) and
+ * no file actions. The entry actions stay (they are the bar's contribution to
+ * the empty state), while the rest of the library bar steps aside. */
 .songbook-bar.is-empty .songbook-picker,
-.songbook-bar.is-empty .songbook-utilities { display: none; }
+.songbook-bar.is-empty .songbook-utilities,
+.songbook-bar.is-empty #importUrlToggle { display: none; }
 
 .songbook-bar.is-empty { grid-template-areas: "actions actions"; }
 .songbook-bar.is-empty .songbook-actions { justify-content: flex-start; }
@@ -4154,20 +4236,25 @@ body.tuner-open { overflow: hidden; }
 
     .edit-book-btn {
         justify-self: end;
-        min-height: 30px;
-        padding: 4px 12px;
+        min-height: 34px;
+        padding: 0 12px;
         font-size: 0.8rem;
     }
 
     .songbook-actions {
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         justify-content: flex-start;
     }
-
-    .songbook-actions .tuner-open-btn { margin-left: auto; }
+    .songbook-actions .pill-btn,
+    .songbook-actions .link-btn { width: 100%; padding: 0 10px; }
+    /* With no book there are only three entry actions; keep them on one line
+     * instead of leaving the fourth grid cell empty. */
+    .songbook-bar.is-empty .songbook-actions { display: flex; }
+    .songbook-bar.is-empty .songbook-actions .pill-btn,
+    .songbook-bar.is-empty .songbook-actions .link-btn { width: auto; }
 
     .songbook-utilities { justify-content: flex-start; }
-    .songbook-utilities .link-btn { padding: 5px 9px; }
 
     .edit-mode-bar { padding: 8px 10px; }
     .edit-mode-text { flex: 1 1 auto; }
@@ -4242,14 +4329,6 @@ body.tuner-open { overflow: hidden; }
      * phone has the vertical room for it — this panel scrolls away — and it
      * buys back the horizontal room these controls actually need. */
     .song-tools {
-        display: flex;
-        flex-direction: column;
-        /* The base rule's `align-items: center` centres the cross axis, which
-         * in a column is the horizontal one: each row would shrink-wrap its
-         * contents and float in the middle, so no two labels or steppers would
-         * line up — the thing this layout exists to fix. */
-        align-items: stretch;
-        gap: 8px;
         padding: 10px 12px;
         /* On a phone the panel starts above the fold and runs under the fixed
          * auto-scroll pill, so the two always meet at the top of a song. The
@@ -4258,6 +4337,24 @@ body.tuner-open { overflow: hidden; }
          * panel scrolls away. */
         position: relative;
         z-index: 1101;
+    }
+    /* A single column inside each layer: every group is one row, labels share
+     * one left edge and controls one right edge. `align-items: stretch` keeps
+     * each row full-width instead of shrinking to its contents. */
+    .song-tools-basic,
+    .song-tools-advanced {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    .song-tools-advanced {
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+    .song-tools-more {
+        width: 100%;
+        margin-left: 0;
+        min-height: 34px;
     }
     .tool-group {
         justify-content: space-between;
@@ -4580,6 +4677,8 @@ button.structure-close,
             <div class="songbook-actions">
                 <button id="newSongbookBtn" class="pill-btn accent" type="button">New songbook</button>
                 <button id="importBtn" class="pill-btn" type="button">Import list…</button>
+                <button id="importUrlToggle" class="link-btn" type="button"
+                        aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
                 <input id="importFile" type="file" accept=".json,application/json" multiple hidden>
                 <button id="tunerBtn" class="link-btn tuner-open-btn" type="button"
                         aria-haspopup="dialog" title="Open tuner">
@@ -4593,8 +4692,7 @@ button.structure-close,
                 </button>
             </div>
             <div class="songbook-utilities" role="group" aria-label="Songbook file actions">
-                <button id="importUrlToggle" class="link-btn" type="button"
-                        aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
+                <span class="bar-util-label" aria-hidden="true">File</span>
                 <button id="refreshSongsBtn" class="link-btn" type="button" hidden>Refresh</button>
                 <button id="duplicateBookBtn" class="link-btn" type="button"
                         title="Duplicate this songbook" hidden>Duplicate</button>
@@ -4723,115 +4821,125 @@ button.structure-close,
         <div id="strumRow" class="strum-row" aria-label="Strum pattern" role="img" hidden></div>
 
         <div class="song-tools" role="toolbar" aria-label="Song tools">
-            <div class="tool-group" role="group" aria-label="Transpose">
-                <span class="tool-label">Transpose</span>
-                <div class="tool-controls">
-                    <div class="stepper">
-                        <button id="trDown" class="step-btn" type="button" aria-label="Transpose down">−</button>
-                        <span id="trValue" class="step-value" aria-live="polite">0</span>
-                        <button id="trUp" class="step-btn" type="button" aria-label="Transpose up">+</button>
+            <div class="song-tools-basic">
+                <div class="tool-group" role="group" aria-label="Transpose">
+                    <span class="tool-label">Transpose</span>
+                    <div class="tool-controls">
+                        <div class="stepper">
+                            <button id="trDown" class="step-btn" type="button" aria-label="Transpose down">−</button>
+                            <span id="trValue" class="step-value" aria-live="polite">0</span>
+                            <button id="trUp" class="step-btn" type="button" aria-label="Transpose up">+</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="tool-group" role="group" aria-label="Text size">
-                <span class="tool-label">Text</span>
-                <div class="tool-controls">
-                    <div class="stepper">
-                        <button id="sizeDown" class="step-btn" type="button" aria-label="Smaller text">−</button>
-                        <span id="sizeValue" class="step-value" aria-live="polite">100%</span>
-                        <button id="sizeUp" class="step-btn" type="button" aria-label="Bigger text">+</button>
+                <div class="tool-group" role="group" aria-label="Chord placement">
+                    <span class="tool-label">Chords</span>
+                    <div class="tool-controls">
+                        <div class="seg-group chord-mode-group" role="group" aria-label="How chords are displayed">
+                            <button class="chord-mode-btn active" data-chord-mode="inline" type="button" aria-pressed="true">In text</button>
+                            <button class="chord-mode-btn" data-chord-mode="above" type="button" aria-pressed="false">Above</button>
+                            <button class="chord-mode-btn" data-chord-mode="grid" type="button" aria-pressed="false" disabled
+                                    aria-label="Grid chord chart" title="This song has no grid chart">Grid</button>
+                            <button class="chord-mode-btn" data-chord-mode="animate" type="button" aria-pressed="false" disabled
+                                    aria-label="Animated chord view" title="This song has no grid chart">Animate</button>
+                            <button id="numbersBtn" class="chord-mode-btn" type="button" aria-pressed="false" aria-label="Show scale degrees instead of chord names" title="Show scale degrees (I, IV, V) instead of chord names">I-V</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="tool-group" role="group" aria-label="Chord placement">
-                <span class="tool-label">Chords</span>
-                <div class="tool-controls">
-                    <div class="seg-group chord-mode-group" role="group" aria-label="How chords are displayed">
-                        <button class="chord-mode-btn active" data-chord-mode="inline" type="button" aria-pressed="true">In text</button>
-                        <button class="chord-mode-btn" data-chord-mode="above" type="button" aria-pressed="false">Above</button>
-                        <button class="chord-mode-btn" data-chord-mode="grid" type="button" aria-pressed="false" disabled
-                                aria-label="Grid chord chart" title="This song has no grid chart">Grid</button>
-                        <button class="chord-mode-btn" data-chord-mode="animate" type="button" aria-pressed="false" disabled
-                                aria-label="Animated chord view" title="This song has no grid chart">Animate</button>
-                        <button id="numbersBtn" class="chord-mode-btn" type="button" aria-pressed="false" aria-label="Show scale degrees instead of chord names" title="Show scale degrees (I, IV, V) instead of chord names">I-V</button>
+                <div class="tool-group" role="group" aria-label="Text size">
+                    <span class="tool-label">Text</span>
+                    <div class="tool-controls">
+                        <div class="stepper">
+                            <button id="sizeDown" class="step-btn" type="button" aria-label="Smaller text">−</button>
+                            <span id="sizeValue" class="step-value" aria-live="polite">100%</span>
+                            <button id="sizeUp" class="step-btn" type="button" aria-label="Bigger text">+</button>
+                        </div>
                     </div>
                 </div>
+                <button id="songToolsMoreBtn" class="song-tools-more" type="button"
+                        aria-expanded="false" aria-controls="songToolsAdvanced"
+                        title="Show diagram, tempo, strum and structure controls">
+                    <span class="song-tools-more-label">More controls</span>
+                    <span class="song-tools-more-chevron" aria-hidden="true">⌄</span>
+                </button>
             </div>
-            <div class="tool-group" role="group" aria-label="Chord diagram size">
-                <span class="tool-label">Diagram</span>
-                <div class="tool-controls">
-                    <div class="stepper">
-                        <button id="chordSizeDown" class="step-btn" type="button" aria-label="Smaller chord diagrams">−</button>
-                        <span id="chordSizeValue" class="step-value" aria-live="polite">100%</span>
-                        <button id="chordSizeUp" class="step-btn" type="button" aria-label="Bigger chord diagrams">+</button>
-                        <span class="step-divider" role="separator"></span>
-                        <button id="chordPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
+            <div id="songToolsAdvanced" class="song-tools-advanced" hidden>
+                <div id="metronomeGroup" class="tool-group" role="group" aria-label="Metronome" hidden>
+                    <span class="tool-label">Tempo</span>
+                    <div class="tool-controls">
+                        <div class="stepper">
+                            <button id="metronomeBtn" class="step-btn metronome-seg" type="button"
+                                    aria-pressed="false" aria-label="Start the metronome" title="Start the metronome">▶</button>
+                            <span class="step-divider" role="separator"></span>
+                            <button id="bpmDown" class="step-btn" type="button" aria-label="Slower tempo">−</button>
+                            <span id="bpmValue" class="step-value" aria-live="polite">—</span>
+                            <button id="bpmUp" class="step-btn" type="button" aria-label="Faster tempo">+</button>
+                            <button id="bpmReset" class="step-btn bpm-reset" type="button"
+                                    aria-label="Reset tempo to the song's default"
+                                    title="Reset to the song's tempo" hidden>↺</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div id="metronomeGroup" class="tool-group" role="group" aria-label="Metronome" hidden>
-                <span class="tool-label">Tempo</span>
-                <div class="tool-controls">
-                    <div class="stepper">
-                        <button id="metronomeBtn" class="step-btn metronome-seg" type="button"
-                                aria-pressed="false" aria-label="Start the metronome" title="Start the metronome">▶</button>
-                        <span class="step-divider" role="separator"></span>
-                        <button id="bpmDown" class="step-btn" type="button" aria-label="Slower tempo">−</button>
-                        <span id="bpmValue" class="step-value" aria-live="polite">—</span>
-                        <button id="bpmUp" class="step-btn" type="button" aria-label="Faster tempo">+</button>
-                        <button id="bpmReset" class="step-btn bpm-reset" type="button"
-                                aria-label="Reset tempo to the song's default"
-                                title="Reset to the song's tempo" hidden>↺</button>
+                <div id="strumGroup" class="tool-group" role="group" aria-label="Strum pattern" hidden>
+                    <span class="tool-label">Strum</span>
+                    <div class="tool-controls">
+                        <label class="strum-select-wrap">
+                            <span class="sr-only">Strum pattern</span>
+                            <select id="strumSelect" class="strum-select" aria-label="Strum pattern"></select>
+                        </label>
+                        <button id="strumEditBtn" class="step-btn strum-edit-btn" type="button"
+                                aria-haspopup="dialog" aria-label="Edit custom strum patterns"
+                                title="Custom strum patterns">✎</button>
+                        <div class="stepper">
+                            <button id="strumNotationBtn" class="step-btn strum-notation-btn" type="button"
+                                    aria-label="Showing arrows — click for D/U letters"
+                                    title="Showing arrows — click for D/U letters">↓↑</button>
+                            <span class="step-divider" role="separator"></span>
+                            <button id="strumSizeDown" class="step-btn" type="button" aria-label="Smaller strum row">−</button>
+                            <span id="strumSizeValue" class="step-value" aria-live="polite">100%</span>
+                            <button id="strumSizeUp" class="step-btn" type="button" aria-label="Bigger strum row">+</button>
+                            <span class="step-divider" role="separator"></span>
+                            <button id="strumPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
+                        </div>
+                        <button id="strumSectionsBtn" class="step-btn strum-sections-btn" type="button"
+                                aria-expanded="false" aria-controls="strumSections"
+                                aria-label="Show per-section strum patterns"
+                                title="Show per-section strum patterns">
+                            <span class="strum-sections-chevron" aria-hidden="true">▸</span>
+                            <span id="strumSectionsSummary" class="strum-sections-summary">Sections</span>
+                        </button>
                     </div>
                 </div>
-            </div>
-            <div id="strumGroup" class="tool-group" role="group" aria-label="Strum pattern" hidden>
-                <span class="tool-label">Strum</span>
-                <div class="tool-controls">
-                    <label class="strum-select-wrap">
-                        <span class="sr-only">Strum pattern</span>
-                        <select id="strumSelect" class="strum-select" aria-label="Strum pattern"></select>
-                    </label>
-                    <button id="strumEditBtn" class="step-btn strum-edit-btn" type="button"
-                            aria-haspopup="dialog" aria-label="Edit custom strum patterns"
-                            title="Custom strum patterns">✎</button>
-                    <div class="stepper">
-                        <button id="strumNotationBtn" class="step-btn strum-notation-btn" type="button"
-                                aria-label="Showing arrows — click for D/U letters"
-                                title="Showing arrows — click for D/U letters">↓↑</button>
-                        <span class="step-divider" role="separator"></span>
-                        <button id="strumSizeDown" class="step-btn" type="button" aria-label="Smaller strum row">−</button>
-                        <span id="strumSizeValue" class="step-value" aria-live="polite">100%</span>
-                        <button id="strumSizeUp" class="step-btn" type="button" aria-label="Bigger strum row">+</button>
-                        <span class="step-divider" role="separator"></span>
-                        <button id="strumPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
-                    </div>
-                    <button id="strumSectionsBtn" class="step-btn strum-sections-btn" type="button"
-                            aria-expanded="false" aria-controls="strumSections"
-                            aria-label="Show per-section strum patterns"
-                            title="Show per-section strum patterns">
-                        <span class="strum-sections-chevron" aria-hidden="true">▸</span>
-                        <span id="strumSectionsSummary" class="strum-sections-summary">Sections</span>
-                    </button>
+                <div id="strumSections" class="strum-sections" role="group"
+                     aria-label="Per-section strum patterns" hidden>
+                    <p id="strumSectionsEmpty" class="strum-sections-empty" hidden>
+                        This song has no sections — the strum above applies to the whole song.
+                    </p>
+                    <div id="strumSectionsList" class="strum-sections-list"></div>
                 </div>
-            </div>
-            <div id="strumSections" class="strum-sections" role="group"
-                 aria-label="Per-section strum patterns" hidden>
-                <p id="strumSectionsEmpty" class="strum-sections-empty" hidden>
-                    This song has no sections — the strum above applies to the whole song.
-                </p>
-                <div id="strumSectionsList" class="strum-sections-list"></div>
-            </div>
-            <div id="editGroup" class="tool-group" role="group" aria-label="Structure editing">
-                <span class="tool-label">Structure</span>
-                <div class="tool-controls">
-                    <button id="editBtn" class="step-btn edit-toggle" type="button"
-                            aria-pressed="false" aria-label="Turn structure editing on or off"
-                            title="Edit chords, bars, beats and metre">Edit</button>
-                    <button id="resetBtn" class="step-btn reset-btn" type="button"
-                            disabled hidden
-                            aria-label="Reset this song to its songbook version"
-                            title="Reset this song to its songbook version">↺ Reset</button>
+                <div class="tool-group" role="group" aria-label="Chord diagram size">
+                    <span class="tool-label">Diagram</span>
+                    <div class="tool-controls">
+                        <div class="stepper">
+                            <button id="chordSizeDown" class="step-btn" type="button" aria-label="Smaller chord diagrams">−</button>
+                            <span id="chordSizeValue" class="step-value" aria-live="polite">100%</span>
+                            <button id="chordSizeUp" class="step-btn" type="button" aria-label="Bigger chord diagrams">+</button>
+                            <span class="step-divider" role="separator"></span>
+                            <button id="chordPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="editGroup" class="tool-group" role="group" aria-label="Structure editing">
+                    <span class="tool-label">Structure</span>
+                    <div class="tool-controls">
+                        <button id="editBtn" class="step-btn edit-toggle" type="button"
+                                aria-pressed="false" aria-label="Turn structure editing on or off"
+                                title="Edit chords, bars, beats and metre">Edit</button>
+                        <button id="resetBtn" class="step-btn reset-btn" type="button"
+                                disabled hidden
+                                aria-label="Reset this song to its songbook version"
+                                title="Reset this song to its songbook version">↺ Reset</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -14287,7 +14395,30 @@ button.structure-close,
         window.scrollTo(0, 0);
     }
 
+    /* The song-tools card keeps the controls used on every song visible and
+     * puts layout, practice and structure controls behind one disclosure.
+     * Expanded is DOM state rather than per-song state: opening it once keeps
+     * it open while moving through the book, and a reload starts collapsed. */
+    function bindSongTools() {
+        var btn = SB.$('songToolsMoreBtn');
+        var advanced = SB.$('songToolsAdvanced');
+        if (!btn || !advanced) return;
+        function apply(open) {
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            advanced.hidden = !open;
+            var label = btn.querySelector('.song-tools-more-label');
+            if (label) label.textContent = open ? 'Fewer controls' : 'More controls';
+            btn.title = open
+                ? 'Hide diagram, tempo, strum and structure controls'
+                : 'Show diagram, tempo, strum and structure controls';
+        }
+        btn.addEventListener('click', function () { apply(advanced.hidden); });
+        apply(!advanced.hidden);
+    }
+
     SB.bindSongControls = function () {
+        bindSongTools();
+
         SB.$('trUp').addEventListener('click', function () {
             if (SB.state.transpose >= 11) return;
             SB.state.transpose++;
@@ -15094,6 +15225,11 @@ button.structure-close,
         var label = SB.state.metronome.playing ? 'Stop the metronome' : 'Start the metronome';
         btn.setAttribute('aria-label', label);
         btn.title = label;
+        // The metronome lives in the advanced layer. If that layer is closed
+        // while a click track is running, the disclosure carries a live dot
+        // so the hidden control is not silent.
+        var more = SB.$('songToolsMoreBtn');
+        if (more) more.classList.toggle('is-playing', !!SB.state.metronome.playing);
     }
 
     SB.bindMetronome = function () {
@@ -15779,13 +15915,14 @@ button.structure-close,
         var differ = roles.length > 0 && sectionsDiffer(song, plan || SB.emptyPlan(), roles);
         var collapsedDiff = !sectionsOpen && differ;
         if (summary) {
-            // Keep the control down to its chevron unless there is something
-            // to report: "multiple patterns" when sections disagree, or a
-            // short notice when there are no sections to choose from.
-            var note = collapsedDiff ? 'Multiple patterns'
-                : (!sectionsOpen && !roles.length ? 'No sections' : '');
-            summary.textContent = note;
-            summary.hidden = !note;
+            // The control keeps a visible word so it never collapses to a
+            // lone chevron: the chevron says "expand", the word says what is
+            // being expanded. State replaces the word only when it changes
+            // the meaning ("Mixed" = section patterns disagree, "None" = the
+            // song has no sections to assign).
+            summary.textContent = collapsedDiff ? 'Mixed'
+                : (!sectionsOpen && !roles.length ? 'None' : 'Sections');
+            summary.hidden = false;
         }
         btn.classList.toggle('is-multiple', collapsedDiff);
         btn.setAttribute('aria-expanded', sectionsOpen ? 'true' : 'false');
