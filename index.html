@@ -27,7 +27,60 @@
                 <button class="instrument-btn active" data-instrument="ukulele" type="button" aria-pressed="true">Ukulele</button>
                 <button class="instrument-btn" data-instrument="guitar" type="button" aria-pressed="false">Guitar</button>
             </div>
-            <button id="themeToggle" class="icon-btn" type="button" aria-label="Switch to dark mode">☀</button>
+            <div class="menu-wrap settings-wrap">
+                <button id="settingsBtn" class="icon-btn settings-btn" type="button"
+                        aria-label="Settings" title="Settings" aria-haspopup="menu"
+                        aria-expanded="false" aria-controls="settingsMenu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" aria-hidden="true">
+                        <path d="M4 7h5M15 7h5M4 17h9M18 17h2"/>
+                        <circle cx="12" cy="7" r="2.4"/>
+                        <circle cx="15" cy="17" r="2.4"/>
+                    </svg>
+                </button>
+                <div id="settingsMenu" class="menu settings-menu" role="menu"
+                     aria-label="Settings" hidden>
+                    <p class="menu-heading">Appearance</p>
+                    <button id="themeToggle" class="menu-item" type="button"
+                            role="menuitemcheckbox" aria-checked="false">
+                        <span class="menu-item-icon" aria-hidden="true">☀</span>
+                        <span class="menu-item-body">
+                            <span class="menu-item-label">Dark mode</span>
+                            <span class="menu-item-hint">Switch the page theme</span>
+                        </span>
+                        <span class="menu-item-state">Off</span>
+                    </button>
+
+                    <div class="menu-sep" role="separator"></div>
+                    <p class="menu-heading">Song controls</p>
+                    <button id="advancedToggle" class="menu-item" type="button"
+                            role="menuitemcheckbox" aria-checked="false">
+                        <span class="menu-item-icon" aria-hidden="true">⚙</span>
+                        <span class="menu-item-body">
+                            <span class="menu-item-label">Advanced song tools</span>
+                            <span class="menu-item-hint">Keep strum, diagram and structure tools open</span>
+                        </span>
+                        <span class="menu-item-state">Off</span>
+                    </button>
+
+                    <div class="menu-sep" role="separator"></div>
+                    <button id="tunerBtn" class="menu-item tuner-open-btn" type="button"
+                            role="menuitem" aria-haspopup="dialog" title="Open tuner">
+                        <span class="menu-item-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                 stroke-linecap="round">
+                                <path d="M9 3v6.5a3 3 0 0 0 6 0V3"/>
+                                <path d="M12 12.5V21"/>
+                                <path d="M8 3h2M14 3h2"/>
+                            </svg>
+                        </span>
+                        <span class="menu-item-body">
+                            <span class="menu-item-label">Tuner</span>
+                            <span class="menu-item-hint">Microphone pitch tuner</span>
+                        </span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </header>
@@ -50,16 +103,6 @@
                 <button id="importUrlToggle" class="link-btn" type="button"
                         aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
                 <input id="importFile" type="file" accept=".json,application/json" multiple hidden>
-                <button id="tunerBtn" class="link-btn tuner-open-btn" type="button"
-                        aria-haspopup="dialog" title="Open tuner">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" aria-hidden="true">
-                        <path d="M9 3v6.5a3 3 0 0 0 6 0V3"/>
-                        <path d="M12 12.5V21"/>
-                        <path d="M8 3h2M14 3h2"/>
-                    </svg>
-                    <span>Tuner</span>
-                </button>
             </div>
             <div class="songbook-utilities" role="group" aria-label="Songbook file actions">
                 <span class="bar-util-label" aria-hidden="true">File</span>
@@ -750,6 +793,7 @@
      core must come first (it creates SB.state) and app.js last (it runs init). -->
 <script src="js/core.js"></script>
 <script src="js/theme.js"></script>
+<script src="js/ui.js"></script>
 <script src="js/idb.js"></script>
 <script src="js/songbooks.js"></script>
 <script src="js/sections.js"></script>

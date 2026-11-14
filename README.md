@@ -70,6 +70,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | --- | --- |
 | `js/core.js` | Helpers (`$`, `el`, `lsGet`/`lsSet`), storage keys, and the shared `SB.state` container |
 | `js/theme.js` | Light/dark theme and the songbook brand logo |
+| `js/ui.js` | Control-surface preferences: the optional song-tool disclosure, the global advanced-tools setting, and the Settings popover menu |
 | `js/idb.js` | IndexedDB persistence for imported songbooks |
 | `js/songbooks.js` | Songbook normalisation/validation, indexing, active songbook |
 | `js/personal.js` | Favourites, per-song notes, recently played |
@@ -136,12 +137,15 @@ attached to `SB`.
   **More controls** opens **Tempo**, **Strum**, **Diagram** and **Structure**
   without re-flowing the basic row. Diagram −/+ scales the chord strip
   (60%–150%, persisted) and a 📌 Pinned / 📍 Scrolls toggle un-sticks it.
+  The disclosure is shared across songs; **Settings → Advanced song tools**
+  keeps it open on every song. Settings also holds dark mode and the tuner.
 - Transpose −/+/0 (sharp spelling, slash basses and strum strokes preserved,
   non-chord tokens like `stop`/`NC`/riff tabs untouched; strip names and diagrams
   transpose too).
-- **Scale degrees** — `I-V` swaps the chord names in the sheet for Roman
-  numerals (`Am G C` → `vi V I`), in both chord placements, for practising
-  intervals. The numerals *replace* the names rather than annotating them:
+- **Scale degrees** — `I-V` (in the **Chords** group) swaps the chord names in
+  the sheet for Roman numerals (`Am G C` → `vi V I`), in both chord placements,
+  for practising intervals. The numerals *replace* the names rather than
+  annotating them:
   showing both more than doubles every chord label, which in Above mode shoves
   chords off the lyric column they are timed to. The chord strip keeps name +
   numeral together as the decoder ring. Degrees come from the written key
@@ -205,9 +209,10 @@ attached to `SB`.
 ## Edit mode and Reset
 
 Structure editing lives behind **More controls → Structure → Edit** in the
-song view. Play mode stays the default: strum selectors and per-beat strum
-overrides keep working, while chord names, chord lengths, beat counts and bar
-structure are read-only.
+song view (or keep the panel open with **Settings → Advanced song tools**).
+Play mode stays the default: strum selectors and per-beat strum overrides keep
+working, while chord names, chord lengths, beat counts and bar structure are
+read-only.
 
 Opening Edit mode opens a panel that works on the song's local edit plan,
 never on the imported songbook:

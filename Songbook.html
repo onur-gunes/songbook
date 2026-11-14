@@ -172,6 +172,128 @@ button, input, select, textarea {
 
 .icon-btn:hover { background: var(--surface-2); }
 
+/* ===== popover menus ===== */
+
+.menu-wrap {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+}
+
+.menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 200;
+    min-width: 280px;
+    max-width: min(320px, calc(100vw - 24px));
+    padding: 6px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+}
+
+.menu-heading {
+    margin: 4px 10px 6px;
+    color: var(--muted);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.menu-sep {
+    height: 1px;
+    margin: 6px 4px;
+    background: var(--line);
+}
+
+/* One row per action: icon, a two-line label (what it does / when to use it)
+ * and an optional state word for checkboxes. Kept as flex rows rather than
+ * plain text so the checkboxes can show their state without changing width. */
+.menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.menu-item:hover,
+.menu-item:focus-visible { background: var(--surface-2); }
+
+.menu-item-icon {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--chip);
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1;
+}
+
+.menu-item-icon svg { width: 15px; height: 15px; }
+
+.menu-item-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.menu-item-label { font-size: 0.86rem; font-weight: 600; }
+
+.menu-item-hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.3;
+}
+
+.menu-item-state {
+    flex: none;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--chip);
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.menu-item[aria-checked="true"] .menu-item-icon { color: var(--accent); }
+
+.menu-item[aria-checked="true"] .menu-item-state {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.settings-btn svg { width: 18px; height: 18px; display: block; }
+
+/* The tuner used to be a standalone bar button; as a menu row it must not
+ * keep the auto-margin that pushed it to the end of the songbook bar. */
+.menu .tuner-open-btn {
+    display: flex;
+    width: 100%;
+    margin-left: 0;
+    border-radius: 10px;
+    padding: 9px 10px;
+    background: transparent;
+}
+
+.menu .tuner-open-btn:hover,
+.menu .tuner-open-btn:focus-visible { background: var(--surface-2); }
+
 /* ===== main / views ===== */
 
 main {
@@ -4346,14 +4468,17 @@ body.tuner-open { overflow: hidden; }
         flex-direction: column;
         align-items: stretch;
         gap: 8px;
+        width: 100%;
     }
     .song-tools-advanced {
         margin-top: 10px;
-        padding-top: 10px;
+        padding-top: 8px;
     }
     .song-tools-more {
         width: 100%;
+        justify-content: center;
         margin-left: 0;
+        margin-top: 2px;
         min-height: 34px;
     }
     .tool-group {
@@ -4657,7 +4782,60 @@ button.structure-close,
                 <button class="instrument-btn active" data-instrument="ukulele" type="button" aria-pressed="true">Ukulele</button>
                 <button class="instrument-btn" data-instrument="guitar" type="button" aria-pressed="false">Guitar</button>
             </div>
-            <button id="themeToggle" class="icon-btn" type="button" aria-label="Switch to dark mode">☀</button>
+            <div class="menu-wrap settings-wrap">
+                <button id="settingsBtn" class="icon-btn settings-btn" type="button"
+                        aria-label="Settings" title="Settings" aria-haspopup="menu"
+                        aria-expanded="false" aria-controls="settingsMenu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" aria-hidden="true">
+                        <path d="M4 7h5M15 7h5M4 17h9M18 17h2"/>
+                        <circle cx="12" cy="7" r="2.4"/>
+                        <circle cx="15" cy="17" r="2.4"/>
+                    </svg>
+                </button>
+                <div id="settingsMenu" class="menu settings-menu" role="menu"
+                     aria-label="Settings" hidden>
+                    <p class="menu-heading">Appearance</p>
+                    <button id="themeToggle" class="menu-item" type="button"
+                            role="menuitemcheckbox" aria-checked="false">
+                        <span class="menu-item-icon" aria-hidden="true">☀</span>
+                        <span class="menu-item-body">
+                            <span class="menu-item-label">Dark mode</span>
+                            <span class="menu-item-hint">Switch the page theme</span>
+                        </span>
+                        <span class="menu-item-state">Off</span>
+                    </button>
+
+                    <div class="menu-sep" role="separator"></div>
+                    <p class="menu-heading">Song controls</p>
+                    <button id="advancedToggle" class="menu-item" type="button"
+                            role="menuitemcheckbox" aria-checked="false">
+                        <span class="menu-item-icon" aria-hidden="true">⚙</span>
+                        <span class="menu-item-body">
+                            <span class="menu-item-label">Advanced song tools</span>
+                            <span class="menu-item-hint">Keep strum, diagram and structure tools open</span>
+                        </span>
+                        <span class="menu-item-state">Off</span>
+                    </button>
+
+                    <div class="menu-sep" role="separator"></div>
+                    <button id="tunerBtn" class="menu-item tuner-open-btn" type="button"
+                            role="menuitem" aria-haspopup="dialog" title="Open tuner">
+                        <span class="menu-item-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                 stroke-linecap="round">
+                                <path d="M9 3v6.5a3 3 0 0 0 6 0V3"/>
+                                <path d="M12 12.5V21"/>
+                                <path d="M8 3h2M14 3h2"/>
+                            </svg>
+                        </span>
+                        <span class="menu-item-body">
+                            <span class="menu-item-label">Tuner</span>
+                            <span class="menu-item-hint">Microphone pitch tuner</span>
+                        </span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </header>
@@ -4680,16 +4858,6 @@ button.structure-close,
                 <button id="importUrlToggle" class="link-btn" type="button"
                         aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
                 <input id="importFile" type="file" accept=".json,application/json" multiple hidden>
-                <button id="tunerBtn" class="link-btn tuner-open-btn" type="button"
-                        aria-haspopup="dialog" title="Open tuner">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" aria-hidden="true">
-                        <path d="M9 3v6.5a3 3 0 0 0 6 0V3"/>
-                        <path d="M12 12.5V21"/>
-                        <path d="M8 3h2M14 3h2"/>
-                    </svg>
-                    <span>Tuner</span>
-                </button>
             </div>
             <div class="songbook-utilities" role="group" aria-label="Songbook file actions">
                 <span class="bar-util-label" aria-hidden="true">File</span>
@@ -7680,8 +7848,22 @@ button.structure-close,
     SB.applyTheme = function (theme) {
         document.documentElement.setAttribute('data-theme', theme);
         var btn = SB.$('themeToggle');
-        btn.textContent = theme === 'dark' ? '☾' : '☀';
-        btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+        if (btn) {
+            var dark = theme === 'dark';
+            /* The toggle is a menu row now: the icon is decorative and the
+             * trailing state word is what changes. Fall back to replacing the
+             * whole label if an older/simpler button is ever used. */
+            var icon = btn.querySelector('.menu-item-icon');
+            if (icon) {
+                icon.textContent = dark ? '☾' : '☀';
+                var state = btn.querySelector('.menu-item-state');
+                if (state) state.textContent = dark ? 'On' : 'Off';
+                btn.setAttribute('aria-checked', dark ? 'true' : 'false');
+            } else {
+                btn.textContent = dark ? '☾' : '☀';
+                btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+            }
+        }
         SB.applyBrand();
         SB.lsSet(THEME_KEY, theme);
     }
@@ -7712,6 +7894,208 @@ button.structure-close,
         }
         SB.applyTheme(saved);
     }
+
+})(window.SB = window.SB || {});
+
+</script>
+<script>
+/* Songbook — ui
+ * control-surface preferences: advanced song tools and menus
+ *
+ * Part of the window.SB namespace. Loaded as a classic script in the
+ * order set by index.html; see js/core.js for the shared state.
+ */
+(function (SB) {
+    'use strict';
+
+    /* ---------------- advanced song tools ---------------- */
+
+    /* The song-tools card keeps the controls used on every song visible and
+     * puts layout, practice and structure controls behind one disclosure.
+     * Expanded is a shared UI state, not per-song state: opening it once keeps
+     * it open while moving through the book, and a reload starts collapsed
+     * unless the advanced-tools preference below is on. */
+    SB.ADVANCED_KEY = SB.NS + ':advanced';
+    SB.state.advanced = SB.lsGet(SB.ADVANCED_KEY, false) === true;
+    SB.state.toolsOpen = false;
+
+    function label(el, text) {
+        if (!el) return;
+        var node = el.querySelector('.song-tools-more-label');
+        if (node) node.textContent = text;
+        else el.textContent = text;
+    }
+
+    SB.setSongToolsOpen = function (open) {
+        SB.state.toolsOpen = !!open;
+        var panel = SB.$('songToolsAdvanced');
+        var btn = SB.$('songToolsMoreBtn');
+        if (panel) panel.hidden = !open;
+        if (btn) {
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            btn.classList.toggle('is-open', !!open);
+            label(btn, open ? 'Fewer controls' : 'More controls');
+            btn.title = open
+                ? 'Hide diagram, tempo, strum and structure controls'
+                : 'Show diagram, tempo, strum and structure controls';
+        }
+        var tools = document.querySelector('.song-tools');
+        if (tools) tools.classList.toggle('is-open', !!open);
+    };
+
+    SB.toggleSongTools = function () {
+        SB.setSongToolsOpen(!SB.state.toolsOpen);
+    };
+
+    /* Editing structure needs the Edit/Reset pair even when the panel was
+     * folded, so opening the editor reveals it rather than leaving the mode
+     * with no visible way out. */
+    SB.revealSongTools = function () {
+        SB.setSongToolsOpen(true);
+    };
+
+    /* Called whenever a song opens: simple mode starts folded, advanced mode
+     * starts open. A user who manually folds the panel keeps that choice for
+     * the rest of the song. */
+    SB.resetSongTools = function () {
+        SB.setSongToolsOpen(SB.state.advanced);
+    };
+
+    SB.isAdvanced = function () { return !!SB.state.advanced; };
+
+    SB.applyAdvancedMode = function () {
+        var on = !!SB.state.advanced;
+        var btn = SB.$('advancedToggle');
+        if (btn) {
+            btn.setAttribute('aria-checked', on ? 'true' : 'false');
+            var state = btn.querySelector('.menu-item-state');
+            if (state) state.textContent = on ? 'On' : 'Off';
+        }
+        /* Turning the preference on should reveal the tools immediately;
+         * turning it off returns the toolbar to its quiet default. */
+        SB.setSongToolsOpen(on);
+    };
+
+    SB.setAdvanced = function (on) {
+        SB.state.advanced = !!on;
+        SB.lsSet(SB.ADVANCED_KEY, SB.state.advanced);
+        SB.applyAdvancedMode();
+    };
+
+    /* ---------------- popover menus ---------------- */
+    /* One small menu replaces the flat row of global actions that used to sit
+     * beside the instrument toggle: dark mode, the advanced song-tools
+     * preference and the tuner. It is plain DOM: the trigger owns
+     * aria-expanded, the menu is a role="menu", Escape closes it and returns
+     * focus to the trigger, and an outside pointer closes it. */
+
+    var open = null; // { trigger: Element, menu: Element }
+
+    function close() {
+        if (!open) return;
+        var trigger = open.trigger;
+        open.menu.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+        open = null;
+        return trigger;
+    }
+
+    SB.closeMenus = function () { close(); };
+
+    function menuItems(menu) {
+        return Array.prototype.filter.call(
+            menu.querySelectorAll('[role="menuitem"], [role="menuitemcheckbox"]'),
+            function (el) { return !el.hidden && !el.disabled && el.offsetParent !== null; });
+    }
+
+    function openMenu(trigger, menu) {
+        if (open && open.trigger === trigger) { close(); return; }
+        close();
+        open = { trigger: trigger, menu: menu };
+        menu.hidden = false;
+        trigger.setAttribute('aria-expanded', 'true');
+        var items = menuItems(menu);
+        if (items.length) items[0].focus();
+    }
+
+    function bindMenu(triggerId, menuId) {
+        var trigger = SB.$(triggerId);
+        var menu = SB.$(menuId);
+        if (!trigger || !menu) return;
+
+        trigger.addEventListener('click', function (e) {
+            e.preventDefault();
+            openMenu(trigger, menu);
+        });
+
+        /* Menu actions close the popover after they run. The settings toggles
+         * are checkboxes: flipping one should not dismiss the menu, so the
+         * user can adjust both without reopening it. Actions that open their
+         * own dialog (the tuner) manage focus themselves. */
+        menu.addEventListener('click', function (e) {
+            var item = e.target.closest('[role="menuitem"], [role="menuitemcheckbox"]');
+            if (!item) return;
+            if (item.getAttribute('role') === 'menuitemcheckbox') return;
+            var trigger = close();
+            if (trigger && !item.hasAttribute('aria-haspopup')) trigger.focus();
+        });
+
+        menu.addEventListener('keydown', function (e) {
+            var items = menuItems(menu);
+            if (!items.length) return;
+            var idx = items.indexOf(document.activeElement);
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                items[(idx + 1 + items.length) % items.length].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                items[(idx - 1 + items.length) % items.length].focus();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                items[0].focus();
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                items[items.length - 1].focus();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                var t = close();
+                if (t) t.focus();
+            } else if (e.key === 'Tab') {
+                /* Let the browser move focus naturally, but never leave an
+                 * invisible menu open behind the next control. */
+                close();
+            }
+        });
+    }
+
+    SB.initUi = function () {
+        var more = SB.$('songToolsMoreBtn');
+        if (more) more.addEventListener('click', SB.toggleSongTools);
+
+        bindMenu('settingsBtn', 'settingsMenu');
+
+        var adv = SB.$('advancedToggle');
+        if (adv) adv.addEventListener('click', function () {
+            SB.setAdvanced(!SB.state.advanced);
+        });
+
+        document.addEventListener('pointerdown', function (e) {
+            if (!open) return;
+            if (e.target.closest && e.target.closest('.menu-wrap')) return;
+            close();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (!open || e.key !== 'Escape') return;
+            e.preventDefault();
+            var t = close();
+            if (t) t.focus();
+        });
+
+        window.addEventListener('hashchange', function () { close(); });
+
+        SB.applyAdvancedMode();
+    };
 
 })(window.SB = window.SB || {});
 
@@ -14355,6 +14739,7 @@ button.structure-close,
         if (SB.state.editMode && SB.closeEditor) SB.closeEditor();
         SB.state.editMode = false;
         if (SB.updateEditUi) SB.updateEditUi();
+        if (SB.resetSongTools) SB.resetSongTools();
         var song = SB.state.byId[id];
         if (!song) { location.hash = SB.routeHash(SB.state.active ? SB.state.active.id : ''); return; }
         SB.state.currentSong = song;
@@ -14395,30 +14780,9 @@ button.structure-close,
         window.scrollTo(0, 0);
     }
 
-    /* The song-tools card keeps the controls used on every song visible and
-     * puts layout, practice and structure controls behind one disclosure.
-     * Expanded is DOM state rather than per-song state: opening it once keeps
-     * it open while moving through the book, and a reload starts collapsed. */
-    function bindSongTools() {
-        var btn = SB.$('songToolsMoreBtn');
-        var advanced = SB.$('songToolsAdvanced');
-        if (!btn || !advanced) return;
-        function apply(open) {
-            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-            advanced.hidden = !open;
-            var label = btn.querySelector('.song-tools-more-label');
-            if (label) label.textContent = open ? 'Fewer controls' : 'More controls';
-            btn.title = open
-                ? 'Hide diagram, tempo, strum and structure controls'
-                : 'Show diagram, tempo, strum and structure controls';
-        }
-        btn.addEventListener('click', function () { apply(advanced.hidden); });
-        apply(!advanced.hidden);
-    }
-
+    /* The song-tools disclosure itself is bound in js/ui.js, which owns the
+     * advanced-mode preference and the shared open/closed state. */
     SB.bindSongControls = function () {
-        bindSongTools();
-
         SB.$('trUp').addEventListener('click', function () {
             if (SB.state.transpose >= 11) return;
             SB.state.transpose++;
@@ -17958,6 +18322,9 @@ button.structure-close,
                 ? 'Reset this song to its songbook version (clears local strum and structure edits)'
                 : 'No local edits to reset';
         }
+        /* Edit and Reset live in the optional panel; structure editing cannot
+         * be left from a button the user has folded away. */
+        if (SB.state.editMode && SB.revealSongTools) SB.revealSongTools();
     };
 
     /* Trap Tab/Escape inside the editor overlay. */
@@ -18198,6 +18565,7 @@ button.structure-close,
 
     function init() {
         SB.initTheme();
+        if (SB.initUi) SB.initUi();
         SB.$('themeToggle').addEventListener('click', function () {
             var cur = document.documentElement.getAttribute('data-theme');
             SB.applyTheme(cur === 'dark' ? 'light' : 'dark');
@@ -18295,6 +18663,10 @@ button.structure-close,
         getSong: function (id) { return SB.state.byId[id]; },
         setInstrument: SB.setInstrument,
         getInstrument: function () { return SB.state.instrument; },
+        setAdvanced: function (on) { if (SB.setAdvanced) SB.setAdvanced(on); },
+        isAdvanced: function () { return !!(SB.isAdvanced && SB.isAdvanced()); },
+        setSongToolsOpen: function (on) { if (SB.setSongToolsOpen) SB.setSongToolsOpen(on); },
+        isSongToolsOpen: function () { return !!(SB.state && SB.state.toolsOpen); },
         getChordMode: function () { return SB.state.chordMode; },
         isGridMode: SB.isGridMode,
         setChordMode: SB.setChordMode,

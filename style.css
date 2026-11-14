@@ -159,6 +159,128 @@ button, input, select, textarea {
 
 .icon-btn:hover { background: var(--surface-2); }
 
+/* ===== popover menus ===== */
+
+.menu-wrap {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+}
+
+.menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 200;
+    min-width: 280px;
+    max-width: min(320px, calc(100vw - 24px));
+    padding: 6px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+}
+
+.menu-heading {
+    margin: 4px 10px 6px;
+    color: var(--muted);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.menu-sep {
+    height: 1px;
+    margin: 6px 4px;
+    background: var(--line);
+}
+
+/* One row per action: icon, a two-line label (what it does / when to use it)
+ * and an optional state word for checkboxes. Kept as flex rows rather than
+ * plain text so the checkboxes can show their state without changing width. */
+.menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.menu-item:hover,
+.menu-item:focus-visible { background: var(--surface-2); }
+
+.menu-item-icon {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--chip);
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1;
+}
+
+.menu-item-icon svg { width: 15px; height: 15px; }
+
+.menu-item-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.menu-item-label { font-size: 0.86rem; font-weight: 600; }
+
+.menu-item-hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.3;
+}
+
+.menu-item-state {
+    flex: none;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--chip);
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.menu-item[aria-checked="true"] .menu-item-icon { color: var(--accent); }
+
+.menu-item[aria-checked="true"] .menu-item-state {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.settings-btn svg { width: 18px; height: 18px; display: block; }
+
+/* The tuner used to be a standalone bar button; as a menu row it must not
+ * keep the auto-margin that pushed it to the end of the songbook bar. */
+.menu .tuner-open-btn {
+    display: flex;
+    width: 100%;
+    margin-left: 0;
+    border-radius: 10px;
+    padding: 9px 10px;
+    background: transparent;
+}
+
+.menu .tuner-open-btn:hover,
+.menu .tuner-open-btn:focus-visible { background: var(--surface-2); }
+
 /* ===== main / views ===== */
 
 main {
@@ -4333,14 +4455,17 @@ body.tuner-open { overflow: hidden; }
         flex-direction: column;
         align-items: stretch;
         gap: 8px;
+        width: 100%;
     }
     .song-tools-advanced {
         margin-top: 10px;
-        padding-top: 10px;
+        padding-top: 8px;
     }
     .song-tools-more {
         width: 100%;
+        justify-content: center;
         margin-left: 0;
+        margin-top: 2px;
         min-height: 34px;
     }
     .tool-group {
