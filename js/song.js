@@ -78,6 +78,8 @@
         window.scrollTo(0, 0);
     }
 
+    /* The song-tools disclosure itself is bound in js/ui.js, which owns the
+     * advanced-mode preference and the shared open/closed state. */
     SB.bindSongControls = function () {
         SB.$('trUp').addEventListener('click', function () {
             if (SB.state.transpose >= 11) return;

@@ -9,13 +9,11 @@
 
     /* ---------------- advanced song tools ---------------- */
 
-    /* The song toolbar keeps only the controls used on nearly every song:
-     * transpose, text size, chord placement and the metronome. Everything
-     * that is useful but occasional (strum editing, diagram sizing, scale
-     * degrees, structure editing) lives in a disclosure. It is closed by
-     * default; this preference keeps it open on every song for players who
-     * use those tools regularly. It is global, not per song, like the other
-     * display preferences. */
+    /* The song-tools card keeps the controls used on every song visible and
+     * puts layout, practice and structure controls behind one disclosure.
+     * Expanded is a shared UI state, not per-song state: opening it once keeps
+     * it open while moving through the book, and a reload starts collapsed
+     * unless the advanced-tools preference below is on. */
     SB.ADVANCED_KEY = SB.NS + ':advanced';
     SB.state.advanced = SB.lsGet(SB.ADVANCED_KEY, false) === true;
     SB.state.toolsOpen = false;
@@ -35,10 +33,10 @@
         if (btn) {
             btn.setAttribute('aria-expanded', open ? 'true' : 'false');
             btn.classList.toggle('is-open', !!open);
-            label(btn, open ? 'Fewer tools' : 'More tools');
+            label(btn, open ? 'Fewer controls' : 'More controls');
             btn.title = open
-                ? 'Hide the optional song controls'
-                : 'Show tempo detail, strum, diagram and structure controls';
+                ? 'Hide diagram, tempo, strum and structure controls'
+                : 'Show diagram, tempo, strum and structure controls';
         }
         var tools = document.querySelector('.song-tools');
         if (tools) tools.classList.toggle('is-open', !!open);
@@ -66,7 +64,6 @@
 
     SB.applyAdvancedMode = function () {
         var on = !!SB.state.advanced;
-        document.body.classList.toggle('advanced-mode', on);
         var btn = SB.$('advancedToggle');
         if (btn) {
             btn.setAttribute('aria-checked', on ? 'true' : 'false');
@@ -85,11 +82,11 @@
     };
 
     /* ---------------- popover menus ---------------- */
-    /* Two small menus replace the flat rows of rare actions that used to sit
-     * beside the primary controls: global settings in the top bar and
-     * songbook file actions in the list view. Both are plain DOM: the trigger
-     * owns aria-expanded, the menu is a role="menu", Escape closes it and
-     * returns focus to the trigger, and an outside pointer closes it. */
+    /* One small menu replaces the flat row of global actions that used to sit
+     * beside the instrument toggle: dark mode, the advanced song-tools
+     * preference and the tuner. It is plain DOM: the trigger owns
+     * aria-expanded, the menu is a role="menu", Escape closes it and returns
+     * focus to the trigger, and an outside pointer closes it. */
 
     var open = null; // { trigger: Element, menu: Element }
 
@@ -175,7 +172,6 @@
         if (more) more.addEventListener('click', SB.toggleSongTools);
 
         bindMenu('settingsBtn', 'settingsMenu');
-        bindMenu('bookMenuBtn', 'bookMenu');
 
         var adv = SB.$('advancedToggle');
         if (adv) adv.addEventListener('click', function () {

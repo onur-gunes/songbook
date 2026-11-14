@@ -318,6 +318,11 @@
         var label = SB.state.metronome.playing ? 'Stop the metronome' : 'Start the metronome';
         btn.setAttribute('aria-label', label);
         btn.title = label;
+        // The metronome lives in the advanced layer. If that layer is closed
+        // while a click track is running, the disclosure carries a live dot
+        // so the hidden control is not silent.
+        var more = SB.$('songToolsMoreBtn');
+        if (more) more.classList.toggle('is-playing', !!SB.state.metronome.playing);
     }
 
     SB.bindMetronome = function () {

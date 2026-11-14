@@ -70,7 +70,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | --- | --- |
 | `js/core.js` | Helpers (`$`, `el`, `lsGet`/`lsSet`), storage keys, and the shared `SB.state` container |
 | `js/theme.js` | Light/dark theme and the songbook brand logo |
-| `js/ui.js` | Control-surface preferences: the optional song-tool disclosure, the global advanced-tools setting, and the Settings/songbook popover menus |
+| `js/ui.js` | Control-surface preferences: the optional song-tool disclosure, the global advanced-tools setting, and the Settings popover menu |
 | `js/idb.js` | IndexedDB persistence for imported songbooks |
 | `js/songbooks.js` | Songbook normalisation/validation, indexing, active songbook |
 | `js/personal.js` | Favourites, per-song notes, recently played |
@@ -132,20 +132,17 @@ attached to `SB`.
   ☰/▤ compact view toggle, persisted.
 - Song view in the same page (`#/<songbook>/<song-id>` — refresh- and back-safe),
   prev/next respecting current filter+sort, compact sticky chord strip.
-- Chord strip controls: Chords −/+ scales diagram size (60%–150%, persisted) and
-  a 📌 Pinned / 📍 Scrolls toggle un-sticks the strip.
-- **Two-tier song toolbar** — the everyday controls (transpose, text size, chord
-  placement and tempo) stay in the open. Occasional tools — strum editing and
-  per-section patterns, diagram size and pinning, scale degrees, and structure
-  editing — sit behind **More tools** so the default surface stays quiet. The
-  disclosure remembers its state for the current song; **Settings → Advanced
-  song tools** keeps it open on every song. Settings also holds dark mode and
-  the tuner, and the list view keeps Export, Refresh and Duplicate behind one
-  songbook-actions menu.
+- **Two-layer song controls** — the always-visible row carries **Transpose**,
+  **Chords** (In text / Above / Grid / Animate / I-V) and **Text** size;
+  **More controls** opens **Tempo**, **Strum**, **Diagram** and **Structure**
+  without re-flowing the basic row. Diagram −/+ scales the chord strip
+  (60%–150%, persisted) and a 📌 Pinned / 📍 Scrolls toggle un-sticks it.
+  The disclosure is shared across songs; **Settings → Advanced song tools**
+  keeps it open on every song. Settings also holds dark mode and the tuner.
 - Transpose −/+/0 (sharp spelling, slash basses and strum strokes preserved,
   non-chord tokens like `stop`/`NC`/riff tabs untouched; strip names and diagrams
   transpose too).
-- **Scale degrees** — `I–V` (under **More tools**) swaps the chord names in
+- **Scale degrees** — `I-V` (in the **Chords** group) swaps the chord names in
   the sheet for Roman numerals (`Am G C` → `vi V I`), in both chord placements,
   for practising intervals. The numerals *replace* the names rather than
   annotating them:
@@ -192,8 +189,8 @@ attached to `SB`.
   on a phone is the difference between the pattern fitting on screen and not.
   Available on every song: one with no `time` uses 4/4, so the row and
   selector still work and a manual choice can be stored per song.
-  Per-section patterns: expand the strum group to pick a pattern per section
-  role present in the song (Verse, Chorus, Bridge, …; "Verse 1" and "Verse 2"
+  Per-section patterns: under **More controls**, open **Sections** in the
+  strum group to pick a pattern per section role present in the song (Verse, Chorus, Bridge, …; "Verse 1" and "Verse 2"
   share one choice). Each selector defaults to "Same as song" and inherits the
   main pattern until changed, and the row updates immediately. Choosing a
   section pattern applies to every section with that role and is remembered in
@@ -211,11 +208,11 @@ attached to `SB`.
 
 ## Edit mode and Reset
 
-Structure editing lives behind the **Edit** button in the song view's optional
-tools panel (open **More tools**, or keep that panel open with **Settings →
-Advanced song tools**). Play mode stays the default: strum selectors and
-per-beat strum overrides keep working, while chord names, chord lengths, beat
-counts and bar structure are read-only.
+Structure editing lives behind **More controls → Structure → Edit** in the
+song view (or keep the panel open with **Settings → Advanced song tools**).
+Play mode stays the default: strum selectors and per-beat strum overrides keep
+working, while chord names, chord lengths, beat counts and bar structure are
+read-only.
 
 Opening Edit mode opens a panel that works on the song's local edit plan,
 never on the imported songbook:
@@ -422,11 +419,11 @@ below: both end in the same songbook JSON described in
    stores the valid songs in one batch and reports one summary, listing any
    files that failed.
 3. **Edit** — **Edit songbook** in the list header turns on a task mode for
-   that book (session-scoped, cleared when you switch books or reload). While
-   it is on, the bar also exposes **Add song…** and **Remove** (the whole
-   book), rows show **Edit source**, **Move up**, **Move down** and
-   **Remove**, and the list shows the book's own order with the sort buttons
-   disabled, so moving a song moves its row. Edit source re-parses and
+   that book (session-scoped, cleared when you switch books or reload). A
+   banner naming the book then exposes **Add song…** and **Remove songbook**
+   (the whole book), rows show a compact **Edit source / Move up / Move down /
+   Remove** action dock, and the list shows the book's own order with the sort
+   buttons disabled, so moving a song moves its row. Edit source re-parses and
    revalidates the ChordPro, keeps the song's id and position, and previews the
    result before saving; a saved source also drops that song's local grid/strum
    plan, because it described the old structure. The first **Remove** press
@@ -438,11 +435,16 @@ below: both end in the same songbook JSON described in
    book with every local edit applied, including the `chordpro` source of each
    authored song. Re-import that file to keep editing it.
 
-The bar outside edit mode is read-only: it keeps **New songbook**, **Import**,
-**From URL**, **Refresh** (URL imports only) and **Export**. **Add song…**,
-**Duplicate** (for imported books) and **Remove** (the whole book) join them
-only while edit mode is on. Bundled books have no edit mode, so their bar keeps
-**Duplicate** as the route to an editable copy.
+The bar outside edit mode is read-only. Its first line holds the book picker,
+**Edit songbook** (imported books only), then the entry actions **New
+songbook**, **Import list…**, **From URL…** and **Tuner**; a quieter second
+line holds the file actions under a **File** label: **Refresh** (URL imports
+only), **Duplicate** (bundled books) and **Export**. Every one of these is the
+same pill shape, with the filled accent reserved for **New songbook**. **Add
+song…** and **Remove songbook** live in the edit-mode banner, and
+**Duplicate** also becomes available for an imported book while editing.
+Bundled books have no edit mode, so their bar keeps **Duplicate** as the route
+to an editable copy.
 
 Authoring outcomes — the add batch summary, update/remove/duplicate results and
 errors — are announced on a polite status line under the songbook bar rather
