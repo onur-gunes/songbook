@@ -37,6 +37,7 @@
         if (SB.state.editMode && SB.closeEditor) SB.closeEditor();
         SB.state.editMode = false;
         if (SB.updateEditUi) SB.updateEditUi();
+        if (SB.resetSongTools) SB.resetSongTools();
         var song = SB.state.byId[id];
         if (!song) { location.hash = SB.routeHash(SB.state.active ? SB.state.active.id : ''); return; }
         SB.state.currentSong = song;

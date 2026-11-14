@@ -1501,7 +1501,18 @@ async function main() {
     win().localStorage.removeItem('songbook:strum:polska-gurom\u0000arahja');
     win().localStorage.removeItem('songbook:bpm:polska-gurom\u0000arahja');
 
-    // 20c. custom strum pattern editor (issue #106)
+    // 20c. simple vs advanced song tools. The default toolbar is deliberately
+    // quiet: strum editing, diagram size, scale degrees and structure editing
+    // are folded into a disclosure (or left open for good in Settings).
+    ok('simple mode keeps the optional tools folded', $('songToolsAdvanced').hidden === true);
+    ok('simple mode still offers the disclosure', $('songToolsMoreBtn').offsetParent !== null);
+    win().songbookTest.setAdvanced(true);
+    await wait(50);
+    ok('advanced mode opens the optional tools',
+        $('songToolsAdvanced').hidden === false && win().songbookTest.isAdvanced() === true);
+    ok('advanced mode exposes the strum editor', $('strumEditBtn').offsetParent !== null);
+
+    // 20d. custom strum pattern editor (issue #106)
     const planKey = 'songbook:plan:polska-gurom\u0000arahja';
     const strumKey = 'songbook:strum:polska-gurom\u0000arahja';
     const planFor = () => {

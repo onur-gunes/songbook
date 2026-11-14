@@ -108,6 +108,16 @@
         show('addSongBtn', editing && imported);
         show('removeSongsBtn', editing && imported);
         show('duplicateBookBtn', !!book && (!imported || editing));
+        /* Export, Refresh and Duplicate sit behind one overflow trigger; the
+         * trigger itself only exists when there is a book to act on. */
+        show('bookMenuBtn', !!book);
+        var bar = SB.$('editModeBar');
+        if (bar) bar.hidden = !(editing && imported);
+        var name = SB.$('editModeName');
+        if (name) name.textContent = editing && imported
+            ? 'Editing “' + book.name + '”'
+            : '';
+        if (!book && SB.closeMenus) SB.closeMenus();
     }
     SB.syncAuthoringBar = syncAuthoringBar;
 
