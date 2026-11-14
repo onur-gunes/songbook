@@ -14,11 +14,12 @@
     /* Authoring outcomes belong on one polite live region, not in a blocking
      * alert: the batch summary is the primary success feedback for adding
      * songs, and it should not interrupt a screen reader or steal focus. */
-    function setAuthorStatus(message, isError) {
+    function setAuthorStatus(message, isError, isHint) {
         var box = SB.$('authorStatus');
         if (!box) return;
         box.textContent = message || '';
         box.classList.toggle('is-error', !!message && !!isError);
+        box.classList.toggle('is-hint', !!message && !!isHint);
     }
     SB.setAuthorStatus = setAuthorStatus;
 
@@ -716,7 +717,7 @@
             SB.renderList();
             setAuthorStatus(SB.isEditingBook()
                 ? 'Edit mode: rows show book order and their edit, move and remove actions.'
-                : '');
+                : '', false, true);
         });
 
         var el = overlay();

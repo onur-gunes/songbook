@@ -126,6 +126,15 @@ async function main() {
     win().location.hash = '#/krakow-ukulele/harbour-lights';
     await wait(200);
     ok('song view shown', $('songView').hidden === false && $('listView').hidden === true);
+    // Layout, practice and structure controls live behind one disclosure.
+    // Open it once so the rest of the suite exercises those controls while
+    // they are actually visible, including focus restoration.
+    ok('advanced song controls start collapsed', $('songToolsAdvanced').hidden === true);
+    $('songToolsMoreBtn').click();
+    await wait(60);
+    ok('advanced song controls expand',
+        $('songToolsAdvanced').hidden === false &&
+        $('songToolsMoreBtn').getAttribute('aria-expanded') === 'true');
     ok('song title', $('songTitle').textContent === 'Harbour Lights', $('songTitle').textContent);
     ok('song number', $('songNumber').textContent.startsWith('#'), $('songNumber').textContent);
     ok('sheet has lines', doc().querySelectorAll('#sheet .line').length > 3, doc().querySelectorAll('#sheet .line').length);
@@ -1741,8 +1750,8 @@ async function main() {
     ok('selectors are labelled for screen readers',
         sectionSelects().every(s => /strum pattern/i.test(s.getAttribute('aria-label'))),
         sectionSelects()[0] && sectionSelects()[0].getAttribute('aria-label'));
-    ok('the collapsed summary is not claiming a difference yet',
-        $('strumSectionsSummary').hidden === true && sectionSummary() === '',
+    ok('the open summary still names the control',
+        $('strumSectionsSummary').hidden === false && sectionSummary() === 'Sections',
         sectionSummary());
 
     chooseSection('chorus', 'dddudu-4-4');
@@ -1769,7 +1778,7 @@ async function main() {
     ok('collapsing hides the section panel',
         sectionBtn().getAttribute('aria-expanded') === 'false' && sectionPanel().hidden === true);
     ok('collapsed summary reports that patterns differ',
-        sectionSummary() === 'Multiple patterns', sectionSummary());
+        sectionSummary() === 'Mixed', sectionSummary());
     ok('collapsed row returns to the one song pattern',
         sState().pattern && sState().pattern.id === sectionMain.id,
         sState().pattern && sState().pattern.id);
@@ -1787,8 +1796,8 @@ async function main() {
         sectionSelect('chorus').value + ',' + sectionSelect('bridge').value);
     sectionBtn().click();
     await wait(60);
-    ok('collapsed summary clears once sections agree again',
-        $('strumSectionsSummary').hidden === true && sectionSummary() === '',
+    ok('collapsed summary returns to the control name once sections agree',
+        $('strumSectionsSummary').hidden === false && sectionSummary() === 'Sections',
         sectionSummary());
 
     // Escape closes the expanded panel and returns focus to the control.
