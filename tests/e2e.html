@@ -126,15 +126,21 @@ async function main() {
     win().location.hash = '#/krakow-ukulele/harbour-lights';
     await wait(200);
     ok('song view shown', $('songView').hidden === false && $('listView').hidden === true);
-    // Layout, practice and structure controls live behind one disclosure.
-    // Open it once so the rest of the suite exercises those controls while
-    // they are actually visible, including focus restoration.
+    // Layout, labelling and structure controls live behind one disclosure.
+    // Everyday controls, including tempo, stay in the basic row.
+    const basicRow = () => doc().querySelector('.song-tools-basic');
     ok('advanced song controls start collapsed', $('songToolsAdvanced').hidden === true);
+    ok('tempo stays in the basic row',
+        $('metronomeGroup').hidden === false &&
+        $('metronomeGroup').closest('.song-tools-basic') === basicRow());
     $('songToolsMoreBtn').click();
     await wait(60);
     ok('advanced song controls expand',
         $('songToolsAdvanced').hidden === false &&
         $('songToolsMoreBtn').getAttribute('aria-expanded') === 'true');
+    ok('advanced controls are strum, diagram, labels and structure',
+        $('numbersBtn').closest('#songToolsAdvanced') !== null &&
+        $('strumGroup').closest('#songToolsAdvanced') !== null);
     ok('song title', $('songTitle').textContent === 'Harbour Lights', $('songTitle').textContent);
     ok('song number', $('songNumber').textContent.startsWith('#'), $('songNumber').textContent);
     ok('sheet has lines', doc().querySelectorAll('#sheet .line').length > 3, doc().querySelectorAll('#sheet .line').length);
@@ -768,6 +774,20 @@ async function main() {
         pickerIds.indexOf('polska-gurom') >= 0,
         pickerIds.join(','));
     ok('import button present', !!$('importBtn'));
+
+    // 19c1. file-level actions (export, refresh, duplicate) live in one ⋯
+    // menu instead of taking a second labelled row under the picker.
+    ok('songbook actions menu present', !!$('bookMenuBtn') && !!$('bookMenu'));
+    ok('songbook menu starts closed',
+        $('bookMenu').hidden === true &&
+        $('bookMenuBtn').getAttribute('aria-expanded') === 'false');
+    $('bookMenuBtn').click();
+    ok('songbook menu opens',
+        $('bookMenu').hidden === false &&
+        $('bookMenuBtn').getAttribute('aria-expanded') === 'true');
+    ok('export lives in the songbook menu', $('exportSongsBtn').closest('#bookMenu') !== null);
+    $('bookMenuBtn').click();
+    ok('songbook menu closes', $('bookMenu').hidden === true);
 
     // 19c2. export: every songbook can be written back out, and the JSON is
     // exactly what normalizeSongbook() accepts — re-importing it reproduces
@@ -1510,7 +1530,51 @@ async function main() {
     win().localStorage.removeItem('songbook:strum:polska-gurom\u0000arahja');
     win().localStorage.removeItem('songbook:bpm:polska-gurom\u0000arahja');
 
-    // 20c. custom strum pattern editor (issue #106)
+    // 20c. the song-tools disclosure is the only switch for the optional
+    // controls: strum editing, diagram size, scale degrees and structure
+    // editing stay folded on load and open on demand. The one preference it
+    // needs lives at the foot of the panel (keep these open on every song).
+    // Earlier steps can leave it open (structure editing reveals it), so start
+    // from known folded state rather than assuming a fresh song.
+    win().songbookTest.setSongToolsOpen(false);
+    await wait(30);
+    ok('the optional tools start folded', $('songToolsAdvanced').hidden === true);
+    ok('the disclosure is always offered', $('songToolsMoreBtn').offsetParent !== null);
+    $('songToolsMoreBtn').click(); await wait(50);
+    ok('opening the disclosure reveals the optional tools',
+        $('songToolsAdvanced').hidden === false &&
+        win().songbookTest.isSongToolsOpen() === true);
+    ok('the open disclosure exposes the strum editor', $('strumEditBtn').offsetParent !== null);
+
+    // The panel foot carries the one preference it needs: keep the optional
+    // tools open on every song. Verify it writes through, and that a fresh
+    // document (same origin, same storage) starts with the panel already open.
+    const keepBox = $('songToolsKeep');
+    ok('the panel offers a keep-open switch', !!keepBox && keepBox.checked === false);
+    keepBox.click(); await wait(50);
+    ok('keep open is remembered',
+        win().songbookTest.isKeepToolsOpen() === true &&
+        win().localStorage.getItem('songbook:tools-keep') === 'true');
+    ok('turning keep open reveals the panel', $('songToolsAdvanced').hidden === false);
+
+    const probe = document.createElement('iframe');
+    probe.src = '../index.html?nosw';
+    probe.style.cssText = 'width:1000px;height:800px;border:0';
+    document.body.appendChild(probe);
+    const probeOpen = await until(() => {
+        const w = probe.contentWindow;
+        return !!(w && w.SB && w.SB.state && w.SB.state.toolsOpen === true);
+    }, 15000);
+    ok('a fresh document reopens the optional tools', probeOpen);
+    probe.remove();
+
+    keepBox.click(); await wait(50);
+    ok('turning keep open off is remembered',
+        win().songbookTest.isKeepToolsOpen() === false &&
+        win().localStorage.getItem('songbook:tools-keep') === 'false');
+    ok('turning keep open off leaves the panel alone', $('songToolsAdvanced').hidden === false);
+
+    // 20d. custom strum pattern editor (issue #106)
     const planKey = 'songbook:plan:polska-gurom\u0000arahja';
     const strumKey = 'songbook:strum:polska-gurom\u0000arahja';
     const planFor = () => {

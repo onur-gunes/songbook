@@ -60,6 +60,7 @@
 
     function init() {
         SB.initTheme();
+        if (SB.initUi) SB.initUi();
         SB.$('themeToggle').addEventListener('click', function () {
             var cur = document.documentElement.getAttribute('data-theme');
             SB.applyTheme(cur === 'dark' ? 'light' : 'dark');
@@ -157,6 +158,10 @@
         getSong: function (id) { return SB.state.byId[id]; },
         setInstrument: SB.setInstrument,
         getInstrument: function () { return SB.state.instrument; },
+        setSongToolsOpen: function (on) { if (SB.setSongToolsOpen) SB.setSongToolsOpen(on); },
+        isSongToolsOpen: function () { return !!(SB.state && SB.state.toolsOpen); },
+        setKeepToolsOpen: function (on) { if (SB.setKeepToolsOpen) SB.setKeepToolsOpen(on); },
+        isKeepToolsOpen: function () { return !!SB.keepToolsOpen; },
         getChordMode: function () { return SB.state.chordMode; },
         isGridMode: SB.isGridMode,
         setChordMode: SB.setChordMode,

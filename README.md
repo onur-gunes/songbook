@@ -70,6 +70,7 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | --- | --- |
 | `js/core.js` | Helpers (`$`, `el`, `lsGet`/`lsSet`), storage keys, and the shared `SB.state` container |
 | `js/theme.js` | Light/dark theme and the songbook brand logo |
+| `js/ui.js` | The optional song-tool disclosure, its keep-open preference, and the songbook popover menu |
 | `js/idb.js` | IndexedDB persistence for imported songbooks |
 | `js/songbooks.js` | Songbook normalisation/validation, indexing, active songbook |
 | `js/personal.js` | Favourites, per-song notes, recently played |
@@ -132,16 +133,22 @@ attached to `SB`.
 - Song view in the same page (`#/<songbook>/<song-id>` — refresh- and back-safe),
   prev/next respecting current filter+sort, compact sticky chord strip.
 - **Two-layer song controls** — the always-visible row carries **Transpose**,
-  **Chords** (In text / Above / Grid / Animate / I-V) and **Text** size;
-  **More controls** opens **Tempo**, **Strum**, **Diagram** and **Structure**
-  without re-flowing the basic row. Diagram −/+ scales the chord strip
-  (60%–150%, persisted) and a 📌 Pinned / 📍 Scrolls toggle un-sticks it.
+  **Chords** (In text / Above / Grid / Animate), **Text** size and **Tempo**;
+  **More controls** opens **Strum**, **Diagram**, **Labels** (scale degrees)
+  and **Structure** without re-flowing the basic row. Diagram −/+ scales the
+  chord strip (60%–150%, persisted) and a 📌 Pinned / 📍 Scrolls toggle
+  un-sticks it. The disclosure is shared across songs: open it once and it
+  stays open while you move through the book, and a reload starts folded
+  unless **Keep these open on every song** (at the foot of the panel, stored
+  per device) is checked. The **Tuner** and the dark-mode toggle sit in the
+  top bar.
 - Transpose −/+/0 (sharp spelling, slash basses and strum strokes preserved,
   non-chord tokens like `stop`/`NC`/riff tabs untouched; strip names and diagrams
   transpose too).
-- **Scale degrees** — `I-V` swaps the chord names in the sheet for Roman
-  numerals (`Am G C` → `vi V I`), in both chord placements, for practising
-  intervals. The numerals *replace* the names rather than annotating them:
+- **Scale degrees** — `I-V` (under **More controls → Labels**) swaps the chord
+  names in the sheet for Roman numerals (`Am G C` → `vi V I`), in both chord
+  placements, for practising intervals. The numerals *replace* the names rather than
+  annotating them:
   showing both more than doubles every chord label, which in Above mode shoves
   chords off the lyric column they are timed to. The chord strip keeps name +
   numeral together as the decoder ring. Degrees come from the written key
@@ -205,9 +212,10 @@ attached to `SB`.
 ## Edit mode and Reset
 
 Structure editing lives behind **More controls → Structure → Edit** in the
-song view. Play mode stays the default: strum selectors and per-beat strum
-overrides keep working, while chord names, chord lengths, beat counts and bar
-structure are read-only.
+song view (or open **More controls** first).
+Play mode stays the default: strum selectors and per-beat strum overrides keep
+working, while chord names, chord lengths, beat counts and bar structure are
+read-only.
 
 Opening Edit mode opens a panel that works on the song's local edit plan,
 never on the imported songbook:
@@ -430,16 +438,16 @@ below: both end in the same songbook JSON described in
    book with every local edit applied, including the `chordpro` source of each
    authored song. Re-import that file to keep editing it.
 
-The bar outside edit mode is read-only. Its first line holds the book picker,
-**Edit songbook** (imported books only), then the entry actions **New
-songbook**, **Import list…**, **From URL…** and **Tuner**; a quieter second
-line holds the file actions under a **File** label: **Refresh** (URL imports
-only), **Duplicate** (bundled books) and **Export**. Every one of these is the
-same pill shape, with the filled accent reserved for **New songbook**. **Add
-song…** and **Remove songbook** live in the edit-mode banner, and
-**Duplicate** also becomes available for an imported book while editing.
-Bundled books have no edit mode, so their bar keeps **Duplicate** as the route
-to an editable copy.
+The bar outside edit mode is read-only and fits on one row: the book picker,
+**Edit songbook** (imported books only), the entry actions **New songbook**,
+**Import list…**, **From URL…**, and a **⋯** menu holding the occasional file
+actions **Refresh** (URL imports only), **Duplicate** (bundled books) and
+**Export**. The filled accent is reserved for **New songbook**. **Add song…**
+and **Remove songbook** live in the edit-mode banner, and **Duplicate** also
+becomes available for an imported book while editing. Bundled books have no
+edit mode, so their menu keeps **Duplicate** as the route to an editable copy.
+The **Tuner** and the dark-mode toggle sit in the top bar, beside the
+instrument switch.
 
 Authoring outcomes — the add batch summary, update/remove/duplicate results and
 errors — are announced on a polite status line under the songbook bar rather

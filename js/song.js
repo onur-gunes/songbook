@@ -77,30 +77,9 @@
         window.scrollTo(0, 0);
     }
 
-    /* The song-tools card keeps the controls used on every song visible and
-     * puts layout, practice and structure controls behind one disclosure.
-     * Expanded is DOM state rather than per-song state: opening it once keeps
-     * it open while moving through the book, and a reload starts collapsed. */
-    function bindSongTools() {
-        var btn = SB.$('songToolsMoreBtn');
-        var advanced = SB.$('songToolsAdvanced');
-        if (!btn || !advanced) return;
-        function apply(open) {
-            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-            advanced.hidden = !open;
-            var label = btn.querySelector('.song-tools-more-label');
-            if (label) label.textContent = open ? 'Fewer controls' : 'More controls';
-            btn.title = open
-                ? 'Hide diagram, tempo, strum and structure controls'
-                : 'Show diagram, tempo, strum and structure controls';
-        }
-        btn.addEventListener('click', function () { apply(advanced.hidden); });
-        apply(!advanced.hidden);
-    }
-
+    /* The song-tools disclosure is bound in js/ui.js, which owns the
+     * shared open/closed state. */
     SB.bindSongControls = function () {
-        bindSongTools();
-
         SB.$('trUp').addEventListener('click', function () {
             if (SB.state.transpose >= 11) return;
             SB.state.transpose++;

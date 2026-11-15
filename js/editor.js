@@ -524,6 +524,9 @@
                 ? 'Reset this song to its songbook version (clears local strum and structure edits)'
                 : 'No local edits to reset';
         }
+        /* Edit and Reset live in the optional panel; structure editing cannot
+         * be left from a button the user has folded away. */
+        if (SB.state.editMode && SB.revealSongTools) SB.revealSongTools();
     };
 
     /* Trap Tab/Escape inside the editor overlay. */

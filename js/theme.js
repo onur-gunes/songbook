@@ -14,8 +14,11 @@
     SB.applyTheme = function (theme) {
         document.documentElement.setAttribute('data-theme', theme);
         var btn = SB.$('themeToggle');
-        btn.textContent = theme === 'dark' ? '☾' : '☀';
-        btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+        if (btn) {
+            var dark = theme === 'dark';
+            btn.textContent = dark ? '☾' : '☀';
+            btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+        }
         SB.applyBrand();
         SB.lsSet(THEME_KEY, theme);
     }
