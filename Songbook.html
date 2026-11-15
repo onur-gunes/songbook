@@ -278,22 +278,6 @@ button, input, select, textarea {
     background: color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
-.settings-btn svg { width: 18px; height: 18px; display: block; }
-
-/* The tuner used to be a standalone bar button; as a menu row it must not
- * keep the auto-margin that pushed it to the end of the songbook bar. */
-.menu .tuner-open-btn {
-    display: flex;
-    width: 100%;
-    margin-left: 0;
-    border-radius: 10px;
-    padding: 9px 10px;
-    background: transparent;
-}
-
-.menu .tuner-open-btn:hover,
-.menu .tuner-open-btn:focus-visible { background: var(--surface-2); }
-
 /* ===== main / views ===== */
 
 main {
@@ -1325,10 +1309,11 @@ main {
 
 /* song tools */
 
-/* The card holds two layers: the controls used on every song, and a
- * disclosure with the ones that change layout or drive practice. The card
- * itself is not a flex row any more — each layer lays out its own groups, so
- * opening the advanced layer does not re-flow the basic row. */
+/* The card holds two layers: the controls used on every song (transpose,
+ * chord placement, text size, tempo), and a disclosure with the ones that
+ * change layout, labels or structure. The card itself is not a flex row any
+ * more — each layer lays out its own groups, so opening the advanced layer
+ * does not re-flow the basic row. */
 .song-tools {
     padding: 12px 16px;
     margin-bottom: 20px;
@@ -1346,9 +1331,7 @@ main {
 }
 
 .song-tools-advanced {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--line);
+    padding-top: 14px;
 }
 
 .song-tools .tool-label {
@@ -1358,19 +1341,23 @@ main {
     text-transform: uppercase;
 }
 
-/* A quiet disclosure, not a sixth control group: it sits at the end of the
- * basic row and borrows the same pill language as the bar. */
+/* The disclosure is a full-width footer row, not another control group. As a
+ * flex child with auto margins it used to land at the far right of whichever
+ * line it wrapped to, leaving a large gap beside the groups. Owning the whole
+ * row keeps its position stable at every width. */
 .song-tools-more {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    min-height: 32px;
-    margin-left: auto;
-    padding: 0 12px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--surface);
+    width: 100%;
+    min-height: 34px;
+    margin: 10px 0 0;
+    padding: 8px 12px;
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+    background: transparent;
     color: var(--muted);
     font-size: 0.76rem;
     font-weight: 600;
@@ -1380,14 +1367,13 @@ main {
 
 .song-tools-more:hover,
 .song-tools-more:focus-visible {
-    border-color: var(--accent);
-    background: var(--surface-2);
+    border-top-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
     color: var(--text);
 }
 
 .song-tools-more[aria-expanded="true"] {
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border-top-color: var(--accent);
     color: var(--accent);
 }
 
@@ -1401,13 +1387,41 @@ main {
     transform: rotate(180deg);
 }
 
-.song-tools-more.is-playing::before {
-    content: "";
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+/* A quiet preference at the foot of the optional layer, not a seventh control
+ * group: it owns the whole row so it never joins the wrap, and reads as a note
+ * (small, muted, no button chrome) because it changes a default rather than a
+ * song. The checkbox is native so Space and screen readers work normally. */
+.song-tools-keep {
+    flex: 1 1 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.keep-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.song-tools-keep input {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    flex: none;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.keep-hint {
+    color: color-mix(in srgb, var(--muted) 75%, transparent);
 }
 
 .tool-group {
@@ -2970,70 +2984,44 @@ body.pattern-open { overflow: hidden; }
 
 /* ===== songbook picker ===== */
 
-/* Three tiers, each with a stable job:
- *   picker    — which book am I in, and can it be edited
- *   actions   — every way to add or play: new, import, URL, tuner
- *   utilities — file-level maintenance (refresh, duplicate, export)
+/* Two jobs, one row:
+ *   picker  — which book am I in, and can it be edited
+ *   actions — every way to add or play: new, import, URL, and a ⋯ menu
+ *             for file-level maintenance (refresh, duplicate, export)
  *
- * Every tier speaks the same button language: one pill geometry, with rank
- * carried by fill and colour instead of by switching some actions to
- * borderless text. The file actions stay on their own line so the primary
- * row never becomes an undifferentiated strip that changes with the book. */
+ * File maintenance is occasional and book-dependent, so it does not get its
+ * own labelled strip. The menu keeps the row stable without pushing rare
+ * actions into the primary group. Rank is still carried by fill and colour:
+ * filled accent for New, normal pills for the routes, muted outline for ⋯. */
 .songbook-bar {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-        "picker actions"
-        "utils  utils";
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 6px 12px;
+    gap: 8px 12px;
     margin-bottom: 12px;
 }
 
 .songbook-picker {
-    grid-area: picker;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    grid-template-areas: "label select edit";
+    display: flex;
     align-items: center;
     gap: 8px;
+    flex: 1 1 420px;
     min-width: 0;
 }
 
 .songbook-actions {
-    grid-area: actions;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
     gap: 8px;
+    flex: none;
     min-width: 0;
 }
 
-.songbook-utilities {
-    grid-area: utils;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-    min-width: 0;
-}
-
-.bar-util-label {
-    color: var(--muted);
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-}
-
-/* One geometry for every action in the bar. Emphasis, not shape, carries
- * rank: filled accent for New, normal text for Import, muted outlines for
- * the secondary routes and file actions. */
+/* One geometry for every action in the bar. */
 .songbook-actions .pill-btn,
-.songbook-actions .link-btn,
-.songbook-utilities .link-btn {
+.songbook-actions .link-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3044,7 +3032,11 @@ body.pattern-open { overflow: hidden; }
     white-space: nowrap;
 }
 
-.songbook-utilities .link-btn { color: var(--muted); }
+.book-menu-btn {
+    font-size: 1.15rem;
+    letter-spacing: 0.04em;
+    line-height: 1;
+}
 
 /* Authoring outcomes (add summary, mode hints, errors) are announced here
  * instead of in a blocking alert. Empty when there is nothing to say. */
@@ -3061,7 +3053,7 @@ body.pattern-open { overflow: hidden; }
 .author-status.is-hint { color: var(--muted); }
 
 .songbook-label {
-    grid-area: label;
+    flex: none;
     color: var(--muted);
     font-size: 0.7rem;
     font-weight: 700;
@@ -3070,8 +3062,8 @@ body.pattern-open { overflow: hidden; }
 }
 
 .songbook-select {
-    grid-area: select;
-    width: 100%;
+    flex: 1 1 auto;
+    width: auto;
     max-width: 360px;
     min-width: 0;
     border: 1px solid var(--line);
@@ -3084,7 +3076,6 @@ body.pattern-open { overflow: hidden; }
 }
 
 .edit-book-btn {
-    grid-area: edit;
     flex: none;
     min-height: 36px;
     padding: 0 14px;
@@ -3103,11 +3094,13 @@ body.pattern-open { overflow: hidden; }
  * no file actions. The entry actions stay (they are the bar's contribution to
  * the empty state), while the rest of the library bar steps aside. */
 .songbook-bar.is-empty .songbook-picker,
-.songbook-bar.is-empty .songbook-utilities,
+.songbook-bar.is-empty .book-menu-wrap,
 .songbook-bar.is-empty #importUrlToggle { display: none; }
 
-.songbook-bar.is-empty { grid-template-areas: "actions actions"; }
-.songbook-bar.is-empty .songbook-actions { justify-content: flex-start; }
+.songbook-bar.is-empty .songbook-actions {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+}
 
 /* Edit mode is a task mode, so it gets a banner of its own rather than
  * changing the shape of the browsing bar under the cursor. The banner owns
@@ -3187,8 +3180,8 @@ body.pattern-open { overflow: hidden; }
 }
 
 .tuner-open-btn svg {
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
     flex: none;
 }
 
@@ -4331,33 +4324,44 @@ body.tuner-open { overflow: hidden; }
 @media (max-width: 640px) {
     body { font-size: 15px; }
 
-    .instrument-btn { padding: 0 10px; font-size: 0.78rem; }
+    .instrument-btn { padding: 0 8px; font-size: 0.78rem; }
+
+    /* The top bar now carries the tuner as well as the theme toggle; with 10px
+     * gaps and 36px buttons the brand name ellipsized to "Son…" on a 390px
+     * phone. Tighten the cluster so the wordmark survives. */
+    .topbar-inner { gap: 8px; }
+    .topbar-right { gap: 6px; }
+    .topbar .icon-btn { width: 32px; height: 32px; }
+    .instrument-toggle { height: 32px; }
+    /* The tuner is a labelled pill on desktop and an icon on a phone, where
+     * the wordmark needs the room. */
+    .tuner-label { display: none; }
+    .topbar-link.tuner-open-btn { width: 32px; height: 32px; padding: 0; justify-content: center; }
 
     main { padding: 16px 12px 40px; }
 
     /* The picker owns a full row: label and Edit on top, the select below.
-     * Everything else falls into two stable lines — entry actions, then the
-     * quiet file actions — instead of re-flowing around whichever buttons the
-     * current book happens to expose. */
+     * Entry actions keep a two-column grid so the row never re-flows around
+     * whichever buttons the current book happens to expose; the ⋯ menu sits
+     * in the last cell. */
     .songbook-bar {
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-areas: "picker" "actions" "utils";
         gap: 8px;
     }
 
     .songbook-picker {
-        grid-template-columns: minmax(0, 1fr) auto;
-        grid-template-areas: "label edit" "select select";
+        flex: 1 1 100%;
+        flex-wrap: wrap;
         gap: 5px 8px;
     }
 
     .songbook-select {
-        width: 100%;
+        flex: 1 1 100%;
+        order: 3;
         max-width: none;
     }
 
     .edit-book-btn {
-        justify-self: end;
+        margin-left: auto;
         min-height: 34px;
         padding: 0 12px;
         font-size: 0.8rem;
@@ -4365,18 +4369,18 @@ body.tuner-open { overflow: hidden; }
 
     .songbook-actions {
         display: grid;
+        flex: 1 1 100%;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         justify-content: flex-start;
     }
     .songbook-actions .pill-btn,
     .songbook-actions .link-btn { width: 100%; padding: 0 10px; }
-    /* With no book there are only three entry actions; keep them on one line
-     * instead of leaving the fourth grid cell empty. */
+    .songbook-actions .book-menu-wrap { justify-self: end; }
+    /* With no book there are only the entry actions; keep them on one line
+     * instead of leaving grid cells empty. */
     .songbook-bar.is-empty .songbook-actions { display: flex; }
     .songbook-bar.is-empty .songbook-actions .pill-btn,
     .songbook-bar.is-empty .songbook-actions .link-btn { width: auto; }
-
-    .songbook-utilities { justify-content: flex-start; }
 
     .edit-mode-bar { padding: 8px 10px; }
     .edit-mode-text { flex: 1 1 auto; }
@@ -4471,16 +4475,15 @@ body.tuner-open { overflow: hidden; }
         width: 100%;
     }
     .song-tools-advanced {
-        margin-top: 10px;
-        padding-top: 8px;
+        padding-top: 10px;
     }
     .song-tools-more {
-        width: 100%;
-        justify-content: center;
-        margin-left: 0;
-        margin-top: 2px;
-        min-height: 34px;
+        margin-top: 8px;
+        min-height: 36px;
     }
+    /* The checkbox carries the meaning; the "remembered" note just crowds a
+     * 390px row. */
+    .keep-hint { display: none; }
     .tool-group {
         justify-content: space-between;
         gap: 10px;
@@ -4782,60 +4785,17 @@ button.structure-close,
                 <button class="instrument-btn active" data-instrument="ukulele" type="button" aria-pressed="true">Ukulele</button>
                 <button class="instrument-btn" data-instrument="guitar" type="button" aria-pressed="false">Guitar</button>
             </div>
-            <div class="menu-wrap settings-wrap">
-                <button id="settingsBtn" class="icon-btn settings-btn" type="button"
-                        aria-label="Settings" title="Settings" aria-haspopup="menu"
-                        aria-expanded="false" aria-controls="settingsMenu">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" aria-hidden="true">
-                        <path d="M4 7h5M15 7h5M4 17h9M18 17h2"/>
-                        <circle cx="12" cy="7" r="2.4"/>
-                        <circle cx="15" cy="17" r="2.4"/>
-                    </svg>
-                </button>
-                <div id="settingsMenu" class="menu settings-menu" role="menu"
-                     aria-label="Settings" hidden>
-                    <p class="menu-heading">Appearance</p>
-                    <button id="themeToggle" class="menu-item" type="button"
-                            role="menuitemcheckbox" aria-checked="false">
-                        <span class="menu-item-icon" aria-hidden="true">☀</span>
-                        <span class="menu-item-body">
-                            <span class="menu-item-label">Dark mode</span>
-                            <span class="menu-item-hint">Switch the page theme</span>
-                        </span>
-                        <span class="menu-item-state">Off</span>
-                    </button>
-
-                    <div class="menu-sep" role="separator"></div>
-                    <p class="menu-heading">Song controls</p>
-                    <button id="advancedToggle" class="menu-item" type="button"
-                            role="menuitemcheckbox" aria-checked="false">
-                        <span class="menu-item-icon" aria-hidden="true">⚙</span>
-                        <span class="menu-item-body">
-                            <span class="menu-item-label">Advanced song tools</span>
-                            <span class="menu-item-hint">Keep strum, diagram and structure tools open</span>
-                        </span>
-                        <span class="menu-item-state">Off</span>
-                    </button>
-
-                    <div class="menu-sep" role="separator"></div>
-                    <button id="tunerBtn" class="menu-item tuner-open-btn" type="button"
-                            role="menuitem" aria-haspopup="dialog" title="Open tuner">
-                        <span class="menu-item-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                                 stroke-linecap="round">
-                                <path d="M9 3v6.5a3 3 0 0 0 6 0V3"/>
-                                <path d="M12 12.5V21"/>
-                                <path d="M8 3h2M14 3h2"/>
-                            </svg>
-                        </span>
-                        <span class="menu-item-body">
-                            <span class="menu-item-label">Tuner</span>
-                            <span class="menu-item-hint">Microphone pitch tuner</span>
-                        </span>
-                    </button>
-                </div>
-            </div>
+            <button id="tunerBtn" class="topbar-link tuner-open-btn" type="button"
+                    aria-label="Tuner" title="Open the tuner" aria-haspopup="dialog">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" aria-hidden="true">
+                    <path d="M9 3v6.5a3 3 0 0 0 6 0V3"/>
+                    <path d="M12 12.5V21"/>
+                    <path d="M8 3h2M14 3h2"/>
+                </svg>
+                <span class="tuner-label">Tuner</span>
+            </button>
+            <button id="themeToggle" class="icon-btn" type="button" aria-label="Switch to dark mode">☀</button>
         </div>
     </div>
 </header>
@@ -4857,14 +4817,41 @@ button.structure-close,
                 <button id="importBtn" class="pill-btn" type="button">Import list…</button>
                 <button id="importUrlToggle" class="link-btn" type="button"
                         aria-expanded="false" aria-controls="importUrlForm">From URL…</button>
+                <div class="menu-wrap book-menu-wrap">
+                    <button id="bookMenuBtn" class="icon-btn book-menu-btn" type="button"
+                            aria-label="Songbook actions" title="Songbook actions"
+                            aria-haspopup="menu" aria-expanded="false"
+                            aria-controls="bookMenu">⋯</button>
+                    <div id="bookMenu" class="menu book-menu" role="menu"
+                         aria-label="Songbook actions" hidden>
+                        <p class="menu-heading">This songbook</p>
+                        <button id="exportSongsBtn" class="menu-item" type="button" role="menuitem">
+                            <span class="menu-item-icon" aria-hidden="true">↓</span>
+                            <span class="menu-item-body">
+                                <span class="menu-item-label">Export songbook</span>
+                                <span class="menu-item-hint">Download the JSON file</span>
+                            </span>
+                        </button>
+                        <button id="refreshSongsBtn" class="menu-item" type="button"
+                                role="menuitem" hidden>
+                            <span class="menu-item-icon" aria-hidden="true">⟳</span>
+                            <span class="menu-item-body">
+                                <span class="menu-item-label">Refresh from URL</span>
+                                <span class="menu-item-hint">Re-fetch the imported source</span>
+                            </span>
+                        </button>
+                        <div class="menu-sep" role="separator"></div>
+                        <button id="duplicateBookBtn" class="menu-item" type="button"
+                                role="menuitem" title="Duplicate this songbook" hidden>
+                            <span class="menu-item-icon" aria-hidden="true">⧉</span>
+                            <span class="menu-item-body">
+                                <span class="menu-item-label">Duplicate songbook</span>
+                                <span class="menu-item-hint">Make an editable copy</span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
                 <input id="importFile" type="file" accept=".json,application/json" multiple hidden>
-            </div>
-            <div class="songbook-utilities" role="group" aria-label="Songbook file actions">
-                <span class="bar-util-label" aria-hidden="true">File</span>
-                <button id="refreshSongsBtn" class="link-btn" type="button" hidden>Refresh</button>
-                <button id="duplicateBookBtn" class="link-btn" type="button"
-                        title="Duplicate this songbook" hidden>Duplicate</button>
-                <button id="exportSongsBtn" class="link-btn" type="button">Export</button>
             </div>
         </div>
 
@@ -5010,7 +4997,6 @@ button.structure-close,
                                     aria-label="Grid chord chart" title="This song has no grid chart">Grid</button>
                             <button class="chord-mode-btn" data-chord-mode="animate" type="button" aria-pressed="false" disabled
                                     aria-label="Animated chord view" title="This song has no grid chart">Animate</button>
-                            <button id="numbersBtn" class="chord-mode-btn" type="button" aria-pressed="false" aria-label="Show scale degrees instead of chord names" title="Show scale degrees (I, IV, V) instead of chord names">I-V</button>
                         </div>
                     </div>
                 </div>
@@ -5024,14 +5010,6 @@ button.structure-close,
                         </div>
                     </div>
                 </div>
-                <button id="songToolsMoreBtn" class="song-tools-more" type="button"
-                        aria-expanded="false" aria-controls="songToolsAdvanced"
-                        title="Show diagram, tempo, strum and structure controls">
-                    <span class="song-tools-more-label">More controls</span>
-                    <span class="song-tools-more-chevron" aria-hidden="true">⌄</span>
-                </button>
-            </div>
-            <div id="songToolsAdvanced" class="song-tools-advanced" hidden>
                 <div id="metronomeGroup" class="tool-group" role="group" aria-label="Metronome" hidden>
                     <span class="tool-label">Tempo</span>
                     <div class="tool-controls">
@@ -5048,6 +5026,14 @@ button.structure-close,
                         </div>
                     </div>
                 </div>
+            </div>
+            <button id="songToolsMoreBtn" class="song-tools-more" type="button"
+                    aria-expanded="false" aria-controls="songToolsAdvanced"
+                    title="Show strum, diagram, labels and structure controls">
+                <span class="song-tools-more-label">More controls</span>
+                <span class="song-tools-more-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div id="songToolsAdvanced" class="song-tools-advanced" hidden>
                 <div id="strumGroup" class="tool-group" role="group" aria-label="Strum pattern" hidden>
                     <span class="tool-label">Strum</span>
                     <div class="tool-controls">
@@ -5097,6 +5083,16 @@ button.structure-close,
                         </div>
                     </div>
                 </div>
+                <div class="tool-group" role="group" aria-label="Chord labels">
+                    <span class="tool-label">Labels</span>
+                    <div class="tool-controls">
+                        <div class="seg-group" role="group" aria-label="Chord label style">
+                            <button id="numbersBtn" class="chord-mode-btn" type="button" aria-pressed="false"
+                                    aria-label="Show scale degrees instead of chord names"
+                                    title="Show scale degrees (I, IV, V) instead of chord names">I–V</button>
+                        </div>
+                    </div>
+                </div>
                 <div id="editGroup" class="tool-group" role="group" aria-label="Structure editing">
                     <span class="tool-label">Structure</span>
                     <div class="tool-controls">
@@ -5108,6 +5104,13 @@ button.structure-close,
                                 aria-label="Reset this song to its songbook version"
                                 title="Reset this song to its songbook version">↺ Reset</button>
                     </div>
+                </div>
+                <div class="song-tools-keep">
+                    <label class="keep-label" for="songToolsKeep">
+                        <input type="checkbox" id="songToolsKeep">
+                        <span>Keep these open on every song</span>
+                    </label>
+                    <span class="keep-hint" aria-hidden="true">Remembered on this device</span>
                 </div>
             </div>
         </div>
@@ -7850,19 +7853,8 @@ button.structure-close,
         var btn = SB.$('themeToggle');
         if (btn) {
             var dark = theme === 'dark';
-            /* The toggle is a menu row now: the icon is decorative and the
-             * trailing state word is what changes. Fall back to replacing the
-             * whole label if an older/simpler button is ever used. */
-            var icon = btn.querySelector('.menu-item-icon');
-            if (icon) {
-                icon.textContent = dark ? '☾' : '☀';
-                var state = btn.querySelector('.menu-item-state');
-                if (state) state.textContent = dark ? 'On' : 'Off';
-                btn.setAttribute('aria-checked', dark ? 'true' : 'false');
-            } else {
-                btn.textContent = dark ? '☾' : '☀';
-                btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
-            }
+            btn.textContent = dark ? '☾' : '☀';
+            btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
         }
         SB.applyBrand();
         SB.lsSet(THEME_KEY, theme);
@@ -7900,7 +7892,7 @@ button.structure-close,
 </script>
 <script>
 /* Songbook — ui
- * control-surface preferences: advanced song tools and menus
+ * the song-tools disclosure and the songbook popover menu
  *
  * Part of the window.SB namespace. Loaded as a classic script in the
  * order set by index.html; see js/core.js for the shared state.
@@ -7908,16 +7900,19 @@ button.structure-close,
 (function (SB) {
     'use strict';
 
-    /* ---------------- advanced song tools ---------------- */
+    /* ---------------- song tools disclosure ---------------- */
 
-    /* The song-tools card keeps the controls used on every song visible and
-     * puts layout, practice and structure controls behind one disclosure.
-     * Expanded is a shared UI state, not per-song state: opening it once keeps
+    /* The song-tools card keeps the controls used on every song visible
+     * (transpose, chord placement, text size, tempo) and puts layout,
+     * labelling and structure controls behind one disclosure.
+     * Expanded is DOM state rather than per-song state: opening it once keeps
      * it open while moving through the book, and a reload starts collapsed
-     * unless the advanced-tools preference below is on. */
-    SB.ADVANCED_KEY = SB.NS + ':advanced';
-    SB.state.advanced = SB.lsGet(SB.ADVANCED_KEY, false) === true;
+     * unless the keep-open switch at the foot of the panel is on. Players who
+     * live in the strum/diagram/structure controls set that once instead of
+     * reopening the panel on every visit. */
     SB.state.toolsOpen = false;
+    SB.KEEP_KEY = SB.NS + ':tools-keep';
+    SB.keepToolsOpen = SB.lsGet(SB.KEEP_KEY, false) === true;
 
     function label(el, text) {
         if (!el) return;
@@ -7936,8 +7931,8 @@ button.structure-close,
             btn.classList.toggle('is-open', !!open);
             label(btn, open ? 'Fewer controls' : 'More controls');
             btn.title = open
-                ? 'Hide diagram, tempo, strum and structure controls'
-                : 'Show diagram, tempo, strum and structure controls';
+                ? 'Hide strum, diagram, labels and structure controls'
+                : 'Show strum, diagram, labels and structure controls';
         }
         var tools = document.querySelector('.song-tools');
         if (tools) tools.classList.toggle('is-open', !!open);
@@ -7954,40 +7949,28 @@ button.structure-close,
         SB.setSongToolsOpen(true);
     };
 
-    /* Called whenever a song opens: simple mode starts folded, advanced mode
-     * starts open. A user who manually folds the panel keeps that choice for
-     * the rest of the song. */
-    SB.resetSongTools = function () {
-        SB.setSongToolsOpen(SB.state.advanced);
+    /* ---------------- keep the optional tools open ---------------- */
+
+    function syncKeep() {
+        var box = SB.$('songToolsKeep');
+        if (box) box.checked = !!SB.keepToolsOpen;
+    }
+
+    /* A preference, not a mode: turning it on reveals the panel now and on
+     * every later visit; turning it off leaves the panel where it is, so the
+     * song in front of the player does not change under the pointer. */
+    SB.setKeepToolsOpen = function (on) {
+        SB.keepToolsOpen = !!on;
+        SB.lsSet(SB.KEEP_KEY, SB.keepToolsOpen);
+        syncKeep();
+        if (SB.keepToolsOpen) SB.setSongToolsOpen(true);
     };
 
-    SB.isAdvanced = function () { return !!SB.state.advanced; };
-
-    SB.applyAdvancedMode = function () {
-        var on = !!SB.state.advanced;
-        var btn = SB.$('advancedToggle');
-        if (btn) {
-            btn.setAttribute('aria-checked', on ? 'true' : 'false');
-            var state = btn.querySelector('.menu-item-state');
-            if (state) state.textContent = on ? 'On' : 'Off';
-        }
-        /* Turning the preference on should reveal the tools immediately;
-         * turning it off returns the toolbar to its quiet default. */
-        SB.setSongToolsOpen(on);
-    };
-
-    SB.setAdvanced = function (on) {
-        SB.state.advanced = !!on;
-        SB.lsSet(SB.ADVANCED_KEY, SB.state.advanced);
-        SB.applyAdvancedMode();
-    };
-
-    /* ---------------- popover menus ---------------- */
-    /* One small menu replaces the flat row of global actions that used to sit
-     * beside the instrument toggle: dark mode, the advanced song-tools
-     * preference and the tuner. It is plain DOM: the trigger owns
-     * aria-expanded, the menu is a role="menu", Escape closes it and returns
-     * focus to the trigger, and an outside pointer closes it. */
+    /* ---------------- popover menu ---------------- */
+    /* One small menu replaces the flat row of rare songbook file actions. It is
+     * plain DOM: the trigger owns aria-expanded, the menu is a role="menu",
+     * Escape closes it and returns focus to the trigger, and an outside
+     * pointer closes it. */
 
     var open = null; // { trigger: Element, menu: Element }
 
@@ -8028,10 +8011,8 @@ button.structure-close,
             openMenu(trigger, menu);
         });
 
-        /* Menu actions close the popover after they run. The settings toggles
-         * are checkboxes: flipping one should not dismiss the menu, so the
-         * user can adjust both without reopening it. Actions that open their
-         * own dialog (the tuner) manage focus themselves. */
+        /* A menu action closes the popover after it runs, then hands focus
+         * back to the trigger unless the action opened something of its own. */
         menu.addEventListener('click', function (e) {
             var item = e.target.closest('[role="menuitem"], [role="menuitemcheckbox"]');
             if (!item) return;
@@ -8072,12 +8053,13 @@ button.structure-close,
         var more = SB.$('songToolsMoreBtn');
         if (more) more.addEventListener('click', SB.toggleSongTools);
 
-        bindMenu('settingsBtn', 'settingsMenu');
+        var keep = SB.$('songToolsKeep');
+        if (keep) {
+            syncKeep();
+            keep.addEventListener('change', function () { SB.setKeepToolsOpen(keep.checked); });
+        }
 
-        var adv = SB.$('advancedToggle');
-        if (adv) adv.addEventListener('click', function () {
-            SB.setAdvanced(!SB.state.advanced);
-        });
+        bindMenu('bookMenuBtn', 'bookMenu');
 
         document.addEventListener('pointerdown', function (e) {
             if (!open) return;
@@ -8094,10 +8076,12 @@ button.structure-close,
 
         window.addEventListener('hashchange', function () { close(); });
 
-        SB.applyAdvancedMode();
+        var panel = SB.$('songToolsAdvanced');
+        if (panel) SB.setSongToolsOpen(SB.keepToolsOpen || !panel.hidden);
     };
 
 })(window.SB = window.SB || {});
+
 
 </script>
 <script>
@@ -8771,8 +8755,8 @@ button.structure-close,
          * rule); this call covers routes that never render the list. */
         if (SB.syncAuthoringBar) SB.syncAuthoringBar();
         if (SB.setAuthorStatus) SB.setAuthorStatus('');
-        /* Refresh is URL-import maintenance, not song authoring, and stays in
-         * the bar next to Export. */
+        /* Refresh is URL-import maintenance, not song authoring, and lives in
+         * the songbook overflow menu next to Export. */
         var rf = SB.$('refreshSongsBtn');
         if (rf) rf.hidden = !(sb && sb.imported && sb.sourceUrl);
         var ex = SB.$('exportSongsBtn');
@@ -14739,7 +14723,6 @@ button.structure-close,
         if (SB.state.editMode && SB.closeEditor) SB.closeEditor();
         SB.state.editMode = false;
         if (SB.updateEditUi) SB.updateEditUi();
-        if (SB.resetSongTools) SB.resetSongTools();
         var song = SB.state.byId[id];
         if (!song) { location.hash = SB.routeHash(SB.state.active ? SB.state.active.id : ''); return; }
         SB.state.currentSong = song;
@@ -14780,8 +14763,8 @@ button.structure-close,
         window.scrollTo(0, 0);
     }
 
-    /* The song-tools disclosure itself is bound in js/ui.js, which owns the
-     * advanced-mode preference and the shared open/closed state. */
+    /* The song-tools disclosure is bound in js/ui.js, which owns the
+     * shared open/closed state. */
     SB.bindSongControls = function () {
         SB.$('trUp').addEventListener('click', function () {
             if (SB.state.transpose >= 11) return;
@@ -15589,11 +15572,6 @@ button.structure-close,
         var label = SB.state.metronome.playing ? 'Stop the metronome' : 'Start the metronome';
         btn.setAttribute('aria-label', label);
         btn.title = label;
-        // The metronome lives in the advanced layer. If that layer is closed
-        // while a click track is running, the disclosure carries a live dot
-        // so the hidden control is not silent.
-        var more = SB.$('songToolsMoreBtn');
-        if (more) more.classList.toggle('is-playing', !!SB.state.metronome.playing);
     }
 
     SB.bindMetronome = function () {
@@ -18663,10 +18641,10 @@ button.structure-close,
         getSong: function (id) { return SB.state.byId[id]; },
         setInstrument: SB.setInstrument,
         getInstrument: function () { return SB.state.instrument; },
-        setAdvanced: function (on) { if (SB.setAdvanced) SB.setAdvanced(on); },
-        isAdvanced: function () { return !!(SB.isAdvanced && SB.isAdvanced()); },
         setSongToolsOpen: function (on) { if (SB.setSongToolsOpen) SB.setSongToolsOpen(on); },
         isSongToolsOpen: function () { return !!(SB.state && SB.state.toolsOpen); },
+        setKeepToolsOpen: function (on) { if (SB.setKeepToolsOpen) SB.setKeepToolsOpen(on); },
+        isKeepToolsOpen: function () { return !!SB.keepToolsOpen; },
         getChordMode: function () { return SB.state.chordMode; },
         isGridMode: SB.isGridMode,
         setChordMode: SB.setChordMode,

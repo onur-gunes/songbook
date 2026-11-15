@@ -37,7 +37,6 @@
         if (SB.state.editMode && SB.closeEditor) SB.closeEditor();
         SB.state.editMode = false;
         if (SB.updateEditUi) SB.updateEditUi();
-        if (SB.resetSongTools) SB.resetSongTools();
         var song = SB.state.byId[id];
         if (!song) { location.hash = SB.routeHash(SB.state.active ? SB.state.active.id : ''); return; }
         SB.state.currentSong = song;
@@ -78,8 +77,8 @@
         window.scrollTo(0, 0);
     }
 
-    /* The song-tools disclosure itself is bound in js/ui.js, which owns the
-     * advanced-mode preference and the shared open/closed state. */
+    /* The song-tools disclosure is bound in js/ui.js, which owns the
+     * shared open/closed state. */
     SB.bindSongControls = function () {
         SB.$('trUp').addEventListener('click', function () {
             if (SB.state.transpose >= 11) return;

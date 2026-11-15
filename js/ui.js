@@ -1,5 +1,5 @@
 /* Songbook — ui
- * control-surface preferences: advanced song tools and menus
+ * the song-tools disclosure and the songbook popover menu
  *
  * Part of the window.SB namespace. Loaded as a classic script in the
  * order set by index.html; see js/core.js for the shared state.
@@ -7,16 +7,19 @@
 (function (SB) {
     'use strict';
 
-    /* ---------------- advanced song tools ---------------- */
+    /* ---------------- song tools disclosure ---------------- */
 
-    /* The song-tools card keeps the controls used on every song visible and
-     * puts layout, practice and structure controls behind one disclosure.
-     * Expanded is a shared UI state, not per-song state: opening it once keeps
+    /* The song-tools card keeps the controls used on every song visible
+     * (transpose, chord placement, text size, tempo) and puts layout,
+     * labelling and structure controls behind one disclosure.
+     * Expanded is DOM state rather than per-song state: opening it once keeps
      * it open while moving through the book, and a reload starts collapsed
-     * unless the advanced-tools preference below is on. */
-    SB.ADVANCED_KEY = SB.NS + ':advanced';
-    SB.state.advanced = SB.lsGet(SB.ADVANCED_KEY, false) === true;
+     * unless the keep-open switch at the foot of the panel is on. Players who
+     * live in the strum/diagram/structure controls set that once instead of
+     * reopening the panel on every visit. */
     SB.state.toolsOpen = false;
+    SB.KEEP_KEY = SB.NS + ':tools-keep';
+    SB.keepToolsOpen = SB.lsGet(SB.KEEP_KEY, false) === true;
 
     function label(el, text) {
         if (!el) return;
@@ -35,8 +38,8 @@
             btn.classList.toggle('is-open', !!open);
             label(btn, open ? 'Fewer controls' : 'More controls');
             btn.title = open
-                ? 'Hide diagram, tempo, strum and structure controls'
-                : 'Show diagram, tempo, strum and structure controls';
+                ? 'Hide strum, diagram, labels and structure controls'
+                : 'Show strum, diagram, labels and structure controls';
         }
         var tools = document.querySelector('.song-tools');
         if (tools) tools.classList.toggle('is-open', !!open);
@@ -53,40 +56,28 @@
         SB.setSongToolsOpen(true);
     };
 
-    /* Called whenever a song opens: simple mode starts folded, advanced mode
-     * starts open. A user who manually folds the panel keeps that choice for
-     * the rest of the song. */
-    SB.resetSongTools = function () {
-        SB.setSongToolsOpen(SB.state.advanced);
+    /* ---------------- keep the optional tools open ---------------- */
+
+    function syncKeep() {
+        var box = SB.$('songToolsKeep');
+        if (box) box.checked = !!SB.keepToolsOpen;
+    }
+
+    /* A preference, not a mode: turning it on reveals the panel now and on
+     * every later visit; turning it off leaves the panel where it is, so the
+     * song in front of the player does not change under the pointer. */
+    SB.setKeepToolsOpen = function (on) {
+        SB.keepToolsOpen = !!on;
+        SB.lsSet(SB.KEEP_KEY, SB.keepToolsOpen);
+        syncKeep();
+        if (SB.keepToolsOpen) SB.setSongToolsOpen(true);
     };
 
-    SB.isAdvanced = function () { return !!SB.state.advanced; };
-
-    SB.applyAdvancedMode = function () {
-        var on = !!SB.state.advanced;
-        var btn = SB.$('advancedToggle');
-        if (btn) {
-            btn.setAttribute('aria-checked', on ? 'true' : 'false');
-            var state = btn.querySelector('.menu-item-state');
-            if (state) state.textContent = on ? 'On' : 'Off';
-        }
-        /* Turning the preference on should reveal the tools immediately;
-         * turning it off returns the toolbar to its quiet default. */
-        SB.setSongToolsOpen(on);
-    };
-
-    SB.setAdvanced = function (on) {
-        SB.state.advanced = !!on;
-        SB.lsSet(SB.ADVANCED_KEY, SB.state.advanced);
-        SB.applyAdvancedMode();
-    };
-
-    /* ---------------- popover menus ---------------- */
-    /* One small menu replaces the flat row of global actions that used to sit
-     * beside the instrument toggle: dark mode, the advanced song-tools
-     * preference and the tuner. It is plain DOM: the trigger owns
-     * aria-expanded, the menu is a role="menu", Escape closes it and returns
-     * focus to the trigger, and an outside pointer closes it. */
+    /* ---------------- popover menu ---------------- */
+    /* One small menu replaces the flat row of rare songbook file actions. It is
+     * plain DOM: the trigger owns aria-expanded, the menu is a role="menu",
+     * Escape closes it and returns focus to the trigger, and an outside
+     * pointer closes it. */
 
     var open = null; // { trigger: Element, menu: Element }
 
@@ -127,10 +118,8 @@
             openMenu(trigger, menu);
         });
 
-        /* Menu actions close the popover after they run. The settings toggles
-         * are checkboxes: flipping one should not dismiss the menu, so the
-         * user can adjust both without reopening it. Actions that open their
-         * own dialog (the tuner) manage focus themselves. */
+        /* A menu action closes the popover after it runs, then hands focus
+         * back to the trigger unless the action opened something of its own. */
         menu.addEventListener('click', function (e) {
             var item = e.target.closest('[role="menuitem"], [role="menuitemcheckbox"]');
             if (!item) return;
@@ -171,12 +160,13 @@
         var more = SB.$('songToolsMoreBtn');
         if (more) more.addEventListener('click', SB.toggleSongTools);
 
-        bindMenu('settingsBtn', 'settingsMenu');
+        var keep = SB.$('songToolsKeep');
+        if (keep) {
+            syncKeep();
+            keep.addEventListener('change', function () { SB.setKeepToolsOpen(keep.checked); });
+        }
 
-        var adv = SB.$('advancedToggle');
-        if (adv) adv.addEventListener('click', function () {
-            SB.setAdvanced(!SB.state.advanced);
-        });
+        bindMenu('bookMenuBtn', 'bookMenu');
 
         document.addEventListener('pointerdown', function (e) {
             if (!open) return;
@@ -193,7 +183,9 @@
 
         window.addEventListener('hashchange', function () { close(); });
 
-        SB.applyAdvancedMode();
+        var panel = SB.$('songToolsAdvanced');
+        if (panel) SB.setSongToolsOpen(SB.keepToolsOpen || !panel.hidden);
     };
 
 })(window.SB = window.SB || {});
+

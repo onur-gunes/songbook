@@ -16,19 +16,8 @@
         var btn = SB.$('themeToggle');
         if (btn) {
             var dark = theme === 'dark';
-            /* The toggle is a menu row now: the icon is decorative and the
-             * trailing state word is what changes. Fall back to replacing the
-             * whole label if an older/simpler button is ever used. */
-            var icon = btn.querySelector('.menu-item-icon');
-            if (icon) {
-                icon.textContent = dark ? '☾' : '☀';
-                var state = btn.querySelector('.menu-item-state');
-                if (state) state.textContent = dark ? 'On' : 'Off';
-                btn.setAttribute('aria-checked', dark ? 'true' : 'false');
-            } else {
-                btn.textContent = dark ? '☾' : '☀';
-                btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
-            }
+            btn.textContent = dark ? '☾' : '☀';
+            btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
         }
         SB.applyBrand();
         SB.lsSet(THEME_KEY, theme);

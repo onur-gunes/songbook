@@ -265,22 +265,6 @@ button, input, select, textarea {
     background: color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
-.settings-btn svg { width: 18px; height: 18px; display: block; }
-
-/* The tuner used to be a standalone bar button; as a menu row it must not
- * keep the auto-margin that pushed it to the end of the songbook bar. */
-.menu .tuner-open-btn {
-    display: flex;
-    width: 100%;
-    margin-left: 0;
-    border-radius: 10px;
-    padding: 9px 10px;
-    background: transparent;
-}
-
-.menu .tuner-open-btn:hover,
-.menu .tuner-open-btn:focus-visible { background: var(--surface-2); }
-
 /* ===== main / views ===== */
 
 main {
@@ -1312,10 +1296,11 @@ main {
 
 /* song tools */
 
-/* The card holds two layers: the controls used on every song, and a
- * disclosure with the ones that change layout or drive practice. The card
- * itself is not a flex row any more — each layer lays out its own groups, so
- * opening the advanced layer does not re-flow the basic row. */
+/* The card holds two layers: the controls used on every song (transpose,
+ * chord placement, text size, tempo), and a disclosure with the ones that
+ * change layout, labels or structure. The card itself is not a flex row any
+ * more — each layer lays out its own groups, so opening the advanced layer
+ * does not re-flow the basic row. */
 .song-tools {
     padding: 12px 16px;
     margin-bottom: 20px;
@@ -1333,9 +1318,7 @@ main {
 }
 
 .song-tools-advanced {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--line);
+    padding-top: 14px;
 }
 
 .song-tools .tool-label {
@@ -1345,19 +1328,23 @@ main {
     text-transform: uppercase;
 }
 
-/* A quiet disclosure, not a sixth control group: it sits at the end of the
- * basic row and borrows the same pill language as the bar. */
+/* The disclosure is a full-width footer row, not another control group. As a
+ * flex child with auto margins it used to land at the far right of whichever
+ * line it wrapped to, leaving a large gap beside the groups. Owning the whole
+ * row keeps its position stable at every width. */
 .song-tools-more {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    min-height: 32px;
-    margin-left: auto;
-    padding: 0 12px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--surface);
+    width: 100%;
+    min-height: 34px;
+    margin: 10px 0 0;
+    padding: 8px 12px;
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+    background: transparent;
     color: var(--muted);
     font-size: 0.76rem;
     font-weight: 600;
@@ -1367,14 +1354,13 @@ main {
 
 .song-tools-more:hover,
 .song-tools-more:focus-visible {
-    border-color: var(--accent);
-    background: var(--surface-2);
+    border-top-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
     color: var(--text);
 }
 
 .song-tools-more[aria-expanded="true"] {
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border-top-color: var(--accent);
     color: var(--accent);
 }
 
@@ -1388,13 +1374,41 @@ main {
     transform: rotate(180deg);
 }
 
-.song-tools-more.is-playing::before {
-    content: "";
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+/* A quiet preference at the foot of the optional layer, not a seventh control
+ * group: it owns the whole row so it never joins the wrap, and reads as a note
+ * (small, muted, no button chrome) because it changes a default rather than a
+ * song. The checkbox is native so Space and screen readers work normally. */
+.song-tools-keep {
+    flex: 1 1 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.keep-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.song-tools-keep input {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    flex: none;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.keep-hint {
+    color: color-mix(in srgb, var(--muted) 75%, transparent);
 }
 
 .tool-group {
@@ -2957,70 +2971,44 @@ body.pattern-open { overflow: hidden; }
 
 /* ===== songbook picker ===== */
 
-/* Three tiers, each with a stable job:
- *   picker    — which book am I in, and can it be edited
- *   actions   — every way to add or play: new, import, URL, tuner
- *   utilities — file-level maintenance (refresh, duplicate, export)
+/* Two jobs, one row:
+ *   picker  — which book am I in, and can it be edited
+ *   actions — every way to add or play: new, import, URL, and a ⋯ menu
+ *             for file-level maintenance (refresh, duplicate, export)
  *
- * Every tier speaks the same button language: one pill geometry, with rank
- * carried by fill and colour instead of by switching some actions to
- * borderless text. The file actions stay on their own line so the primary
- * row never becomes an undifferentiated strip that changes with the book. */
+ * File maintenance is occasional and book-dependent, so it does not get its
+ * own labelled strip. The menu keeps the row stable without pushing rare
+ * actions into the primary group. Rank is still carried by fill and colour:
+ * filled accent for New, normal pills for the routes, muted outline for ⋯. */
 .songbook-bar {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-        "picker actions"
-        "utils  utils";
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 6px 12px;
+    gap: 8px 12px;
     margin-bottom: 12px;
 }
 
 .songbook-picker {
-    grid-area: picker;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    grid-template-areas: "label select edit";
+    display: flex;
     align-items: center;
     gap: 8px;
+    flex: 1 1 420px;
     min-width: 0;
 }
 
 .songbook-actions {
-    grid-area: actions;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
     gap: 8px;
+    flex: none;
     min-width: 0;
 }
 
-.songbook-utilities {
-    grid-area: utils;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-    min-width: 0;
-}
-
-.bar-util-label {
-    color: var(--muted);
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-}
-
-/* One geometry for every action in the bar. Emphasis, not shape, carries
- * rank: filled accent for New, normal text for Import, muted outlines for
- * the secondary routes and file actions. */
+/* One geometry for every action in the bar. */
 .songbook-actions .pill-btn,
-.songbook-actions .link-btn,
-.songbook-utilities .link-btn {
+.songbook-actions .link-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3031,7 +3019,11 @@ body.pattern-open { overflow: hidden; }
     white-space: nowrap;
 }
 
-.songbook-utilities .link-btn { color: var(--muted); }
+.book-menu-btn {
+    font-size: 1.15rem;
+    letter-spacing: 0.04em;
+    line-height: 1;
+}
 
 /* Authoring outcomes (add summary, mode hints, errors) are announced here
  * instead of in a blocking alert. Empty when there is nothing to say. */
@@ -3048,7 +3040,7 @@ body.pattern-open { overflow: hidden; }
 .author-status.is-hint { color: var(--muted); }
 
 .songbook-label {
-    grid-area: label;
+    flex: none;
     color: var(--muted);
     font-size: 0.7rem;
     font-weight: 700;
@@ -3057,8 +3049,8 @@ body.pattern-open { overflow: hidden; }
 }
 
 .songbook-select {
-    grid-area: select;
-    width: 100%;
+    flex: 1 1 auto;
+    width: auto;
     max-width: 360px;
     min-width: 0;
     border: 1px solid var(--line);
@@ -3071,7 +3063,6 @@ body.pattern-open { overflow: hidden; }
 }
 
 .edit-book-btn {
-    grid-area: edit;
     flex: none;
     min-height: 36px;
     padding: 0 14px;
@@ -3090,11 +3081,13 @@ body.pattern-open { overflow: hidden; }
  * no file actions. The entry actions stay (they are the bar's contribution to
  * the empty state), while the rest of the library bar steps aside. */
 .songbook-bar.is-empty .songbook-picker,
-.songbook-bar.is-empty .songbook-utilities,
+.songbook-bar.is-empty .book-menu-wrap,
 .songbook-bar.is-empty #importUrlToggle { display: none; }
 
-.songbook-bar.is-empty { grid-template-areas: "actions actions"; }
-.songbook-bar.is-empty .songbook-actions { justify-content: flex-start; }
+.songbook-bar.is-empty .songbook-actions {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+}
 
 /* Edit mode is a task mode, so it gets a banner of its own rather than
  * changing the shape of the browsing bar under the cursor. The banner owns
@@ -3174,8 +3167,8 @@ body.pattern-open { overflow: hidden; }
 }
 
 .tuner-open-btn svg {
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
     flex: none;
 }
 
@@ -4318,33 +4311,44 @@ body.tuner-open { overflow: hidden; }
 @media (max-width: 640px) {
     body { font-size: 15px; }
 
-    .instrument-btn { padding: 0 10px; font-size: 0.78rem; }
+    .instrument-btn { padding: 0 8px; font-size: 0.78rem; }
+
+    /* The top bar now carries the tuner as well as the theme toggle; with 10px
+     * gaps and 36px buttons the brand name ellipsized to "Son…" on a 390px
+     * phone. Tighten the cluster so the wordmark survives. */
+    .topbar-inner { gap: 8px; }
+    .topbar-right { gap: 6px; }
+    .topbar .icon-btn { width: 32px; height: 32px; }
+    .instrument-toggle { height: 32px; }
+    /* The tuner is a labelled pill on desktop and an icon on a phone, where
+     * the wordmark needs the room. */
+    .tuner-label { display: none; }
+    .topbar-link.tuner-open-btn { width: 32px; height: 32px; padding: 0; justify-content: center; }
 
     main { padding: 16px 12px 40px; }
 
     /* The picker owns a full row: label and Edit on top, the select below.
-     * Everything else falls into two stable lines — entry actions, then the
-     * quiet file actions — instead of re-flowing around whichever buttons the
-     * current book happens to expose. */
+     * Entry actions keep a two-column grid so the row never re-flows around
+     * whichever buttons the current book happens to expose; the ⋯ menu sits
+     * in the last cell. */
     .songbook-bar {
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-areas: "picker" "actions" "utils";
         gap: 8px;
     }
 
     .songbook-picker {
-        grid-template-columns: minmax(0, 1fr) auto;
-        grid-template-areas: "label edit" "select select";
+        flex: 1 1 100%;
+        flex-wrap: wrap;
         gap: 5px 8px;
     }
 
     .songbook-select {
-        width: 100%;
+        flex: 1 1 100%;
+        order: 3;
         max-width: none;
     }
 
     .edit-book-btn {
-        justify-self: end;
+        margin-left: auto;
         min-height: 34px;
         padding: 0 12px;
         font-size: 0.8rem;
@@ -4352,18 +4356,18 @@ body.tuner-open { overflow: hidden; }
 
     .songbook-actions {
         display: grid;
+        flex: 1 1 100%;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         justify-content: flex-start;
     }
     .songbook-actions .pill-btn,
     .songbook-actions .link-btn { width: 100%; padding: 0 10px; }
-    /* With no book there are only three entry actions; keep them on one line
-     * instead of leaving the fourth grid cell empty. */
+    .songbook-actions .book-menu-wrap { justify-self: end; }
+    /* With no book there are only the entry actions; keep them on one line
+     * instead of leaving grid cells empty. */
     .songbook-bar.is-empty .songbook-actions { display: flex; }
     .songbook-bar.is-empty .songbook-actions .pill-btn,
     .songbook-bar.is-empty .songbook-actions .link-btn { width: auto; }
-
-    .songbook-utilities { justify-content: flex-start; }
 
     .edit-mode-bar { padding: 8px 10px; }
     .edit-mode-text { flex: 1 1 auto; }
@@ -4458,16 +4462,15 @@ body.tuner-open { overflow: hidden; }
         width: 100%;
     }
     .song-tools-advanced {
-        margin-top: 10px;
-        padding-top: 8px;
+        padding-top: 10px;
     }
     .song-tools-more {
-        width: 100%;
-        justify-content: center;
-        margin-left: 0;
-        margin-top: 2px;
-        min-height: 34px;
+        margin-top: 8px;
+        min-height: 36px;
     }
+    /* The checkbox carries the meaning; the "remembered" note just crowds a
+     * 390px row. */
+    .keep-hint { display: none; }
     .tool-group {
         justify-content: space-between;
         gap: 10px;
