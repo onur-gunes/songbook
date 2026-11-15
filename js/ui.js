@@ -13,13 +13,8 @@
      * (transpose, chord placement, text size, tempo) and puts layout,
      * labelling and structure controls behind one disclosure.
      * Expanded is DOM state rather than per-song state: opening it once keeps
-     * it open while moving through the book, and a reload starts collapsed
-     * unless the keep-open switch at the foot of the panel is on. Players who
-     * live in the strum/diagram/structure controls set that once instead of
-     * reopening the panel on every visit. */
+     * it open while moving through the book, and a reload starts collapsed. */
     SB.state.toolsOpen = false;
-    SB.KEEP_KEY = SB.NS + ':tools-keep';
-    SB.keepToolsOpen = SB.lsGet(SB.KEEP_KEY, false) === true;
 
     function label(el, text) {
         if (!el) return;
@@ -54,23 +49,6 @@
      * with no visible way out. */
     SB.revealSongTools = function () {
         SB.setSongToolsOpen(true);
-    };
-
-    /* ---------------- keep the optional tools open ---------------- */
-
-    function syncKeep() {
-        var box = SB.$('songToolsKeep');
-        if (box) box.checked = !!SB.keepToolsOpen;
-    }
-
-    /* A preference, not a mode: turning it on reveals the panel now and on
-     * every later visit; turning it off leaves the panel where it is, so the
-     * song in front of the player does not change under the pointer. */
-    SB.setKeepToolsOpen = function (on) {
-        SB.keepToolsOpen = !!on;
-        SB.lsSet(SB.KEEP_KEY, SB.keepToolsOpen);
-        syncKeep();
-        if (SB.keepToolsOpen) SB.setSongToolsOpen(true);
     };
 
     /* ---------------- popover menu ---------------- */
@@ -160,12 +138,6 @@
         var more = SB.$('songToolsMoreBtn');
         if (more) more.addEventListener('click', SB.toggleSongTools);
 
-        var keep = SB.$('songToolsKeep');
-        if (keep) {
-            syncKeep();
-            keep.addEventListener('change', function () { SB.setKeepToolsOpen(keep.checked); });
-        }
-
         bindMenu('bookMenuBtn', 'bookMenu');
 
         document.addEventListener('pointerdown', function (e) {
@@ -184,7 +156,7 @@
         window.addEventListener('hashchange', function () { close(); });
 
         var panel = SB.$('songToolsAdvanced');
-        if (panel) SB.setSongToolsOpen(SB.keepToolsOpen || !panel.hidden);
+        if (panel) SB.setSongToolsOpen(!panel.hidden);
     };
 
 })(window.SB = window.SB || {});
