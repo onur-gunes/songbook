@@ -1378,50 +1378,16 @@ main {
 }
 
 .song-tools-more-chevron {
-    font-size: 0.9rem;
-    line-height: 1;
-    transition: transform 0.15s ease;
+    width: 14px;
+    height: 14px;
+    flex: none;
+    display: block;
+    transform-origin: 50% 50%;
+    transition: transform 0.18s ease;
 }
 
 .song-tools-more[aria-expanded="true"] .song-tools-more-chevron {
     transform: rotate(180deg);
-}
-
-/* A quiet preference at the foot of the optional layer, not a seventh control
- * group: it owns the whole row so it never joins the wrap, and reads as a note
- * (small, muted, no button chrome) because it changes a default rather than a
- * song. The checkbox is native so Space and screen readers work normally. */
-.song-tools-keep {
-    flex: 1 1 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid var(--line);
-    color: var(--muted);
-    font-size: 0.75rem;
-}
-
-.keep-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-}
-
-.song-tools-keep input {
-    width: 15px;
-    height: 15px;
-    margin: 0;
-    flex: none;
-    accent-color: var(--accent);
-    cursor: pointer;
-}
-
-.keep-hint {
-    color: color-mix(in srgb, var(--muted) 75%, transparent);
 }
 
 .tool-group {
@@ -1440,6 +1406,14 @@ main {
     align-items: center;
     gap: 8px;
     min-width: 0;
+}
+
+/* Strum has more controls than any other group, so it is wrapped in two
+ * lines that the phone layout can stack deliberately. On desktop the wrappers
+ * are layout-transparent and the controls stay in one row with the others. */
+.strum-pattern-line,
+.strum-view-line {
+    display: contents;
 }
 
 .stepper {
@@ -4475,15 +4449,21 @@ body.tuner-open { overflow: hidden; }
         width: 100%;
     }
     .song-tools-advanced {
-        padding-top: 10px;
+        gap: 0;
+        padding-top: 8px;
+    }
+    /* The optional layer is a list: each group owns a row, and a rule keeps
+     * Strum / Diagram / Labels / Structure apart instead of reading as one
+     * cloud of controls. */
+    .song-tools-advanced > * + * {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--line);
     }
     .song-tools-more {
         margin-top: 8px;
         min-height: 36px;
     }
-    /* The checkbox carries the meaning; the "remembered" note just crowds a
-     * 390px row. */
-    .keep-hint { display: none; }
     .tool-group {
         justify-content: space-between;
         gap: 10px;
@@ -4509,7 +4489,7 @@ body.tuner-open { overflow: hidden; }
     /* The one control that can genuinely run out of room: a pattern name
      * ("D DU UDU") beside a five-segment stepper. Let it take what is left of
      * the row and ellipsize rather than widening the panel. */
-    .strum-select-wrap { min-width: 0; flex: 0 1 auto; }
+    .strum-select-wrap { min-width: 0; flex: 1 1 auto; }
     .strum-select {
         min-width: 0;
         width: 100%;
@@ -4517,9 +4497,34 @@ body.tuner-open { overflow: hidden; }
         font-size: 0.75rem;
         text-overflow: ellipsis;
     }
+    /* Strum has the most controls, so give it two deliberate rows instead of
+     * letting flex-wrap scatter them: pattern + editor on the first, then the
+     * view stepper beside Sections. */
     #strumGroup .tool-controls {
-        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: stretch;
+        flex-wrap: nowrap;
         row-gap: 6px;
+    }
+    .strum-pattern-line,
+    .strum-view-line {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    /* Strum owns two rows, so pin its label to the first one instead of
+     * letting it float halfway down the group. */
+    #strumGroup { align-items: flex-start; }
+    #strumGroup .tool-label { padding-top: 10px; }
+    .strum-view-line {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        row-gap: 6px;
+    }
+    .strum-view-line .stepper {
+        flex: 0 1 auto;
+        min-width: 0;
+        margin-right: auto;
     }
     .strum-sections-btn {
         flex: 0 1 auto;
@@ -4588,8 +4593,43 @@ body.tuner-open { overflow: hidden; }
 
 /* ===== Step 6: structure editing ===== */
 
+/* Structure's Edit is a real control, not a bare word: a bordered pill gives it
+ * the same weight as the strum and pin buttons beside it, and its pressed
+ * state is legible at a glance. Reset shares the shell so the pair reads as
+ * one action group. */
+.edit-toggle,
+.reset-btn {
+    height: 36px;
+    padding: 0 14px;
+    gap: 6px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.edit-toggle:hover,
+.edit-toggle:focus-visible,
+.reset-btn:hover,
+.reset-btn:focus-visible {
+    border-color: var(--accent);
+}
+
+.edit-toggle-icon {
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
 /* Edit toggle: pressed state when edit mode is on. */
-.edit-toggle.active { background: var(--accent); color: var(--surface); }
+.edit-toggle.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--surface);
+}
 
 .structure-open { overflow: hidden; }
 
@@ -5031,37 +5071,45 @@ button.structure-close,
                     aria-expanded="false" aria-controls="songToolsAdvanced"
                     title="Show strum, diagram, labels and structure controls">
                 <span class="song-tools-more-label">More controls</span>
-                <span class="song-tools-more-chevron" aria-hidden="true">⌄</span>
+                <svg class="song-tools-more-chevron" viewBox="0 0 16 16" width="14" height="14"
+                     fill="none" stroke="currentColor" stroke-width="1.75"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4 6.25 8 10.25l4-4"></path>
+                </svg>
             </button>
             <div id="songToolsAdvanced" class="song-tools-advanced" hidden>
                 <div id="strumGroup" class="tool-group" role="group" aria-label="Strum pattern" hidden>
                     <span class="tool-label">Strum</span>
-                    <div class="tool-controls">
-                        <label class="strum-select-wrap">
-                            <span class="sr-only">Strum pattern</span>
-                            <select id="strumSelect" class="strum-select" aria-label="Strum pattern"></select>
-                        </label>
-                        <button id="strumEditBtn" class="step-btn strum-edit-btn" type="button"
-                                aria-haspopup="dialog" aria-label="Edit custom strum patterns"
-                                title="Custom strum patterns">✎</button>
-                        <div class="stepper">
-                            <button id="strumNotationBtn" class="step-btn strum-notation-btn" type="button"
-                                    aria-label="Showing arrows — click for D/U letters"
-                                    title="Showing arrows — click for D/U letters">↓↑</button>
-                            <span class="step-divider" role="separator"></span>
-                            <button id="strumSizeDown" class="step-btn" type="button" aria-label="Smaller strum row">−</button>
-                            <span id="strumSizeValue" class="step-value" aria-live="polite">100%</span>
-                            <button id="strumSizeUp" class="step-btn" type="button" aria-label="Bigger strum row">+</button>
-                            <span class="step-divider" role="separator"></span>
-                            <button id="strumPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
+                    <div class="tool-controls strum-controls">
+                        <div class="strum-pattern-line">
+                            <label class="strum-select-wrap">
+                                <span class="sr-only">Strum pattern</span>
+                                <select id="strumSelect" class="strum-select" aria-label="Strum pattern"></select>
+                            </label>
+                            <button id="strumEditBtn" class="step-btn strum-edit-btn" type="button"
+                                    aria-haspopup="dialog" aria-label="Edit custom strum patterns"
+                                    title="Custom strum patterns">✎</button>
                         </div>
-                        <button id="strumSectionsBtn" class="step-btn strum-sections-btn" type="button"
-                                aria-expanded="false" aria-controls="strumSections"
-                                aria-label="Show per-section strum patterns"
-                                title="Show per-section strum patterns">
-                            <span class="strum-sections-chevron" aria-hidden="true">▸</span>
-                            <span id="strumSectionsSummary" class="strum-sections-summary">Sections</span>
-                        </button>
+                        <div class="strum-view-line">
+                            <div class="stepper">
+                                <button id="strumNotationBtn" class="step-btn strum-notation-btn" type="button"
+                                        aria-label="Showing arrows — click for D/U letters"
+                                        title="Showing arrows — click for D/U letters">↓↑</button>
+                                <span class="step-divider" role="separator"></span>
+                                <button id="strumSizeDown" class="step-btn" type="button" aria-label="Smaller strum row">−</button>
+                                <span id="strumSizeValue" class="step-value" aria-live="polite">100%</span>
+                                <button id="strumSizeUp" class="step-btn" type="button" aria-label="Bigger strum row">+</button>
+                                <span class="step-divider" role="separator"></span>
+                                <button id="strumPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
+                            </div>
+                            <button id="strumSectionsBtn" class="step-btn strum-sections-btn" type="button"
+                                    aria-expanded="false" aria-controls="strumSections"
+                                    aria-label="Show per-section strum patterns"
+                                    title="Show per-section strum patterns">
+                                <span class="strum-sections-chevron" aria-hidden="true">▸</span>
+                                <span id="strumSectionsSummary" class="strum-sections-summary">Sections</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div id="strumSections" class="strum-sections" role="group"
@@ -5098,19 +5146,15 @@ button.structure-close,
                     <div class="tool-controls">
                         <button id="editBtn" class="step-btn edit-toggle" type="button"
                                 aria-pressed="false" aria-label="Turn structure editing on or off"
-                                title="Edit chords, bars, beats and metre">Edit</button>
+                                title="Edit chords, bars, beats and metre">
+                            <span class="edit-toggle-icon" aria-hidden="true">✎</span>
+                            <span id="editBtnLabel">Edit</span>
+                        </button>
                         <button id="resetBtn" class="step-btn reset-btn" type="button"
                                 disabled hidden
                                 aria-label="Reset this song to its songbook version"
                                 title="Reset this song to its songbook version">↺ Reset</button>
                     </div>
-                </div>
-                <div class="song-tools-keep">
-                    <label class="keep-label" for="songToolsKeep">
-                        <input type="checkbox" id="songToolsKeep">
-                        <span>Keep these open on every song</span>
-                    </label>
-                    <span class="keep-hint" aria-hidden="true">Remembered on this device</span>
                 </div>
             </div>
         </div>
@@ -7906,13 +7950,8 @@ button.structure-close,
      * (transpose, chord placement, text size, tempo) and puts layout,
      * labelling and structure controls behind one disclosure.
      * Expanded is DOM state rather than per-song state: opening it once keeps
-     * it open while moving through the book, and a reload starts collapsed
-     * unless the keep-open switch at the foot of the panel is on. Players who
-     * live in the strum/diagram/structure controls set that once instead of
-     * reopening the panel on every visit. */
+     * it open while moving through the book, and a reload starts collapsed. */
     SB.state.toolsOpen = false;
-    SB.KEEP_KEY = SB.NS + ':tools-keep';
-    SB.keepToolsOpen = SB.lsGet(SB.KEEP_KEY, false) === true;
 
     function label(el, text) {
         if (!el) return;
@@ -7947,23 +7986,6 @@ button.structure-close,
      * with no visible way out. */
     SB.revealSongTools = function () {
         SB.setSongToolsOpen(true);
-    };
-
-    /* ---------------- keep the optional tools open ---------------- */
-
-    function syncKeep() {
-        var box = SB.$('songToolsKeep');
-        if (box) box.checked = !!SB.keepToolsOpen;
-    }
-
-    /* A preference, not a mode: turning it on reveals the panel now and on
-     * every later visit; turning it off leaves the panel where it is, so the
-     * song in front of the player does not change under the pointer. */
-    SB.setKeepToolsOpen = function (on) {
-        SB.keepToolsOpen = !!on;
-        SB.lsSet(SB.KEEP_KEY, SB.keepToolsOpen);
-        syncKeep();
-        if (SB.keepToolsOpen) SB.setSongToolsOpen(true);
     };
 
     /* ---------------- popover menu ---------------- */
@@ -8053,12 +8075,6 @@ button.structure-close,
         var more = SB.$('songToolsMoreBtn');
         if (more) more.addEventListener('click', SB.toggleSongTools);
 
-        var keep = SB.$('songToolsKeep');
-        if (keep) {
-            syncKeep();
-            keep.addEventListener('change', function () { SB.setKeepToolsOpen(keep.checked); });
-        }
-
         bindMenu('bookMenuBtn', 'bookMenu');
 
         document.addEventListener('pointerdown', function (e) {
@@ -8077,7 +8093,7 @@ button.structure-close,
         window.addEventListener('hashchange', function () { close(); });
 
         var panel = SB.$('songToolsAdvanced');
-        if (panel) SB.setSongToolsOpen(SB.keepToolsOpen || !panel.hidden);
+        if (panel) SB.setSongToolsOpen(!panel.hidden);
     };
 
 })(window.SB = window.SB || {});
@@ -18287,10 +18303,11 @@ button.structure-close,
         if (editBtn) {
             editBtn.setAttribute('aria-pressed', SB.state.editMode ? 'true' : 'false');
             editBtn.classList.toggle('active', SB.state.editMode);
-            editBtn.textContent = SB.state.editMode ? 'Edit ▸' : 'Edit';
+            var editLabel = SB.$('editBtnLabel');
+            if (editLabel) editLabel.textContent = SB.state.editMode ? 'Done' : 'Edit';
             editBtn.title = SB.state.editMode
-                ? 'Structure editing is on — open the panel above to change chords, bars and metre'
-                : 'Structure editing is off — structure is read-only in play mode';
+                ? 'Finish editing — return the sheet to play mode'
+                : 'Edit chords, bars, beats and metre';
         }
         if (resetBtn) {
             var hasEdits = SB.editHasChanges();
@@ -18643,8 +18660,6 @@ button.structure-close,
         getInstrument: function () { return SB.state.instrument; },
         setSongToolsOpen: function (on) { if (SB.setSongToolsOpen) SB.setSongToolsOpen(on); },
         isSongToolsOpen: function () { return !!(SB.state && SB.state.toolsOpen); },
-        setKeepToolsOpen: function (on) { if (SB.setKeepToolsOpen) SB.setKeepToolsOpen(on); },
-        isKeepToolsOpen: function () { return !!SB.keepToolsOpen; },
         getChordMode: function () { return SB.state.chordMode; },
         isGridMode: SB.isGridMode,
         setChordMode: SB.setChordMode,

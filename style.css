@@ -1365,50 +1365,16 @@ main {
 }
 
 .song-tools-more-chevron {
-    font-size: 0.9rem;
-    line-height: 1;
-    transition: transform 0.15s ease;
+    width: 14px;
+    height: 14px;
+    flex: none;
+    display: block;
+    transform-origin: 50% 50%;
+    transition: transform 0.18s ease;
 }
 
 .song-tools-more[aria-expanded="true"] .song-tools-more-chevron {
     transform: rotate(180deg);
-}
-
-/* A quiet preference at the foot of the optional layer, not a seventh control
- * group: it owns the whole row so it never joins the wrap, and reads as a note
- * (small, muted, no button chrome) because it changes a default rather than a
- * song. The checkbox is native so Space and screen readers work normally. */
-.song-tools-keep {
-    flex: 1 1 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid var(--line);
-    color: var(--muted);
-    font-size: 0.75rem;
-}
-
-.keep-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-}
-
-.song-tools-keep input {
-    width: 15px;
-    height: 15px;
-    margin: 0;
-    flex: none;
-    accent-color: var(--accent);
-    cursor: pointer;
-}
-
-.keep-hint {
-    color: color-mix(in srgb, var(--muted) 75%, transparent);
 }
 
 .tool-group {
@@ -1427,6 +1393,14 @@ main {
     align-items: center;
     gap: 8px;
     min-width: 0;
+}
+
+/* Strum has more controls than any other group, so it is wrapped in two
+ * lines that the phone layout can stack deliberately. On desktop the wrappers
+ * are layout-transparent and the controls stay in one row with the others. */
+.strum-pattern-line,
+.strum-view-line {
+    display: contents;
 }
 
 .stepper {
@@ -4462,15 +4436,21 @@ body.tuner-open { overflow: hidden; }
         width: 100%;
     }
     .song-tools-advanced {
-        padding-top: 10px;
+        gap: 0;
+        padding-top: 8px;
+    }
+    /* The optional layer is a list: each group owns a row, and a rule keeps
+     * Strum / Diagram / Labels / Structure apart instead of reading as one
+     * cloud of controls. */
+    .song-tools-advanced > * + * {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--line);
     }
     .song-tools-more {
         margin-top: 8px;
         min-height: 36px;
     }
-    /* The checkbox carries the meaning; the "remembered" note just crowds a
-     * 390px row. */
-    .keep-hint { display: none; }
     .tool-group {
         justify-content: space-between;
         gap: 10px;
@@ -4496,7 +4476,7 @@ body.tuner-open { overflow: hidden; }
     /* The one control that can genuinely run out of room: a pattern name
      * ("D DU UDU") beside a five-segment stepper. Let it take what is left of
      * the row and ellipsize rather than widening the panel. */
-    .strum-select-wrap { min-width: 0; flex: 0 1 auto; }
+    .strum-select-wrap { min-width: 0; flex: 1 1 auto; }
     .strum-select {
         min-width: 0;
         width: 100%;
@@ -4504,9 +4484,34 @@ body.tuner-open { overflow: hidden; }
         font-size: 0.75rem;
         text-overflow: ellipsis;
     }
+    /* Strum has the most controls, so give it two deliberate rows instead of
+     * letting flex-wrap scatter them: pattern + editor on the first, then the
+     * view stepper beside Sections. */
     #strumGroup .tool-controls {
-        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: stretch;
+        flex-wrap: nowrap;
         row-gap: 6px;
+    }
+    .strum-pattern-line,
+    .strum-view-line {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    /* Strum owns two rows, so pin its label to the first one instead of
+     * letting it float halfway down the group. */
+    #strumGroup { align-items: flex-start; }
+    #strumGroup .tool-label { padding-top: 10px; }
+    .strum-view-line {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        row-gap: 6px;
+    }
+    .strum-view-line .stepper {
+        flex: 0 1 auto;
+        min-width: 0;
+        margin-right: auto;
     }
     .strum-sections-btn {
         flex: 0 1 auto;
@@ -4575,8 +4580,43 @@ body.tuner-open { overflow: hidden; }
 
 /* ===== Step 6: structure editing ===== */
 
+/* Structure's Edit is a real control, not a bare word: a bordered pill gives it
+ * the same weight as the strum and pin buttons beside it, and its pressed
+ * state is legible at a glance. Reset shares the shell so the pair reads as
+ * one action group. */
+.edit-toggle,
+.reset-btn {
+    height: 36px;
+    padding: 0 14px;
+    gap: 6px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.edit-toggle:hover,
+.edit-toggle:focus-visible,
+.reset-btn:hover,
+.reset-btn:focus-visible {
+    border-color: var(--accent);
+}
+
+.edit-toggle-icon {
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
 /* Edit toggle: pressed state when edit mode is on. */
-.edit-toggle.active { background: var(--accent); color: var(--surface); }
+.edit-toggle.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--surface);
+}
 
 .structure-open { overflow: hidden; }
 

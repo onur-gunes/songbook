@@ -75,21 +75,20 @@ def main():
         ok('More controls collapses again',
            cdp.eval("document.getElementById('songToolsAdvanced').hidden") is True)
 
-        # The panel foot carries the one preference it needs: a switch that
-        # keeps the optional tools open on every song. Off by default, and
-        # turning it on reveals the panel immediately.
-        ok('keep-open switch is off by default',
-           cdp.eval("document.getElementById('songToolsKeep').checked") is False)
-        cdp.eval("document.getElementById('songToolsKeep').click()")
-        ok('keep-open switch remembers the choice',
-           cdp.eval("document.getElementById('songToolsKeep').checked") is True
-           and cdp.eval("window.localStorage.getItem('songbook:tools-keep')") == 'true'
-           and cdp.eval("document.getElementById('songToolsAdvanced').hidden") is False)
-        cdp.eval("document.getElementById('songToolsKeep').click()")
-        ok('turning keep-open off does not collapse the panel',
-           cdp.eval("document.getElementById('songToolsKeep').checked") is False
-           and cdp.eval("window.localStorage.getItem('songbook:tools-keep')") == 'false'
-           and cdp.eval("document.getElementById('songToolsAdvanced').hidden") is False)
+        # Expanded is DOM state, not a saved preference: it stays open while
+        # moving through the book, and there is no keep-open switch to set.
+        cdp.eval("document.getElementById('songToolsMoreBtn').click()")
+        cdp.eval("location.hash = '#/krakow-ukulele/three-quarter-time'")
+        cdp.wait_js("document.getElementById('songTitle').textContent === 'Three Quarter Time'",
+                    timeout=10)
+        ok('open disclosure survives a song change',
+           cdp.eval("document.getElementById('songToolsAdvanced').hidden") is False
+           and cdp.eval("document.getElementById('songToolsMoreBtn').getAttribute('aria-expanded')") == 'true')
+        ok('no keep-open switch',
+           cdp.eval("document.getElementById('songToolsKeep') === null") is True)
+        cdp.eval("location.hash = '#/krakow-ukulele/harbour-lights'")
+        cdp.wait_js("document.getElementById('songTitle').textContent === 'Harbour Lights'",
+                    timeout=10)
         cdp.eval("document.getElementById('songToolsMoreBtn').click()")
 
         cdp.eval("document.getElementById('trUp').click()")

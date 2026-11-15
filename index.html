@@ -273,37 +273,45 @@
                     aria-expanded="false" aria-controls="songToolsAdvanced"
                     title="Show strum, diagram, labels and structure controls">
                 <span class="song-tools-more-label">More controls</span>
-                <span class="song-tools-more-chevron" aria-hidden="true">⌄</span>
+                <svg class="song-tools-more-chevron" viewBox="0 0 16 16" width="14" height="14"
+                     fill="none" stroke="currentColor" stroke-width="1.75"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4 6.25 8 10.25l4-4"></path>
+                </svg>
             </button>
             <div id="songToolsAdvanced" class="song-tools-advanced" hidden>
                 <div id="strumGroup" class="tool-group" role="group" aria-label="Strum pattern" hidden>
                     <span class="tool-label">Strum</span>
-                    <div class="tool-controls">
-                        <label class="strum-select-wrap">
-                            <span class="sr-only">Strum pattern</span>
-                            <select id="strumSelect" class="strum-select" aria-label="Strum pattern"></select>
-                        </label>
-                        <button id="strumEditBtn" class="step-btn strum-edit-btn" type="button"
-                                aria-haspopup="dialog" aria-label="Edit custom strum patterns"
-                                title="Custom strum patterns">✎</button>
-                        <div class="stepper">
-                            <button id="strumNotationBtn" class="step-btn strum-notation-btn" type="button"
-                                    aria-label="Showing arrows — click for D/U letters"
-                                    title="Showing arrows — click for D/U letters">↓↑</button>
-                            <span class="step-divider" role="separator"></span>
-                            <button id="strumSizeDown" class="step-btn" type="button" aria-label="Smaller strum row">−</button>
-                            <span id="strumSizeValue" class="step-value" aria-live="polite">100%</span>
-                            <button id="strumSizeUp" class="step-btn" type="button" aria-label="Bigger strum row">+</button>
-                            <span class="step-divider" role="separator"></span>
-                            <button id="strumPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
+                    <div class="tool-controls strum-controls">
+                        <div class="strum-pattern-line">
+                            <label class="strum-select-wrap">
+                                <span class="sr-only">Strum pattern</span>
+                                <select id="strumSelect" class="strum-select" aria-label="Strum pattern"></select>
+                            </label>
+                            <button id="strumEditBtn" class="step-btn strum-edit-btn" type="button"
+                                    aria-haspopup="dialog" aria-label="Edit custom strum patterns"
+                                    title="Custom strum patterns">✎</button>
                         </div>
-                        <button id="strumSectionsBtn" class="step-btn strum-sections-btn" type="button"
-                                aria-expanded="false" aria-controls="strumSections"
-                                aria-label="Show per-section strum patterns"
-                                title="Show per-section strum patterns">
-                            <span class="strum-sections-chevron" aria-hidden="true">▸</span>
-                            <span id="strumSectionsSummary" class="strum-sections-summary">Sections</span>
-                        </button>
+                        <div class="strum-view-line">
+                            <div class="stepper">
+                                <button id="strumNotationBtn" class="step-btn strum-notation-btn" type="button"
+                                        aria-label="Showing arrows — click for D/U letters"
+                                        title="Showing arrows — click for D/U letters">↓↑</button>
+                                <span class="step-divider" role="separator"></span>
+                                <button id="strumSizeDown" class="step-btn" type="button" aria-label="Smaller strum row">−</button>
+                                <span id="strumSizeValue" class="step-value" aria-live="polite">100%</span>
+                                <button id="strumSizeUp" class="step-btn" type="button" aria-label="Bigger strum row">+</button>
+                                <span class="step-divider" role="separator"></span>
+                                <button id="strumPinBtn" class="step-btn pin-seg" type="button" aria-pressed="true">📌</button>
+                            </div>
+                            <button id="strumSectionsBtn" class="step-btn strum-sections-btn" type="button"
+                                    aria-expanded="false" aria-controls="strumSections"
+                                    aria-label="Show per-section strum patterns"
+                                    title="Show per-section strum patterns">
+                                <span class="strum-sections-chevron" aria-hidden="true">▸</span>
+                                <span id="strumSectionsSummary" class="strum-sections-summary">Sections</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div id="strumSections" class="strum-sections" role="group"
@@ -340,19 +348,15 @@
                     <div class="tool-controls">
                         <button id="editBtn" class="step-btn edit-toggle" type="button"
                                 aria-pressed="false" aria-label="Turn structure editing on or off"
-                                title="Edit chords, bars, beats and metre">Edit</button>
+                                title="Edit chords, bars, beats and metre">
+                            <span class="edit-toggle-icon" aria-hidden="true">✎</span>
+                            <span id="editBtnLabel">Edit</span>
+                        </button>
                         <button id="resetBtn" class="step-btn reset-btn" type="button"
                                 disabled hidden
                                 aria-label="Reset this song to its songbook version"
                                 title="Reset this song to its songbook version">↺ Reset</button>
                     </div>
-                </div>
-                <div class="song-tools-keep">
-                    <label class="keep-label" for="songToolsKeep">
-                        <input type="checkbox" id="songToolsKeep">
-                        <span>Keep these open on every song</span>
-                    </label>
-                    <span class="keep-hint" aria-hidden="true">Remembered on this device</span>
                 </div>
             </div>
         </div>

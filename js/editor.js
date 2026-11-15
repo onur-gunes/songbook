@@ -511,10 +511,11 @@
         if (editBtn) {
             editBtn.setAttribute('aria-pressed', SB.state.editMode ? 'true' : 'false');
             editBtn.classList.toggle('active', SB.state.editMode);
-            editBtn.textContent = SB.state.editMode ? 'Edit ▸' : 'Edit';
+            var editLabel = SB.$('editBtnLabel');
+            if (editLabel) editLabel.textContent = SB.state.editMode ? 'Done' : 'Edit';
             editBtn.title = SB.state.editMode
-                ? 'Structure editing is on — open the panel above to change chords, bars and metre'
-                : 'Structure editing is off — structure is read-only in play mode';
+                ? 'Finish editing — return the sheet to play mode'
+                : 'Edit chords, bars, beats and metre';
         }
         if (resetBtn) {
             var hasEdits = SB.editHasChanges();
