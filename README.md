@@ -138,10 +138,8 @@ attached to `SB`.
   and **Structure** without re-flowing the basic row. Diagram −/+ scales the
   chord strip (60%–150%, persisted) and a 📌 Pinned / 📍 Scrolls toggle
   un-sticks it. The disclosure is shared across songs: open it once and it
-  stays open while you move through the book, and a reload starts folded
-  unless **Keep these open on every song** (at the foot of the panel, stored
-  per device) is checked. The **Tuner** and the dark-mode toggle sit in the
-  top bar.
+  stays open while you move through the book; a reload starts folded. The
+  **Tuner** and the dark-mode toggle sit in the top bar.
 - Transpose −/+/0 (sharp spelling, slash basses and strum strokes preserved,
   non-chord tokens like `stop`/`NC`/riff tabs untouched; strip names and diagrams
   transpose too).

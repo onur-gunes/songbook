@@ -160,8 +160,6 @@
         getInstrument: function () { return SB.state.instrument; },
         setSongToolsOpen: function (on) { if (SB.setSongToolsOpen) SB.setSongToolsOpen(on); },
         isSongToolsOpen: function () { return !!(SB.state && SB.state.toolsOpen); },
-        setKeepToolsOpen: function (on) { if (SB.setKeepToolsOpen) SB.setKeepToolsOpen(on); },
-        isKeepToolsOpen: function () { return !!SB.keepToolsOpen; },
         getChordMode: function () { return SB.state.chordMode; },
         isGridMode: SB.isGridMode,
         setChordMode: SB.setChordMode,

@@ -1532,10 +1532,10 @@ async function main() {
 
     // 20c. the song-tools disclosure is the only switch for the optional
     // controls: strum editing, diagram size, scale degrees and structure
-    // editing stay folded on load and open on demand. The one preference it
-    // needs lives at the foot of the panel (keep these open on every song).
-    // Earlier steps can leave it open (structure editing reveals it), so start
-    // from known folded state rather than assuming a fresh song.
+    // editing stay folded on load and open on demand. It is DOM state, so it
+    // stays open while moving through the book. Earlier steps can leave it
+    // open (structure editing reveals it), so start from known folded state
+    // rather than assuming a fresh song.
     win().songbookTest.setSongToolsOpen(false);
     await wait(30);
     ok('the optional tools start folded', $('songToolsAdvanced').hidden === true);
@@ -1546,33 +1546,15 @@ async function main() {
         win().songbookTest.isSongToolsOpen() === true);
     ok('the open disclosure exposes the strum editor', $('strumEditBtn').offsetParent !== null);
 
-    // The panel foot carries the one preference it needs: keep the optional
-    // tools open on every song. Verify it writes through, and that a fresh
-    // document (same origin, same storage) starts with the panel already open.
-    const keepBox = $('songToolsKeep');
-    ok('the panel offers a keep-open switch', !!keepBox && keepBox.checked === false);
-    keepBox.click(); await wait(50);
-    ok('keep open is remembered',
-        win().songbookTest.isKeepToolsOpen() === true &&
-        win().localStorage.getItem('songbook:tools-keep') === 'true');
-    ok('turning keep open reveals the panel', $('songToolsAdvanced').hidden === false);
-
-    const probe = document.createElement('iframe');
-    probe.src = '../index.html?nosw';
-    probe.style.cssText = 'width:1000px;height:800px;border:0';
-    document.body.appendChild(probe);
-    const probeOpen = await until(() => {
-        const w = probe.contentWindow;
-        return !!(w && w.SB && w.SB.state && w.SB.state.toolsOpen === true);
-    }, 15000);
-    ok('a fresh document reopens the optional tools', probeOpen);
-    probe.remove();
-
-    keepBox.click(); await wait(50);
-    ok('turning keep open off is remembered',
-        win().songbookTest.isKeepToolsOpen() === false &&
-        win().localStorage.getItem('songbook:tools-keep') === 'false');
-    ok('turning keep open off leaves the panel alone', $('songToolsAdvanced').hidden === false);
+    // Expanded is DOM state rather than a saved preference: it stays open
+    // while moving through the book, and a reload starts folded.
+    win().location.hash = '#/polska-gurom/baranek';
+    await wait(300);
+    ok('the open disclosure survives a song change',
+        $('songToolsAdvanced').hidden === false &&
+        win().songbookTest.isSongToolsOpen() === true);
+    win().location.hash = '#/polska-gurom/arahja';
+    await wait(300);
 
     // 20d. custom strum pattern editor (issue #106)
     const planKey = 'songbook:plan:polska-gurom\u0000arahja';
