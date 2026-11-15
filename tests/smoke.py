@@ -57,18 +57,40 @@ def main():
         ok('capo shown', cdp.eval("document.getElementById('capoValue').textContent") == 'Capo 1',
            cdp.eval("document.getElementById('capoValue').textContent"))
 
-        # Song tools: layout, practice and structure controls sit behind one
-        # disclosure, so the basic reading row does not grow with every song.
+        # Song tools: everyday controls (transpose, chords, text, tempo) stay
+        # visible; layout, labels and structure controls sit behind one
+        # disclosure so the basic row does not grow with every song.
         ok('advanced song controls start collapsed',
            cdp.eval("document.getElementById('songToolsAdvanced').hidden") is True)
+        ok('tempo stays in the basic row',
+           cdp.eval("document.getElementById('metronomeGroup').hidden") is False
+           and cdp.eval("document.getElementById('metronomeGroup').closest('.song-tools-basic') !== null"))
         cdp.eval("document.getElementById('songToolsMoreBtn').click()")
-        ok('More controls reveals tempo, strum, diagram and structure',
+        ok('More controls reveals strum, diagram, labels and structure',
            cdp.eval("document.getElementById('songToolsAdvanced').hidden") is False
            and cdp.eval("document.getElementById('songToolsMoreBtn').getAttribute('aria-expanded')") == 'true'
-           and cdp.eval("document.getElementById('metronomeGroup').hidden") is False)
+           and cdp.eval("document.getElementById('strumGroup').hidden") is False
+           and cdp.eval("document.getElementById('numbersBtn').closest('#songToolsAdvanced') !== null"))
         cdp.eval("document.getElementById('songToolsMoreBtn').click()")
         ok('More controls collapses again',
            cdp.eval("document.getElementById('songToolsAdvanced').hidden") is True)
+
+        # The panel foot carries the one preference it needs: a switch that
+        # keeps the optional tools open on every song. Off by default, and
+        # turning it on reveals the panel immediately.
+        ok('keep-open switch is off by default',
+           cdp.eval("document.getElementById('songToolsKeep').checked") is False)
+        cdp.eval("document.getElementById('songToolsKeep').click()")
+        ok('keep-open switch remembers the choice',
+           cdp.eval("document.getElementById('songToolsKeep').checked") is True
+           and cdp.eval("window.localStorage.getItem('songbook:tools-keep')") == 'true'
+           and cdp.eval("document.getElementById('songToolsAdvanced').hidden") is False)
+        cdp.eval("document.getElementById('songToolsKeep').click()")
+        ok('turning keep-open off does not collapse the panel',
+           cdp.eval("document.getElementById('songToolsKeep').checked") is False
+           and cdp.eval("window.localStorage.getItem('songbook:tools-keep')") == 'false'
+           and cdp.eval("document.getElementById('songToolsAdvanced').hidden") is False)
+        cdp.eval("document.getElementById('songToolsMoreBtn').click()")
 
         cdp.eval("document.getElementById('trUp').click()")
         time.sleep(0.1)

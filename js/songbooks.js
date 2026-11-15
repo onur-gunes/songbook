@@ -583,8 +583,8 @@
          * rule); this call covers routes that never render the list. */
         if (SB.syncAuthoringBar) SB.syncAuthoringBar();
         if (SB.setAuthorStatus) SB.setAuthorStatus('');
-        /* Refresh is URL-import maintenance, not song authoring, and stays in
-         * the bar next to Export. */
+        /* Refresh is URL-import maintenance, not song authoring, and lives in
+         * the songbook overflow menu next to Export. */
         var rf = SB.$('refreshSongsBtn');
         if (rf) rf.hidden = !(sb && sb.imported && sb.sourceUrl);
         var ex = SB.$('exportSongsBtn');
