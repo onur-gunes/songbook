@@ -104,7 +104,6 @@
      * Declared after the helpers above because several initialisers call
      * lsGet() / use NS.
      */
-    var SB = window.SB = window.SB || {};
     SB.state = {
         /* songbook store */
         bundled: [],

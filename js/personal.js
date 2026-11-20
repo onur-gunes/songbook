@@ -173,7 +173,12 @@
         };
     };
 
-    function knownPlanTime(value) { return value && PLAN_TIMES[value] ? value : null; }
+    /* The plan comes from localStorage, so the metre is untrusted: an own-key
+     * check keeps 'constructor' and friends from passing as a valid metre. */
+    function knownPlanTime(value) {
+        return (value && Object.prototype.hasOwnProperty.call(PLAN_TIMES, value))
+            ? value : null;
+    }
 
     SB.emptyPlan = emptyPlan;
     SB.PLAN_VERSION = PLAN_VERSION;

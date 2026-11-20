@@ -7793,7 +7793,6 @@ button.structure-close,
      * Declared after the helpers above because several initialisers call
      * lsGet() / use NS.
      */
-    var SB = window.SB = window.SB || {};
     SB.state = {
         /* songbook store */
         bundled: [],
@@ -8197,6 +8196,17 @@ button.structure-close,
 
     /* ---------------- songbook store ---------------- */
 
+    /* `table[key]` on an object literal also finds Object.prototype members,
+     * so an imported kind or metre of 'constructor', 'toString' or
+     * '__proto__' passes a bare truthiness check it should fail — and then
+     * yields a function where a string or a beat count is expected. Every
+     * lookup keyed by untrusted data goes through this instead. The tables
+     * stay plain literals so tests/strum.py can keep reading them as the
+     * mirror of chordpro.py's constants. */
+    function lookup(table, key) {
+        return Object.prototype.hasOwnProperty.call(table, key) ? table[key] : undefined;
+    }
+
 
     SB.activeSongs = function () { return SB.state.active ? SB.state.active.songs : []; }
     SB.allSongbooks = function () { return SB.state.bundled.concat(SB.state.imported); }
@@ -8219,7 +8229,7 @@ button.structure-close,
     SB.BPM_MIN = BPM_MIN;
     SB.BPM_MAX = BPM_MAX;
     SB.TIME_SIGNATURES = TIME_SIGNATURES;
-    SB.beatsPerBar = function (time) { return BEATS_PER_BAR[time] || null; };
+    SB.beatsPerBar = function (time) { return lookup(BEATS_PER_BAR, time) || null; };
 
     /* Imported songbooks are untrusted JSON, so an out-of-range or non-numeric
      * tempo is dropped to null rather than clamped: clamping "0" to 20 would
@@ -8262,7 +8272,7 @@ button.structure-close,
         }
         if (value === undefined || value === null) return null;
         if (!Array.isArray(value) || !value.length) return drop('grid must be a non-empty array');
-        var beatsPerBar = BEATS_PER_BAR[time];
+        var beatsPerBar = lookup(BEATS_PER_BAR, time);
         if (!beatsPerBar) return drop('song has no valid time signature'); // a grid is meaningless without a metre
         var blocks = [];
         for (var bi = 0; bi < value.length; bi++) {
@@ -8382,12 +8392,13 @@ button.structure-close,
         value.forEach(function (p) {
             if (!p || typeof p !== 'object') return;
             var id = p.id, name = p.name, time = p.time, subdiv = p.subdiv, slots = p.slots;
-            if (typeof id !== 'string' || !id || seen[id] || builtIn[id]) return;
+            if (typeof id !== 'string' || !id) return;
+            if (lookup(seen, id) || lookup(builtIn, id)) return;
             if (typeof name !== 'string' || !name.trim()) return;
             if (TIME_SIGNATURES.indexOf(time) < 0) return;
             if (typeof subdiv !== 'number' || !isFinite(subdiv) || subdiv < 1 || subdiv !== Math.floor(subdiv)) return;
             if (typeof slots !== 'string' || !slots || !/^[DU-]+$/.test(slots)) return;
-            var expected = BEATS_PER_BAR[time] * subdiv;
+            var expected = lookup(BEATS_PER_BAR, time) * subdiv;
             if (slots.length !== expected) return;
             seen[id] = true;
             out.push({ id: id, name: name.trim(), time: time, subdiv: subdiv, slots: slots });
@@ -8405,7 +8416,7 @@ button.structure-close,
     function normalizeSegment(seg) {
         if (!Array.isArray(seg) || seg.length < 2) return null;
         var kind = seg[0];
-        if (typeof kind !== 'string' || !SHEET_KINDS[kind]) return null;
+        if (typeof kind !== 'string' || !lookup(SHEET_KINDS, kind)) return null;
         var val = seg[1];
         if (val == null) return null;
         return [kind, String(val)];
@@ -9086,7 +9097,12 @@ button.structure-close,
         };
     };
 
-    function knownPlanTime(value) { return value && PLAN_TIMES[value] ? value : null; }
+    /* The plan comes from localStorage, so the metre is untrusted: an own-key
+     * check keeps 'constructor' and friends from passing as a valid metre. */
+    function knownPlanTime(value) {
+        return (value && Object.prototype.hasOwnProperty.call(PLAN_TIMES, value))
+            ? value : null;
+    }
 
     SB.emptyPlan = emptyPlan;
     SB.PLAN_VERSION = PLAN_VERSION;
@@ -9405,6 +9421,14 @@ button.structure-close,
     // handle them explicitly below.
     var SEG_CLASS = { m: 'seg-muted', b: 'seg-bold', i: 'seg-italic' };
 
+    /* A stored or hand-edited sheet can carry any string as a kind, and
+     * `SEG_CLASS[kind]` would also find Object.prototype members: 'toString'
+     * and 'constructor' return a function, which then becomes the element's
+     * class name. Resolve to a real own entry, or nothing. */
+    function segClass(kind) {
+        return Object.prototype.hasOwnProperty.call(SEG_CLASS, kind) ? SEG_CLASS[kind] : null;
+    }
+
     // Shared kind-dispatch for whole-line rendering. The inline and
     // chords-above renderers differ only in how a chord is labelled —
     // inline keeps the [brackets], above strips them — so that is the one
@@ -9418,8 +9442,8 @@ button.structure-close,
             var kind = seg[0], val = seg[1];
             if (kind === 'c') {
                 lineDiv.appendChild(SB.el('span', 'seg-chord', chordLabelFn(val)));
-            } else if (SEG_CLASS[kind]) {
-                lineDiv.appendChild(SB.el('span', SEG_CLASS[kind], val));
+            } else if (segClass(kind)) {
+                lineDiv.appendChild(SB.el('span', segClass(kind), val));
             } else if (kind === 'y') {
                 lineDiv.appendChild(SB.noteNode(val));
             } else {
@@ -9707,7 +9731,7 @@ button.structure-close,
                 // text already flattened by plainText(), so a `y` note has
                 // had its markup stripped and must stay a plain span —
                 // re-parsing a fragment of it as HTML would be wrong.
-                var cls = p.kind === 'y' ? 'seg-note' : SEG_CLASS[p.kind];
+                var cls = p.kind === 'y' ? 'seg-note' : segClass(p.kind);
                 ly.appendChild(cls ? SB.el('span', cls, txt) : document.createTextNode(txt));
             });
             unit.appendChild(ly);
@@ -15320,8 +15344,12 @@ button.structure-close,
 
     function AudioCtx() { return window.AudioContext || window.webkitAudioContext; }
 
+    /* `time` reaches here straight from song data, so guard the lookup: a
+     * metre of 'constructor' or 'toString' would otherwise resolve to a
+     * function off Object.prototype and be used as a beat count. */
     SB.metronomeBeatsPerBar = function (time) {
-        return BEATS_PER_BAR[time] || 4;
+        return (Object.prototype.hasOwnProperty.call(BEATS_PER_BAR, time)
+            ? BEATS_PER_BAR[time] : 0) || 4;
     }
 
     function clampBpm(v) {
