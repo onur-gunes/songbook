@@ -46,6 +46,14 @@
     // handle them explicitly below.
     var SEG_CLASS = { m: 'seg-muted', b: 'seg-bold', i: 'seg-italic' };
 
+    /* A stored or hand-edited sheet can carry any string as a kind, and
+     * `SEG_CLASS[kind]` would also find Object.prototype members: 'toString'
+     * and 'constructor' return a function, which then becomes the element's
+     * class name. Resolve to a real own entry, or nothing. */
+    function segClass(kind) {
+        return Object.prototype.hasOwnProperty.call(SEG_CLASS, kind) ? SEG_CLASS[kind] : null;
+    }
+
     // Shared kind-dispatch for whole-line rendering. The inline and
     // chords-above renderers differ only in how a chord is labelled —
     // inline keeps the [brackets], above strips them — so that is the one
@@ -59,8 +67,8 @@
             var kind = seg[0], val = seg[1];
             if (kind === 'c') {
                 lineDiv.appendChild(SB.el('span', 'seg-chord', chordLabelFn(val)));
-            } else if (SEG_CLASS[kind]) {
-                lineDiv.appendChild(SB.el('span', SEG_CLASS[kind], val));
+            } else if (segClass(kind)) {
+                lineDiv.appendChild(SB.el('span', segClass(kind), val));
             } else if (kind === 'y') {
                 lineDiv.appendChild(SB.noteNode(val));
             } else {
@@ -348,7 +356,7 @@
                 // text already flattened by plainText(), so a `y` note has
                 // had its markup stripped and must stay a plain span —
                 // re-parsing a fragment of it as HTML would be wrong.
-                var cls = p.kind === 'y' ? 'seg-note' : SEG_CLASS[p.kind];
+                var cls = p.kind === 'y' ? 'seg-note' : segClass(p.kind);
                 ly.appendChild(cls ? SB.el('span', cls, txt) : document.createTextNode(txt));
             });
             unit.appendChild(ly);

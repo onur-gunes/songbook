@@ -50,8 +50,12 @@
 
     function AudioCtx() { return window.AudioContext || window.webkitAudioContext; }
 
+    /* `time` reaches here straight from song data, so guard the lookup: a
+     * metre of 'constructor' or 'toString' would otherwise resolve to a
+     * function off Object.prototype and be used as a beat count. */
     SB.metronomeBeatsPerBar = function (time) {
-        return BEATS_PER_BAR[time] || 4;
+        return (Object.prototype.hasOwnProperty.call(BEATS_PER_BAR, time)
+            ? BEATS_PER_BAR[time] : 0) || 4;
     }
 
     function clampBpm(v) {
