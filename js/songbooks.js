@@ -9,6 +9,17 @@
 
     /* ---------------- songbook store ---------------- */
 
+    /* `table[key]` on an object literal also finds Object.prototype members,
+     * so an imported kind or metre of 'constructor', 'toString' or
+     * '__proto__' passes a bare truthiness check it should fail — and then
+     * yields a function where a string or a beat count is expected. Every
+     * lookup keyed by untrusted data goes through this instead. The tables
+     * stay plain literals so tests/strum.py can keep reading them as the
+     * mirror of chordpro.py's constants. */
+    function lookup(table, key) {
+        return Object.prototype.hasOwnProperty.call(table, key) ? table[key] : undefined;
+    }
+
 
     SB.activeSongs = function () { return SB.state.active ? SB.state.active.songs : []; }
     SB.allSongbooks = function () { return SB.state.bundled.concat(SB.state.imported); }
@@ -31,7 +42,7 @@
     SB.BPM_MIN = BPM_MIN;
     SB.BPM_MAX = BPM_MAX;
     SB.TIME_SIGNATURES = TIME_SIGNATURES;
-    SB.beatsPerBar = function (time) { return BEATS_PER_BAR[time] || null; };
+    SB.beatsPerBar = function (time) { return lookup(BEATS_PER_BAR, time) || null; };
 
     /* Imported songbooks are untrusted JSON, so an out-of-range or non-numeric
      * tempo is dropped to null rather than clamped: clamping "0" to 20 would
@@ -74,7 +85,7 @@
         }
         if (value === undefined || value === null) return null;
         if (!Array.isArray(value) || !value.length) return drop('grid must be a non-empty array');
-        var beatsPerBar = BEATS_PER_BAR[time];
+        var beatsPerBar = lookup(BEATS_PER_BAR, time);
         if (!beatsPerBar) return drop('song has no valid time signature'); // a grid is meaningless without a metre
         var blocks = [];
         for (var bi = 0; bi < value.length; bi++) {
@@ -194,12 +205,13 @@
         value.forEach(function (p) {
             if (!p || typeof p !== 'object') return;
             var id = p.id, name = p.name, time = p.time, subdiv = p.subdiv, slots = p.slots;
-            if (typeof id !== 'string' || !id || seen[id] || builtIn[id]) return;
+            if (typeof id !== 'string' || !id) return;
+            if (lookup(seen, id) || lookup(builtIn, id)) return;
             if (typeof name !== 'string' || !name.trim()) return;
             if (TIME_SIGNATURES.indexOf(time) < 0) return;
             if (typeof subdiv !== 'number' || !isFinite(subdiv) || subdiv < 1 || subdiv !== Math.floor(subdiv)) return;
             if (typeof slots !== 'string' || !slots || !/^[DU-]+$/.test(slots)) return;
-            var expected = BEATS_PER_BAR[time] * subdiv;
+            var expected = lookup(BEATS_PER_BAR, time) * subdiv;
             if (slots.length !== expected) return;
             seen[id] = true;
             out.push({ id: id, name: name.trim(), time: time, subdiv: subdiv, slots: slots });
@@ -217,7 +229,7 @@
     function normalizeSegment(seg) {
         if (!Array.isArray(seg) || seg.length < 2) return null;
         var kind = seg[0];
-        if (typeof kind !== 'string' || !SHEET_KINDS[kind]) return null;
+        if (typeof kind !== 'string' || !lookup(SHEET_KINDS, kind)) return null;
         var val = seg[1];
         if (val == null) return null;
         return [kind, String(val)];
