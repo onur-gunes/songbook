@@ -1232,6 +1232,13 @@ async function main() {
     ok('every metre has several patterns',
         ['4/4', '3/4', '6/8', '2/4'].every(t => win().songbookTest.strumPatternsFor(t).length >= 2),
         ['4/4', '3/4', '6/8', '2/4'].map(t => t + '=' + win().songbookTest.strumPatternsFor(t).length).join(' '));
+    const sixteenthBuiltIn = win().songbookTest.strumPatterns()
+        .filter(p => p.id === 'sixteenth-ddu-4-4')[0];
+    ok('library includes the 16th-note pattern',
+        sixteenthBuiltIn && sixteenthBuiltIn.time === '4/4' &&
+        sixteenthBuiltIn.subdiv === 4 &&
+        sixteenthBuiltIn.slots === 'D-D-D-DU-UD-DUDU',
+        JSON.stringify(sixteenthBuiltIn));
 
     // Songs without a metre use the default metre and still get a usable row.
     const defaultTime = win().songbookTest.defaultTime;
@@ -1294,6 +1301,17 @@ async function main() {
         sRow().querySelectorAll('.strum-slot').length);
     ok('row starts in the pattern phase', sRow().dataset.phase === 'pattern',
         sRow().dataset.phase);
+
+    // The built-in sixteenth pattern renders the full 16-slot grid.
+    win().songbookTest.setStrum('sixteenth-ddu-4-4');
+    await wait(30);
+    ok('16th pattern renders sixteen slots',
+        sRow().querySelectorAll('.strum-slot').length === 16,
+        sRow().querySelectorAll('.strum-slot').length);
+    ok('16th pattern uses the reference slots',
+        sState().pattern.slots === 'D-D-D-DU-UD-DUDU', sState().pattern.slots);
+    win().songbookTest.setStrum('downs-4-4');
+    await wait(30);
 
     // manual choice persists per song under the namespaced key
     win().songbookTest.setStrum('dddudu-4-4');
@@ -1708,6 +1726,53 @@ async function main() {
     ok('selection falls back after deleting the selected pattern',
         sState().pattern && sState().pattern.id !== duplicate.id,
         sState().pattern && sState().pattern.id);
+
+    // The editor can build the 16th-note pattern from the reference image:
+    // four beat groups of four slots, counted 1 e + a.
+    openEditor(); await wait(50);
+    $('patternNew').click(); await wait(30);
+    const subdivSel = $('patternSubdiv');
+    subdivSel.value = '4';
+    subdivSel.dispatchEvent(new (win().Event)('change', {bubbles: true}));
+    await wait(30);
+    ok('subdivision offers sixteenth notes',
+        Array.prototype.some.call(subdivSel.options,
+            o => o.value === '4' && /16th/.test(o.textContent)),
+        Array.prototype.map.call(subdivSel.options, o => o.textContent).join(' | '));
+    ok('sixteenth grid renders sixteen slots in four beat groups',
+        editorSlots().length === 16 &&
+        doc().querySelectorAll('#patternSlots .pattern-beat-group').length === 4,
+        editorSlots().length + ' slots / ' +
+        doc().querySelectorAll('#patternSlots .pattern-beat-group').length + ' groups');
+    ok('each beat group carries the 1 e + a count',
+        doc().querySelector('#patternSlots .pattern-beat-count').textContent === '1e+a',
+        doc().querySelector('#patternSlots .pattern-beat-count').textContent);
+
+    const targetSlots = 'D-D-D-DU-UD-DUDU';
+    const slotGlyphFor = ch => ch === '-' ? '\u00b7' : ch;
+    for (let i = 0; i < targetSlots.length; i++) {
+        for (let tries = 0; tries < 3 &&
+            editorSlots()[i].textContent !== slotGlyphFor(targetSlots[i]); tries++) {
+            editorSlots()[i].click();
+            await wait(5);
+        }
+    }
+    ok('sixteenth slots can be built from the reference pattern',
+        editorSlots().map(b => b.textContent).join('') === 'D\u00b7D\u00b7D\u00b7DU\u00b7UD\u00b7DUDU',
+        editorSlots().map(b => b.textContent).join(''));
+    $('patternName').value = 'Sixteenth reference';
+    $('patternName').dispatchEvent(new (win().Event)('input'));
+    $('patternSave').click();
+    await wait(100);
+    const sixteenthCustom = customPatterns()
+        .filter(p => p.name === 'Sixteenth reference')[0];
+    ok('the editor saves the 16th pattern',
+        sixteenthCustom && sixteenthCustom.subdiv === 4 &&
+        sixteenthCustom.slots === targetSlots, JSON.stringify(sixteenthCustom));
+    ok('the saved 16th pattern is drawn in the row',
+        sState().pattern && sState().pattern.slots === targetSlots &&
+        sRow().querySelectorAll('.strum-slot').length === 16,
+        sState().pattern && sState().pattern.slots);
 
     // invalid values are rejected with a message. The slot row itself always
     // has the right shape, so the same validator the editor uses is checked
