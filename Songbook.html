@@ -1978,7 +1978,41 @@ body.pattern-open { overflow: hidden; }
 .pattern-slots {
     display: flex;
     flex-wrap: wrap;
+    gap: 10px 12px;
+}
+
+/* One group per felt beat. The group keeps a 16-slot pattern readable as
+ * four beats, and the count row underneath uses the 1 e + a marks players
+ * already know. */
+.pattern-beat-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pattern-beat-slots {
+    display: flex;
     gap: 6px;
+}
+
+.pattern-beat-count {
+    display: flex;
+    gap: 6px;
+}
+
+.pattern-count {
+    flex: 1 1 0;
+    min-width: 38px;
+    text-align: center;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    line-height: 1;
+}
+
+.pattern-count.is-beat {
+    color: var(--text);
+    font-weight: 700;
 }
 
 .pattern-slot {
@@ -2028,9 +2062,14 @@ body.pattern-open { overflow: hidden; }
 .pattern-preview {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 10px;
     padding-left: 10px;
     border-left: 1px solid var(--line);
+}
+
+.pattern-preview-beat {
+    display: flex;
+    gap: 5px;
 }
 
 .pattern-preview-slot {
@@ -5376,7 +5415,7 @@ button.structure-close,
             </div>
 
             <span id="patternSlotLabel" class="pattern-slot-label">
-                Slots — tap to cycle down → up → rest
+                Slots — each group is one beat; tap a cell to cycle down → up → rest
             </span>
             <div id="patternSlots" class="pattern-slots" role="group"
                  aria-labelledby="patternSlotLabel"></div>
@@ -7801,6 +7840,7 @@ button.structure-close,
         active: null,           // current songbook
         byId: {},               // active songs by id
         currentSong: null,
+        lastBookHash: '#/',     // last non-explorer route, for the Chords toggle
 
         /* List edit mode: the id of the songbook whose authoring row actions
          * are showing, or null. Session only — never persisted. See
@@ -12009,6 +12049,18 @@ button.structure-close,
     }
 
     function bindOnce() {
+        var link = document.getElementById('explorerLink');
+        if (link) {
+            /* The topbar Chords link is a toggle: on the explorer it goes back
+             * to the song or song list the user was on, instead of being a
+             * dead link because the hash already matches. */
+            link.addEventListener('click', function (event) {
+                if (!SB.explorerVisible()) return;
+                event.preventDefault();
+                location.hash = SB.state.lastBookHash || '#/';
+            });
+        }
+
         var circle = document.getElementById('explorerCircle');
         circle.addEventListener('click', function (event) {
             var group = event.target.closest('[data-kind]');
@@ -15677,6 +15729,8 @@ button.structure-close,
         { id: 'ddudu-4-4', name: 'D DU D DU', time: '4/4', subdiv: 2, slots: 'D-DUD-DU' },
         { id: 'duudu-4-4', name: 'D U UDU', time: '4/4', subdiv: 2, slots: 'D-U-UDU-' },
         { id: 'dddududu-4-4', name: 'D D D U D U D U', time: '4/4', subdiv: 2, slots: 'DDDUDUDU' },
+        // 4/4 — sixteenths (16 slots)
+        { id: 'sixteenth-ddu-4-4', name: 'D - D - D - DU - UD - DUDU', time: '4/4', subdiv: 4, slots: 'D-D-D-DU-UD-DUDU' },
         // 3/4 — eighths (6 slots)
         { id: 'downs-3-4', name: 'All downs', time: '3/4', subdiv: 2, slots: 'D-D-D-' },
         { id: 'eighths-3-4', name: 'All eighths', time: '3/4', subdiv: 2, slots: 'DUDUDU' },
@@ -16665,6 +16719,24 @@ button.structure-close,
         return ch === 'D' ? 'U' : (ch === 'U' ? '-' : 'D');
     }
 
+    /* Beat-position marks for the editor's count row. Four slots per beat are
+     * the sixteenths players already count as "1 e + a"; eighths get the "+"
+     * between beats, and the other grids show only the beat number. The labels
+     * are what make a 16-slot pattern readable as four beats rather than one
+     * long row of arrows. */
+    var SUB_LABELS = {
+        1: [''],
+        2: ['', '+'],
+        3: ['', '', ''],
+        4: ['', 'e', '+', 'a']
+    };
+
+    function beatLabel(beat, part, subdiv) {
+        var marks = SUB_LABELS[subdiv] || [];
+        var mark = marks[part];
+        return 'Beat ' + (beat + 1) + (mark ? ' ' + mark : '');
+    }
+
     /* The single validation the editor uses before it writes a definition to
      * the plan. Returns a clear, user-facing message, or null when valid. The
      * `excludeId` argument lets an edit keep its own id while still rejecting
@@ -16830,48 +16902,76 @@ button.structure-close,
         }
     }
 
+    var SUBDIV_LABELS = {
+        1: '1 per beat',
+        2: '2 per beat (eighths)',
+        3: '3 per beat',
+        4: '4 per beat (16ths)'
+    };
+
     function populateSubdivs(current) {
         var sel = SB.$('patternSubdiv');
         if (!sel) return;
         sel.textContent = '';
         var max = Math.max(MAX_SUBDIV, current || 1);
         for (var n = 1; n <= max; n++) {
-            var opt = SB.el('option', null, n + ' per beat');
+            var opt = SB.el('option', null, SUBDIV_LABELS[n] || (n + ' per beat'));
             opt.value = String(n);
             sel.appendChild(opt);
         }
         sel.value = String(current || 2);
     }
 
+    function patternSlotButton(idx, beat, part, subdiv) {
+        var ch = editor.slots.charAt(idx);
+        var btn = SB.el('button', 'pattern-slot' +
+            (ch === '-' ? ' rest' : '') +
+            (part === 0 ? ' beat' : '') +
+            (idx === 0 ? ' first' : ''),
+            ch === '-' ? '\u00b7' : ch);
+        btn.type = 'button';
+        btn.dataset.idx = String(idx);
+        var where = beatLabel(beat, part, subdiv);
+        btn.setAttribute('aria-label', where + ': ' + slotWord(ch) +
+            '. Activate to change to ' + slotWord(nextSlot(ch)) + '.');
+        btn.title = where + ': ' + slotWord(ch) +
+            ' \u2014 click for ' + slotWord(nextSlot(ch));
+        btn.addEventListener('click', function () {
+            cyclePatternSlot(idx);
+        });
+        return btn;
+    }
+
     function renderEditorSlots() {
         var wrap = SB.$('patternSlots');
         if (!wrap || !editor) return;
         var subdiv = editor.subdiv;
-        var expected = SB.metronomeBeatsPerBar(editor.time) * subdiv;
-        if (editor.slots.length !== expected) {
-            editor.slots = resizeSlots(editor.slots, subdiv, subdiv,
-                SB.metronomeBeatsPerBar(editor.time));
+        var beats = SB.metronomeBeatsPerBar(editor.time);
+        if (editor.slots.length !== beats * subdiv) {
+            editor.slots = resizeSlots(editor.slots, subdiv, subdiv, beats);
         }
         wrap.textContent = '';
-        for (var i = 0; i < editor.slots.length; i++) {
-            (function (idx) {
-                var ch = editor.slots.charAt(idx);
-                var btn = SB.el('button', 'pattern-slot' +
-                    (ch === '-' ? ' rest' : '') +
-                    (idx % subdiv === 0 ? ' beat' : '') +
-                    (idx === 0 ? ' first' : ''),
-                    ch === '-' ? '\u00b7' : ch);
-                btn.type = 'button';
-                btn.dataset.idx = String(idx);
-                btn.setAttribute('aria-label', 'Slot ' + (idx + 1) + ': ' + slotWord(ch) +
-                    '. Activate to change to ' + slotWord(nextSlot(ch)) + '.');
-                btn.title = 'Slot ' + (idx + 1) + ': ' + slotWord(ch) +
-                    ' \u2014 click for ' + slotWord(nextSlot(ch));
-                btn.addEventListener('click', function () {
-                    cyclePatternSlot(idx);
-                });
-                wrap.appendChild(btn);
-            })(i);
+        for (var b = 0; b < beats; b++) {
+            var group = SB.el('div', 'pattern-beat-group');
+            group.dataset.beat = String(b + 1);
+            var slots = SB.el('div', 'pattern-beat-slots');
+            for (var part = 0; part < subdiv; part++) {
+                slots.appendChild(patternSlotButton(b * subdiv + part, b, part, subdiv));
+            }
+            group.appendChild(slots);
+
+            /* The count row mirrors the image players learn from: beat numbers
+             * under the down-beats, e/+a between them on a sixteenth grid. */
+            var counts = SB.el('div', 'pattern-beat-count');
+            counts.setAttribute('aria-hidden', 'true');
+            for (var c = 0; c < subdiv; c++) {
+                var mark = (SUB_LABELS[subdiv] || [])[c] || '';
+                counts.appendChild(SB.el('span',
+                    'pattern-count' + (c === 0 ? ' is-beat' : ''),
+                    c === 0 ? String(b + 1) : mark));
+            }
+            group.appendChild(counts);
+            wrap.appendChild(group);
         }
         updatePatternPreview();
     }
@@ -16892,11 +16992,17 @@ button.structure-close,
         var preview = SB.$('patternPreview');
         if (!preview || !editor) return;
         preview.textContent = '';
-        for (var i = 0; i < editor.slots.length; i++) {
-            var ch = editor.slots.charAt(i);
-            preview.appendChild(SB.el('span', 'pattern-preview-slot' +
-                (ch === '-' ? ' rest' : '') +
-                (i % editor.subdiv === 0 ? ' beat' : ''), slotGlyph(ch)));
+        var beats = SB.metronomeBeatsPerBar(editor.time);
+        for (var b = 0; b < beats; b++) {
+            var group = SB.el('div', 'pattern-preview-beat');
+            for (var part = 0; part < editor.subdiv; part++) {
+                var i = b * editor.subdiv + part;
+                var ch = editor.slots.charAt(i);
+                group.appendChild(SB.el('span', 'pattern-preview-slot' +
+                    (ch === '-' ? ' rest' : '') +
+                    (part === 0 ? ' beat' : ''), slotGlyph(ch)));
+            }
+            preview.appendChild(group);
         }
     }
 
@@ -18425,6 +18531,7 @@ button.structure-close,
             SB.stopMetronome();
             if (SB.gridDeactivate) SB.gridDeactivate();
             SB.state.currentSong = null;
+            SB.state.lastBookHash = '#/';
             SB.$('songView').hidden = true;
             SB.$('explorerView').hidden = true;
             SB.$('listView').hidden = false;
@@ -18433,6 +18540,8 @@ button.structure-close,
         }
 
         SB.setActive(sb);
+        SB.state.lastBookHash = SB.routeHash(sb.id,
+            songId && SB.state.byId[songId] ? songId : null);
 
         if (songId && SB.state.byId[songId]) {
             SB.$('listView').hidden = true;

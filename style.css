@@ -1965,7 +1965,41 @@ body.pattern-open { overflow: hidden; }
 .pattern-slots {
     display: flex;
     flex-wrap: wrap;
+    gap: 10px 12px;
+}
+
+/* One group per felt beat. The group keeps a 16-slot pattern readable as
+ * four beats, and the count row underneath uses the 1 e + a marks players
+ * already know. */
+.pattern-beat-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pattern-beat-slots {
+    display: flex;
     gap: 6px;
+}
+
+.pattern-beat-count {
+    display: flex;
+    gap: 6px;
+}
+
+.pattern-count {
+    flex: 1 1 0;
+    min-width: 38px;
+    text-align: center;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    line-height: 1;
+}
+
+.pattern-count.is-beat {
+    color: var(--text);
+    font-weight: 700;
 }
 
 .pattern-slot {
@@ -2015,9 +2049,14 @@ body.pattern-open { overflow: hidden; }
 .pattern-preview {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 10px;
     padding-left: 10px;
     border-left: 1px solid var(--line);
+}
+
+.pattern-preview-beat {
+    display: flex;
+    gap: 5px;
 }
 
 .pattern-preview-slot {

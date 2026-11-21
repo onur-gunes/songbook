@@ -357,6 +357,18 @@
     }
 
     function bindOnce() {
+        var link = document.getElementById('explorerLink');
+        if (link) {
+            /* The topbar Chords link is a toggle: on the explorer it goes back
+             * to the song or song list the user was on, instead of being a
+             * dead link because the hash already matches. */
+            link.addEventListener('click', function (event) {
+                if (!SB.explorerVisible()) return;
+                event.preventDefault();
+                location.hash = SB.state.lastBookHash || '#/';
+            });
+        }
+
         var circle = document.getElementById('explorerCircle');
         circle.addEventListener('click', function (event) {
             var group = event.target.closest('[data-kind]');

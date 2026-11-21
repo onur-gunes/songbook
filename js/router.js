@@ -51,6 +51,7 @@
             SB.stopMetronome();
             if (SB.gridDeactivate) SB.gridDeactivate();
             SB.state.currentSong = null;
+            SB.state.lastBookHash = '#/';
             SB.$('songView').hidden = true;
             SB.$('explorerView').hidden = true;
             SB.$('listView').hidden = false;
@@ -59,6 +60,8 @@
         }
 
         SB.setActive(sb);
+        SB.state.lastBookHash = SB.routeHash(sb.id,
+            songId && SB.state.byId[songId] ? songId : null);
 
         if (songId && SB.state.byId[songId]) {
             SB.$('listView').hidden = true;
