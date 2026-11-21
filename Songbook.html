@@ -7840,6 +7840,7 @@ button.structure-close,
         active: null,           // current songbook
         byId: {},               // active songs by id
         currentSong: null,
+        lastBookHash: '#/',     // last non-explorer route, for the Chords toggle
 
         /* List edit mode: the id of the songbook whose authoring row actions
          * are showing, or null. Session only — never persisted. See
@@ -12048,6 +12049,18 @@ button.structure-close,
     }
 
     function bindOnce() {
+        var link = document.getElementById('explorerLink');
+        if (link) {
+            /* The topbar Chords link is a toggle: on the explorer it goes back
+             * to the song or song list the user was on, instead of being a
+             * dead link because the hash already matches. */
+            link.addEventListener('click', function (event) {
+                if (!SB.explorerVisible()) return;
+                event.preventDefault();
+                location.hash = SB.state.lastBookHash || '#/';
+            });
+        }
+
         var circle = document.getElementById('explorerCircle');
         circle.addEventListener('click', function (event) {
             var group = event.target.closest('[data-kind]');
@@ -18518,6 +18531,7 @@ button.structure-close,
             SB.stopMetronome();
             if (SB.gridDeactivate) SB.gridDeactivate();
             SB.state.currentSong = null;
+            SB.state.lastBookHash = '#/';
             SB.$('songView').hidden = true;
             SB.$('explorerView').hidden = true;
             SB.$('listView').hidden = false;
@@ -18526,6 +18540,8 @@ button.structure-close,
         }
 
         SB.setActive(sb);
+        SB.state.lastBookHash = SB.routeHash(sb.id,
+            songId && SB.state.byId[songId] ? songId : null);
 
         if (songId && SB.state.byId[songId]) {
             SB.$('listView').hidden = true;

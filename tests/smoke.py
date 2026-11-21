@@ -161,6 +161,14 @@ def main():
            and cdp.eval("document.getElementById('songView').hidden") is True)
         ok('explorer link marked current',
            cdp.eval("document.getElementById('explorerLink').getAttribute('aria-current')") == 'page')
+        cdp.eval("document.getElementById('explorerLink').click()")
+        cdp.wait_js("document.getElementById('songView').hidden === false", timeout=10)
+        ok('chords link toggles back to the song',
+           cdp.eval("document.getElementById('songTitle').textContent") == 'Harbour Lights',
+           cdp.eval("document.getElementById('songTitle').textContent"))
+        cdp.eval("location.hash = '#/chords'")
+        cdp.wait_js("document.getElementById('explorerView').hidden === false", timeout=10)
+        ok('chords link returns to the explorer', cdp.eval("songbookTest.isExplorerVisible()") is True)
         ok('explorer circle has 24 roots',
            cdp.eval("document.querySelectorAll('#explorerCircle [data-kind]').length") == 24)
         ok('explorer has 18 chord types',

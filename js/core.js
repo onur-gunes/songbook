@@ -112,6 +112,7 @@
         active: null,           // current songbook
         byId: {},               // active songs by id
         currentSong: null,
+        lastBookHash: '#/',     // last non-explorer route, for the Chords toggle
 
         /* List edit mode: the id of the songbook whose authoring row actions
          * are showing, or null. Session only — never persisted. See
