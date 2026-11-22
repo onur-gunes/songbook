@@ -28,6 +28,14 @@
     --hard: #ad3434;
     --neck-tone: #237c6e;
     --neck-scale: #4a9d8e;
+    --neck-accent: #a97a45;
+    --neck-accent-soft: #f4ebde;
+    --caged-c: #d9556f;
+    --caged-a: #c79a25;
+    --caged-g: #4d9a3b;
+    --caged-e: #2c8bb0;
+    --caged-d: #8a5bc7;
+    --caged-ink: #ffffff;
     --topbar-h: 56px;
     --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
@@ -48,6 +56,14 @@
     --hard: #e07b7b;
     --neck-tone: #57cbb5;
     --neck-scale: #3c8f82;
+    --neck-accent: #9c7748;
+    --neck-accent-soft: #352b20;
+    --caged-c: #f47c95;
+    --caged-a: #f2d06b;
+    --caged-g: #7ed957;
+    --caged-e: #4cc9f0;
+    --caged-d: #c77dff;
+    --caged-ink: #141414;
 }
 
 * { box-sizing: border-box; }
@@ -4051,17 +4067,97 @@ body.tuner-open { overflow: hidden; }
     text-align: center;
 }
 
-/* ===== neck explorer ===== */
+/* ===== neck / CAGED explorer ===== */
 
 .neck-pane { max-width: 880px; }
 
-.neck-toolbar {
-    display: grid;
-    grid-template-columns: 108px 178px minmax(180px, 1fr) auto;
-    gap: 12px;
-    align-items: end;
+.neck-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
     margin-bottom: 16px;
 }
+.neck-hero-id { min-width: 0; }
+.neck-chord-name {
+    color: var(--text);
+    font-size: 2.7rem;
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+}
+.neck-chord-notes {
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 1rem;
+}
+.neck-audio { display: flex; flex-wrap: wrap; gap: 8px; }
+.neck-audio-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 42px;
+    padding: 0 16px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 0.92rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+}
+.neck-audio-btn:hover { border-color: var(--neck-accent); background: var(--surface); }
+.neck-audio-btn:active { transform: translateY(1px); }
+.neck-play-icon { color: var(--neck-accent); font-size: 0.72rem; }
+
+.neck-controls {
+    display: grid;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface-2);
+}
+.neck-control-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+.neck-control-label {
+    min-width: 42px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 650;
+}
+.neck-control-label-gap { margin-left: 10px; }
+.neck-seg { display: inline-flex; flex-wrap: wrap; gap: 5px; }
+.neck-seg button {
+    min-width: 38px;
+    height: 36px;
+    padding: 0 11px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.84rem;
+    font-weight: 650;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.neck-seg button:hover:not(:disabled) { border-color: var(--muted); }
+.neck-seg button[aria-pressed="true"] {
+    border-color: var(--neck-accent);
+    background: var(--neck-accent);
+    color: #fff;
+}
+.neck-seg button:disabled { opacity: 0.35; cursor: default; }
+.neck-seg-acc button { min-width: 34px; padding: 0 8px; font-size: 0.95rem; }
+
+.neck-more { display: inline-flex; min-width: 0; }
+.neck-more-select { min-width: 190px; }
 .neck-field {
     display: flex;
     flex-direction: column;
@@ -4076,23 +4172,147 @@ body.tuner-open { overflow: hidden; }
     text-transform: uppercase;
 }
 .neck-select {
-    width: 100%;
-    height: 38px;
+    height: 36px;
     padding: 0 10px;
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 9px;
     background: var(--surface);
     color: var(--text);
     cursor: pointer;
 }
-.neck-select:focus-visible { border-color: var(--accent); }
-.neck-field-grow { min-width: 0; }
+.neck-select:focus-visible { border-color: var(--neck-accent); }
+.neck-bass-select { min-width: 170px; }
+.neck-capo { width: 112px; margin-left: auto; }
+.neck-capo > span { display: none; }
 
+.neck-card {
+    margin-top: 16px;
+    padding: 12px 10px 8px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface);
+}
+.neck-diagram { width: 100%; overflow-x: auto; overflow-y: hidden; }
+.neck-diagram svg {
+    display: block;
+    width: 100%;
+    min-width: 720px;
+    height: auto;
+}
+.neck-board { fill: var(--surface-2); opacity: 0.65; }
+.neck-region {
+    fill-opacity: 0.16;
+    stroke-opacity: 0.85;
+    stroke-width: 2.2;
+    stroke-dasharray: 20 12;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.neck-region.is-dim { opacity: 0.35; }
+.neck-diagram .neck-string { stroke: var(--muted); stroke-width: 1.2; opacity: 0.55; }
+.neck-diagram .neck-fret { stroke: var(--line); stroke-width: 1.2; }
+.neck-diagram .neck-nut {
+    stroke: var(--text);
+    stroke-width: 5;
+    stroke-linecap: round;
+    opacity: 0.85;
+}
+.neck-diagram .neck-fret-num,
+.neck-diagram .neck-string-label {
+    fill: var(--muted);
+    font-size: 10px;
+    font-weight: 650;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    font-variant-numeric: tabular-nums;
+}
+.neck-diagram .neck-string-label { font-size: 10.5px; font-weight: 700; text-anchor: end; }
+.neck-diagram .neck-inlay { fill: var(--line); opacity: 0.9; }
+.neck-diagram .neck-note-scale { fill: var(--neck-scale); opacity: 0.32; }
+.neck-diagram .neck-note-tone {
+    fill: var(--neck-tone);
+    stroke: var(--surface);
+    stroke-width: 1.4;
+}
+.neck-diagram .neck-note-shape { stroke: var(--surface); stroke-width: 1.4; }
+.neck-diagram .neck-note-ring {
+    fill: none;
+    stroke: var(--text);
+    stroke-width: 1.5;
+    stroke-dasharray: 3 3;
+    opacity: 0.75;
+}
+.neck-diagram .neck-note-text {
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+}
+.neck-diagram .neck-note-text-tone { fill: #fff; font-size: 9.5px; font-weight: 700; }
+.neck-diagram .neck-note-text-shape {
+    fill: var(--caged-ink);
+    font-size: 10.5px;
+    font-weight: 700;
+}
+.neck-diagram .neck-note-text-oct { font-size: 7.6px; }
+.neck-diagram .neck-note-ghost {
+    fill: var(--muted);
+    stroke: none;
+    opacity: 0.34;
+}
+.neck-diagram .neck-note-ghost.is-open {
+    fill: var(--surface);
+    stroke: var(--muted);
+    stroke-width: 1.4;
+    opacity: 0.8;
+}
+.neck-diagram .neck-note-text-ghost {
+    fill: var(--muted);
+    font-size: 9px;
+    font-weight: 650;
+}
+.neck-diagram .neck-badge {
+    fill: var(--text);
+    stroke: var(--surface);
+    stroke-width: 1.2;
+}
+.neck-diagram .neck-badge-text {
+    fill: var(--surface);
+    font-size: 5.8px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+.neck-diagram .neck-muted {
+    fill: var(--muted);
+    font-size: 15px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+.neck-shape-pill { cursor: pointer; }
+.neck-shape-pill rect { transition: filter 0.15s ease; }
+.neck-shape-pill:hover rect { filter: brightness(1.08); }
+.neck-shape-pill text {
+    fill: var(--caged-ink);
+    font-size: 11px;
+    font-weight: 800;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+}
+
+.neck-options {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    margin: 12px 0 16px;
+}
 .neck-pill {
-    height: 38px;
+    height: 36px;
     padding: 0 13px;
     border: 1px solid var(--line);
-    border-radius: 999px;
+    border-radius: 9px;
     background: var(--surface);
     color: var(--muted);
     font-size: 0.8rem;
@@ -4102,188 +4322,24 @@ body.tuner-open { overflow: hidden; }
 }
 .neck-pill:hover { color: var(--text); border-color: var(--muted); }
 .neck-pill[aria-pressed="true"] {
-    border-color: var(--accent);
-    background: var(--accent-soft);
-    color: var(--accent);
+    border-color: var(--neck-accent);
+    background: var(--neck-accent-soft);
+    color: var(--neck-accent);
 }
-
-.neck-summary {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px 18px;
-    padding: 14px 16px;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: var(--surface);
-}
-.neck-chord-id { min-width: 132px; }
-.neck-chord-name {
-    color: var(--accent);
-    font-size: 1.8rem;
-    font-weight: 700;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-}
-.neck-chord-notes {
-    margin-top: 3px;
-    color: var(--muted);
-    font-size: 0.82rem;
-}
-.neck-shape-nav { display: flex; align-items: center; gap: 6px; }
-.neck-step {
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--line);
-    border-radius: 9px;
-    background: var(--surface-2);
-    color: var(--text);
-    font-size: 0.95rem;
-    line-height: 1;
-    cursor: pointer;
-}
-.neck-step:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-.neck-step:disabled { opacity: 0.4; cursor: default; }
-.neck-shape-count {
-    min-width: 62px;
-    color: var(--muted);
-    font-size: 0.8rem;
-    font-variant-numeric: tabular-nums;
-    text-align: center;
-}
-.neck-frets-label {
-    padding: 6px 10px;
-    border-radius: 8px;
-    background: var(--surface-2);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 0.8rem;
-    letter-spacing: 0.06em;
-    white-space: nowrap;
-}
-.neck-capo { margin-left: auto; width: 120px; }
-
-.neck-options {
-    display: flex;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    gap: 8px 10px;
-    margin: 12px 0 16px;
-}
-.neck-scale-fields {
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-}
+.neck-scale-fields { display: flex; align-items: flex-end; gap: 8px; }
 .neck-scale-fields[hidden] { display: none; }
 .neck-scale-fields .neck-field { width: 136px; }
-
-.neck-card {
-    padding: 12px 10px 9px;
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    background: var(--surface);
-    overflow: hidden;
-}
-.neck-diagram { width: 100%; }
-.neck-diagram svg { display: block; width: 100%; height: auto; }
-
-.neck-diagram .neck-string { stroke: var(--muted); stroke-width: 1.1; opacity: 0.5; }
-.neck-diagram .neck-fret { stroke: var(--line); stroke-width: 1.2; }
-.neck-diagram .neck-nut {
-    stroke: var(--text);
-    stroke-width: 5;
-    stroke-linecap: round;
-}
-.neck-diagram .neck-fret-num,
-.neck-diagram .neck-string-label {
-    fill: var(--muted);
-    font-size: 10px;
-    font-weight: 600;
-    text-anchor: middle;
-    dominant-baseline: middle;
-    font-variant-numeric: tabular-nums;
-}
-.neck-diagram .neck-string-label { font-size: 10.5px; font-weight: 700; }
-.neck-diagram .neck-inlay { fill: var(--line); }
-.neck-diagram .neck-note-scale { fill: var(--neck-scale); opacity: 0.95; }
-.neck-diagram .neck-note-tone {
-    fill: var(--surface);
-    stroke: var(--neck-tone);
-    stroke-width: 1.8;
-}
-.neck-diagram .neck-note-shape {
-    fill: var(--accent);
-    stroke: var(--surface);
-    stroke-width: 1.5;
-}
-.neck-diagram .neck-note-text {
-    text-anchor: middle;
-    dominant-baseline: middle;
-}
-.neck-diagram .neck-note-text-tone {
-    fill: var(--neck-tone);
-    font-size: 9px;
-    font-weight: 700;
-}
-.neck-diagram .neck-note-text-shape {
-    fill: #fff;
-    font-size: 9.5px;
-    font-weight: 700;
-}
-.neck-diagram .neck-note-text-oct { font-size: 7.4px; }
-.neck-diagram .neck-badge {
-    fill: var(--accent);
-    stroke: var(--surface);
-    stroke-width: 1.2;
-}
-.neck-diagram .neck-badge-text {
-    fill: #fff;
-    font-size: 5.5px;
-    font-weight: 700;
-    text-anchor: middle;
-    dominant-baseline: middle;
-}
-.neck-diagram .neck-muted {
-    fill: var(--muted);
-    font-size: 13px;
-    font-weight: 700;
-    text-anchor: middle;
-    dominant-baseline: middle;
-}
-
-.neck-legend {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    margin: 10px 4px 2px;
-    color: var(--muted);
-    font-size: 0.76rem;
-}
-.neck-key { display: inline-flex; align-items: center; gap: 6px; }
-.neck-swatch {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-}
-.neck-swatch-shape { background: var(--accent); }
-.neck-swatch-tone {
-    border: 2px solid var(--neck-tone);
-    background: var(--surface);
-}
-.neck-swatch-scale { background: var(--neck-scale); }
-.neck-scale-summary { margin-left: auto; }
+.neck-scale-summary { margin-left: auto; color: var(--muted); font-size: 0.76rem; }
 
 .neck-notes { margin-top: 22px; }
 .neck-notes-head {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 4px 12px;
     margin-bottom: 12px;
 }
+.neck-notes-head .explorer-shapes-count:last-child { margin-left: auto; }
 .neck-string-notes {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
@@ -4296,8 +4352,8 @@ body.tuner-open { overflow: hidden; }
     background: var(--surface);
 }
 .neck-string-note.root {
-    border-color: var(--accent);
-    background: var(--accent-soft);
+    border-color: var(--neck-accent);
+    background: var(--neck-accent-soft);
 }
 .neck-string-note-top {
     display: flex;
@@ -4305,10 +4361,7 @@ body.tuner-open { overflow: hidden; }
     justify-content: space-between;
     gap: 8px;
 }
-.neck-string-note-name {
-    font-size: 1.05rem;
-    font-weight: 700;
-}
+.neck-string-note-name { font-size: 1.05rem; font-weight: 700; }
 .neck-string-degree {
     display: inline-flex;
     align-items: center;
@@ -4317,7 +4370,7 @@ body.tuner-open { overflow: hidden; }
     height: 22px;
     padding: 0 4px;
     border-radius: 999px;
-    background: var(--accent);
+    background: var(--neck-accent);
     color: #fff;
     font-size: 0.62rem;
     font-weight: 700;
@@ -4342,8 +4395,7 @@ body.tuner-open { overflow: hidden; }
     .explorer-circle { max-width: 380px; }
     .explorer-find { margin-top: 0; }
 
-    .neck-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .neck-field-grow { grid-column: 1 / -1; }
+    .neck-pane { max-width: 100%; }
 }
 
 /* ===== responsive ===== */
@@ -4440,10 +4492,18 @@ body.tuner-open { overflow: hidden; }
     .explorer-shapes { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 9px; }
     .explorer-shape { padding: 10px 5px 7px; }
 
-    .neck-toolbar { grid-template-columns: 1fr 1fr; gap: 9px; }
-    .neck-field-grow { grid-column: 1 / -1; }
-    .neck-summary { gap: 10px 12px; padding: 12px 13px; }
-    .neck-chord-id { flex: 1 1 100%; }
+    .neck-hero { align-items: stretch; flex-wrap: wrap; gap: 12px; }
+    .neck-chord-name { font-size: 2.15rem; }
+    .neck-audio { width: 100%; }
+    .neck-audio-btn { flex: 1; justify-content: center; }
+    .neck-controls { padding: 12px; gap: 10px; }
+    .neck-control-row { gap: 6px; }
+    .neck-control-label { min-width: 42px; }
+    .neck-control-label-gap { margin-left: 0; }
+    .neck-seg button { height: 34px; padding: 0 9px; }
+    .neck-more,
+    .neck-more-select,
+    .neck-bass-select { width: 100%; min-width: 0; }
     .neck-capo { margin-left: 0; width: auto; }
     .neck-options { gap: 7px; }
     .neck-scale-fields { width: 100%; }
@@ -5273,8 +5333,8 @@ button.structure-close,
                         Every way to play any chord on
                         <strong id="explorerInstrumentName">ukulele</strong> — pick a root
                         on the circle of fifths, then a chord type. Or switch to
-                        <strong>Neck</strong> to see the shape, chord tones and a scale
-                        across the whole fretboard.
+                        <strong>Neck</strong> to see the CAGED shapes, chord tones and a
+                        scale across the whole fretboard.
                     </p>
                 </div>
                 <nav class="explorer-tabs" aria-label="Chord explorer mode">
@@ -5318,42 +5378,57 @@ button.structure-close,
         </div>
 
         <div id="explorerNeckPane" class="neck-pane" hidden>
-            <div class="neck-toolbar" aria-label="Neck chord controls">
-                <label class="neck-field">
-                    <span>Root</span>
-                    <select id="neckRoot" class="neck-select"></select>
-                </label>
-                <label class="neck-field">
-                    <span>Chord</span>
-                    <select id="neckQuality" class="neck-select"></select>
-                </label>
-                <label class="neck-field neck-field-grow">
-                    <span>Voicing</span>
-                    <select id="neckVoicing" class="neck-select"></select>
-                </label>
-                <button id="neckSpell" class="neck-pill" type="button" hidden></button>
-            </div>
-
-            <div class="neck-summary">
-                <div class="neck-chord-id">
+            <header class="neck-hero">
+                <div class="neck-hero-id">
                     <div id="neckChordName" class="neck-chord-name">C</div>
-                    <div id="neckChordNotes" class="neck-chord-notes"></div>
+                    <div id="neckChordNotes" class="neck-chord-notes">C major</div>
                 </div>
-                <div class="neck-shape-nav" role="group" aria-label="Chord shape">
-                    <button id="neckPrev" class="neck-step" type="button" aria-label="Previous shape">←</button>
-                    <span id="neckShapeCount" class="neck-shape-count" aria-live="polite">—</span>
-                    <button id="neckNext" class="neck-step" type="button" aria-label="Next shape">→</button>
+                <div class="neck-audio" role="group" aria-label="Play chord">
+                    <button id="neckStrum" class="neck-audio-btn" type="button">
+                        <span class="neck-play-icon" aria-hidden="true">▶</span> Strum
+                    </button>
+                    <button id="neckArpeggio" class="neck-audio-btn" type="button">
+                        <span class="neck-play-icon" aria-hidden="true">▶</span> Arpeggio
+                    </button>
                 </div>
-                <span id="neckShapeFrets" class="neck-frets-label"></span>
-                <label class="neck-field neck-capo">
-                    <span>Capo</span>
-                    <select id="neckCapo" class="neck-select"></select>
-                </label>
+            </header>
+
+            <div class="neck-controls" aria-label="Chord controls">
+                <div class="neck-control-row">
+                    <span class="neck-control-label">Root</span>
+                    <div id="neckRoot" class="neck-seg" role="group" aria-label="Root note"></div>
+                    <div id="neckAccidental" class="neck-seg neck-seg-acc" role="group" aria-label="Root accidental"></div>
+                    <span class="neck-control-label neck-control-label-gap">Labels</span>
+                    <div id="neckLabels" class="neck-seg" role="group" aria-label="Note labels"></div>
+                </div>
+
+                <div class="neck-control-row">
+                    <span class="neck-control-label">Chord</span>
+                    <div id="neckQualities" class="neck-seg" role="group" aria-label="Chord type"></div>
+                    <label class="neck-more">
+                        <span class="sr-only">More chord types</span>
+                        <select id="neckQuality" class="neck-select neck-more-select"></select>
+                    </label>
+                </div>
+
+                <div class="neck-control-row">
+                    <span class="neck-control-label">Shape</span>
+                    <div id="neckShapes" class="neck-seg" role="group" aria-label="CAGED shape"></div>
+                    <span class="neck-control-label neck-control-label-gap">Bass</span>
+                    <select id="neckBass" class="neck-select neck-bass-select" aria-label="Bass note"></select>
+                    <span class="neck-control-label neck-control-label-gap">Frets</span>
+                    <div id="neckFrets" class="neck-seg" role="group" aria-label="Fret count"></div>
+                </div>
             </div>
 
-            <div class="neck-options" role="group" aria-label="Neck display">
-                <button id="neckAllTones" class="neck-pill" type="button" aria-pressed="true">All chord tones</button>
-                <button id="neckScaleToggle" class="neck-pill" type="button" aria-pressed="true">Scale</button>
+            <div class="neck-card">
+                <div id="neckDiagram" class="neck-diagram" role="group"></div>
+            </div>
+
+            <div class="neck-options" role="group" aria-label="Fretboard display">
+                <button id="neckScaleToggle" class="neck-pill" type="button" aria-pressed="true">Scale notes</button>
+                <button id="neckFingers" class="neck-pill" type="button" aria-pressed="false">Fingers</button>
+                <button id="neckOctaves" class="neck-pill" type="button" aria-pressed="false">Octaves</button>
                 <span id="neckScaleFields" class="neck-scale-fields">
                     <label class="neck-field">
                         <span>Scale key</span>
@@ -5364,22 +5439,17 @@ button.structure-close,
                         <select id="neckScaleType" class="neck-select"></select>
                     </label>
                 </span>
-                <button id="neckOctaves" class="neck-pill" type="button" aria-pressed="false">Octaves</button>
+                <label class="neck-field neck-capo">
+                    <span>Capo</span>
+                    <select id="neckCapo" class="neck-select"></select>
+                </label>
+                <span id="neckScaleSummary" class="neck-scale-summary"></span>
             </div>
-
-            <section class="neck-card">
-                <div id="neckDiagram" class="neck-diagram" role="img"></div>
-                <p class="neck-legend">
-                    <span class="neck-key"><i class="neck-swatch neck-swatch-shape"></i>Shape</span>
-                    <span class="neck-key"><i class="neck-swatch neck-swatch-tone"></i>Chord tones</span>
-                    <span class="neck-key"><i class="neck-swatch neck-swatch-scale"></i>Scale</span>
-                    <span id="neckScaleSummary" class="neck-scale-summary"></span>
-                </p>
-            </section>
 
             <section class="neck-notes" aria-labelledby="neckNotesTitle">
                 <div class="neck-notes-head">
                     <h2 id="neckNotesTitle" class="explorer-shapes-title">Shape notes, bass to top</h2>
+                    <span id="neckShapeCount" class="explorer-shapes-count"></span>
                     <span id="neckNotesCount" class="explorer-shapes-count"></span>
                 </div>
                 <div id="neckShapeNotes" class="neck-string-notes"></div>
@@ -6414,6 +6484,94 @@ button.structure-close,
         version: '1.2.0'
     };
 })(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script>window.__SONGBOOKS__ = [{"id": "demo", "name": "Public Domain Songbook", "description": "Twelve traditional songs and evergreens in the public domain, arranged to show chords, tempo, metre, strumming and the bar/beat grid.", "instrument": "ukulele", "songs": [{"id": "amazing-grace", "n": 1, "title": "Amazing Grace", "artist": "John Newton", "level": "Easy", "new": false, "dur": 3.0, "key": "G", "sheetKey": "G", "capo": 0, "bpm": 72, "time": "3/4", "strum": "waltz-3-4", "chords": ["G", "C", "D"], "sheet": [[["i", "Verse 1"]], [["c", "[G]"], ["x", "Amazing grace, how "], ["c", "[C]"], ["x", "sweet the sound"]], [["x", "That "], ["c", "[G]"], ["x", "saved a "], ["c", "[D]"], ["x", "wretch like me"]], [["c", "[G]"], ["x", "I once was lost, but "], ["c", "[C]"], ["x", "now am found"]], [["x", "Was "], ["c", "[G]"], ["x", "blind, but "], ["c", "[D]"], ["x", "now I "], ["c", "[G]"], ["x", "see"]], [], [["i", "Verse 2"]], [["c", "[G]"], ["x", "'Twas grace that taught my "], ["c", "[C]"], ["x", "heart to fear"]], [["x", "And "], ["c", "[G]"], ["x", "grace my "], ["c", "[D]"], ["x", "fears relieved"]], [["c", "[G]"], ["x", "How precious did that "], ["c", "[C]"], ["x", "grace appear"]], [["x", "The "], ["c", "[G]"], ["x", "hour I "], ["c", "[D]"], ["x", "first be"], ["c", "[G]"], ["x", "lieved"]], [], [["i", "Verse 3"]], [["x", "Through "], ["c", "[G]"], ["x", "many dangers, "], ["c", "[C]"], ["x", "toils and snares"]], [["x", "I "], ["c", "[G]"], ["x", "have already "], ["c", "[D]"], ["x", "come"]], [["x", "'Tis "], ["c", "[G]"], ["x", "grace hath brought me "], ["c", "[C]"], ["x", "safe thus far"]], [["x", "And "], ["c", "[G]"], ["x", "grace will "], ["c", "[D]"], ["x", "lead me "], ["c", "[G]"], ["x", "home"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "D", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "D", "beats": 1}, {"chord": "G", "beats": 2}]}]}]}, {"id": "auld-lang-syne", "n": 2, "title": "Auld Lang Syne", "artist": "Robert Burns", "level": "Easy", "new": false, "dur": 2.5, "key": "C", "sheetKey": "C", "capo": 0, "bpm": 84, "time": "3/4", "strum": "waltz-3-4", "chords": ["C", "C7", "F", "G7"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "Should auld acquaintance "], ["c", "[C7]"], ["x", "be forgot"]], [["x", "and "], ["c", "[F]"], ["x", "never brought to "], ["c", "[G7]"], ["x", "mind?"]], [["c", "[C]"], ["x", "Should auld acquaintance "], ["c", "[C7]"], ["x", "be forgot"]], [["x", "and "], ["c", "[F]"], ["x", "auld lang "], ["c", "[C]"], ["x", "syne?"]], [], [["i", "Chorus"]], [["x", "For "], ["c", "[C]"], ["x", "auld lang syne, my "], ["c", "[C7]"], ["x", "dear"]], [["x", "for "], ["c", "[F]"], ["x", "auld lang "], ["c", "[G7]"], ["x", "syne"]], [["x", "we'll "], ["c", "[C]"], ["x", "tak' a cup o' "], ["c", "[C7]"], ["x", "kindness yet"]], [["x", "for "], ["c", "[F]"], ["x", "auld lang "], ["c", "[C]"], ["x", "syne"]], [], [["i", "Verse 2"]], [["x", "And "], ["c", "[C]"], ["x", "surely ye'll be your "], ["c", "[C7]"], ["x", "pint-stowp"]], [["x", "and "], ["c", "[F]"], ["x", "surely I'll be "], ["c", "[G7]"], ["x", "mine"]], [["x", "and "], ["c", "[C]"], ["x", "we'll tak' a cup o' "], ["c", "[C7]"], ["x", "kindness yet"]], [["x", "for "], ["c", "[F]"], ["x", "auld lang "], ["c", "[C]"], ["x", "syne"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "C7", "beats": 3}]}, {"beats": [{"chord": "F", "beats": 3}]}, {"beats": [{"chord": "G7", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "C7", "beats": 3}]}, {"beats": [{"chord": "F", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}]}, {"label": "Chorus", "role": "chorus", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "C7", "beats": 3}]}, {"beats": [{"chord": "F", "beats": 3}]}, {"beats": [{"chord": "G7", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "C7", "beats": 3}]}, {"beats": [{"chord": "F", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}]}]}, {"id": "down-by-the-riverside", "n": 3, "title": "Down by the Riverside", "artist": "Traditional spiritual", "level": "Easy", "new": false, "dur": 2.5, "key": "C", "sheetKey": "C", "capo": 0, "bpm": 120, "time": "4/4", "strum": "dduudu-4-4", "chords": ["C", "F", "G"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "I'm gonna lay down my "], ["c", "[F]"], ["x", "sword and shield"]], [["c", "[C]"], ["x", "Down by the "], ["c", "[G]"], ["x", "riverside"]], [["c", "[C]"], ["x", "I'm gonna lay down my "], ["c", "[F]"], ["x", "sword and shield"]], [["c", "[C]"], ["x", "Down by the "], ["c", "[G]"], ["x", "riverside"]], [], [["i", "Chorus"]], [["c", "[C]"], ["x", "I ain't gonna study "], ["c", "[F]"], ["x", "war no more"]], [["c", "[C]"], ["x", "Ain't gonna "], ["c", "[G]"], ["x", "study war no more"]], [["c", "[C]"], ["x", "I ain't gonna study "], ["c", "[F]"], ["x", "war no more"]], [["c", "[C]"], ["x", "Ain't gonna "], ["c", "[G]"], ["x", "study war no more"]], [], [["i", "Verse 2"]], [["c", "[C]"], ["x", "I'm gonna lay down my "], ["c", "[F]"], ["x", "heavy load"]], [["c", "[C]"], ["x", "Down by the "], ["c", "[G]"], ["x", "riverside"]], [["c", "[C]"], ["x", "I'm gonna lay down my "], ["c", "[F]"], ["x", "heavy load"]], [["c", "[C]"], ["x", "Down by the "], ["c", "[G]"], ["x", "riverside"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": true, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}]}, {"label": "Chorus", "role": "chorus", "repeat": true, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}]}]}, {"id": "when-the-saints-go-marching-in", "n": 4, "title": "When the Saints Go Marching In", "artist": "Traditional spiritual", "level": "Easy", "new": false, "dur": 2.5, "key": "C", "sheetKey": "C", "capo": 0, "bpm": 120, "time": "4/4", "strum": "dduudu-4-4", "chords": ["C", "C7", "F", "G7"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "Oh, when the saints go "], ["c", "[C7]"], ["x", "marching in"]], [["c", "[F]"], ["x", "Oh, when the saints go "], ["c", "[C]"], ["x", "marching in"]], [["c", "[G7]"], ["x", "Lord, I want to be in that number"]], [["c", "[C]"], ["x", "When the saints go "], ["c", "[G7]"], ["x", "marching "], ["c", "[C]"], ["x", "in"]], [], [["i", "Verse 2"]], [["c", "[C]"], ["x", "Oh, when the saints go "], ["c", "[C7]"], ["x", "marching in"]], [["c", "[F]"], ["x", "Oh, when the saints go "], ["c", "[C]"], ["x", "marching in"]], [["c", "[G7]"], ["x", "Lord, I want to be in that number"]], [["c", "[C]"], ["x", "When the saints go "], ["c", "[G7]"], ["x", "marching "], ["c", "[C]"], ["x", "in"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "C7", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}]}]}, {"id": "house-of-the-rising-sun", "n": 5, "title": "House of the Rising Sun", "artist": "Traditional", "level": "Medium", "new": false, "dur": 3.5, "key": "Am", "sheetKey": "Am", "capo": 0, "bpm": 96, "time": "6/8", "strum": "du-6-8", "chords": ["Am", "C", "D", "F", "E7"], "sheet": [[["i", "Verse 1"]], [["c", "[Am]"], ["x", "There is a house in "], ["c", "[C]"], ["x", "New Orleans"]], [["c", "[D]"], ["x", "They call the "], ["c", "[F]"], ["x", "Rising Sun"]], [["c", "[Am]"], ["x", "And it's been the ruin of "], ["c", "[C]"], ["x", "many a poor boy"]], [["c", "[E7]"], ["x", "And God, I "], ["c", "[Am]"], ["x", "know I'm one"]], [], [["i", "Verse 2"]], [["c", "[Am]"], ["x", "My mother was a "], ["c", "[C]"], ["x", "tailor"]], [["c", "[D]"], ["x", "She sewed my "], ["c", "[F]"], ["x", "new blue jeans"]], [["c", "[Am]"], ["x", "My father was a "], ["c", "[C]"], ["x", "gamblin' man"]], [["c", "[E7]"], ["x", "Down in "], ["c", "[Am]"], ["x", "New Orleans"]], [], [["i", "Verse 3"]], [["c", "[Am]"], ["x", "Now the only thing a "], ["c", "[C]"], ["x", "gambler needs"]], [["c", "[D]"], ["x", "Is a suitcase and a "], ["c", "[F]"], ["x", "trunk"]], [["c", "[Am]"], ["x", "And the only time he's "], ["c", "[C]"], ["x", "satisfied"]], [["c", "[E7]"], ["x", "Is when he's "], ["c", "[Am]"], ["x", "on a drunk"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": true, "bars": [{"beats": [{"chord": "Am", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "D", "beats": 2}]}, {"beats": [{"chord": "F", "beats": 2}]}, {"beats": [{"chord": "Am", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "E7", "beats": 2}]}, {"beats": [{"chord": "Am", "beats": 2}]}]}]}, {"id": "scarborough-fair", "n": 6, "title": "Scarborough Fair", "artist": "Traditional", "level": "Medium", "new": false, "dur": 3.0, "key": "Am", "sheetKey": "Am", "capo": 0, "bpm": 100, "time": "3/4", "strum": "waltz-3-4", "chords": ["Am", "G", "C"], "sheet": [[["i", "Verse 1"]], [["c", "[Am]"], ["x", "Are you going to "], ["c", "[G]"], ["x", "Scarborough Fair?"]], [["c", "[C]"], ["x", "Parsley, sage, "], ["c", "[G]"], ["x", "rosemary and thyme"]], [["c", "[Am]"], ["x", "Remember me to "], ["c", "[G]"], ["x", "one who lives there"]], [["c", "[C]"], ["x", "For she once was a "], ["c", "[G]"], ["x", "true love of mine"]], [], [["i", "Verse 2"]], [["c", "[Am]"], ["x", "Tell her to make me a "], ["c", "[G]"], ["x", "cambric shirt"]], [["c", "[C]"], ["x", "Parsley, sage, "], ["c", "[G]"], ["x", "rosemary and thyme"]], [["c", "[Am]"], ["x", "Without no seams nor "], ["c", "[G]"], ["x", "needlework"]], [["c", "[C]"], ["x", "Then she'll be a "], ["c", "[G]"], ["x", "true love of mine"]], [], [["i", "Verse 3"]], [["c", "[Am]"], ["x", "Tell her to find me an "], ["c", "[G]"], ["x", "acre of land"]], [["c", "[C]"], ["x", "Parsley, sage, "], ["c", "[G]"], ["x", "rosemary and thyme"]], [["c", "[Am]"], ["x", "Between the salt water and the "], ["c", "[G]"], ["x", "sea strand"]], [["c", "[C]"], ["x", "Then she'll be a "], ["c", "[G]"], ["x", "true love of mine"]], [], [["i", "Verse 4"]], [["c", "[Am]"], ["x", "Tell her to reap it with a "], ["c", "[G]"], ["x", "sickle of leather"]], [["c", "[C]"], ["x", "Parsley, sage, "], ["c", "[G]"], ["x", "rosemary and thyme"]], [["c", "[Am]"], ["x", "And gather it all in a "], ["c", "[G]"], ["x", "bunch of heather"]], [["c", "[C]"], ["x", "Then she'll be a "], ["c", "[G]"], ["x", "true love of mine"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "Am", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "Am", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}]}]}, {"id": "shenandoah", "n": 7, "title": "Shenandoah", "artist": "Traditional", "level": "Medium", "new": false, "dur": 3.0, "key": "C", "sheetKey": "C", "capo": 0, "bpm": 66, "time": "4/4", "strum": "dduudu-4-4", "chords": ["C", "F", "G"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "Oh Shenandoah, I "], ["c", "[F]"], ["x", "long to hear you"]], [["c", "[C]"], ["x", "Away, you "], ["c", "[G]"], ["x", "rolling river"]], [["c", "[C]"], ["x", "Oh Shenandoah, I "], ["c", "[F]"], ["x", "long to hear you"]], [["c", "[C]"], ["x", "Away, I'm "], ["c", "[G]"], ["x", "bound away"]], [["x", "'Cross the "], ["c", "[F]"], ["x", "wide Mis"], ["c", "[C]"], ["x", "souri"]], [], [["i", "Verse 2"]], [["c", "[C]"], ["x", "Oh Shenandoah, I "], ["c", "[F]"], ["x", "love your daughter"]], [["c", "[C]"], ["x", "Away, you "], ["c", "[G]"], ["x", "rolling river"]], [["c", "[C]"], ["x", "Oh Shenandoah, I "], ["c", "[F]"], ["x", "love your daughter"]], [["c", "[C]"], ["x", "Away, I'm "], ["c", "[G]"], ["x", "bound away"]], [["x", "'Cross the "], ["c", "[F]"], ["x", "wide Mis"], ["c", "[C]"], ["x", "souri"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}]}]}, {"id": "danny-boy", "n": 8, "title": "Danny Boy", "artist": "Frederic Weatherly", "level": "Hard", "new": false, "dur": 3.5, "key": "D", "sheetKey": "C", "capo": 2, "bpm": 72, "time": "4/4", "strum": "dduudu-4-4", "chords": ["C", "F", "G", "Dm", "G7", "Am"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "Oh Danny Boy, the "], ["c", "[F]"], ["x", "pipes, the pipes are "], ["c", "[C]"], ["x", "calling"]], [["x", "From "], ["c", "[G]"], ["x", "glen to glen, and "], ["c", "[Dm]"], ["x", "down the mountain "], ["c", "[G]"], ["x", "side"]], [["x", "The "], ["c", "[C]"], ["x", "summer's gone, and "], ["c", "[F]"], ["x", "all the roses "], ["c", "[C]"], ["x", "falling"]], [["x", "It's "], ["c", "[G]"], ["x", "you, it's you must "], ["c", "[G7]"], ["x", "go and I must "], ["c", "[C]"], ["x", "bide"]], [], [["i", "Verse 2"]], [["x", "But "], ["c", "[C]"], ["x", "come ye back when "], ["c", "[F]"], ["x", "summer's in the "], ["c", "[C]"], ["x", "meadow"]], [["x", "Or when the "], ["c", "[G]"], ["x", "valley's hushed and "], ["c", "[Dm]"], ["x", "white with "], ["c", "[G]"], ["x", "snow"]], [["x", "It's "], ["c", "[C]"], ["x", "I'll be here in "], ["c", "[F]"], ["x", "sunshine or in "], ["c", "[C]"], ["x", "shadow"]], [["x", "Oh "], ["c", "[Am]"], ["x", "Danny Boy, oh "], ["c", "[F]"], ["x", "Danny Boy, I "], ["c", "[G]"], ["x", "love you "], ["c", "[C]"], ["x", "so"]]], "grid": [{"label": "Verse 1", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "Dm", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}]}, {"label": "Verse 2", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "Dm", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "Am", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}]}]}, {"id": "waltzing-matilda", "n": 9, "title": "Waltzing Matilda", "artist": "Banjo Paterson", "level": "Easy", "new": false, "dur": 3.0, "key": "C", "sheetKey": "C", "capo": 0, "bpm": 108, "time": "4/4", "strum": "dduudu-4-4", "chords": ["C", "G7", "F"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "Once a jolly swagman camped by a "], ["c", "[G7]"], ["x", "billabong"]], [["c", "[C]"], ["x", "Under the shade of a "], ["c", "[G7]"], ["x", "coolibah tree"]], [["c", "[C]"], ["x", "And he sang as he watched and waited till his "], ["c", "[F]"], ["x", "billy boiled"]], [["c", "[C]"], ["x", "\"You'll come a-"], ["c", "[G7]"], ["x", "waltzing Matilda with "], ["c", "[C]"], ["x", "me\""]], [], [["i", "Chorus"]], [["c", "[C]"], ["x", "Waltzing Matilda, "], ["c", "[G7]"], ["x", "waltzing Matilda"]], [["c", "[C]"], ["x", "You'll come a-"], ["c", "[G7]"], ["x", "waltzing Matilda with me"]], [["c", "[C]"], ["x", "And he sang as he watched and waited till his "], ["c", "[F]"], ["x", "billy boiled"]], [["c", "[C]"], ["x", "\"You'll come a-"], ["c", "[G7]"], ["x", "waltzing Matilda with "], ["c", "[C]"], ["x", "me\""]], [], [["i", "Verse 2"]], [["c", "[C]"], ["x", "Down came a jumbuck to drink at that "], ["c", "[G7]"], ["x", "billabong"]], [["c", "[C]"], ["x", "Up jumped the swagman and "], ["c", "[G7]"], ["x", "grabbed him with glee"]], [["c", "[C]"], ["x", "And he sang as he shoved that jumbuck in his "], ["c", "[F]"], ["x", "tucker bag"]], [["c", "[C]"], ["x", "\"You'll come a-"], ["c", "[G7]"], ["x", "waltzing Matilda with "], ["c", "[C]"], ["x", "me\""]], [], [["i", "Verse 3"]], [["c", "[C]"], ["x", "Up rode the squatter, mounted on his "], ["c", "[G7]"], ["x", "thoroughbred"]], [["c", "[C]"], ["x", "Down came the troopers, "], ["c", "[G7]"], ["x", "one, two, three"]], [["c", "[C]"], ["x", "\"Where's that jolly jumbuck you've got in your "], ["c", "[F]"], ["x", "tucker bag?\""]], [["c", "[C]"], ["x", "\"You'll come a-"], ["c", "[G7]"], ["x", "waltzing Matilda with "], ["c", "[C]"], ["x", "me\""]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}]}, {"label": "Chorus", "role": "chorus", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}]}]}, {"id": "the-water-is-wide", "n": 10, "title": "The Water Is Wide", "artist": "Traditional", "level": "Easy", "new": false, "dur": 3.0, "key": "G", "sheetKey": "G", "capo": 0, "bpm": 80, "time": "3/4", "strum": "waltz-3-4", "chords": ["G", "C", "Em", "D"], "sheet": [[["i", "Verse 1"]], [["c", "[G]"], ["x", "The water is wide, I "], ["c", "[C]"], ["x", "cannot get "], ["c", "[G]"], ["x", "o'er"]], [["x", "And "], ["c", "[Em]"], ["x", "neither have I "], ["c", "[D]"], ["x", "wings to fly"]], [["x", "Give "], ["c", "[G]"], ["x", "me a boat that can "], ["c", "[C]"], ["x", "carry "], ["c", "[G]"], ["x", "two"]], [["x", "And "], ["c", "[Em]"], ["x", "both shall row, my "], ["c", "[D]"], ["x", "love and "], ["c", "[G]"], ["x", "I"]], [], [["i", "Verse 2"]], [["c", "[G]"], ["x", "A ship there is and "], ["c", "[C]"], ["x", "she sails the "], ["c", "[G]"], ["x", "sea"]], [["x", "She's "], ["c", "[Em]"], ["x", "loaded deep as "], ["c", "[D]"], ["x", "deep can be"]], [["x", "But "], ["c", "[G]"], ["x", "not so deep as the "], ["c", "[C]"], ["x", "love I'm "], ["c", "[G]"], ["x", "in"]], [["x", "And I "], ["c", "[Em]"], ["x", "know not if I "], ["c", "[D]"], ["x", "sink or "], ["c", "[G]"], ["x", "swim"]], [], [["i", "Verse 3"]], [["c", "[G]"], ["x", "Oh love is gentle and "], ["c", "[C]"], ["x", "love is "], ["c", "[G]"], ["x", "kind"]], [["x", "The "], ["c", "[Em]"], ["x", "sweetest flower when "], ["c", "[D]"], ["x", "first it's new"]], [["x", "But "], ["c", "[G]"], ["x", "love grows old and "], ["c", "[C]"], ["x", "waxes "], ["c", "[G]"], ["x", "cold"]], [["x", "And "], ["c", "[Em]"], ["x", "fades away like the "], ["c", "[D]"], ["x", "morning "], ["c", "[G]"], ["x", "dew"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "Em", "beats": 3}]}, {"beats": [{"chord": "D", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "Em", "beats": 3}]}, {"beats": [{"chord": "D", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}]}]}, {"id": "wayfaring-stranger", "n": 11, "title": "Wayfaring Stranger", "artist": "Traditional", "level": "Medium", "new": false, "dur": 3.0, "key": "Am", "sheetKey": "Am", "capo": 0, "bpm": 92, "time": "4/4", "strum": "dduudu-4-4", "chords": ["Am", "C", "Dm", "E7"], "sheet": [[["i", "Verse 1"]], [["c", "[Am]"], ["x", "I'm just a poor wayfaring "], ["c", "[C]"], ["x", "stranger"]], [["x", "While "], ["c", "[Dm]"], ["x", "traveling through this "], ["c", "[Am]"], ["x", "world of "], ["c", "[E7]"], ["x", "woe"]], [["x", "Yet "], ["c", "[Am]"], ["x", "there's no sickness, "], ["c", "[C]"], ["x", "toil nor danger"]], [["x", "In "], ["c", "[Dm]"], ["x", "that bright land to "], ["c", "[E7]"], ["x", "which I "], ["c", "[Am]"], ["x", "go"]], [], [["i", "Verse 2"]], [["c", "[Am]"], ["x", "I'm going there to see my "], ["c", "[C]"], ["x", "father"]], [["x", "I'm "], ["c", "[Dm]"], ["x", "going there no "], ["c", "[Am]"], ["x", "more to "], ["c", "[E7]"], ["x", "roam"]], [["x", "I'm "], ["c", "[Am]"], ["x", "only going "], ["c", "[C]"], ["x", "over Jordan"]], [["x", "I'm "], ["c", "[Dm]"], ["x", "only going "], ["c", "[E7]"], ["x", "over "], ["c", "[Am]"], ["x", "home"]], [], [["i", "Verse 3"]], [["c", "[Am]"], ["x", "I know dark clouds will gather "], ["c", "[C]"], ["x", "'round me"]], [["x", "I "], ["c", "[Dm]"], ["x", "know my way is "], ["c", "[Am]"], ["x", "rough and "], ["c", "[E7]"], ["x", "steep"]], [["x", "Yet "], ["c", "[Am]"], ["x", "golden fields lie "], ["c", "[C]"], ["x", "just before me"]], [["x", "Where "], ["c", "[Dm]"], ["x", "God's redeemed shall "], ["c", "[E7]"], ["x", "ever "], ["c", "[Am]"], ["x", "sleep"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "Am", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "Dm", "beats": 4}]}, {"beats": [{"chord": "Am", "beats": 4}]}, {"beats": [{"chord": "E7", "beats": 4}]}, {"beats": [{"chord": "Am", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "Dm", "beats": 4}]}, {"beats": [{"chord": "E7", "beats": 4}]}, {"beats": [{"chord": "Am", "beats": 4}]}]}]}, {"id": "oh-susanna", "n": 12, "title": "Oh! Susanna", "artist": "Stephen Foster", "level": "Easy", "new": false, "dur": 2.5, "key": "C", "sheetKey": "C", "capo": 0, "bpm": 120, "time": "2/4", "strum": "eighths-2-4", "chords": ["C", "G7"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "I come from Alabama with my "], ["c", "[G7]"], ["x", "banjo on my knee"]], [["x", "I'm "], ["c", "[C]"], ["x", "going to Louisiana, my "], ["c", "[G7]"], ["x", "true love for to see"]], [["x", "It "], ["c", "[C]"], ["x", "rained all night the day I left, the "], ["c", "[G7]"], ["x", "weather it was dry"]], [["x", "The "], ["c", "[C]"], ["x", "sun so hot I froze to death, Su"], ["c", "[G7]"], ["x", "sanna, don't you "], ["c", "[C]"], ["x", "cry"]], [], [["i", "Chorus"]], [["c", "[C]"], ["x", "Oh, Susanna! Oh, don't you "], ["c", "[G7]"], ["x", "cry for me"]], [["x", "For "], ["c", "[C]"], ["x", "I come from Alabama with my "], ["c", "[G7]"], ["x", "banjo on my "], ["c", "[C]"], ["x", "knee"]], [], [["i", "Verse 2"]], [["x", "I "], ["c", "[C]"], ["x", "had a dream the other night when "], ["c", "[G7]"], ["x", "everything was still"]], [["x", "I "], ["c", "[C]"], ["x", "thought I saw Susanna dear a-"], ["c", "[G7]"], ["x", "coming down the hill"]], [["x", "The "], ["c", "[C]"], ["x", "buckwheat cake was in her mouth, the "], ["c", "[G7]"], ["x", "tear was in her eye"]], [["x", "Says "], ["c", "[C]"], ["x", "I, \"I'm coming from the South, Su"], ["c", "[G7]"], ["x", "sanna, don't you "], ["c", "[C]"], ["x", "cry\""]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "G7", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "G7", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "G7", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "G7", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}]}, {"label": "Chorus", "role": "chorus", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "G7", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "G7", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}]}]}]}];</script>
+<script>
+/* Songbook — chord playback for the chord explorer
+ *
+ * A tiny Web Audio plucked-string synth. It is intentionally dependency-free
+ * and only creates an AudioContext from a user gesture (the Strum/Arpeggio
+ * buttons), so it works under the same iOS restrictions as the metronome.
+ */
+(function (SB) {
+    'use strict';
+
+    var ctx = null;
+
+    function audioCtx() {
+        if (ctx) {
+            if (ctx.state === 'suspended') ctx.resume();
+            return ctx;
+        }
+        var AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return null;
+        try {
+            ctx = new AudioCtx();
+        } catch (e) {
+            return null;
+        }
+        if (ctx.state === 'suspended') ctx.resume();
+        return ctx;
+    }
+
+    function midiToFreq(midi) {
+        return 440 * Math.pow(2, (midi - 69) / 12);
+    }
+
+    function pluck(context, midi, when, duration, level) {
+        var freq = midiToFreq(midi);
+        var osc = context.createOscillator();
+        var filter = context.createBiquadFilter();
+        var gain = context.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, when);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(Math.min(7000, freq * 7), when);
+        filter.Q.setValueAtTime(0.6, when);
+
+        gain.gain.setValueAtTime(0.0001, when);
+        gain.gain.exponentialRampToValueAtTime(level, when + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, when + duration);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(context.destination);
+        osc.start(when);
+        osc.stop(when + duration + 0.05);
+    }
+
+    /* Play a fretted voicing. `frets` uses -1 for a muted string; `capo` is
+     * added to every sounding fret. Returns false when Web Audio is missing. */
+    SB.playChord = function (frets, instrumentId, mode, capo) {
+        var context = audioCtx();
+        if (!context || !frets || !frets.length) return false;
+
+        var instrument = ChordKit.instrumentOf(instrumentId);
+        var offset = Number(capo) || 0;
+        var notes = [];
+        for (var i = 0; i < frets.length && i < instrument.tuning.length; i++) {
+            if (frets[i] < 0) continue;
+            notes.push(instrument.tuning[i] + offset + frets[i]);
+        }
+        if (!notes.length) return false;
+
+        // Strum low to high; the arpeggio uses the same order with a wider gap.
+        notes.sort(function (a, b) { return a - b; });
+        var now = context.currentTime + 0.03;
+        var arpeggio = mode === 'arpeggio';
+        var step = arpeggio ? 0.14 : 0.035;
+        var duration = arpeggio ? 1.35 : 1.05;
+        var level = arpeggio ? 0.10 : 0.085;
+
+        notes.forEach(function (midi, index) {
+            pluck(context, midi, now + index * step, duration, level);
+        });
+        return true;
+    };
+})(window.SB = window.SB || {});
 
 </script>
 <script>
@@ -7738,7 +7896,6 @@ button.structure-close,
      single-file build keeps working from file://. This ordering is the one
      source of truth: build_single.py and build_pages.py both read it.
      core must come first (it creates SB.state) and app.js last (it runs init). -->
-<script>window.__SONGBOOKS__ = [{"id": "demo", "name": "Public Domain Songbook", "description": "Twelve traditional songs and evergreens in the public domain, arranged to show chords, tempo, metre, strumming and the bar/beat grid.", "instrument": "ukulele", "songs": [{"id": "amazing-grace", "n": 1, "title": "Amazing Grace", "artist": "John Newton", "level": "Easy", "new": false, "dur": 3.0, "key": "G", "sheetKey": "G", "capo": 0, "bpm": 72, "time": "3/4", "strum": "waltz-3-4", "chords": ["G", "C", "D"], "sheet": [[["i", "Verse 1"]], [["c", "[G]"], ["x", "Amazing grace, how "], ["c", "[C]"], ["x", "sweet the sound"]], [["x", "That "], ["c", "[G]"], ["x", "saved a "], ["c", "[D]"], ["x", "wretch like me"]], [["c", "[G]"], ["x", "I once was lost, but "], ["c", "[C]"], ["x", "now am found"]], [["x", "Was "], ["c", "[G]"], ["x", "blind, but "], ["c", "[D]"], ["x", "now I "], ["c", "[G]"], ["x", "see"]], [], [["i", "Verse 2"]], [["c", "[G]"], ["x", "'Twas grace that taught my "], ["c", "[C]"], ["x", "heart to fear"]], [["x", "And "], ["c", "[G]"], ["x", "grace my "], ["c", "[D]"], ["x", "fears relieved"]], [["c", "[G]"], ["x", "How precious did that "], ["c", "[C]"], ["x", "grace appear"]], [["x", "The "], ["c", "[G]"], ["x", "hour I "], ["c", "[D]"], ["x", "first be"], ["c", "[G]"], ["x", "lieved"]], [], [["i", "Verse 3"]], [["x", "Through "], ["c", "[G]"], ["x", "many dangers, "], ["c", "[C]"], ["x", "toils and snares"]], [["x", "I "], ["c", "[G]"], ["x", "have already "], ["c", "[D]"], ["x", "come"]], [["x", "'Tis "], ["c", "[G]"], ["x", "grace hath brought me "], ["c", "[C]"], ["x", "safe thus far"]], [["x", "And "], ["c", "[G]"], ["x", "grace will "], ["c", "[D]"], ["x", "lead me "], ["c", "[G]"], ["x", "home"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "D", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "D", "beats": 1}, {"chord": "G", "beats": 2}]}]}]}, {"id": "auld-lang-syne", "n": 2, "title": "Auld Lang Syne", "artist": "Robert Burns", "level": "Easy", "new": false, "dur": 2.5, "key": "C", "sheetKey": "C", "capo": 0, "bpm": 84, "time": "3/4", "strum": "waltz-3-4", "chords": ["C", "C7", "F", "G7"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "Should auld acquaintance "], ["c", "[C7]"], ["x", "be forgot"]], [["x", "and "], ["c", "[F]"], ["x", "never brought to "], ["c", "[G7]"], ["x", "mind?"]], [["c", "[C]"], ["x", "Should auld acquaintance "], ["c", "[C7]"], ["x", "be forgot"]], [["x", "and "], ["c", "[F]"], ["x", "auld lang "], ["c", "[C]"], ["x", "syne?"]], [], [["i", "Chorus"]], [["x", "For "], ["c", "[C]"], ["x", "auld lang syne, my "], ["c", "[C7]"], ["x", "dear"]], [["x", "for "], ["c", "[F]"], ["x", "auld lang "], ["c", "[G7]"], ["x", "syne"]], [["x", "we'll "], ["c", "[C]"], ["x", "tak' a cup o' "], ["c", "[C7]"], ["x", "kindness yet"]], [["x", "for "], ["c", "[F]"], ["x", "auld lang "], ["c", "[C]"], ["x", "syne"]], [], [["i", "Verse 2"]], [["x", "And "], ["c", "[C]"], ["x", "surely ye'll be your "], ["c", "[C7]"], ["x", "pint-stowp"]], [["x", "and "], ["c", "[F]"], ["x", "surely I'll be "], ["c", "[G7]"], ["x", "mine"]], [["x", "and "], ["c", "[C]"], ["x", "we'll tak' a cup o' "], ["c", "[C7]"], ["x", "kindness yet"]], [["x", "for "], ["c", "[F]"], ["x", "auld lang "], ["c", "[C]"], ["x", "syne"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "C7", "beats": 3}]}, {"beats": [{"chord": "F", "beats": 3}]}, {"beats": [{"chord": "G7", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "C7", "beats": 3}]}, {"beats": [{"chord": "F", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}]}, {"label": "Chorus", "role": "chorus", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "C7", "beats": 3}]}, {"beats": [{"chord": "F", "beats": 3}]}, {"beats": [{"chord": "G7", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "C7", "beats": 3}]}, {"beats": [{"chord": "F", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}]}]}, {"id": "down-by-the-riverside", "n": 3, "title": "Down by the Riverside", "artist": "Traditional spiritual", "level": "Easy", "new": false, "dur": 2.5, "key": "C", "sheetKey": "C", "capo": 0, "bpm": 120, "time": "4/4", "strum": "dduudu-4-4", "chords": ["C", "F", "G"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "I'm gonna lay down my "], ["c", "[F]"], ["x", "sword and shield"]], [["c", "[C]"], ["x", "Down by the "], ["c", "[G]"], ["x", "riverside"]], [["c", "[C]"], ["x", "I'm gonna lay down my "], ["c", "[F]"], ["x", "sword and shield"]], [["c", "[C]"], ["x", "Down by the "], ["c", "[G]"], ["x", "riverside"]], [], [["i", "Chorus"]], [["c", "[C]"], ["x", "I ain't gonna study "], ["c", "[F]"], ["x", "war no more"]], [["c", "[C]"], ["x", "Ain't gonna "], ["c", "[G]"], ["x", "study war no more"]], [["c", "[C]"], ["x", "I ain't gonna study "], ["c", "[F]"], ["x", "war no more"]], [["c", "[C]"], ["x", "Ain't gonna "], ["c", "[G]"], ["x", "study war no more"]], [], [["i", "Verse 2"]], [["c", "[C]"], ["x", "I'm gonna lay down my "], ["c", "[F]"], ["x", "heavy load"]], [["c", "[C]"], ["x", "Down by the "], ["c", "[G]"], ["x", "riverside"]], [["c", "[C]"], ["x", "I'm gonna lay down my "], ["c", "[F]"], ["x", "heavy load"]], [["c", "[C]"], ["x", "Down by the "], ["c", "[G]"], ["x", "riverside"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": true, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}]}, {"label": "Chorus", "role": "chorus", "repeat": true, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}]}]}, {"id": "when-the-saints-go-marching-in", "n": 4, "title": "When the Saints Go Marching In", "artist": "Traditional spiritual", "level": "Easy", "new": false, "dur": 2.5, "key": "C", "sheetKey": "C", "capo": 0, "bpm": 120, "time": "4/4", "strum": "dduudu-4-4", "chords": ["C", "C7", "F", "G7"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "Oh, when the saints go "], ["c", "[C7]"], ["x", "marching in"]], [["c", "[F]"], ["x", "Oh, when the saints go "], ["c", "[C]"], ["x", "marching in"]], [["c", "[G7]"], ["x", "Lord, I want to be in that number"]], [["c", "[C]"], ["x", "When the saints go "], ["c", "[G7]"], ["x", "marching "], ["c", "[C]"], ["x", "in"]], [], [["i", "Verse 2"]], [["c", "[C]"], ["x", "Oh, when the saints go "], ["c", "[C7]"], ["x", "marching in"]], [["c", "[F]"], ["x", "Oh, when the saints go "], ["c", "[C]"], ["x", "marching in"]], [["c", "[G7]"], ["x", "Lord, I want to be in that number"]], [["c", "[C]"], ["x", "When the saints go "], ["c", "[G7]"], ["x", "marching "], ["c", "[C]"], ["x", "in"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "C7", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}]}]}, {"id": "house-of-the-rising-sun", "n": 5, "title": "House of the Rising Sun", "artist": "Traditional", "level": "Medium", "new": false, "dur": 3.5, "key": "Am", "sheetKey": "Am", "capo": 0, "bpm": 96, "time": "6/8", "strum": "du-6-8", "chords": ["Am", "C", "D", "F", "E7"], "sheet": [[["i", "Verse 1"]], [["c", "[Am]"], ["x", "There is a house in "], ["c", "[C]"], ["x", "New Orleans"]], [["c", "[D]"], ["x", "They call the "], ["c", "[F]"], ["x", "Rising Sun"]], [["c", "[Am]"], ["x", "And it's been the ruin of "], ["c", "[C]"], ["x", "many a poor boy"]], [["c", "[E7]"], ["x", "And God, I "], ["c", "[Am]"], ["x", "know I'm one"]], [], [["i", "Verse 2"]], [["c", "[Am]"], ["x", "My mother was a "], ["c", "[C]"], ["x", "tailor"]], [["c", "[D]"], ["x", "She sewed my "], ["c", "[F]"], ["x", "new blue jeans"]], [["c", "[Am]"], ["x", "My father was a "], ["c", "[C]"], ["x", "gamblin' man"]], [["c", "[E7]"], ["x", "Down in "], ["c", "[Am]"], ["x", "New Orleans"]], [], [["i", "Verse 3"]], [["c", "[Am]"], ["x", "Now the only thing a "], ["c", "[C]"], ["x", "gambler needs"]], [["c", "[D]"], ["x", "Is a suitcase and a "], ["c", "[F]"], ["x", "trunk"]], [["c", "[Am]"], ["x", "And the only time he's "], ["c", "[C]"], ["x", "satisfied"]], [["c", "[E7]"], ["x", "Is when he's "], ["c", "[Am]"], ["x", "on a drunk"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": true, "bars": [{"beats": [{"chord": "Am", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "D", "beats": 2}]}, {"beats": [{"chord": "F", "beats": 2}]}, {"beats": [{"chord": "Am", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "E7", "beats": 2}]}, {"beats": [{"chord": "Am", "beats": 2}]}]}]}, {"id": "scarborough-fair", "n": 6, "title": "Scarborough Fair", "artist": "Traditional", "level": "Medium", "new": false, "dur": 3.0, "key": "Am", "sheetKey": "Am", "capo": 0, "bpm": 100, "time": "3/4", "strum": "waltz-3-4", "chords": ["Am", "G", "C"], "sheet": [[["i", "Verse 1"]], [["c", "[Am]"], ["x", "Are you going to "], ["c", "[G]"], ["x", "Scarborough Fair?"]], [["c", "[C]"], ["x", "Parsley, sage, "], ["c", "[G]"], ["x", "rosemary and thyme"]], [["c", "[Am]"], ["x", "Remember me to "], ["c", "[G]"], ["x", "one who lives there"]], [["c", "[C]"], ["x", "For she once was a "], ["c", "[G]"], ["x", "true love of mine"]], [], [["i", "Verse 2"]], [["c", "[Am]"], ["x", "Tell her to make me a "], ["c", "[G]"], ["x", "cambric shirt"]], [["c", "[C]"], ["x", "Parsley, sage, "], ["c", "[G]"], ["x", "rosemary and thyme"]], [["c", "[Am]"], ["x", "Without no seams nor "], ["c", "[G]"], ["x", "needlework"]], [["c", "[C]"], ["x", "Then she'll be a "], ["c", "[G]"], ["x", "true love of mine"]], [], [["i", "Verse 3"]], [["c", "[Am]"], ["x", "Tell her to find me an "], ["c", "[G]"], ["x", "acre of land"]], [["c", "[C]"], ["x", "Parsley, sage, "], ["c", "[G]"], ["x", "rosemary and thyme"]], [["c", "[Am]"], ["x", "Between the salt water and the "], ["c", "[G]"], ["x", "sea strand"]], [["c", "[C]"], ["x", "Then she'll be a "], ["c", "[G]"], ["x", "true love of mine"]], [], [["i", "Verse 4"]], [["c", "[Am]"], ["x", "Tell her to reap it with a "], ["c", "[G]"], ["x", "sickle of leather"]], [["c", "[C]"], ["x", "Parsley, sage, "], ["c", "[G]"], ["x", "rosemary and thyme"]], [["c", "[Am]"], ["x", "And gather it all in a "], ["c", "[G]"], ["x", "bunch of heather"]], [["c", "[C]"], ["x", "Then she'll be a "], ["c", "[G]"], ["x", "true love of mine"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "Am", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "Am", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}]}]}, {"id": "shenandoah", "n": 7, "title": "Shenandoah", "artist": "Traditional", "level": "Medium", "new": false, "dur": 3.0, "key": "C", "sheetKey": "C", "capo": 0, "bpm": 66, "time": "4/4", "strum": "dduudu-4-4", "chords": ["C", "F", "G"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "Oh Shenandoah, I "], ["c", "[F]"], ["x", "long to hear you"]], [["c", "[C]"], ["x", "Away, you "], ["c", "[G]"], ["x", "rolling river"]], [["c", "[C]"], ["x", "Oh Shenandoah, I "], ["c", "[F]"], ["x", "long to hear you"]], [["c", "[C]"], ["x", "Away, I'm "], ["c", "[G]"], ["x", "bound away"]], [["x", "'Cross the "], ["c", "[F]"], ["x", "wide Mis"], ["c", "[C]"], ["x", "souri"]], [], [["i", "Verse 2"]], [["c", "[C]"], ["x", "Oh Shenandoah, I "], ["c", "[F]"], ["x", "love your daughter"]], [["c", "[C]"], ["x", "Away, you "], ["c", "[G]"], ["x", "rolling river"]], [["c", "[C]"], ["x", "Oh Shenandoah, I "], ["c", "[F]"], ["x", "love your daughter"]], [["c", "[C]"], ["x", "Away, I'm "], ["c", "[G]"], ["x", "bound away"]], [["x", "'Cross the "], ["c", "[F]"], ["x", "wide Mis"], ["c", "[C]"], ["x", "souri"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}]}]}, {"id": "danny-boy", "n": 8, "title": "Danny Boy", "artist": "Frederic Weatherly", "level": "Hard", "new": false, "dur": 3.5, "key": "D", "sheetKey": "C", "capo": 2, "bpm": 72, "time": "4/4", "strum": "dduudu-4-4", "chords": ["C", "F", "G", "Dm", "G7", "Am"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "Oh Danny Boy, the "], ["c", "[F]"], ["x", "pipes, the pipes are "], ["c", "[C]"], ["x", "calling"]], [["x", "From "], ["c", "[G]"], ["x", "glen to glen, and "], ["c", "[Dm]"], ["x", "down the mountain "], ["c", "[G]"], ["x", "side"]], [["x", "The "], ["c", "[C]"], ["x", "summer's gone, and "], ["c", "[F]"], ["x", "all the roses "], ["c", "[C]"], ["x", "falling"]], [["x", "It's "], ["c", "[G]"], ["x", "you, it's you must "], ["c", "[G7]"], ["x", "go and I must "], ["c", "[C]"], ["x", "bide"]], [], [["i", "Verse 2"]], [["x", "But "], ["c", "[C]"], ["x", "come ye back when "], ["c", "[F]"], ["x", "summer's in the "], ["c", "[C]"], ["x", "meadow"]], [["x", "Or when the "], ["c", "[G]"], ["x", "valley's hushed and "], ["c", "[Dm]"], ["x", "white with "], ["c", "[G]"], ["x", "snow"]], [["x", "It's "], ["c", "[C]"], ["x", "I'll be here in "], ["c", "[F]"], ["x", "sunshine or in "], ["c", "[C]"], ["x", "shadow"]], [["x", "Oh "], ["c", "[Am]"], ["x", "Danny Boy, oh "], ["c", "[F]"], ["x", "Danny Boy, I "], ["c", "[G]"], ["x", "love you "], ["c", "[C]"], ["x", "so"]]], "grid": [{"label": "Verse 1", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "Dm", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}]}, {"label": "Verse 2", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "Dm", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "Am", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "G", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}]}]}, {"id": "waltzing-matilda", "n": 9, "title": "Waltzing Matilda", "artist": "Banjo Paterson", "level": "Easy", "new": false, "dur": 3.0, "key": "C", "sheetKey": "C", "capo": 0, "bpm": 108, "time": "4/4", "strum": "dduudu-4-4", "chords": ["C", "G7", "F"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "Once a jolly swagman camped by a "], ["c", "[G7]"], ["x", "billabong"]], [["c", "[C]"], ["x", "Under the shade of a "], ["c", "[G7]"], ["x", "coolibah tree"]], [["c", "[C]"], ["x", "And he sang as he watched and waited till his "], ["c", "[F]"], ["x", "billy boiled"]], [["c", "[C]"], ["x", "\"You'll come a-"], ["c", "[G7]"], ["x", "waltzing Matilda with "], ["c", "[C]"], ["x", "me\""]], [], [["i", "Chorus"]], [["c", "[C]"], ["x", "Waltzing Matilda, "], ["c", "[G7]"], ["x", "waltzing Matilda"]], [["c", "[C]"], ["x", "You'll come a-"], ["c", "[G7]"], ["x", "waltzing Matilda with me"]], [["c", "[C]"], ["x", "And he sang as he watched and waited till his "], ["c", "[F]"], ["x", "billy boiled"]], [["c", "[C]"], ["x", "\"You'll come a-"], ["c", "[G7]"], ["x", "waltzing Matilda with "], ["c", "[C]"], ["x", "me\""]], [], [["i", "Verse 2"]], [["c", "[C]"], ["x", "Down came a jumbuck to drink at that "], ["c", "[G7]"], ["x", "billabong"]], [["c", "[C]"], ["x", "Up jumped the swagman and "], ["c", "[G7]"], ["x", "grabbed him with glee"]], [["c", "[C]"], ["x", "And he sang as he shoved that jumbuck in his "], ["c", "[F]"], ["x", "tucker bag"]], [["c", "[C]"], ["x", "\"You'll come a-"], ["c", "[G7]"], ["x", "waltzing Matilda with "], ["c", "[C]"], ["x", "me\""]], [], [["i", "Verse 3"]], [["c", "[C]"], ["x", "Up rode the squatter, mounted on his "], ["c", "[G7]"], ["x", "thoroughbred"]], [["c", "[C]"], ["x", "Down came the troopers, "], ["c", "[G7]"], ["x", "one, two, three"]], [["c", "[C]"], ["x", "\"Where's that jolly jumbuck you've got in your "], ["c", "[F]"], ["x", "tucker bag?\""]], [["c", "[C]"], ["x", "\"You'll come a-"], ["c", "[G7]"], ["x", "waltzing Matilda with "], ["c", "[C]"], ["x", "me\""]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}]}, {"label": "Chorus", "role": "chorus", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "F", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "G7", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}]}]}, {"id": "the-water-is-wide", "n": 10, "title": "The Water Is Wide", "artist": "Traditional", "level": "Easy", "new": false, "dur": 3.0, "key": "G", "sheetKey": "G", "capo": 0, "bpm": 80, "time": "3/4", "strum": "waltz-3-4", "chords": ["G", "C", "Em", "D"], "sheet": [[["i", "Verse 1"]], [["c", "[G]"], ["x", "The water is wide, I "], ["c", "[C]"], ["x", "cannot get "], ["c", "[G]"], ["x", "o'er"]], [["x", "And "], ["c", "[Em]"], ["x", "neither have I "], ["c", "[D]"], ["x", "wings to fly"]], [["x", "Give "], ["c", "[G]"], ["x", "me a boat that can "], ["c", "[C]"], ["x", "carry "], ["c", "[G]"], ["x", "two"]], [["x", "And "], ["c", "[Em]"], ["x", "both shall row, my "], ["c", "[D]"], ["x", "love and "], ["c", "[G]"], ["x", "I"]], [], [["i", "Verse 2"]], [["c", "[G]"], ["x", "A ship there is and "], ["c", "[C]"], ["x", "she sails the "], ["c", "[G]"], ["x", "sea"]], [["x", "She's "], ["c", "[Em]"], ["x", "loaded deep as "], ["c", "[D]"], ["x", "deep can be"]], [["x", "But "], ["c", "[G]"], ["x", "not so deep as the "], ["c", "[C]"], ["x", "love I'm "], ["c", "[G]"], ["x", "in"]], [["x", "And I "], ["c", "[Em]"], ["x", "know not if I "], ["c", "[D]"], ["x", "sink or "], ["c", "[G]"], ["x", "swim"]], [], [["i", "Verse 3"]], [["c", "[G]"], ["x", "Oh love is gentle and "], ["c", "[C]"], ["x", "love is "], ["c", "[G]"], ["x", "kind"]], [["x", "The "], ["c", "[Em]"], ["x", "sweetest flower when "], ["c", "[D]"], ["x", "first it's new"]], [["x", "But "], ["c", "[G]"], ["x", "love grows old and "], ["c", "[C]"], ["x", "waxes "], ["c", "[G]"], ["x", "cold"]], [["x", "And "], ["c", "[Em]"], ["x", "fades away like the "], ["c", "[D]"], ["x", "morning "], ["c", "[G]"], ["x", "dew"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "Em", "beats": 3}]}, {"beats": [{"chord": "D", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "C", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}, {"beats": [{"chord": "Em", "beats": 3}]}, {"beats": [{"chord": "D", "beats": 3}]}, {"beats": [{"chord": "G", "beats": 3}]}]}]}, {"id": "wayfaring-stranger", "n": 11, "title": "Wayfaring Stranger", "artist": "Traditional", "level": "Medium", "new": false, "dur": 3.0, "key": "Am", "sheetKey": "Am", "capo": 0, "bpm": 92, "time": "4/4", "strum": "dduudu-4-4", "chords": ["Am", "C", "Dm", "E7"], "sheet": [[["i", "Verse 1"]], [["c", "[Am]"], ["x", "I'm just a poor wayfaring "], ["c", "[C]"], ["x", "stranger"]], [["x", "While "], ["c", "[Dm]"], ["x", "traveling through this "], ["c", "[Am]"], ["x", "world of "], ["c", "[E7]"], ["x", "woe"]], [["x", "Yet "], ["c", "[Am]"], ["x", "there's no sickness, "], ["c", "[C]"], ["x", "toil nor danger"]], [["x", "In "], ["c", "[Dm]"], ["x", "that bright land to "], ["c", "[E7]"], ["x", "which I "], ["c", "[Am]"], ["x", "go"]], [], [["i", "Verse 2"]], [["c", "[Am]"], ["x", "I'm going there to see my "], ["c", "[C]"], ["x", "father"]], [["x", "I'm "], ["c", "[Dm]"], ["x", "going there no "], ["c", "[Am]"], ["x", "more to "], ["c", "[E7]"], ["x", "roam"]], [["x", "I'm "], ["c", "[Am]"], ["x", "only going "], ["c", "[C]"], ["x", "over Jordan"]], [["x", "I'm "], ["c", "[Dm]"], ["x", "only going "], ["c", "[E7]"], ["x", "over "], ["c", "[Am]"], ["x", "home"]], [], [["i", "Verse 3"]], [["c", "[Am]"], ["x", "I know dark clouds will gather "], ["c", "[C]"], ["x", "'round me"]], [["x", "I "], ["c", "[Dm]"], ["x", "know my way is "], ["c", "[Am]"], ["x", "rough and "], ["c", "[E7]"], ["x", "steep"]], [["x", "Yet "], ["c", "[Am]"], ["x", "golden fields lie "], ["c", "[C]"], ["x", "just before me"]], [["x", "Where "], ["c", "[Dm]"], ["x", "God's redeemed shall "], ["c", "[E7]"], ["x", "ever "], ["c", "[Am]"], ["x", "sleep"]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "Am", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "Dm", "beats": 4}]}, {"beats": [{"chord": "Am", "beats": 4}]}, {"beats": [{"chord": "E7", "beats": 4}]}, {"beats": [{"chord": "Am", "beats": 4}]}, {"beats": [{"chord": "C", "beats": 4}]}, {"beats": [{"chord": "Dm", "beats": 4}]}, {"beats": [{"chord": "E7", "beats": 4}]}, {"beats": [{"chord": "Am", "beats": 4}]}]}]}, {"id": "oh-susanna", "n": 12, "title": "Oh! Susanna", "artist": "Stephen Foster", "level": "Easy", "new": false, "dur": 2.5, "key": "C", "sheetKey": "C", "capo": 0, "bpm": 120, "time": "2/4", "strum": "eighths-2-4", "chords": ["C", "G7"], "sheet": [[["i", "Verse 1"]], [["c", "[C]"], ["x", "I come from Alabama with my "], ["c", "[G7]"], ["x", "banjo on my knee"]], [["x", "I'm "], ["c", "[C]"], ["x", "going to Louisiana, my "], ["c", "[G7]"], ["x", "true love for to see"]], [["x", "It "], ["c", "[C]"], ["x", "rained all night the day I left, the "], ["c", "[G7]"], ["x", "weather it was dry"]], [["x", "The "], ["c", "[C]"], ["x", "sun so hot I froze to death, Su"], ["c", "[G7]"], ["x", "sanna, don't you "], ["c", "[C]"], ["x", "cry"]], [], [["i", "Chorus"]], [["c", "[C]"], ["x", "Oh, Susanna! Oh, don't you "], ["c", "[G7]"], ["x", "cry for me"]], [["x", "For "], ["c", "[C]"], ["x", "I come from Alabama with my "], ["c", "[G7]"], ["x", "banjo on my "], ["c", "[C]"], ["x", "knee"]], [], [["i", "Verse 2"]], [["x", "I "], ["c", "[C]"], ["x", "had a dream the other night when "], ["c", "[G7]"], ["x", "everything was still"]], [["x", "I "], ["c", "[C]"], ["x", "thought I saw Susanna dear a-"], ["c", "[G7]"], ["x", "coming down the hill"]], [["x", "The "], ["c", "[C]"], ["x", "buckwheat cake was in her mouth, the "], ["c", "[G7]"], ["x", "tear was in her eye"]], [["x", "Says "], ["c", "[C]"], ["x", "I, \"I'm coming from the South, Su"], ["c", "[G7]"], ["x", "sanna, don't you "], ["c", "[C]"], ["x", "cry\""]]], "grid": [{"label": "Verse", "role": "verse", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "G7", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "G7", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "G7", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "G7", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}]}, {"label": "Chorus", "role": "chorus", "repeat": false, "bars": [{"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "G7", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}, {"beats": [{"chord": "G7", "beats": 2}]}, {"beats": [{"chord": "C", "beats": 2}]}]}]}]}];</script>
 <script>
 /* Songbook — core
  * shared helpers, storage keys and the SB.state container
@@ -12174,20 +12331,27 @@ button.structure-close,
 })(window.SB = window.SB || {});
 </script>
 <script>
-/* Songbook — neck explorer
- * full fretboard: selected chord shape, all chord tones and a scale layer
+/* Songbook — chord explorer: full neck, CAGED shapes, chord tones and scale
  *
  * Part of the window.SB namespace. Loaded as a classic script in the order
  * set by index.html; see js/core.js for the shared state. The neck edits the
  * same root/quality/spelling as the shapes tab (js/explorer.js) and reads its
  * voicings from the shared ChordKit engine in chords.js.
+ *
+ * The CAGED layout is built from the five movable major shapes. For each
+ * shape position the engine supplies the best voicing of the actual chord
+ * quality, so a Cm7 region still shows a real Cm7 voicing rather than a
+ * major triad. Regions repeat every octave, which is what makes the familiar
+ * C–A–G–E–D run appear across the neck.
  */
 (function (SB) {
     'use strict';
 
     var PREF_KEY = SB.NS + ':neck';
-    var NECK_FRETS = 12;
-    var INLAY_FRETS = { 3: 1, 5: 1, 7: 1, 9: 1, 12: 2 };
+    var INLAY_FRETS = {
+        3: 1, 5: 1, 7: 1, 9: 1, 12: 2,
+        15: 1, 17: 1, 19: 1, 21: 1, 24: 2
+    };
 
     var MINOR_IDS = { m: 1, m7: 1, m6: 1, m9: 1, 'm7b5': 1 };
 
@@ -12230,14 +12394,41 @@ button.structure-close,
         '\u266d\u266d7': 'Diminished 7th'
     };
 
+    var LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+    var LETTER_PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+    var CAGED_LETTERS = ['C', 'A', 'G', 'E', 'D'];
+    var QUICK_QUALITIES = ['maj', 'm', '7', 'maj7', 'm7'];
+    var LABEL_MODES = ['notes', 'degrees', 'none'];
+    var FRET_CHOICES = [12, 15, 24];
+
+    /* Semitone offsets from the shape's root string. These are the movable
+     * major forms: C and A put the root on the A string, G and E on the low E,
+     * and D on the D string. */
+    var CAGED_SHAPES = {
+        C: { rootString: 1, offsets: { 1: 0, 2: -1, 3: -3, 4: -2, 5: -3 } },
+        A: { rootString: 1, offsets: { 1: 0, 2: 2, 3: 2, 4: 2, 5: 0 } },
+        G: { rootString: 0, offsets: { 0: 0, 1: -1, 2: -3, 3: -3, 4: -3, 5: 0 } },
+        E: { rootString: 0, offsets: { 0: 0, 1: 2, 2: 2, 3: 1, 4: 0, 5: 0 } },
+        D: { rootString: 2, offsets: { 2: 0, 3: 2, 4: 3, 5: 2 } }
+    };
+
+    var CAGED_COLORS = {
+        C: 'var(--caged-c)',
+        A: 'var(--caged-a)',
+        G: 'var(--caged-g)',
+        E: 'var(--caged-e)',
+        D: 'var(--caged-d)'
+    };
+
     var prefs = readPrefs();
 
     var state = {
-        shapeIndex: 0,
         scaleRootPc: null,
-        scaleId: prefs.scaleId || null,
-        scaleTouched: !!prefs.scaleId
+        scaleId: prefs.scaleId || null
     };
+
+    var highGuitarId = null;
+    var voicingCache = {};
 
     /* ---------------- preferences ---------------- */
 
@@ -12245,22 +12436,40 @@ button.structure-close,
         var raw = SB.lsGet(PREF_KEY, {});
         if (!raw || typeof raw !== 'object') raw = {};
         var capo = Number(raw.capo);
+        var frets = Number(raw.frets);
+        if (FRET_CHOICES.indexOf(frets) < 0) frets = 15;
+
+        var shapeMode = typeof raw.shapeMode === 'string' ? raw.shapeMode : 'caged';
+        if (shapeMode !== 'caged' && shapeMode !== 'all' &&
+            CAGED_LETTERS.indexOf(shapeMode) < 0) {
+            shapeMode = 'caged';
+        }
+        var labelMode = LABEL_MODES.indexOf(raw.labelMode) >= 0 ? raw.labelMode : 'notes';
+
         return {
-            allTones: raw.allTones !== false,
             scaleOn: raw.scaleOn !== false,
             octaves: raw.octaves === true,
             capo: capo >= 0 && capo <= 7 ? Math.floor(capo) : 0,
-            scaleId: typeof raw.scaleId === 'string' ? raw.scaleId : null
+            scaleId: typeof raw.scaleId === 'string' ? raw.scaleId : null,
+            frets: frets,
+            shapeMode: shapeMode,
+            labelMode: labelMode,
+            bassDegree: typeof raw.bassDegree === 'string' ? raw.bassDegree : 'root',
+            fingers: raw.fingers === true
         };
     }
 
     function savePrefs() {
         SB.lsSet(PREF_KEY, {
-            allTones: prefs.allTones,
             scaleOn: prefs.scaleOn,
             octaves: prefs.octaves,
             capo: prefs.capo,
-            scaleId: state.scaleId
+            scaleId: state.scaleId,
+            frets: prefs.frets,
+            shapeMode: prefs.shapeMode,
+            labelMode: prefs.labelMode,
+            bassDegree: prefs.bassDegree,
+            fingers: prefs.fingers
         });
     }
 
@@ -12268,14 +12477,23 @@ button.structure-close,
 
     function exp() { return SB.explorerState; }
     function inst() { return ChordKit.instrumentOf(SB.state.instrument); }
+    function isGuitar() { return inst().id === 'guitar'; }
     function type() { return ChordKit.typeOf(exp().quality); }
     function mod12(n) { return ((n % 12) + 12) % 12; }
     function isMinorQuality() { return !!MINOR_IDS[exp().quality]; }
 
     function chordName() { return exp().rootName + type().suffix; }
+
+    /* The chord the shapes are drawn for. With a capo the shapes are relative
+     * to the capo, exactly like a player reading a capo chart. */
+    function shapeRootPc() { return mod12(exp().rootPc - prefs.capo); }
     function shapeChordName() {
-        return ChordKit.rootName(mod12(exp().rootPc - prefs.capo), exp().spelling) +
-            type().suffix;
+        return ChordKit.rootName(shapeRootPc(), exp().spelling) + type().suffix;
+    }
+
+    function parsedRoot() {
+        return ChordKit.parse(exp().rootName) ||
+            { letter: 'C', acc: 0, rootPc: 0 };
     }
 
     function defaultScaleId() {
@@ -12305,53 +12523,6 @@ button.structure-close,
 
     /* ---------------- chord data ---------------- */
 
-    function shapes() {
-        return curateShapes(ChordKit.voicings(shapeChordName(), inst().id) || []);
-    }
-
-    /* The engine returns every playable permutation, which is useful for the
-     * shapes grid but far too many for a neck stepper (Am7 on guitar alone has
-     * over a thousand). For the neck, keep the best-ranked voicing for each
-     * bass note in each hand position: one representative per inversion and
-     * region, so paging moves through distinct shapes rather than variants
-     * that only double a note on another string. */
-    function curateShapes(list) {
-        var guitar = inst();
-        var seen = {};
-        var out = [];
-        list.forEach(function (frets) {
-            var bassMidi = null;
-            var minFret = Infinity;
-            for (var i = 0; i < frets.length; i++) {
-                var fret = frets[i];
-                if (fret < 0) continue;
-                if (fret > 0 && fret < minFret) minFret = fret;
-                var midi = guitar.tuning[i] + prefs.capo + fret;
-                if (bassMidi === null || midi < bassMidi) bassMidi = midi;
-            }
-            if (bassMidi === null) return;
-            var key = mod12(bassMidi) + ':' + region(minFret);
-            if (seen[key]) return;
-            seen[key] = true;
-            out.push(frets);
-        });
-        return out;
-    }
-
-    function region(minFret) {
-        if (minFret === Infinity || minFret === 0) return 0;
-        if (minFret <= 4) return 1;
-        if (minFret <= 8) return 2;
-        return 3;
-    }
-
-    function currentShape(list) {
-        if (!list.length) return null;
-        if (state.shapeIndex < 0) state.shapeIndex = list.length - 1;
-        if (state.shapeIndex >= list.length) state.shapeIndex = 0;
-        return list[state.shapeIndex];
-    }
-
     function chordMap() {
         var map = {};
         ChordKit.chordNotes(chordName()).forEach(function (note) {
@@ -12380,42 +12551,236 @@ button.structure-close,
         return degree === 'root' ? 'R' : degree;
     }
 
-    function voiceLabel(frets, index) {
-        var guitar = inst();
-        var bassMidi = null;
-        var minFret = Infinity;
+    function octave(midi) {
+        return Math.floor(midi / 12) - 1;
+    }
+
+    function bassPcOf(frets) {
+        var min = null;
         for (var i = 0; i < frets.length; i++) {
-            var fret = frets[i];
-            if (fret < 0) continue;
-            if (fret > 0 && fret < minFret) minFret = fret;
-            var midi = guitar.tuning[i] + prefs.capo + fret;
-            if (bassMidi === null || midi < bassMidi) bassMidi = midi;
+            if (frets[i] < 0) continue;
+            var midi = inst().tuning[i] + prefs.capo + frets[i];
+            if (min === null || midi < min) min = midi;
         }
-        if (bassMidi === null) return (index + 1) + '. Muted';
-        var bassPc = mod12(bassMidi);
-        var rootInBass = bassPc === exp().rootPc;
-        var position;
-        if (minFret === Infinity || minFret <= 2) {
-            position = prefs.capo ? 'At capo' : 'Open position';
-        } else if (minFret <= 4) {
-            position = 'Low position';
-        } else if (minFret <= 8) {
-            position = 'Mid position';
-        } else {
-            position = 'High position';
-        }
-        var bass = rootInBass ? 'root' : ChordKit.rootName(bassPc, exp().spelling);
-        return (index + 1) + '. ' + position + ', ' + bass + ' in bass \u00b7 ' +
-            fretsLabel(frets);
+        return min === null ? null : mod12(min);
     }
 
-    function fretsLabel(frets) {
+    function selectedBassPc() {
+        if (!prefs.bassDegree) return null;
+        var notes = ChordKit.chordNotes(chordName());
+        for (var i = 0; i < notes.length; i++) {
+            if (notes[i].degree === prefs.bassDegree) return notes[i].pc;
+        }
+        return notes.length ? notes[0].pc : null;
+    }
+
+    function ordinal(degree) {
+        var map = {
+            root: 'root',
+            '2': '2nd', '\u266d2': '2nd',
+            '3': '3rd', '\u266d3': '3rd',
+            '4': '4th', '\u266f4': '4th',
+            '5': '5th', '\u266f5': '5th', '\u266d5': '5th',
+            '6': '6th', '\u266d6': '6th',
+            '7': '7th', '\u266d7': '7th',
+            '9': '9th', '\u266d9': '9th',
+            '11': '11th', '\u266f11': '11th',
+            '13': '13th', '\u266d13': '13th'
+        };
+        return map[degree] || degree;
+    }
+
+    function fingerMap(frets) {
+        var uniq = [];
+        frets.forEach(function (fret) {
+            if (fret > 0 && uniq.indexOf(fret) < 0) uniq.push(fret);
+        });
+        uniq.sort(function (a, b) { return a - b; });
+        var map = {};
+        uniq.forEach(function (fret, index) {
+            map[fret] = Math.min(4, index + 1);
+        });
+        return map;
+    }
+
+    /* ---------------- CAGED shape positions ---------------- */
+
+    function highGuitar() {
+        if (highGuitarId) return highGuitarId;
+        var base = ChordKit.instrumentOf('guitar');
+        if (!ChordKit.INSTRUMENTS.guitar15) {
+            var clone = {};
+            Object.keys(base).forEach(function (key) { clone[key] = base[key]; });
+            clone.id = 'guitar15';
+            clone.maxFret = 15;
+            ChordKit.INSTRUMENTS.guitar15 = clone;
+        }
+        highGuitarId = 'guitar15';
+        return highGuitarId;
+    }
+
+    function qualityVoicings() {
+        if (!isGuitar()) return [];
+        var name = shapeChordName();
+        if (!voicingCache[name]) {
+            voicingCache[name] = ChordKit.voicings(name, highGuitar());
+        }
+        return voicingCache[name];
+    }
+
+    function shiftFrets(frets, amount) {
         return frets.map(function (fret) {
-            return fret < 0 ? 'x' : String(fret);
-        }).join(' ');
+            return fret < 0 ? -1 : fret + amount;
+        });
     }
 
-    /* ---------------- select builders ---------------- */
+    function cagedTemplates() {
+        var rootPc = shapeRootPc();
+        var tuning = inst().tuning;
+        var num = tuning.length;
+        var out = [];
+        if (!isGuitar()) return out;
+
+        CAGED_LETTERS.forEach(function (letter) {
+            var shape = CAGED_SHAPES[letter];
+            var rootFret = mod12(rootPc - tuning[shape.rootString]);
+            for (var octave = 0; octave <= 2; octave++) {
+                var anchor = rootFret + 12 * octave;
+                var frets = [];
+                var valid = true;
+                for (var s = 0; s < num; s++) {
+                    if (shape.offsets[s] == null) {
+                        frets.push(-1);
+                        continue;
+                    }
+                    var fret = anchor + shape.offsets[s];
+                    if (fret < 0 || fret > prefs.frets) {
+                        valid = false;
+                        break;
+                    }
+                    frets.push(fret);
+                }
+                if (!valid) continue;
+                var sounding = frets.filter(function (fret) { return fret >= 0; });
+                if (sounding.length < 3) continue;
+                out.push({
+                    letter: letter,
+                    template: frets,
+                    octave: octave,
+                    minFret: Math.min.apply(null, sounding),
+                    maxFret: Math.max.apply(null, sounding)
+                });
+            }
+        });
+
+        out.sort(function (a, b) {
+            if (a.minFret !== b.minFret) return a.minFret - b.minFret;
+            return CAGED_LETTERS.indexOf(a.letter) - CAGED_LETTERS.indexOf(b.letter);
+        });
+        return out;
+    }
+
+    function cagedShapes() {
+        if (!isGuitar()) return [];
+        var templates = cagedTemplates();
+        var voicings = qualityVoicings();
+        var wantedBass = selectedBassPc();
+        var out = [];
+
+        templates.forEach(function (template) {
+            var baseLo = template.minFret - 12 * template.octave;
+            var baseHi = template.maxFret - 12 * template.octave;
+            var candidates = voicings.filter(function (frets) {
+                return frets.every(function (fret) {
+                    return fret < 0 || (fret >= baseLo && fret <= baseHi);
+                });
+            });
+            if (!candidates.length) return;
+
+            var chosen = null;
+            var bassMatch = wantedBass == null;
+            if (wantedBass != null) {
+                for (var i = 0; i < candidates.length; i++) {
+                    var shifted = shiftFrets(candidates[i], 12 * template.octave);
+                    if (bassPcOf(shifted) === wantedBass) {
+                        chosen = candidates[i];
+                        bassMatch = true;
+                        break;
+                    }
+                }
+            }
+            if (!chosen) chosen = candidates[0];
+
+            var frets = shiftFrets(chosen, 12 * template.octave);
+            var sounding = frets.filter(function (fret) { return fret >= 0; });
+            if (!sounding.length) return;
+
+            out.push({
+                letter: template.letter,
+                frets: frets,
+                minFret: Math.min.apply(null, sounding),
+                maxFret: Math.max.apply(null, sounding),
+                bassPc: bassPcOf(frets),
+                bassMatch: bassMatch
+            });
+        });
+
+        var seen = {};
+        out = out.filter(function (shape) {
+            var key = shape.letter + ':' + shape.frets.join(',');
+            if (seen[key]) return false;
+            seen[key] = true;
+            return true;
+        });
+
+        out.sort(function (a, b) {
+            if (a.minFret !== b.minFret) return a.minFret - b.minFret;
+            return CAGED_LETTERS.indexOf(a.letter) - CAGED_LETTERS.indexOf(b.letter);
+        });
+        return out;
+    }
+
+    function effectiveShapeMode() {
+        if (!isGuitar()) return 'all';
+        if (prefs.shapeMode === 'caged' || prefs.shapeMode === 'all' ||
+            CAGED_LETTERS.indexOf(prefs.shapeMode) >= 0) {
+            return prefs.shapeMode;
+        }
+        return 'caged';
+    }
+
+    function activeShapes(allShapes) {
+        var mode = effectiveShapeMode();
+        if (mode === 'caged') return allShapes;
+        if (mode === 'all') return [];
+        return allShapes.filter(function (shape) { return shape.letter === mode; });
+    }
+
+    function currentVoicing() {
+        var shapes = cagedShapes();
+        var active = activeShapes(shapes);
+        var wantedBass = selectedBassPc();
+
+        if (active.length) {
+            if (wantedBass != null) {
+                for (var i = 0; i < active.length; i++) {
+                    if (active[i].bassPc === wantedBass) return active[i].frets;
+                }
+            }
+            return active[0].frets;
+        }
+
+        var id = isGuitar() ? highGuitar() : inst().id;
+        var list = ChordKit.voicings(shapeChordName(), id);
+        if (wantedBass != null) {
+            for (var j = 0; j < list.length; j++) {
+                if (bassPcOf(list[j]) === wantedBass) return list[j];
+            }
+        }
+        return list.length ? list[0] : null;
+    }
+
+    /* ---------------- control builders ---------------- */
 
     function fillSelect(select, options, value) {
         select.innerHTML = options.map(function (opt) {
@@ -12432,15 +12797,6 @@ button.structure-close,
         return out;
     }
 
-    function qualityOptions() {
-        return ChordKit.TYPES.map(function (item) {
-            return {
-                value: item.id,
-                label: QUALITY_LABELS[item.id] || item.suffix || 'Major'
-            };
-        });
-    }
-
     function scaleTypeOptions() {
         return ChordKit.SCALES.map(function (scale) {
             return { value: scale.id, label: scale.label };
@@ -12453,62 +12809,119 @@ button.structure-close,
         return out;
     }
 
-    function renderToolbar() {
-        fillSelect(SB.$('neckRoot'), rootOptions(), exp().rootPc);
-        fillSelect(SB.$('neckQuality'), qualityOptions(), exp().quality);
-        fillSelect(SB.$('neckCapo'), capoOptions(), prefs.capo);
-
-        var scaleKeyOptions = [{ value: '', label: 'Follow chord (' + exp().rootName + ')' }].concat(rootOptions());
-        fillSelect(SB.$('neckScaleRoot'), scaleKeyOptions,
-            state.scaleRootPc == null ? '' : state.scaleRootPc);
-        fillSelect(SB.$('neckScaleType'), scaleTypeOptions(), scaleId());
-
-        var spell = SB.$('neckSpell');
-        var sharp = ChordKit.rootName(exp().rootPc, 'sharp');
-        var flat = ChordKit.rootName(exp().rootPc, 'flat');
-        if (sharp === flat) {
-            spell.hidden = true;
-        } else {
-            spell.hidden = false;
-            spell.textContent = 'Spell as ' + (exp().spelling === 'sharp' ? flat : sharp);
-            spell.setAttribute('aria-label',
-                'Spell the root as ' + (exp().spelling === 'sharp' ? flat : sharp));
-        }
-
-        SB.$('neckAllTones').setAttribute('aria-pressed', prefs.allTones ? 'true' : 'false');
-        SB.$('neckScaleToggle').setAttribute('aria-pressed', prefs.scaleOn ? 'true' : 'false');
-        SB.$('neckOctaves').setAttribute('aria-pressed', prefs.octaves ? 'true' : 'false');
-        SB.$('neckScaleFields').hidden = !prefs.scaleOn;
+    function renderHero() {
+        SB.$('neckChordName').textContent = chordName();
+        SB.$('neckChordNotes').textContent =
+            exp().rootName + ' ' + (QUALITY_LABELS[exp().quality] || 'Major').toLowerCase();
     }
 
-    function renderSummary(list) {
+    function renderRoots() {
+        var parsed = parsedRoot();
+        SB.$('neckRoot').innerHTML = LETTERS.map(function (letter) {
+            var active = parsed.letter === letter;
+            return '<button type="button" data-root-letter="' + letter +
+                '" aria-pressed="' + active + '">' + letter + '</button>';
+        }).join('');
+
+        var accidentals = [
+            { value: -1, label: '\u266d', name: 'Flat' },
+            { value: 0, label: '\u266e', name: 'Natural' },
+            { value: 1, label: '\u266f', name: 'Sharp' }
+        ];
+        SB.$('neckAccidental').innerHTML = accidentals.map(function (item) {
+            return '<button type="button" data-acc="' + item.value +
+                '" aria-pressed="' + (parsed.acc === item.value) +
+                '" aria-label="' + item.name + '">' + item.label + '</button>';
+        }).join('');
+    }
+
+    function renderLabels() {
+        SB.$('neckLabels').innerHTML = [
+            { value: 'notes', label: 'Notes' },
+            { value: 'degrees', label: 'Degrees' },
+            { value: 'none', label: 'None' }
+        ].map(function (item) {
+            return '<button type="button" data-label="' + item.value +
+                '" aria-pressed="' + (prefs.labelMode === item.value) + '">' +
+                item.label + '</button>';
+        }).join('');
+    }
+
+    function renderQualities() {
+        var root = exp().rootName;
+        SB.$('neckQualities').innerHTML = QUICK_QUALITIES.map(function (id) {
+            var quality = ChordKit.typeOf(id);
+            return '<button type="button" data-quality="' + id +
+                '" aria-pressed="' + (exp().quality === id) + '">' +
+                root + quality.suffix + '</button>';
+        }).join('');
+
+        var select = SB.$('neckQuality');
+        select.innerHTML = '<option value="" disabled>More chords</option>' +
+            ChordKit.TYPES.map(function (item) {
+                return '<option value="' + item.id + '">' + root + item.suffix +
+                    ' \u00b7 ' + (QUALITY_LABELS[item.id] || item.suffix) + '</option>';
+            }).join('');
+        select.value = QUICK_QUALITIES.indexOf(exp().quality) >= 0 ? '' : exp().quality;
+    }
+
+    function renderShapes() {
+        var guitar = isGuitar();
+        var mode = effectiveShapeMode();
+        var options = [
+            { value: 'caged', label: 'CAGED' },
+            { value: 'all', label: 'All' }
+        ].concat(CAGED_LETTERS.map(function (letter) {
+            return { value: letter, label: letter };
+        }));
+
+        SB.$('neckShapes').innerHTML = options.map(function (item) {
+            var disabled = !guitar && item.value !== 'all';
+            var title = disabled ? ' title="CAGED shapes are a guitar layout"' : '';
+            return '<button type="button" data-shape-mode="' + item.value +
+                '" aria-pressed="' + (mode === item.value) + '"' +
+                (disabled ? ' disabled' : '') + title + '>' + item.label + '</button>';
+        }).join('');
+    }
+
+    function renderBass() {
         var notes = ChordKit.chordNotes(chordName());
-        SB.$('neckChordName').textContent = chordName();
-        SB.$('neckChordNotes').textContent = notes.map(function (note) {
-            return note.name;
-        }).join(' \u00b7 ');
-
-        var count = SB.$('neckShapeCount');
-        var next = SB.$('neckNext');
-        var prev = SB.$('neckPrev');
-        var frets = SB.$('neckShapeFrets');
-
-        if (!list.length) {
-            count.textContent = 'No shapes';
-            frets.textContent = '\u2014';
-            next.disabled = true;
-            prev.disabled = true;
-            fillSelect(SB.$('neckVoicing'), [{ value: 0, label: 'No playable shape' }], 0);
-        } else {
-            currentShape(list);
-            count.textContent = (state.shapeIndex + 1) + ' / ' + list.length;
-            frets.textContent = fretsLabel(list[state.shapeIndex]);
-            next.disabled = list.length < 2;
-            prev.disabled = list.length < 2;
-            fillSelect(SB.$('neckVoicing'), list.map(function (frets, index) {
-                return { value: index, label: voiceLabel(frets, index) };
-            }), state.shapeIndex);
+        var found = notes.some(function (note) {
+            return note.degree === prefs.bassDegree;
+        });
+        if (!found && prefs.bassDegree) {
+            prefs.bassDegree = 'root';
+            savePrefs();
         }
+
+        var options = [{ value: '', label: 'Any bass' }].concat(notes.map(function (note) {
+            return {
+                value: note.degree,
+                label: note.name + ', the ' + ordinal(note.degree)
+            };
+        }));
+        fillSelect(SB.$('neckBass'), options, prefs.bassDegree || '');
+    }
+
+    function renderFrets() {
+        SB.$('neckFrets').innerHTML = FRET_CHOICES.map(function (count) {
+            return '<button type="button" data-frets="' + count +
+                '" aria-pressed="' + (prefs.frets === count) + '">' + count + '</button>';
+        }).join('');
+    }
+
+    function renderOptions() {
+        SB.$('neckScaleToggle').setAttribute('aria-pressed', prefs.scaleOn ? 'true' : 'false');
+        SB.$('neckFingers').setAttribute('aria-pressed', prefs.fingers ? 'true' : 'false');
+        SB.$('neckOctaves').setAttribute('aria-pressed', prefs.octaves ? 'true' : 'false');
+        SB.$('neckScaleFields').hidden = !prefs.scaleOn;
+
+        fillSelect(SB.$('neckScaleType'), scaleTypeOptions(), scaleId());
+        var scaleKeyOptions = [{ value: '', label: 'Follow chord (' + exp().rootName + ')' }]
+            .concat(rootOptions());
+        fillSelect(SB.$('neckScaleRoot'), scaleKeyOptions,
+            state.scaleRootPc == null ? '' : state.scaleRootPc);
+        fillSelect(SB.$('neckCapo'), capoOptions(), prefs.capo);
 
         var summary = scaleInfo();
         SB.$('neckScaleSummary').textContent = prefs.scaleOn
@@ -12518,245 +12931,458 @@ button.structure-close,
 
     /* ---------------- neck drawing ---------------- */
 
-    function noteMarkup(x, y, opts) {
-        if (opts.kind === 'scale') {
-            return '<circle class="neck-note neck-note-scale" cx="' + x +
-                '" cy="' + y + '" r="' + opts.r + '"/>';
+    function horizontalNeck(shapes, tones, scales) {
+        var instrument = inst();
+        var num = instrument.tuning.length;
+        var frets = prefs.frets;
+        var mode = effectiveShapeMode();
+
+        var W = 1000;
+        var left = 46;
+        var openW = 44;
+        var right = 22;
+        var top = 30;
+        var rowGap = num === 6 ? 34 : 46;
+        var boardTop = top - 16;
+        var boardBottom = top + (num - 1) * rowGap + 16;
+        var fretNumY = boardBottom + 22;
+        var pillBaseY = fretNumY + 27;
+        var H = pillBaseY + 34;
+
+        var nutX = left + openW;
+        var fw = (W - nutX - right) / frets;
+        var xOpen = left + openW / 2;
+        var noteR = num === 6 ? 13 : 15;
+
+        function xFret(fret) {
+            return fret <= 0 ? xOpen : nutX + (fret - 0.5) * fw;
         }
-        var shape = opts.kind === 'shape';
-        var textClass = shape ? 'neck-note-text neck-note-text-shape' : 'neck-note-text neck-note-text-tone';
-        if (opts.octaves) textClass += ' neck-note-text-oct';
-        var out = '<circle class="neck-note ' + (shape ? 'neck-note-shape' : 'neck-note-tone') +
-            '" cx="' + x + '" cy="' + y + '" r="' + opts.r + '"/>' +
-            '<text class="' + textClass + '" x="' + x + '" y="' + (y + 0.5) + '">' +
-            opts.name + '</text>';
-        if (shape && opts.degree) {
-            var bx = x + opts.r * 0.85;
-            var by = y - opts.r * 0.85;
-            out += '<circle class="neck-badge" cx="' + bx + '" cy="' + by + '" r="6"/>' +
-                '<text class="neck-badge-text" x="' + bx + '" y="' + (by + 0.5) + '">' +
-                opts.degree + '</text>';
+        function rowY(row) {
+            return top + row * rowGap;
+        }
+        function stringRow(index) {
+            return num - 1 - index;
+        }
+
+        var geometry = {
+            num: num,
+            stringRow: stringRow,
+            xFret: xFret,
+            rowY: rowY,
+            fw: fw,
+            noteR: noteR
+        };
+
+        var out = [];
+        out.push('<svg viewBox="0 0 ' + W + ' ' + H +
+            '" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="group">');
+        out.push('<defs><clipPath id="neckClip"><rect x="' + (left - 8) +
+            '" y="' + boardTop + '" width="' + (W - left - right + 16) +
+            '" height="' + (boardBottom - boardTop) + '" rx="12"/></clipPath></defs>');
+        out.push('<rect class="neck-board" x="' + (left - 8) + '" y="' + boardTop +
+            '" width="' + (W - left - right + 16) + '" height="' +
+            (boardBottom - boardTop) + '" rx="12"/>');
+
+        // Coloured CAGED regions sit behind the grid.
+        out.push('<g clip-path="url(#neckClip)">');
+        shapes.forEach(function (shape) {
+            var d = regionPath(shape, geometry);
+            if (!d) return;
+            var color = CAGED_COLORS[shape.letter];
+            out.push('<path class="neck-region' + (shape.bassMatch ? '' : ' is-dim') +
+                '" d="' + d + '" fill="' + color + '" stroke="' + color + '"/>');
+        });
+        out.push('</g>');
+
+        // Fret lines (the nut is drawn after the strings so it stays crisp).
+        for (var fret = 1; fret <= frets; fret++) {
+            var fretX = nutX + fret * fw;
+            out.push('<line class="neck-fret" x1="' + fretX + '" y1="' + (boardTop + 4) +
+                '" x2="' + fretX + '" y2="' + (boardBottom - 4) + '"/>');
+        }
+
+        // Inlays between the middle strings.
+        var centerRow = (num - 1) / 2;
+        var inlayY = top + centerRow * rowGap;
+        Object.keys(INLAY_FRETS).forEach(function (key) {
+            var inlayFret = Number(key);
+            if (inlayFret > frets) return;
+            var inlayX = nutX + (inlayFret - 0.5) * fw;
+            if (INLAY_FRETS[key] === 2) {
+                out.push('<circle class="neck-inlay" cx="' + inlayX + '" cy="' +
+                    (inlayY - 9) + '" r="3.2"/>');
+                out.push('<circle class="neck-inlay" cx="' + inlayX + '" cy="' +
+                    (inlayY + 9) + '" r="3.2"/>');
+            } else {
+                out.push('<circle class="neck-inlay" cx="' + inlayX + '" cy="' +
+                    inlayY + '" r="3.2"/>');
+            }
+        });
+
+        // Strings and labels.
+        for (var string = 0; string < num; string++) {
+            var y = rowY(stringRow(string));
+            out.push('<line class="neck-string" x1="' + nutX + '" y1="' + y +
+                '" x2="' + (nutX + frets * fw) + '" y2="' + y + '"/>');
+            out.push('<text class="neck-string-label" x="' + (left - 12) +
+                '" y="' + (y + 0.5) + '">' + instrument.strings[string] + '</text>');
+        }
+
+        out.push('<line class="neck-nut" x1="' + nutX + '" y1="' + (boardTop + 4) +
+            '" x2="' + nutX + '" y2="' + (boardBottom - 4) + '"/>');
+
+        // Faint scale layer.
+        if (prefs.scaleOn) {
+            for (var scaleString = 0; scaleString < num; scaleString++) {
+                for (var scaleFret = 0; scaleFret <= frets; scaleFret++) {
+                    var scalePitch = pitchAt(scaleString, scaleFret);
+                    if (!scales[scalePitch.pc]) continue;
+                    out.push('<circle class="neck-note-scale" cx="' + xFret(scaleFret) +
+                        '" cy="' + rowY(stringRow(scaleString)) + '" r="' +
+                        (scaleFret === 0 ? 4 : 3.5) + '"/>');
+                }
+            }
+        }
+
+        // Notes: shape notes first, then the rest of the chord tones.
+        var markers = buildMarkers(shapes, tones, mode, num, frets);
+        Object.keys(markers).forEach(function (key) {
+            out.push(markerSVG(markers[key], geometry, tones));
+        });
+
+        // A single shape shows its muted strings; CAGED would be too noisy.
+        if (mode !== 'caged' && mode !== 'all' && shapes.length) {
+            var selected = shapes[0];
+            for (var mutedString = 0; mutedString < num; mutedString++) {
+                if (selected.frets[mutedString] !== -1) continue;
+                out.push('<text class="neck-muted" x="' + xOpen + '" y="' +
+                    rowY(stringRow(mutedString)) + '">\u00d7</text>');
+            }
+        }
+
+        // Fret numbers below the board.
+        for (var number = 1; number <= frets; number++) {
+            out.push('<text class="neck-fret-num" x="' + xFret(number) +
+                '" y="' + fretNumY + '">' + number + '</text>');
+        }
+
+        // Shape pills under the fret numbers; clicking one isolates that shape.
+        var pillRows = [];
+        shapes.forEach(function (shape) {
+            var center = (xFret(shape.minFret) + xFret(shape.maxFret)) / 2;
+            var row = 0;
+            while (pillRows[row] != null && center - pillRows[row] < 30) row++;
+            pillRows[row] = center;
+            var color = CAGED_COLORS[shape.letter];
+            var pillY = pillBaseY + row * 22;
+            out.push('<g class="neck-shape-pill" data-shape="' + shape.letter +
+                '" tabindex="0" role="button" aria-label="Select ' + shape.letter +
+                ' shape">' +
+                '<rect x="' + (center - 12) + '" y="' + (pillY - 10) +
+                '" width="24" height="20" rx="10" fill="' + color + '"/>' +
+                '<text x="' + center + '" y="' + (pillY + 0.5) + '">' +
+                shape.letter + '</text></g>');
+        });
+
+        out.push('</svg>');
+        return out.join('');
+    }
+
+    /* A CAGED region should read as one soft island around the notes of that
+     * shape. Grow the note cluster by a disc: sample a ring around every
+     * note and take the convex hull, which is the true rounded outline of the
+     * cluster. Miter-offsetting the hull instead would spike at the sharp
+     * corners where neighbouring strings sit close together. */
+    function regionPath(shape, geometry) {
+        var num = geometry.num;
+        var points = [];
+        for (var string = 0; string < num; string++) {
+            var fret = shape.frets[string];
+            if (fret < 0) continue;
+            points.push({
+                x: geometry.xFret(fret),
+                y: geometry.rowY(geometry.stringRow(string))
+            });
+        }
+        if (points.length < 2) return '';
+
+        var pad = geometry.noteR + 8;
+        var steps = 48;
+        var ring = [];
+        points.forEach(function (point) {
+            for (var i = 0; i < steps; i++) {
+                var angle = (i / steps) * Math.PI * 2;
+                ring.push({
+                    x: point.x + Math.cos(angle) * pad,
+                    y: point.y + Math.sin(angle) * pad
+                });
+            }
+        });
+
+        var hull = convexHull(ring);
+        if (hull.length < 3) return '';
+        return roundedPolygonPath(hull, pad * 0.5);
+    }
+
+    /* Andrew's monotone chain. Collinear points are dropped so the hull is a
+     * clean convex outline (counter-clockwise in SVG coordinates). */
+    function convexHull(points) {
+        var sorted = points.slice().sort(function (a, b) {
+            return a.x === b.x ? a.y - b.y : a.x - b.x;
+        });
+
+        function cross(o, a, b) {
+            return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+        }
+
+        var lower = [];
+        sorted.forEach(function (point) {
+            while (lower.length >= 2 &&
+                   cross(lower[lower.length - 2], lower[lower.length - 1], point) <= 0) {
+                lower.pop();
+            }
+            lower.push(point);
+        });
+
+        var upper = [];
+        for (var i = sorted.length - 1; i >= 0; i--) {
+            var point = sorted[i];
+            while (upper.length >= 2 &&
+                   cross(upper[upper.length - 2], upper[upper.length - 1], point) <= 0) {
+                upper.pop();
+            }
+            upper.push(point);
+        }
+
+        lower.pop();
+        upper.pop();
+        return lower.concat(upper);
+    }
+
+    /* Draw a closed polygon with softly rounded corners while keeping the
+     * straight edges, so the island keeps the size we gave it. */
+    function roundedPolygonPath(points, radius) {
+        var n = points.length;
+        if (n < 3) return '';
+
+        function unit(a, b) {
+            var dx = b.x - a.x;
+            var dy = b.y - a.y;
+            var len = Math.sqrt(dx * dx + dy * dy) || 1;
+            return { x: dx / len, y: dy / len, len: len };
+        }
+
+        var d = '';
+        for (var i = 0; i < n; i++) {
+            var prev = points[(i + n - 1) % n];
+            var cur = points[i];
+            var next = points[(i + 1) % n];
+            var inDir = unit(prev, cur);
+            var outDir = unit(cur, next);
+            var start = {
+                x: cur.x - inDir.x * Math.min(radius, inDir.len / 2),
+                y: cur.y - inDir.y * Math.min(radius, inDir.len / 2)
+            };
+            var end = {
+                x: cur.x + outDir.x * Math.min(radius, outDir.len / 2),
+                y: cur.y + outDir.y * Math.min(radius, outDir.len / 2)
+            };
+            d += (i === 0 ? 'M' : ' L') + round(start.x) + ' ' + round(start.y) +
+                ' Q' + round(cur.x) + ' ' + round(cur.y) + ' ' +
+                round(end.x) + ' ' + round(end.y);
+        }
+        return d + ' Z';
+    }
+
+    function round(value) {
+        return Math.round(value * 10) / 10;
+    }
+
+    function buildMarkers(shapes, tones, mode, num, frets) {
+        var markers = {};
+        function keyOf(string, fret) { return string + ':' + fret; }
+
+        shapes.forEach(function (shape) {
+            var fingers = fingerMap(shape.frets);
+            for (var string = 0; string < num; string++) {
+                var fret = shape.frets[string];
+                if (fret < 0 || fret > frets) continue;
+                var key = keyOf(string, fret);
+                if (markers[key]) continue;
+                var pitch = pitchAt(string, fret);
+                markers[key] = {
+                    kind: 'shape',
+                    string: string,
+                    fret: fret,
+                    pitch: pitch,
+                    tone: tones[pitch.pc],
+                    shape: shape,
+                    finger: fingers[fret] || 0
+                };
+            }
+        });
+
+        if (mode === 'all') {
+            for (var string = 0; string < num; string++) {
+                for (var fret = 0; fret <= frets; fret++) {
+                    var pitch = pitchAt(string, fret);
+                    if (!tones[pitch.pc]) continue;
+                    var key = keyOf(string, fret);
+                    if (markers[key]) continue;
+                    markers[key] = {
+                        kind: 'tone',
+                        string: string,
+                        fret: fret,
+                        pitch: pitch,
+                        tone: tones[pitch.pc],
+                        finger: 0
+                    };
+                }
+            }
+        } else {
+            // Ghost chord tones outside the selected shapes keep the fretboard
+            // readable without competing with the coloured shape notes. Open
+            // strings are skipped because the string labels already name them.
+            for (var ghostString = 0; ghostString < num; ghostString++) {
+                for (var ghostFret = 1; ghostFret <= frets; ghostFret++) {
+                    var ghostPitch = pitchAt(ghostString, ghostFret);
+                    if (!tones[ghostPitch.pc]) continue;
+                    var ghostKey = keyOf(ghostString, ghostFret);
+                    if (markers[ghostKey]) continue;
+                    markers[ghostKey] = {
+                        kind: 'ghost',
+                        string: ghostString,
+                        fret: ghostFret,
+                        pitch: ghostPitch,
+                        tone: tones[ghostPitch.pc],
+                        finger: 0
+                    };
+                }
+            }
+        }
+        return markers;
+    }
+
+    function labelFor(pitch, tone, tones) {
+        if (prefs.labelMode === 'none') return '';
+        if (prefs.labelMode === 'degrees') {
+            return tone ? degreeMark(tone.degree) : '';
+        }
+        var name = noteName(pitch.pc, tones);
+        return name + (prefs.octaves ? octave(pitch.midi) : '');
+    }
+
+    function markerSVG(marker, geometry, tones) {
+        var x = geometry.xFret(marker.fret);
+        var y = geometry.rowY(geometry.stringRow(marker.string));
+        var r = geometry.noteR;
+        var out = '';
+
+        if (marker.kind === 'shape') {
+            var color = CAGED_COLORS[marker.shape.letter];
+            if (marker.tone && marker.tone.degree === 'root') {
+                out += '<circle class="neck-note-ring" cx="' + x + '" cy="' + y +
+                    '" r="' + (r + 3) + '"/>';
+            }
+            out += '<circle class="neck-note neck-note-shape" cx="' + x + '" cy="' + y +
+                '" r="' + r + '" fill="' + color + '"/>';
+            var label = labelFor(marker.pitch, marker.tone, tones);
+            if (label) {
+                out += '<text class="neck-note-text neck-note-text-shape" x="' + x +
+                    '" y="' + (y + 0.5) + '">' + label + '</text>';
+            }
+            if (prefs.fingers && marker.finger) {
+                var bx = x + r * 0.82;
+                var by = y - r * 0.82;
+                out += '<circle class="neck-badge" cx="' + bx + '" cy="' + by +
+                    '" r="5.6"/>';
+                out += '<text class="neck-badge-text" x="' + bx + '" y="' + (by + 0.5) +
+                    '">' + marker.finger + '</text>';
+            }
+            return out;
+        }
+
+        if (marker.kind === 'tone') {
+            out += '<circle class="neck-note neck-note-tone" cx="' + x + '" cy="' + y +
+                '" r="' + (r - 2) + '"/>';
+            var toneLabel = labelFor(marker.pitch, marker.tone, tones);
+            if (toneLabel) {
+                out += '<text class="neck-note-text neck-note-text-tone" x="' + x +
+                    '" y="' + (y + 0.5) + '">' + toneLabel + '</text>';
+            }
+            return out;
+        }
+
+        // Ghost notes are small map markers. Open strings keep their name so
+        // the fretboard still reads like a chord chart.
+        var ghostR = marker.fret === 0 ? 10 : 3.6;
+        out += '<circle class="neck-note-ghost' + (marker.fret === 0 ? ' is-open' : '') +
+            '" cx="' + x + '" cy="' + y + '" r="' + ghostR + '"/>';
+        if (marker.fret === 0) {
+            var ghostLabel = labelFor(marker.pitch, marker.tone, tones);
+            if (ghostLabel) {
+                out += '<text class="neck-note-text neck-note-text-ghost" x="' + x +
+                    '" y="' + (y + 0.5) + '">' + ghostLabel + '</text>';
+            }
         }
         return out;
     }
 
-    function mutedMarkup(x, y) {
-        return '<text class="neck-muted" x="' + x + '" y="' + y + '">\u00d7</text>';
-    }
-
-    function markerAt(stringIndex, fret, shape, tones, scales) {
-        var pitch = pitchAt(stringIndex, fret);
-        var shapeFret = shape ? shape[stringIndex] : null;
-
-        if (shapeFret === -1 && fret === 0) return { kind: 'muted' };
-        if (shapeFret === fret) {
-            var note = tones[pitch.pc];
-            return {
-                kind: 'shape',
-                name: noteName(pitch.pc, tones) + (prefs.octaves ? octave(pitch.midi) : ''),
-                degree: note ? degreeMark(note.degree) : ''
-            };
-        }
-        if (prefs.allTones && tones[pitch.pc]) {
-            return {
-                kind: 'tone',
-                name: noteName(pitch.pc, tones) + (prefs.octaves ? octave(pitch.midi) : '')
-            };
-        }
-        if (prefs.scaleOn && scales[pitch.pc]) return { kind: 'scale' };
-        return null;
-    }
-
-    function octave(midi) {
-        return Math.floor(midi / 12) - 1;
-    }
-
-    function addMarker(out, x, y, marker, shapeRadius, toneRadius, scaleRadius) {
-        if (!marker) return;
-        if (marker.kind === 'muted') {
-            out.push(mutedMarkup(x, y));
-            return;
-        }
-        out.push(noteMarkup(x, y, {
-            kind: marker.kind,
-            name: marker.name,
-            degree: marker.degree,
-            octaves: prefs.octaves,
-            r: marker.kind === 'shape' ? shapeRadius :
-                (marker.kind === 'tone' ? toneRadius : scaleRadius)
-        }));
-    }
-
-    function horizontalNeck(instrument, shape, tones, scales) {
-        var num = instrument.tuning.length;
-        var W = 860;
-        var left = 30, openW = 38, right = 18, top = 36, bottom = 18;
-        var rowGap = num === 6 ? 31 : 39;
-        var H = top + (num - 1) * rowGap + bottom;
-        var nutX = left + openW;
-        var fw = (W - nutX - right) / NECK_FRETS;
-        var rowY = function (row) { return top + row * rowGap; };
-        var out = ['<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">'];
-
-        // Fret lines and numbers.
-        for (var f = 0; f <= NECK_FRETS; f++) {
-            var x = nutX + f * fw;
-            var cls = f === 0 ? 'neck-nut' : 'neck-fret';
-            out.push('<line class="' + cls + '" x1="' + x + '" y1="' + (top - 9) +
-                '" x2="' + x + '" y2="' + (top + (num - 1) * rowGap + 9) + '"/>');
-            if (f > 0) {
-                out.push('<text class="neck-fret-num" x="' + (x - fw / 2) +
-                    '" y="' + (top - 17) + '">' + f + '</text>');
-            }
-        }
-
-        // Inlays sit between the two middle string rows.
-        Object.keys(INLAY_FRETS).forEach(function (key) {
-            var fret = Number(key);
-            if (fret > NECK_FRETS) return;
-            var cx = nutX + (fret - 0.5) * fw;
-            var cy = top + ((num - 1) * rowGap) / 2;
-            var dots = INLAY_FRETS[key];
-            if (dots === 2) {
-                out.push('<circle class="neck-inlay" cx="' + cx + '" cy="' + (cy - 9) + '" r="3.2"/>');
-                out.push('<circle class="neck-inlay" cx="' + cx + '" cy="' + (cy + 9) + '" r="3.2"/>');
-            } else {
-                out.push('<circle class="neck-inlay" cx="' + cx + '" cy="' + cy + '" r="3.2"/>');
-            }
-        });
-
-        // Strings, labels and the open-string column.
-        for (var i = 0; i < num; i++) {
-            var row = num - 1 - i;
-            var y = rowY(row);
-            out.push('<line class="neck-string" x1="' + nutX + '" y1="' + y + '" x2="' +
-                (nutX + NECK_FRETS * fw) + '" y2="' + y + '"/>');
-            out.push('<text class="neck-string-label" x="' + (left - 10) + '" y="' + (y + 0.5) +
-                '">' + instrument.strings[i] + '</text>');
-            addMarker(out, left + openW / 2, y, markerAt(i, 0, shape, tones, scales), 11, 9.5, 4.5);
-            for (var fret = 1; fret <= NECK_FRETS; fret++) {
-                addMarker(out, nutX + (fret - 0.5) * fw, y,
-                    markerAt(i, fret, shape, tones, scales), 11, 9.5, 4.5);
-            }
-        }
-
-        out.push('</svg>');
-        return out.join('');
-    }
-
-    function verticalNeck(instrument, shape, tones, scales) {
-        var num = instrument.tuning.length;
-        var W = 340;
-        var left = 34, right = 14, top = 42, bottom = 16;
-        var colW = (W - left - right) / (num - 1);
-        var openY = top;
-        var nutY = top + 26;
-        var fh = 44;
-        var H = nutY + NECK_FRETS * fh + bottom;
-        var colX = function (i) { return left + i * colW; };
-        var out = ['<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">'];
-
-        // String labels above the open row.
-        for (var i = 0; i < num; i++) {
-            out.push('<text class="neck-string-label" x="' + colX(i) + '" y="' + (openY - 17) +
-                '">' + instrument.strings[i] + '</text>');
-        }
-
-        // Fret lines and numbers.
-        for (var f = 0; f <= NECK_FRETS; f++) {
-            var y = nutY + f * fh;
-            var cls = f === 0 ? 'neck-nut' : 'neck-fret';
-            out.push('<line class="' + cls + '" x1="' + (left - 9) + '" y1="' + y + '" x2="' +
-                (W - right + 9) + '" y2="' + y + '"/>');
-            if (f > 0) {
-                out.push('<text class="neck-fret-num" x="' + (left - 18) + '" y="' +
-                    (y - fh / 2 + 3) + '">' + f + '</text>');
-            }
-        }
-
-        // Inlays sit on the centre line between the two middle strings.
-        Object.keys(INLAY_FRETS).forEach(function (key) {
-            var fret = Number(key);
-            if (fret > NECK_FRETS) return;
-            var cy = nutY + (fret - 0.5) * fh;
-            var cx = (left + (W - right)) / 2;
-            var dots = INLAY_FRETS[key];
-            if (dots === 2) {
-                out.push('<circle class="neck-inlay" cx="' + (cx - 10) + '" cy="' + cy + '" r="3.2"/>');
-                out.push('<circle class="neck-inlay" cx="' + (cx + 10) + '" cy="' + cy + '" r="3.2"/>');
-            } else {
-                out.push('<circle class="neck-inlay" cx="' + cx + '" cy="' + cy + '" r="3.2"/>');
-            }
-        });
-
-        // Strings and note markers.
-        for (var s = 0; s < num; s++) {
-            var x = colX(s);
-            out.push('<line class="neck-string" x1="' + x + '" y1="' + nutY + '" x2="' + x +
-                '" y2="' + (nutY + NECK_FRETS * fh) + '"/>');
-            addMarker(out, x, openY, markerAt(s, 0, shape, tones, scales), 13, 11, 5);
-            for (var fret = 1; fret <= NECK_FRETS; fret++) {
-                addMarker(out, x, nutY + (fret - 0.5) * fh,
-                    markerAt(s, fret, shape, tones, scales), 13, 11, 5);
-            }
-        }
-
-        out.push('</svg>');
-        return out.join('');
-    }
-
-    function renderDiagram(list) {
-        var shape = currentShape(list);
-        var tones = chordMap();
-        var scales = prefs.scaleOn ? scaleMap() : {};
-        var vertical = window.matchMedia('(max-width: 640px)').matches;
-        var host = SB.$('neckDiagram');
-        var svg = vertical
-            ? verticalNeck(inst(), shape, tones, scales)
-            : horizontalNeck(inst(), shape, tones, scales);
-        host.innerHTML = svg;
-
-        var desc = chordName();
-        if (shape) {
-            desc += ', shape ' + (state.shapeIndex + 1) + ' of ' + list.length +
-                ', frets ' + fretsLabel(shape);
-        }
-        if (prefs.capo) desc += ', capo ' + prefs.capo;
-        if (prefs.scaleOn) desc += ', ' + scaleInfo().summary;
-        host.setAttribute('aria-label', 'Fretboard: ' + desc);
-    }
-
     /* ---------------- shape notes ---------------- */
 
-    function renderShapeNotes(list) {
+    function renderShapeNotes() {
         var host = SB.$('neckShapeNotes');
         var count = SB.$('neckNotesCount');
-        var shape = currentShape(list);
-        if (!shape) {
+        var shapeCount = SB.$('neckShapeCount');
+        var allShapes = cagedShapes();
+        var active = activeShapes(allShapes);
+        var mode = effectiveShapeMode();
+
+        var sources = [];
+        if (mode === 'all' || !active.length) {
+            var voicing = currentVoicing();
+            if (voicing) sources.push({ label: chordName(), frets: voicing });
+            shapeCount.textContent = 'Default voicing';
+        } else {
+            active.forEach(function (shape) {
+                sources.push({ label: shape.letter + ' shape', frets: shape.frets });
+            });
+            shapeCount.textContent = active.length +
+                (active.length === 1 ? ' shape' : ' shapes');
+        }
+
+        var tones = chordMap();
+        var notes = [];
+        var seen = {};
+        sources.forEach(function (source) {
+            for (var string = 0; string < source.frets.length; string++) {
+                var fret = source.frets[string];
+                if (fret < 0) continue;
+                var key = string + ':' + fret;
+                if (seen[key]) continue;
+                seen[key] = true;
+                var pitch = pitchAt(string, fret);
+                var tone = tones[pitch.pc];
+                notes.push({
+                    stringIndex: string,
+                    fret: fret,
+                    midi: pitch.midi,
+                    name: noteName(pitch.pc, tones),
+                    octave: octave(pitch.midi),
+                    degree: tone ? tone.degree : null,
+                    role: tone ? (DEGREE_LABELS[tone.degree] || tone.degree) : 'Chord tone',
+                    shape: source.label
+                });
+            }
+        });
+
+        if (!notes.length) {
             host.innerHTML = '<p class="explorer-empty">No playable shape for this chord in the explorer range.</p>';
             count.textContent = '';
             return;
         }
 
-        var tones = chordMap();
-        var notes = [];
-        for (var i = 0; i < shape.length; i++) {
-            var fret = shape[i];
-            if (fret < 0) continue;
-            var pitch = pitchAt(i, fret);
-            var tone = tones[pitch.pc];
-            notes.push({
-                stringIndex: i,
-                fret: fret,
-                midi: pitch.midi,
-                name: noteName(pitch.pc, tones),
-                octave: octave(pitch.midi),
-                degree: tone ? tone.degree : null,
-                role: tone ? (DEGREE_LABELS[tone.degree] || tone.degree) : 'Chord tone'
-            });
-        }
         notes.sort(function (a, b) { return a.midi - b.midi; });
-
         host.innerHTML = notes.map(function (note) {
             var stringNo = inst().tuning.length - note.stringIndex;
             var at = note.fret === 0
@@ -12774,24 +13400,61 @@ button.structure-close,
         count.textContent = notes.length + (notes.length === 1 ? ' note' : ' notes');
     }
 
+    function renderDiagram() {
+        var host = SB.$('neckDiagram');
+        var allShapes = cagedShapes();
+        var shapes = activeShapes(allShapes);
+        var tones = chordMap();
+        var scales = prefs.scaleOn ? scaleMap() : {};
+        var mode = effectiveShapeMode();
+
+        host.innerHTML = horizontalNeck(shapes, tones, scales);
+
+        var desc = chordName() + ', ' + (QUALITY_LABELS[exp().quality] || 'Major').toLowerCase();
+        if (prefs.capo) desc += ', capo ' + prefs.capo;
+        if (mode === 'caged') desc += ', CAGED shapes';
+        else if (mode === 'all') desc += ', all chord tones';
+        else desc += ', ' + mode + ' shape';
+        desc += ', frets 1 to ' + prefs.frets;
+        if (prefs.scaleOn) desc += ', ' + scaleInfo().summary;
+        host.setAttribute('aria-label', 'Fretboard: ' + desc);
+    }
+
     /* ---------------- render ---------------- */
 
     function render() {
         if (!SB.$('neckRoot')) return;
-        var list = shapes();
-        renderToolbar();
-        renderSummary(list);
-        renderDiagram(list);
-        renderShapeNotes(list);
+        renderHero();
+        renderRoots();
+        renderLabels();
+        renderQualities();
+        renderShapes();
+        renderBass();
+        renderFrets();
+        renderOptions();
+        renderDiagram();
+        renderShapeNotes();
     }
 
     /* ---------------- wiring ---------------- */
 
-    function setChordRoot(pc) {
-        SB.applyExplorerSelection({
-            rootPc: pc,
-            rootName: ChordKit.rootName(pc, exp().spelling)
-        });
+    function setRoot(letter, acc) {
+        var pc = (LETTER_PC[letter] + acc + 12) % 12;
+        var spelling = acc < 0 ? 'flat' : 'sharp';
+        var name = ChordKit.rootName(pc, spelling);
+        // E#/Cb and friends would change the letter; keep the clicked letter
+        // only when the spelling actually belongs to it.
+        if (name.charAt(0) !== letter) {
+            pc = LETTER_PC[letter];
+            name = ChordKit.rootName(pc, 'sharp');
+        }
+        SB.applyExplorerSelection({ rootPc: pc, rootName: name, spelling: spelling });
+    }
+
+    function play(mode) {
+        var frets = currentVoicing();
+        if (!frets || !SB.playChord) return;
+        SB.playChord(frets, inst().id, mode, prefs.capo);
     }
 
     function bindOnce() {
@@ -12799,51 +13462,67 @@ button.structure-close,
         if (!root || root.dataset.bound) return;
         root.dataset.bound = '1';
 
-        root.addEventListener('change', function () {
-            state.shapeIndex = 0;
-            setChordRoot(Number(root.value));
+        root.addEventListener('click', function (event) {
+            var button = event.target.closest('[data-root-letter]');
+            if (!button) return;
+            setRoot(button.getAttribute('data-root-letter'), parsedRoot().acc);
         });
 
-        SB.$('neckQuality').addEventListener('change', function () {
-            state.shapeIndex = 0;
-            if (!state.scaleTouched) state.scaleId = null;
-            SB.applyExplorerSelection({ quality: SB.$('neckQuality').value });
+        SB.$('neckAccidental').addEventListener('click', function (event) {
+            var button = event.target.closest('[data-acc]');
+            if (!button) return;
+            setRoot(parsedRoot().letter, Number(button.getAttribute('data-acc')));
         });
 
-        SB.$('neckVoicing').addEventListener('change', function () {
-            state.shapeIndex = Number(SB.$('neckVoicing').value) || 0;
-            render();
-        });
-
-        SB.$('neckPrev').addEventListener('click', function () {
-            var list = shapes();
-            if (!list.length) return;
-            state.shapeIndex = (state.shapeIndex - 1 + list.length) % list.length;
-            render();
-        });
-
-        SB.$('neckNext').addEventListener('click', function () {
-            var list = shapes();
-            if (!list.length) return;
-            state.shapeIndex = (state.shapeIndex + 1) % list.length;
-            render();
-        });
-
-        SB.$('neckCapo').addEventListener('change', function () {
-            prefs.capo = Number(SB.$('neckCapo').value) || 0;
-            state.shapeIndex = 0;
+        SB.$('neckLabels').addEventListener('click', function (event) {
+            var button = event.target.closest('[data-label]');
+            if (!button) return;
+            prefs.labelMode = button.getAttribute('data-label');
             savePrefs();
             render();
         });
 
-        SB.$('neckAllTones').addEventListener('click', function () {
-            prefs.allTones = !prefs.allTones;
+        SB.$('neckQualities').addEventListener('click', function (event) {
+            var button = event.target.closest('[data-quality]');
+            if (!button) return;
+            SB.applyExplorerSelection({ quality: button.getAttribute('data-quality') });
+        });
+
+        SB.$('neckQuality').addEventListener('change', function () {
+            if (!this.value) return;
+            SB.applyExplorerSelection({ quality: this.value });
+        });
+
+        SB.$('neckShapes').addEventListener('click', function (event) {
+            var button = event.target.closest('[data-shape-mode]');
+            if (!button || button.disabled) return;
+            prefs.shapeMode = button.getAttribute('data-shape-mode');
+            savePrefs();
+            render();
+        });
+
+        SB.$('neckBass').addEventListener('change', function () {
+            prefs.bassDegree = this.value;
+            savePrefs();
+            render();
+        });
+
+        SB.$('neckFrets').addEventListener('click', function (event) {
+            var button = event.target.closest('[data-frets]');
+            if (!button) return;
+            prefs.frets = Number(button.getAttribute('data-frets'));
             savePrefs();
             render();
         });
 
         SB.$('neckScaleToggle').addEventListener('click', function () {
             prefs.scaleOn = !prefs.scaleOn;
+            savePrefs();
+            render();
+        });
+
+        SB.$('neckFingers').addEventListener('click', function () {
+            prefs.fingers = !prefs.fingers;
             savePrefs();
             render();
         });
@@ -12855,33 +13534,46 @@ button.structure-close,
         });
 
         SB.$('neckScaleRoot').addEventListener('change', function () {
-            var value = SB.$('neckScaleRoot').value;
-            state.scaleRootPc = value === '' ? null : Number(value);
+            state.scaleRootPc = this.value === '' ? null : Number(this.value);
             render();
         });
 
         SB.$('neckScaleType').addEventListener('change', function () {
-            state.scaleId = SB.$('neckScaleType').value;
-            state.scaleTouched = true;
+            state.scaleId = this.value;
             savePrefs();
             render();
         });
 
-        SB.$('neckSpell').addEventListener('click', function () {
-            var next = exp().spelling === 'sharp' ? 'flat' : 'sharp';
-            SB.applyExplorerSelection({ rootPc: exp().rootPc, spelling: next });
+        SB.$('neckCapo').addEventListener('change', function () {
+            prefs.capo = Number(this.value) || 0;
+            savePrefs();
+            render();
         });
 
-        var media = window.matchMedia('(max-width: 640px)');
-        if (media.addEventListener) {
-            media.addEventListener('change', function () {
-                if (SB.neckVisible && SB.neckVisible()) render();
-            });
+        SB.$('neckStrum').addEventListener('click', function () { play('strum'); });
+        SB.$('neckArpeggio').addEventListener('click', function () { play('arpeggio'); });
+
+        var diagram = SB.$('neckDiagram');
+        function pickShape(event) {
+            var pill = event.target.closest('[data-shape]');
+            if (!pill) return false;
+            prefs.shapeMode = pill.getAttribute('data-shape');
+            savePrefs();
+            render();
+            return true;
         }
+        diagram.addEventListener('click', pickShape);
+        diagram.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            if (pickShape(event)) event.preventDefault();
+        });
     }
 
     SB.renderNeck = render;
     SB.neckPrefs = prefs;
+    SB.neckState = state;
+    SB.neckShapes = cagedShapes;
+    SB.neckVoicing = currentVoicing;
 
     bindOnce();
 
