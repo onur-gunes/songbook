@@ -216,7 +216,7 @@ def main():
            cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length") >= 5,
            cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length"))
         ok('neck groups each shape into a rounded island',
-           cdp.eval("Array.from(document.querySelectorAll('#neckDiagram .neck-region')).every(r => r.tagName === 'rect' && Number(r.getAttribute('rx')) > 0)"))
+           cdp.eval("Array.from(document.querySelectorAll('#neckDiagram .neck-region')).every(r => r.tagName === 'path' && r.getAttribute('d').indexOf('Q') > -1)"))
         ok('neck counts the shapes',
            'shape' in cdp.eval("document.getElementById('neckShapeCount').textContent").lower(),
            cdp.eval("document.getElementById('neckShapeCount').textContent"))

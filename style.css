@@ -4188,10 +4188,10 @@ body.tuner-open { overflow: hidden; }
 }
 .neck-board { fill: var(--surface-2); opacity: 0.65; }
 .neck-region {
-    fill-opacity: 0.14;
-    stroke-opacity: 0.8;
-    stroke-width: 1.8;
-    stroke-dasharray: 18 11;
+    fill-opacity: 0.16;
+    stroke-opacity: 0.85;
+    stroke-width: 2.2;
+    stroke-dasharray: 20 12;
     stroke-linecap: round;
     stroke-linejoin: round;
 }

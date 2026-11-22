@@ -4201,10 +4201,10 @@ body.tuner-open { overflow: hidden; }
 }
 .neck-board { fill: var(--surface-2); opacity: 0.65; }
 .neck-region {
-    fill-opacity: 0.14;
-    stroke-opacity: 0.8;
-    stroke-width: 1.8;
-    stroke-dasharray: 18 11;
+    fill-opacity: 0.16;
+    stroke-opacity: 0.85;
+    stroke-width: 2.2;
+    stroke-dasharray: 20 12;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
@@ -12986,14 +12986,11 @@ button.structure-close,
         // Coloured CAGED regions sit behind the grid.
         out.push('<g clip-path="url(#neckClip)">');
         shapes.forEach(function (shape) {
-            var box = regionBox(shape, geometry);
-            if (!box) return;
+            var d = regionPath(shape, geometry);
+            if (!d) return;
             var color = CAGED_COLORS[shape.letter];
-            out.push('<rect class="neck-region' + (shape.bassMatch ? '' : ' is-dim') +
-                '" x="' + round(box.x) + '" y="' + round(box.y) +
-                '" width="' + round(box.w) + '" height="' + round(box.h) +
-                '" rx="' + round(box.rx) + '" fill="' + color +
-                '" stroke="' + color + '"/>');
+            out.push('<path class="neck-region' + (shape.bassMatch ? '' : ' is-dim') +
+                '" d="' + d + '" fill="' + color + '" stroke="' + color + '"/>');
         });
         out.push('</g>');
 
@@ -13091,31 +13088,110 @@ button.structure-close,
         return out.join('');
     }
 
-    function regionBox(shape, geometry) {
+    /* A CAGED region should read as one soft island around the notes of that
+     * shape. Grow the note cluster by a disc: sample a ring around every
+     * note and take the convex hull, which is the true rounded outline of the
+     * cluster. Miter-offsetting the hull instead would spike at the sharp
+     * corners where neighbouring strings sit close together. */
+    function regionPath(shape, geometry) {
         var num = geometry.num;
-        var xs = [];
-        var minRow = Infinity;
-        var maxRow = -Infinity;
+        var points = [];
         for (var string = 0; string < num; string++) {
             var fret = shape.frets[string];
             if (fret < 0) continue;
-            xs.push(geometry.xFret(fret));
-            var row = geometry.stringRow(string);
-            if (row < minRow) minRow = row;
-            if (row > maxRow) maxRow = row;
+            points.push({
+                x: geometry.xFret(fret),
+                y: geometry.rowY(geometry.stringRow(string))
+            });
         }
-        if (xs.length < 2) return null;
+        if (points.length < 2) return '';
 
-        var minX = Math.min.apply(null, xs);
-        var maxX = Math.max.apply(null, xs);
-        var padX = geometry.fw * 0.48;
-        var padY = 19;
-        var x = minX - padX;
-        var y = geometry.rowY(minRow) - padY;
-        var w = (maxX - minX) + padX * 2;
-        var h = geometry.rowY(maxRow) - geometry.rowY(minRow) + padY * 2;
-        var rx = Math.min(26, w / 2, h / 2);
-        return { x: x, y: y, w: w, h: h, rx: rx };
+        var pad = geometry.noteR + 8;
+        var steps = 48;
+        var ring = [];
+        points.forEach(function (point) {
+            for (var i = 0; i < steps; i++) {
+                var angle = (i / steps) * Math.PI * 2;
+                ring.push({
+                    x: point.x + Math.cos(angle) * pad,
+                    y: point.y + Math.sin(angle) * pad
+                });
+            }
+        });
+
+        var hull = convexHull(ring);
+        if (hull.length < 3) return '';
+        return roundedPolygonPath(hull, pad * 0.5);
+    }
+
+    /* Andrew's monotone chain. Collinear points are dropped so the hull is a
+     * clean convex outline (counter-clockwise in SVG coordinates). */
+    function convexHull(points) {
+        var sorted = points.slice().sort(function (a, b) {
+            return a.x === b.x ? a.y - b.y : a.x - b.x;
+        });
+
+        function cross(o, a, b) {
+            return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+        }
+
+        var lower = [];
+        sorted.forEach(function (point) {
+            while (lower.length >= 2 &&
+                   cross(lower[lower.length - 2], lower[lower.length - 1], point) <= 0) {
+                lower.pop();
+            }
+            lower.push(point);
+        });
+
+        var upper = [];
+        for (var i = sorted.length - 1; i >= 0; i--) {
+            var point = sorted[i];
+            while (upper.length >= 2 &&
+                   cross(upper[upper.length - 2], upper[upper.length - 1], point) <= 0) {
+                upper.pop();
+            }
+            upper.push(point);
+        }
+
+        lower.pop();
+        upper.pop();
+        return lower.concat(upper);
+    }
+
+    /* Draw a closed polygon with softly rounded corners while keeping the
+     * straight edges, so the island keeps the size we gave it. */
+    function roundedPolygonPath(points, radius) {
+        var n = points.length;
+        if (n < 3) return '';
+
+        function unit(a, b) {
+            var dx = b.x - a.x;
+            var dy = b.y - a.y;
+            var len = Math.sqrt(dx * dx + dy * dy) || 1;
+            return { x: dx / len, y: dy / len, len: len };
+        }
+
+        var d = '';
+        for (var i = 0; i < n; i++) {
+            var prev = points[(i + n - 1) % n];
+            var cur = points[i];
+            var next = points[(i + 1) % n];
+            var inDir = unit(prev, cur);
+            var outDir = unit(cur, next);
+            var start = {
+                x: cur.x - inDir.x * Math.min(radius, inDir.len / 2),
+                y: cur.y - inDir.y * Math.min(radius, inDir.len / 2)
+            };
+            var end = {
+                x: cur.x + outDir.x * Math.min(radius, outDir.len / 2),
+                y: cur.y + outDir.y * Math.min(radius, outDir.len / 2)
+            };
+            d += (i === 0 ? 'M' : ' L') + round(start.x) + ' ' + round(start.y) +
+                ' Q' + round(cur.x) + ' ' + round(cur.y) + ' ' +
+                round(end.x) + ' ' + round(end.y);
+        }
+        return d + ' Z';
     }
 
     function round(value) {
