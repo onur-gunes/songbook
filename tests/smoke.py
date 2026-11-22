@@ -215,6 +215,8 @@ def main():
         ok('neck shows CAGED regions',
            cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length") >= 5,
            cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length"))
+        ok('neck groups each shape into a rounded island',
+           cdp.eval("Array.from(document.querySelectorAll('#neckDiagram .neck-region')).every(r => r.tagName === 'rect' && Number(r.getAttribute('rx')) > 0)"))
         ok('neck counts the shapes',
            'shape' in cdp.eval("document.getElementById('neckShapeCount').textContent").lower(),
            cdp.eval("document.getElementById('neckShapeCount').textContent"))
