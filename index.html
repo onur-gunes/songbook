@@ -422,8 +422,8 @@
                         Every way to play any chord on
                         <strong id="explorerInstrumentName">ukulele</strong> — pick a root
                         on the circle of fifths, then a chord type. Or switch to
-                        <strong>Neck</strong> to see the shape, chord tones and a scale
-                        across the whole fretboard.
+                        <strong>Neck</strong> to see the CAGED shapes, chord tones and a
+                        scale across the whole fretboard.
                     </p>
                 </div>
                 <nav class="explorer-tabs" aria-label="Chord explorer mode">
@@ -467,42 +467,57 @@
         </div>
 
         <div id="explorerNeckPane" class="neck-pane" hidden>
-            <div class="neck-toolbar" aria-label="Neck chord controls">
-                <label class="neck-field">
-                    <span>Root</span>
-                    <select id="neckRoot" class="neck-select"></select>
-                </label>
-                <label class="neck-field">
-                    <span>Chord</span>
-                    <select id="neckQuality" class="neck-select"></select>
-                </label>
-                <label class="neck-field neck-field-grow">
-                    <span>Voicing</span>
-                    <select id="neckVoicing" class="neck-select"></select>
-                </label>
-                <button id="neckSpell" class="neck-pill" type="button" hidden></button>
-            </div>
-
-            <div class="neck-summary">
-                <div class="neck-chord-id">
+            <header class="neck-hero">
+                <div class="neck-hero-id">
                     <div id="neckChordName" class="neck-chord-name">C</div>
-                    <div id="neckChordNotes" class="neck-chord-notes"></div>
+                    <div id="neckChordNotes" class="neck-chord-notes">C major</div>
                 </div>
-                <div class="neck-shape-nav" role="group" aria-label="Chord shape">
-                    <button id="neckPrev" class="neck-step" type="button" aria-label="Previous shape">←</button>
-                    <span id="neckShapeCount" class="neck-shape-count" aria-live="polite">—</span>
-                    <button id="neckNext" class="neck-step" type="button" aria-label="Next shape">→</button>
+                <div class="neck-audio" role="group" aria-label="Play chord">
+                    <button id="neckStrum" class="neck-audio-btn" type="button">
+                        <span class="neck-play-icon" aria-hidden="true">▶</span> Strum
+                    </button>
+                    <button id="neckArpeggio" class="neck-audio-btn" type="button">
+                        <span class="neck-play-icon" aria-hidden="true">▶</span> Arpeggio
+                    </button>
                 </div>
-                <span id="neckShapeFrets" class="neck-frets-label"></span>
-                <label class="neck-field neck-capo">
-                    <span>Capo</span>
-                    <select id="neckCapo" class="neck-select"></select>
-                </label>
+            </header>
+
+            <div class="neck-controls" aria-label="Chord controls">
+                <div class="neck-control-row">
+                    <span class="neck-control-label">Root</span>
+                    <div id="neckRoot" class="neck-seg" role="group" aria-label="Root note"></div>
+                    <div id="neckAccidental" class="neck-seg neck-seg-acc" role="group" aria-label="Root accidental"></div>
+                    <span class="neck-control-label neck-control-label-gap">Labels</span>
+                    <div id="neckLabels" class="neck-seg" role="group" aria-label="Note labels"></div>
+                </div>
+
+                <div class="neck-control-row">
+                    <span class="neck-control-label">Chord</span>
+                    <div id="neckQualities" class="neck-seg" role="group" aria-label="Chord type"></div>
+                    <label class="neck-more">
+                        <span class="sr-only">More chord types</span>
+                        <select id="neckQuality" class="neck-select neck-more-select"></select>
+                    </label>
+                </div>
+
+                <div class="neck-control-row">
+                    <span class="neck-control-label">Shape</span>
+                    <div id="neckShapes" class="neck-seg" role="group" aria-label="CAGED shape"></div>
+                    <span class="neck-control-label neck-control-label-gap">Bass</span>
+                    <select id="neckBass" class="neck-select neck-bass-select" aria-label="Bass note"></select>
+                    <span class="neck-control-label neck-control-label-gap">Frets</span>
+                    <div id="neckFrets" class="neck-seg" role="group" aria-label="Fret count"></div>
+                </div>
             </div>
 
-            <div class="neck-options" role="group" aria-label="Neck display">
-                <button id="neckAllTones" class="neck-pill" type="button" aria-pressed="true">All chord tones</button>
-                <button id="neckScaleToggle" class="neck-pill" type="button" aria-pressed="true">Scale</button>
+            <div class="neck-card">
+                <div id="neckDiagram" class="neck-diagram" role="group"></div>
+            </div>
+
+            <div class="neck-options" role="group" aria-label="Fretboard display">
+                <button id="neckScaleToggle" class="neck-pill" type="button" aria-pressed="true">Scale notes</button>
+                <button id="neckFingers" class="neck-pill" type="button" aria-pressed="false">Fingers</button>
+                <button id="neckOctaves" class="neck-pill" type="button" aria-pressed="false">Octaves</button>
                 <span id="neckScaleFields" class="neck-scale-fields">
                     <label class="neck-field">
                         <span>Scale key</span>
@@ -513,22 +528,17 @@
                         <select id="neckScaleType" class="neck-select"></select>
                     </label>
                 </span>
-                <button id="neckOctaves" class="neck-pill" type="button" aria-pressed="false">Octaves</button>
+                <label class="neck-field neck-capo">
+                    <span>Capo</span>
+                    <select id="neckCapo" class="neck-select"></select>
+                </label>
+                <span id="neckScaleSummary" class="neck-scale-summary"></span>
             </div>
-
-            <section class="neck-card">
-                <div id="neckDiagram" class="neck-diagram" role="img"></div>
-                <p class="neck-legend">
-                    <span class="neck-key"><i class="neck-swatch neck-swatch-shape"></i>Shape</span>
-                    <span class="neck-key"><i class="neck-swatch neck-swatch-tone"></i>Chord tones</span>
-                    <span class="neck-key"><i class="neck-swatch neck-swatch-scale"></i>Scale</span>
-                    <span id="neckScaleSummary" class="neck-scale-summary"></span>
-                </p>
-            </section>
 
             <section class="neck-notes" aria-labelledby="neckNotesTitle">
                 <div class="neck-notes-head">
                     <h2 id="neckNotesTitle" class="explorer-shapes-title">Shape notes, bass to top</h2>
+                    <span id="neckShapeCount" class="explorer-shapes-count"></span>
                     <span id="neckNotesCount" class="explorer-shapes-count"></span>
                 </div>
                 <div id="neckShapeNotes" class="neck-string-notes"></div>
@@ -790,6 +800,7 @@
 </div>
 
 <script src="chords.js"></script>
+<script src="js/chordaudio.js"></script>
 <script src="tuner.js"></script>
 <!-- App modules. Classic scripts sharing window.SB, not ES modules, so the
      single-file build keeps working from file://. This ordering is the one
