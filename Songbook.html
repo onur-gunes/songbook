@@ -1579,17 +1579,26 @@ main {
 
 .strum-slot {
     flex: none;
-    min-width: calc(20px * var(--strum-size, 1));
-    height: calc(28px * var(--strum-size, 1));
+    min-width: calc(24px * var(--strum-size, 1));
+    height: calc(32px * var(--strum-size, 1));
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-family: var(--mono);
-    font-size: calc(1.05rem * var(--strum-size, 1));
+    font-size: calc(1.3rem * var(--strum-size, 1));
     font-weight: 700;
     color: var(--text);
     border-radius: 6px;
     background: var(--surface-2);
+    transform-origin: 50% 55%;
+    opacity: 0.6;
+    /* The pulse is carried by the glyph: the arrow brightens and grows as the
+       beat reaches it, then dims and settles as the next one lights. */
+    transition:
+        color 120ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        opacity 120ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        text-shadow 220ms ease,
+        transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .strum-slot.rest {
@@ -1602,8 +1611,21 @@ main {
 }
 
 .strum-slot.on {
-    background: var(--accent);
-    color: var(--surface);
+    color: var(--accent);
+    opacity: 1;
+    font-weight: 900;
+    transform: scale(1.22);
+    text-shadow:
+        0 0 6px color-mix(in srgb, var(--accent) 85%, transparent),
+        0 0 16px color-mix(in srgb, var(--accent) 60%, transparent),
+        0 0 30px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+/* The count-in reuses these cells, so the lit count must not inherit the
+   muted count-in text colour: it should glow with the same accent as the
+   pattern arrows. */
+.strum-row.is-countin .strum-slot.on {
+    color: var(--accent);
 }
 
 .strum-edit-btn {
@@ -2426,6 +2448,10 @@ body.pattern-open { overflow: hidden; }
 .sheet.chords-grid .grid-diagram {
     display: block;
     object-fit: contain;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    border-radius: 4px;
+    transition: outline-color 140ms ease;
 }
 
 [data-theme="dark"] .sheet.chords-grid .grid-diagram {
@@ -2437,6 +2463,9 @@ body.pattern-open { overflow: hidden; }
     font-weight: 700;
     line-height: 1.2;
     white-space: nowrap;
+    transition:
+        background-color 140ms ease,
+        color 140ms ease;
 }
 
 /* The playhead's chord: the label becomes a badge and the diagram gets a
@@ -2491,22 +2520,6 @@ body.pattern-open { overflow: hidden; }
     font-size: 0.85em;
 }
 
-/* The beat itself: a thin horizontal line running through each beat cell,
-   under the chord diagram. The line is the primary beat indicator and the
-   strum strokes sit on it. */
-.sheet.chords-grid .grid-beat::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 1px;
-    background: var(--line);
-    opacity: 0.5;
-    transform: translateY(-50%);
-    pointer-events: none;
-}
-
 /* A faint tick at each beat boundary, so a run of subdivision arrows reads
    as beats rather than one undifferentiated string of glyphs. */
 .sheet.chords-grid .grid-beat + .grid-beat::after {
@@ -2544,37 +2557,38 @@ body.pattern-open { overflow: hidden; }
     text-align: center;
     border-radius: 999px;
     color: var(--text);
-    opacity: 0.7;
-    font-size: 1.1em;
+    opacity: 0.5;
+    font-size: 1.5em;
     font-weight: 800;
     position: relative;
     z-index: 1;
+    transform-origin: 50% 55%;
+    /* Same glyph-led fade as the top strum row: the arrow itself brightens
+       and grows in place instead of sitting in a filled pill. */
+    transition:
+        color 120ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        opacity 120ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        text-shadow 220ms ease,
+        transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .sheet.chords-grid .grid-beat-slot.rest {
     color: var(--muted);
     font-weight: 400;
-    opacity: 0.45;
+    opacity: 0.3;
 }
 
 /* The playhead's arrow: lights up subdivision-by-subdivision within the
    active beat, so each down / up pulses as the metronome passes it. */
 .sheet.chords-grid .grid-beat-slot.on {
-    color: var(--surface);
-    background: var(--accent);
+    color: var(--accent);
     opacity: 1;
     font-weight: 900;
-    transform: scale(1.15);
-}
-
-/* The playhead's beat: the line turns to the accent colour and the current
-   arrow pops, so the current strum pulse is readable at a glance. */
-.sheet.chords-grid .grid-beat.on {
-    color: var(--surface);
-}
-.sheet.chords-grid .grid-beat.on::before {
-    background: var(--accent);
-    opacity: 1;
+    transform: scale(1.35);
+    text-shadow:
+        0 0 6px color-mix(in srgb, var(--accent) 85%, transparent),
+        0 0 16px color-mix(in srgb, var(--accent) 60%, transparent),
+        0 0 30px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 /* An overridden beat keeps its own ring so the distinction is not colour
