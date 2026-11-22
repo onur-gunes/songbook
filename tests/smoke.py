@@ -198,21 +198,25 @@ def main():
         cdp.eval("songbookTest.setInstrument('ukulele')")
         time.sleep(0.3)
 
-        # neck tab: curated voicings, chord tones and a scale layer
+        # neck tab: CAGED shapes, chord tones and a scale layer
         cdp.eval("location.hash = '#/chords/neck'")
         cdp.wait_js("document.getElementById('explorerNeckPane').hidden === false", timeout=10)
         ok('neck tab opens',
            cdp.eval("location.hash") == '#/chords/neck'
            and cdp.eval("document.getElementById('explorerShapesPane').hidden") is True)
-        cdp.eval("(function(){var r=document.getElementById('neckRoot');r.value='9';r.dispatchEvent(new Event('change',{bubbles:true}));})()")
-        cdp.eval("(function(){var q=document.getElementById('neckQuality');q.value='m7';q.dispatchEvent(new Event('change',{bubbles:true}));})()")
+        cdp.eval("songbookTest.setInstrument('guitar')")
+        time.sleep(0.3)
+        cdp.eval("document.querySelector('#neckRoot [data-root-letter=\"A\"]').click()")
+        cdp.eval("document.querySelector('#neckQualities [data-quality=\"m7\"]').click()")
         time.sleep(0.1)
         ok('neck selects Am7',
            cdp.eval("document.getElementById('neckChordName').textContent") == 'Am7',
            cdp.eval("document.getElementById('neckChordName').textContent"))
-        ok('neck uses a curated shape stepper',
-           0 < int(cdp.eval("document.getElementById('neckShapeCount').textContent").split('/')[1].strip())
-           < 100,
+        ok('neck shows CAGED regions',
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length") >= 5,
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length"))
+        ok('neck counts the shapes',
+           'shape' in cdp.eval("document.getElementById('neckShapeCount').textContent").lower(),
            cdp.eval("document.getElementById('neckShapeCount').textContent"))
         ok('neck draws the selected shape',
            cdp.eval("document.querySelectorAll('#neckDiagram .neck-note-shape').length") > 0)
@@ -221,13 +225,71 @@ def main():
         ok('neck lists shape notes',
            cdp.eval("document.querySelectorAll('#neckShapeNotes .neck-string-note').length") > 0,
            cdp.eval("document.querySelectorAll('#neckShapeNotes .neck-string-note').length"))
-        cdp.eval("songbookTest.setInstrument('guitar')")
-        time.sleep(0.3)
+
+        # New control surface: accidental, labels, fret range, shape filter, bass.
+        cdp.eval("document.querySelector('#neckAccidental [data-acc=\"-1\"]').click()")
+        time.sleep(0.1)
+        ok('neck accidental spells A flat',
+           cdp.eval("document.getElementById('neckChordName').textContent") == 'A\u266dm7',
+           cdp.eval("document.getElementById('neckChordName').textContent"))
+        cdp.eval("document.querySelector('#neckLabels [data-label=\"degrees\"]').click()")
+        time.sleep(0.1)
+        ok('neck can label degrees',
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-note-text-shape').length") > 0
+           and 'R' in cdp.eval("document.getElementById('neckDiagram').textContent"))
+        cdp.eval("document.querySelector('#neckLabels [data-label=\"none\"]').click()")
+        time.sleep(0.1)
+        ok('neck can hide note labels',
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-note-text-shape').length") == 0)
+        cdp.eval("document.querySelector('#neckLabels [data-label=\"notes\"]').click()")
+        cdp.eval("document.getElementById('neckFingers').click()")
+        time.sleep(0.1)
+        ok('neck can show finger numbers',
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-badge').length") > 0,
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-badge').length"))
+        cdp.eval("document.getElementById('neckFingers').click()")
+        cdp.eval("document.getElementById('neckOctaves').click()")
+        time.sleep(0.1)
+        ok('neck can label octaves',
+           cdp.eval("Array.from(document.querySelectorAll('#neckDiagram .neck-note-text-shape')).some(t=>/[0-9]/.test(t.textContent))"))
+        cdp.eval("document.getElementById('neckOctaves').click()")
+        cdp.eval("document.getElementById('neckScaleToggle').click()")
+        time.sleep(0.1)
+        ok('neck can hide the scale layer',
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-note-scale').length") == 0)
+        cdp.eval("document.getElementById('neckScaleToggle').click()")
+        cdp.eval("document.querySelector('#neckFrets [data-frets=\"24\"]').click()")
+        time.sleep(0.1)
+        ok('neck can show 24 frets',
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-fret').length") == 24,
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-fret').length"))
+        cdp.eval("document.querySelector('#neckShapes [data-shape-mode=\"C\"]').click()")
+        time.sleep(0.1)
+        ok('neck isolates one CAGED shape',
+           0 < cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length") <= 2
+           and cdp.eval("document.querySelectorAll('#neckDiagram .neck-note-shape').length") > 0,
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length"))
+        cdp.eval("document.querySelector('#neckShapes [data-shape-mode=\"caged\"]').click()")
+        cdp.eval("(function(){var b=document.getElementById('neckBass');b.value='\u266d3';b.dispatchEvent(new Event('change',{bubbles:true}));})()")
+        time.sleep(0.1)
+        ok('neck bass selector picks the third',
+           cdp.eval("document.getElementById('neckBass').value") == '\u266d3')
+        ok('neck bass filters shapes by lowest note',
+           cdp.eval("SB.neckShapes().filter(s=>s.bassMatch).length") >= 3
+           and cdp.eval("SB.neckShapes().filter(s=>s.bassMatch).every(s=>s.bassPc===11)"),
+           cdp.eval("SB.neckShapes().filter(s=>s.bassMatch).length"))
+        cdp.eval("document.querySelector('#neckFrets [data-frets=\"15\"]').click()")
+        ok('neck has strum and arpeggio playback',
+           cdp.eval("!!document.getElementById('neckStrum') && !!document.getElementById('neckArpeggio')"))
         ok('neck follows the instrument to guitar',
            cdp.eval("document.querySelectorAll('#neckDiagram .neck-string').length") == 6,
            cdp.eval("document.querySelectorAll('#neckDiagram .neck-string').length"))
         cdp.eval("songbookTest.setInstrument('ukulele')")
         time.sleep(0.3)
+        ok('neck falls back to chord tones on ukulele',
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-string').length") == 4
+           and cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length") == 0,
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-string').length"))
         cdp.eval("location.hash = '#/chords'")
         cdp.wait_js("document.getElementById('explorerShapesPane').hidden === false", timeout=10)
         ok('shapes tab returns',

@@ -80,7 +80,8 @@ creates `SB.state`) and `app.js` last (it runs `init()`).
 | `js/grid.js` | Play-along grid chart: bars, beat slashes, diagrams and the metronome-driven beat cursor |
 | `js/chordstrip.js` | Sticky chord strip and the voicing chooser |
 | `js/explorer.js` | Chord explorer: circle of fifths, chord types, voicing browser and reverse fret lookup |
-| `js/neck.js` | Full-neck explorer tab: selected chord shape, all chord tones and an optional scale layer across the fretboard |
+| `js/neck.js` | Full-neck explorer tab: CAGED shape regions, chord tones, note/degree labels, bass and fret-range controls, and an optional scale layer |
+| `js/chordaudio.js` | Web Audio strum/arpeggio playback for the neck explorer |
 | `js/list.js` | List view: search, filters, sort, songbook picker |
 | `js/import.js` | Importing songbook JSON from disk or a URL (shared parse/validate/persist pipeline) |
 | `js/export.js` | Exporting any songbook (bundled or imported) back to a JSON file |
@@ -117,14 +118,15 @@ attached to `SB`.
   fifths, choose one of 18 chord types, and see every playable voicing with
   fret labels. It also spells out the chord tones (with enharmonic spelling)
   and reverses the lookup: set each string's fret and it names the shape.
-  The **Neck** tab (`#/chords/neck`) draws the whole fretboard with the
-  selected shape, every chord tone, and an optional scale layer (major,
-  minor, pentatonic, blues, Dorian, Mixolydian). Voicings are curated to one
-  representative per inversion and hand position, so the shape stepper moves
-  through distinct shapes instead of hundreds of note-doubling variants.
-  Capo, octave labels, flats/sharps and the scale key/type are adjustable
-  there. Everything follows the global instrument toggle, so the same view
-  covers both tunings.
+  The **Neck** tab (`#/chords/neck`) is a CAGED fretboard explorer: it draws
+  the whole neck with colour-coded C, A, G, E and D shape regions, the chord
+  tones, and an optional scale layer (major, minor, pentatonic, blues, Dorian,
+  Mixolydian). Labels switch between note names and scale degrees, the bass
+  selector filters shapes by their lowest note, and the fret range switches
+  between 12, 15 and 24 frets. Strum and Arpeggio buttons play the current
+  voicing with Web Audio. CAGED regions are a guitar layout, so the ukulele
+  falls back to all chord tones. Capo, octave labels and flats/sharps are
+  adjustable there too, and everything follows the global instrument toggle.
 - Live search (title + artist), difficulty filters — multi-select, results OR'd
   across Easy / Medium / Hard, 🔥 New, ⭐ Favorites (localStorage),
   sort Title/Artist — list defaults to alphabetical by name,
