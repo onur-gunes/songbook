@@ -1059,6 +1059,14 @@ async function main() {
     ok('bpm falls back to the app default', mState().bpm === defaultBpm, String(mState().bpm));
     ok('default bpm is shown', $('bpmValue').textContent === String(defaultBpm),
         $('bpmValue').textContent);
+    ok('tempo badge says Default when the song has no tempo',
+        $('bpmSource').textContent === 'Default' &&
+        $('bpmSource').dataset.source === 'default',
+        $('bpmSource').textContent + '/' + $('bpmSource').dataset.source);
+    ok('tempo default is explained in the badge tooltip',
+        /app default/i.test($('bpmSource').title) &&
+        /no tempo/i.test($('bpmSource').title),
+        $('bpmSource').title);
     ok('beats per bar fall back to the default metre', mState().beats === 4,
         String(mState().beats));
     ok('default bpm is not stored until adjusted',
@@ -1071,10 +1079,22 @@ async function main() {
         win().localStorage.getItem(defaultBpmKey) === String(defaultBpm + 1),
         win().localStorage.getItem(defaultBpmKey));
     ok('reset shown for an override', $('bpmReset').hidden === false);
+    ok('tempo badge switches to Edited for a local override',
+        $('bpmSource').textContent === 'Edited' &&
+        $('bpmSource').dataset.source === 'manual',
+        $('bpmSource').textContent + '/' + $('bpmSource').dataset.source);
+    ok('edited tempo tooltip names the fallback',
+        /Your tempo/i.test($('bpmSource').title) &&
+        /no tempo/i.test($('bpmSource').title),
+        $('bpmSource').title);
     $('bpmReset').click(); await wait(30);
     ok('reset returns to the app default',
         mState().bpm === defaultBpm && $('bpmValue').textContent === String(defaultBpm),
         String(mState().bpm));
+    ok('tempo badge returns to Default after the reset',
+        $('bpmSource').textContent === 'Default' &&
+        $('bpmSource').dataset.source === 'default',
+        $('bpmSource').textContent);
     ok('reset clears the default override',
         win().localStorage.getItem(defaultBpmKey) === null,
         win().localStorage.getItem(defaultBpmKey));
@@ -1085,6 +1105,13 @@ async function main() {
     await wait(250);
     ok('metronome shown with tempo data', mGroup().hidden === false, 'hidden=' + mGroup().hidden);
     ok('bpm defaults from the song', $('bpmValue').textContent === '176', $('bpmValue').textContent);
+    ok('tempo badge says Songbook for documented tempo',
+        $('bpmSource').textContent === 'Songbook' &&
+        $('bpmSource').dataset.source === 'songbook',
+        $('bpmSource').textContent + '/' + $('bpmSource').dataset.source);
+    ok('songbook tempo is explained in the badge tooltip',
+        /songbook data/i.test($('bpmSource').title),
+        $('bpmSource').title);
     ok('beats per bar from time signature', mState().beats === 4, String(mState().beats));
     ok('6/8 counted in two dotted-quarter pulses',
         win().songbookTest.metronomeBeatsPerBar('6/8') === 2 &&
@@ -1098,11 +1125,23 @@ async function main() {
     ok('bpm -1 twice', $('bpmValue').textContent === '175', $('bpmValue').textContent);
     ok('bpm persisted', win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja') === '175',
         win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja'));
+    ok('tempo badge switches to Edited for a song override',
+        $('bpmSource').textContent === 'Edited' &&
+        $('bpmSource').dataset.source === 'manual',
+        $('bpmSource').textContent + '/' + $('bpmSource').dataset.source);
+    ok('edited tempo tooltip names the songbook value',
+        /Your tempo: 175 bpm/i.test($('bpmSource').title) &&
+        /songbook says 176 bpm/i.test($('bpmSource').title),
+        $('bpmSource').title);
 
     // a per-song override has a way back to the documented tempo
     ok('reset shown for a song override', $('bpmReset').hidden === false);
     $('bpmReset').click(); await wait(30);
     ok('reset returns to the song tempo', $('bpmValue').textContent === '176', $('bpmValue').textContent);
+    ok('tempo badge returns to Songbook after the reset',
+        $('bpmSource').textContent === 'Songbook' &&
+        $('bpmSource').dataset.source === 'songbook',
+        $('bpmSource').textContent);
     ok('reset clears the song override',
         win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja') === null,
         win().localStorage.getItem('songbook:bpm:polska-gurom\u0000arahja'));
@@ -1232,6 +1271,29 @@ async function main() {
     ok('every metre has several patterns',
         ['4/4', '3/4', '6/8', '2/4'].every(t => win().songbookTest.strumPatternsFor(t).length >= 2),
         ['4/4', '3/4', '6/8', '2/4'].map(t => t + '=' + win().songbookTest.strumPatternsFor(t).length).join(' '));
+
+    // A documented songbook pattern is labelled Songbook, not Default.
+    win().location.hash = '#/krakow-ukulele/harbour-lights';
+    await wait(250);
+    ok('strum badge says Songbook for a documented pattern',
+        $('strumSource').textContent === 'Songbook' &&
+        $('strumSource').dataset.source === 'songbook',
+        $('strumSource').textContent + '/' + $('strumSource').dataset.source);
+    ok('songbook strum is explained in the badge tooltip',
+        /songbook data/i.test($('strumSource').title),
+        $('strumSource').title);
+    ok('no strum reset while following the songbook', $('strumReset').hidden === true);
+    win().songbookTest.setStrum('dddudu-4-4');
+    await wait(30);
+    ok('edited strum tooltip names the documented pattern',
+        /Your strum pattern: "D D DU DU"/.test($('strumSource').title) &&
+        /songbook pattern is "D DU UDU"/.test($('strumSource').title),
+        $('strumSource').title);
+    $('strumReset').click(); await wait(30);
+    ok('strum reset returns to the songbook pattern',
+        sState().pattern.id === 'dduudu-4-4' &&
+        $('strumSource').textContent === 'Songbook',
+        sState().pattern.id + '/' + $('strumSource').textContent);
     const sixteenthBuiltIn = win().songbookTest.strumPatterns()
         .filter(p => p.id === 'sixteenth-ddu-4-4')[0];
     ok('library includes the 16th-note pattern',
@@ -1251,6 +1313,15 @@ async function main() {
     ok('default metre supplies a pattern',
         sState().pattern && sState().pattern.id === defaultStrum.id,
         sState().pattern && sState().pattern.id);
+    ok('strum badge says Default when the song has no pattern',
+        $('strumSource').textContent === 'Default' &&
+        $('strumSource').dataset.source === 'default',
+        $('strumSource').textContent + '/' + $('strumSource').dataset.source);
+    ok('strum default is explained in the badge tooltip',
+        /no strum pattern/i.test($('strumSource').title) &&
+        /default/i.test($('strumSource').title),
+        $('strumSource').title);
+    ok('no strum reset without an override', $('strumReset').hidden === true);
     ok('selector lists patterns for the default metre',
         Array.prototype.every.call(sSel().options, o =>
             win().songbookTest.strumPatterns().some(p => p.id === o.value && p.time === defaultTime)),
@@ -1263,9 +1334,28 @@ async function main() {
     ok('manual choice persisted for a no-time song',
         win().localStorage.getItem('songbook:strum:polska-gurom\u0000nie-ma-nas') === 'eighths-4-4',
         win().localStorage.getItem('songbook:strum:polska-gurom\u0000nie-ma-nas'));
+    ok('strum badge switches to Edited for a manual choice',
+        $('strumSource').textContent === 'Edited' &&
+        $('strumSource').dataset.source === 'manual',
+        $('strumSource').textContent + '/' + $('strumSource').dataset.source);
+    ok('strum reset appears for a manual choice', $('strumReset').hidden === false);
+    ok('edited strum tooltip says the song has no pattern',
+        /Your strum pattern/i.test($('strumSource').title) &&
+        /no strum pattern/i.test($('strumSource').title),
+        $('strumSource').title);
+    $('strumReset').click(); await wait(30);
+    ok('strum reset returns to the default pattern',
+        sState().pattern.id === defaultStrum.id &&
+        $('strumSource').textContent === 'Default',
+        sState().pattern.id + '/' + $('strumSource').textContent);
+    ok('strum reset hidden after clearing', $('strumReset').hidden === true);
+    ok('strum reset clears the stored plan choice',
+        win().songbookTest.loadPlan('polska-gurom', 'nie-ma-nas').songStrum === null,
+        JSON.stringify(win().songbookTest.loadPlan('polska-gurom', 'nie-ma-nas')));
     win().localStorage.removeItem('songbook:strum:polska-gurom\u0000nie-ma-nas');
 
-    // arahja carries time 4/4 and the documented default strum downs-4-4
+    // arahja carries time 4/4 but no documented strum; the first 4/4 pattern
+    // is the app fallback, so the badge must say Default
     win().localStorage.removeItem('songbook:strum:polska-gurom\u0000arahja');
     win().location.hash = '#/polska-gurom/arahja';
     await wait(250);
@@ -1279,9 +1369,17 @@ async function main() {
     ok('strum row is actually visible',
         !!sRow().offsetParent && win().getComputedStyle(sRow()).display !== 'none',
         'display=' + win().getComputedStyle(sRow()).display);
-    ok('documented default selected automatically', sState().pattern && sState().pattern.id === 'downs-4-4',
+    ok('fallback pattern selected automatically', sState().pattern && sState().pattern.id === 'downs-4-4',
         sState().pattern && sState().pattern.id);
-    ok('selector reflects the default', sSel().value === 'downs-4-4', sSel().value);
+    ok('selector reflects the fallback', sSel().value === 'downs-4-4', sSel().value);
+    ok('strum badge says Default when the song has no pattern',
+        $('strumSource').textContent === 'Default' &&
+        $('strumSource').dataset.source === 'default',
+        $('strumSource').textContent + '/' + $('strumSource').dataset.source);
+    ok('default strum is explained in the badge tooltip',
+        /no strum pattern/i.test($('strumSource').title),
+        $('strumSource').title);
+    ok('no strum reset while following the fallback', $('strumReset').hidden === true);
     // every option in the selector is a 4/4 pattern
     ok('selector lists only 4/4 patterns',
         Array.prototype.every.call(sSel().options, o =>
@@ -1326,6 +1424,27 @@ async function main() {
     win().location.hash = '#/polska-gurom/arahja';
     await wait(250);
     ok('manual strum choice remembered', sState().pattern.id === 'dddudu-4-4', sState().pattern.id);
+    ok('strum badge says Edited while the manual choice is active',
+        $('strumSource').textContent === 'Edited' &&
+        $('strumSource').dataset.source === 'manual',
+        $('strumSource').textContent + '/' + $('strumSource').dataset.source);
+    ok('edited strum tooltip says the song has no documented pattern',
+        /Your strum pattern: "D D DU DU"/.test($('strumSource').title) &&
+        /no strum pattern/.test($('strumSource').title),
+        $('strumSource').title);
+
+    // reset returns to the songbook/default pattern without touching other edits
+    $('strumReset').click(); await wait(30);
+    ok('strum reset returns to the fallback pattern',
+        sState().pattern.id === 'downs-4-4' &&
+        $('strumSource').textContent === 'Default',
+        sState().pattern.id + '/' + $('strumSource').textContent);
+    ok('strum reset clears both the plan and legacy choice',
+        win().songbookTest.loadPlan('polska-gurom', 'arahja').songStrum === null &&
+        win().localStorage.getItem('songbook:strum:polska-gurom\u0000arahja') === null,
+        String(win().songbookTest.loadPlan('polska-gurom', 'arahja').songStrum));
+    ok('strum reset button hides once back on the songbook',
+        $('strumReset').hidden === true);
 
     // the highlight stays locked to the metronome with no second timer: the
     // lit slot always equals what metronomePosition() implies, across a run
