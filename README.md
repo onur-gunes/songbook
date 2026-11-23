@@ -118,15 +118,17 @@ attached to `SB`.
   fifths, choose one of 18 chord types, and see every playable voicing with
   fret labels. It also spells out the chord tones (with enharmonic spelling)
   and reverses the lookup: set each string's fret and it names the shape.
-  The **Neck** tab (`#/chords/neck`) is a CAGED fretboard explorer: it draws
-  the whole neck with colour-coded C, A, G, E and D shape regions, the chord
-  tones, and an optional scale layer (major, minor, pentatonic, blues, Dorian,
-  Mixolydian). Labels switch between note names and scale degrees, the bass
-  selector filters shapes by their lowest note, and the fret range switches
-  between 12, 15 and 24 frets. Strum and Arpeggio buttons play the current
-  voicing with Web Audio. CAGED regions are a guitar layout, so the ukulele
-  falls back to all chord tones. Capo, octave labels and flats/sharps are
-  adjustable there too, and everything follows the global instrument toggle.
+  The **Neck** tab (`#/chords/neck`) is a movable-shape fretboard explorer:
+  it draws the whole neck with colour-coded shape regions, the chord tones,
+  and an optional scale layer (major, minor, pentatonic, blues, Dorian,
+  Mixolydian). Guitar uses the familiar CAGED regions; ukulele uses the
+  equivalent CAGFD layout (C, A, G, F and D, with the F grip replacing the
+  impractical E grip on a re-entrant uke). Labels switch between note names
+  and scale degrees, the bass selector filters shapes by their lowest note,
+  and the fret range switches between 12, 15 and 24 frets. Strum and
+  Arpeggio buttons play the current voicing with Web Audio. Capo, octave
+  labels and flats/sharps are adjustable there too, and everything follows
+  the global instrument toggle.
 - Live search (title + artist), difficulty filters — multi-select, results OR'd
   across Easy / Medium / Hard, 🔥 New, ⭐ Favorites (localStorage),
   sort Title/Artist — list defaults to alphabetical by name,
