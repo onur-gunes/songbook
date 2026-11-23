@@ -168,11 +168,14 @@ attached to `SB`.
 - **Metronome** — clicks at the song's `bpm`, accenting beat 1 according to
   `time`. Adjust the tempo and it is remembered for that song; the ↺ button
   next to the stepper drops that override and returns to the song's documented
-  tempo (or the 100 bpm default). Available on every song: one with no tempo
-  data starts at a neutral 100 bpm in 4/4, and the first adjustment stores a
-  per-song override. Scheduled against the audio clock rather than a timer, so
-  it does not drift; a live tempo change re-spaces the remaining clicks instead
-  of letting the old grid play out.
+  tempo (or the 100 bpm default). A small badge beside the **Tempo** label
+  always says where the shown value came from — **Songbook**, **Edited** (your
+  override) or **Default** (the song has no tempo, so the app's neutral 100 bpm
+  is in use), with the full explanation in its tooltip. Available on every
+  song: one with no tempo data starts at a neutral 100 bpm in 4/4, and the first
+  adjustment stores a per-song override. Scheduled against the audio clock
+  rather than a timer, so it does not drift; a live tempo change re-spaces the
+  remaining clicks instead of letting the old grid play out.
 - **Strum pattern** — a row of arrows (`↓ ↑ ·`) under the chord strip, chosen
   from a library of common patterns filtered by the song's `time` (4/4, 3/4,
   6/8, 2/4 — several per metre). A toggle switches the row between arrows and
@@ -194,6 +197,10 @@ attached to `SB`.
   on a phone is the difference between the pattern fitting on screen and not.
   Available on every song: one with no `time` uses 4/4, so the row and
   selector still work and a manual choice can be stored per song.
+  The **Strum** badge follows the same **Songbook / Edited / Default** rule as
+  Tempo, and a ↺ button appears beside the selector once you have chosen a
+  pattern so you can return to the songbook's own (or the default) pattern
+  without clearing the rest of your edits.
   Per-section patterns: under **More controls**, open **Sections** in the
   strum group to pick a pattern per section role present in the song (Verse, Chorus, Bridge, …; "Verse 1" and "Verse 2"
   share one choice). Each selector defaults to "Same as song" and inherits the
@@ -614,6 +621,12 @@ it is never written into the songbook or stored as an override until the user
 changes the tempo. The ↺ button appears once an override exists, so there is
 always a way back to the song's own value. The same rule applies to strum: a
 song with no `time` uses 4/4 so its row and selector are available.
+
+Both controls label their source in the toolbar — **Songbook** for documented
+data, **Edited** once you have overridden it locally, and **Default** when the
+song carries no value and the app fallback is showing. The badge is text as
+well as colour, and its tooltip spells out which number or pattern is in use
+and what the songbook documents, so a fallback is never mistaken for song data.
 
 Curated values live in the per-book `tempo.json` sidecar, merged by song id
 exactly like `original-keys.json`, and take precedence over an inline

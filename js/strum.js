@@ -258,22 +258,66 @@
 
     /* The song-level pattern, ignoring section/bar/beat overrides. This is
      * what the collapsed row shows: per-section choices are a separate layer
-     * until the grid lane follows them during playback (Step 5). */
-    function mainPatternFor(song, plan) {
-        if (!song) return null;
+     * until the grid lane follows them during playback (Step 5).
+     *
+     * Returns the pattern and where it came from so the selector can say
+     * "Songbook" / "Edited" / "Default" instead of leaving the player to guess
+     * whether a pattern is documented or invented. `songPattern` is the
+     * songbook's own choice (if any), kept for the manual badge's explanation. */
+    function mainStrumProvenance(song, plan) {
+        var none = { source: 'none', pattern: null, songPattern: null };
+        if (!song) return none;
         if (plan === undefined) plan = currentPlanFor(song);
         plan = planWithSong(song, plan);
         var time = timeFor(song, plan);
+        var songPattern = findPattern(song.strum, time, plan);
         var pattern = findPattern(plan.songStrum, time, plan);
+        var source = pattern ? 'manual' : null;
         if (!pattern && SB.state.active) {
             pattern = findPattern(storedChoice(SB.state.active.id, song.id), time, plan);
+            source = pattern ? 'manual' : null;
         }
-        if (!pattern) pattern = findPattern(song.strum, time, plan);
+        if (!pattern) {
+            pattern = songPattern;
+            source = pattern ? 'songbook' : null;
+        }
         if (!pattern) {
             var list = SB.strumPatternsForSong(song, plan);
             pattern = list.length ? list[0] : null;
+            source = pattern ? 'default' : 'none';
         }
-        return pattern;
+        return {
+            source: source || 'none',
+            pattern: pattern,
+            songPattern: songPattern
+        };
+    }
+
+    function mainPatternFor(song, plan) {
+        return mainStrumProvenance(song, plan).pattern;
+    }
+
+    SB.strumProvenance = mainStrumProvenance;
+
+    /* The badge's tooltip/accessible description. Like the tempo one, it names
+     * the source and then gives the actual pattern, plus what the songbook
+     * documents when the player has overridden it. */
+    function strumSourceDetail(prov) {
+        if (!prov || !prov.pattern || prov.source === 'none') {
+            return 'No strum pattern is available for this song.';
+        }
+        var pattern = '"' + prov.pattern.name + '"';
+        if (prov.source === 'songbook') {
+            return 'Strum pattern ' + pattern + ' comes from the songbook data.';
+        }
+        if (prov.source === 'default') {
+            return 'The songbook has no strum pattern. Showing the default ' +
+                prov.pattern.time + ' pattern ' + pattern + '.';
+        }
+        return 'Your strum pattern: ' + pattern + '. ' +
+            (prov.songPattern
+                ? 'The songbook pattern is "' + prov.songPattern.name + '".'
+                : 'The songbook has no strum pattern.');
     }
 
     /* A section's effective pattern: its plan override when one fits the
@@ -848,6 +892,26 @@
 
     /* ---------------- wiring ---------------- */
 
+    /* The selector always shows the song-wide choice, so its source badge is
+     * derived from mainStrumProvenance and never from the transient row
+     * pattern: during playback the row previews the effective section pattern,
+     * and labelling that "Edited" would be a lie about the stored choice. */
+    function updateStrumSource() {
+        var song = SB.state.currentSong;
+        var prov = song ? mainStrumProvenance(song, currentPlanFor(song))
+            : { source: 'none', pattern: null, songPattern: null };
+        SB.setSourceBadge(SB.$('strumSource'), prov.source, strumSourceDetail(prov));
+        var reset = SB.$('strumReset');
+        if (reset) {
+            reset.hidden = prov.source !== 'manual';
+            var label = prov.songPattern
+                ? 'Reset strum pattern to the songbook\'s "' + prov.songPattern.name + '"'
+                : 'Reset strum pattern to the default for this song';
+            reset.setAttribute('aria-label', label);
+            reset.title = label;
+        }
+    }
+
     /* Shows or hides both halves of the feature together: the selector in the
      * toolbar and the subdivision row under the chord strip. Both start hidden
      * in the markup, so the row has to be unhidden here — without that the
@@ -862,6 +926,7 @@
         if (group) group.hidden = !on;
         if (row) row.hidden = !on;
         if (sections) sections.hidden = !on || !sectionsOpen;
+        updateStrumSource();
         SB.applyStrumSettings();
     }
 
@@ -987,6 +1052,30 @@
         // new row; strumOnMetronomeStart is a no-op if the loop is already up.
         if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
     }
+
+    /* Drops the manual song-level choice and returns the selector to the
+     * documented pattern (or the first pattern for the metre). Other local
+     * edits stay: this is the strum twin of resetBpmForSong, not a full plan
+     * reset, because section/bar/beat overrides and structure edits belong to
+     * different controls. The legacy pre-plan key has to go too, or it would
+     * seed the choice straight back on the next read. */
+    SB.resetStrumForSong = function () {
+        var song = SB.state.currentSong;
+        var active = SB.state.active;
+        if (!song || !active) return;
+        try { window.localStorage.removeItem(SB.strumKey(active.id, song.id)); }
+        catch (e) { /* ignore */ }
+        var plan = SB.loadPlan(active.id, song.id);
+        plan.songStrum = null;
+        if (SB.hasLocalEdits(plan)) {
+            SB.savePlan(active.id, song.id, plan);
+        } else {
+            try { window.localStorage.removeItem(SB.planKey(active.id, song.id)); }
+            catch (e) { /* ignore */ }
+        }
+        previewRole = null;
+        refreshCurrentStrum();
+    };
 
     /* ---------------- custom pattern editor ----------------
      *
@@ -1572,6 +1661,9 @@
         if (sel) sel.addEventListener('change', function () { SB.setStrum(sel.value); });
         var nbtn = SB.$('strumNotationBtn');
         if (nbtn) nbtn.addEventListener('click', SB.toggleStrumNotation);
+
+        var reset = SB.$('strumReset');
+        if (reset) reset.addEventListener('click', SB.resetStrumForSong);
 
         var edit = SB.$('strumEditBtn');
         if (edit) edit.addEventListener('click', openPatternEditor);

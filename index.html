@@ -253,7 +253,7 @@
                     </div>
                 </div>
                 <div id="metronomeGroup" class="tool-group" role="group" aria-label="Metronome" hidden>
-                    <span class="tool-label">Tempo</span>
+                    <span class="tool-label">Tempo<span id="bpmSource" class="source-badge" hidden></span></span>
                     <div class="tool-controls">
                         <div class="stepper">
                             <button id="metronomeBtn" class="step-btn metronome-seg" type="button"
@@ -281,13 +281,16 @@
             </button>
             <div id="songToolsAdvanced" class="song-tools-advanced" hidden>
                 <div id="strumGroup" class="tool-group" role="group" aria-label="Strum pattern" hidden>
-                    <span class="tool-label">Strum</span>
+                    <span class="tool-label">Strum<span id="strumSource" class="source-badge" hidden></span></span>
                     <div class="tool-controls strum-controls">
                         <div class="strum-pattern-line">
                             <label class="strum-select-wrap">
                                 <span class="sr-only">Strum pattern</span>
                                 <select id="strumSelect" class="strum-select" aria-label="Strum pattern"></select>
                             </label>
+                            <button id="strumReset" class="step-btn strum-reset" type="button"
+                                    aria-label="Reset strum pattern to the song's default"
+                                    title="Reset to the song's strum pattern" hidden>↺</button>
                             <button id="strumEditBtn" class="step-btn strum-edit-btn" type="button"
                                     aria-haspopup="dialog" aria-label="Edit custom strum patterns"
                                     title="Custom strum patterns">✎</button>

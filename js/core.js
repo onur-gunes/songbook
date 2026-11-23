@@ -76,6 +76,41 @@
     }
     SB.compositeId = function (sbId, songId) { return sbId + SB.SEP + songId; }
 
+    /* Setting provenance: where the value a control is showing came from.
+     * "songbook" is documented song data, "manual" is the player's local
+     * override, and "default" is the app fallback used when the song carries
+     * no value at all. The badge is text, not colour alone, so the state is
+     * legible without seeing the tint; `detail` is a full sentence for the
+     * tooltip and assistive tech. */
+    var SOURCE_LABELS = {
+        songbook: 'Songbook',
+        manual: 'Edited',
+        default: 'Default'
+    };
+
+    SB.setSourceBadge = function (el, source, detail) {
+        if (!el) return;
+        var label = SOURCE_LABELS[source];
+        if (!label) {
+            el.hidden = true;
+            el.textContent = '';
+            el.removeAttribute('title');
+            el.removeAttribute('aria-label');
+            delete el.dataset.source;
+            return;
+        }
+        el.hidden = false;
+        el.textContent = label;
+        el.dataset.source = source;
+        if (detail) {
+            el.title = detail;
+            el.setAttribute('aria-label', detail);
+        } else {
+            el.removeAttribute('title');
+            el.removeAttribute('aria-label');
+        }
+    };
+
     /* Both the static chart ('grid') and the in-place animated view
      * ('animate') draw from the same beat grid, so every "is this a chart
      * song?" branch goes through here rather than enumerating the modes. */

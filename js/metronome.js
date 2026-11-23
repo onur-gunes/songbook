@@ -73,18 +73,51 @@
         return v;
     }
 
-    /* The tempo the control should show: the user's per-song override, else
-     * the songbook's bpm, else the app default. The default keeps the
-     * metronome available on songs with no tempo data, and is not written to
-     * storage until the user actually steps the tempo. */
-    function tempoFor(song) {
-        if (!song) return null;
+    /* Where the tempo the control shows came from, and the values needed to
+     * explain it. Precedence: the user's per-song override, else the songbook's
+     * documented bpm, else the app default. The default keeps the metronome
+     * available on songs with no tempo data, and is not written to storage
+     * until the user actually steps the tempo. */
+    function tempoProvenance(song) {
+        if (!song) return { source: 'none', bpm: null, songBpm: null };
+        var fromSong = clampBpm(song.bpm);
         if (SB.state.active) {
             var saved = SB.loadBpmForSong(SB.state.active.id, song.id);
-            if (saved !== null) return saved;
+            if (saved !== null) {
+                return { source: 'manual', bpm: saved, songBpm: fromSong };
+            }
         }
-        var fromSong = clampBpm(song.bpm);
-        return fromSong !== null ? fromSong : SB.DEFAULT_BPM;
+        if (fromSong !== null) {
+            return { source: 'songbook', bpm: fromSong, songBpm: fromSong };
+        }
+        return { source: 'default', bpm: SB.DEFAULT_BPM, songBpm: null };
+    }
+
+    /* The tempo the control should show. Kept as a thin read of the
+     * provenance so the number and its label can never disagree. */
+    function tempoFor(song) {
+        return tempoProvenance(song).bpm;
+    }
+
+    SB.tempoProvenance = tempoProvenance;
+
+    /* The badge's tooltip/accessible description. The wording names the
+     * source first and gives the number in context: "Default" alone would not
+     * say which value the app invented, and "Edited" alone would not say what
+     * the songbook actually documented. */
+    function tempoSourceDetail(prov) {
+        if (!prov || prov.source === 'none') return '';
+        if (prov.source === 'songbook') {
+            return 'Tempo ' + prov.bpm + ' bpm comes from the songbook data.';
+        }
+        if (prov.source === 'default') {
+            return 'The songbook has no tempo. Showing the app default of ' +
+                prov.bpm + ' bpm.';
+        }
+        return 'Your tempo: ' + prov.bpm + ' bpm. ' +
+            (prov.songBpm !== null
+                ? 'The songbook says ' + prov.songBpm + ' bpm.'
+                : 'The songbook has no tempo.');
     }
 
     /* ---------------- audio ---------------- */
@@ -309,11 +342,17 @@
         group.hidden = !on;
         if (!on) return;
         SB.$('bpmValue').textContent = SB.state.metronome.bpm;
+        var song = SB.state.currentSong;
+        var prov = song ? tempoProvenance(song) : { source: 'none', bpm: null, songBpm: null };
+        SB.setSourceBadge(SB.$('bpmSource'), prov.source, tempoSourceDetail(prov));
         var reset = SB.$('bpmReset');
         if (reset) {
-            var overridden = !!(SB.state.active && SB.state.currentSong &&
-                SB.loadBpmForSong(SB.state.active.id, SB.state.currentSong.id) !== null);
-            reset.hidden = !overridden;
+            reset.hidden = prov.source !== 'manual';
+            var resetLabel = prov.songBpm !== null
+                ? 'Reset tempo to the songbook\'s ' + prov.songBpm + ' bpm'
+                : 'Reset tempo to the app default of ' + SB.DEFAULT_BPM + ' bpm';
+            reset.setAttribute('aria-label', resetLabel);
+            reset.title = resetLabel;
         }
         var btn = SB.$('metronomeBtn');
         btn.textContent = SB.state.metronome.playing ? '⏸' : '▶';
