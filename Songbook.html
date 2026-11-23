@@ -34,6 +34,7 @@
     --caged-a: #c79a25;
     --caged-g: #4d9a3b;
     --caged-e: #2c8bb0;
+    --caged-f: #d4703c;
     --caged-d: #8a5bc7;
     --caged-ink: #ffffff;
     --topbar-h: 56px;
@@ -62,6 +63,7 @@
     --caged-a: #f2d06b;
     --caged-g: #7ed957;
     --caged-e: #4cc9f0;
+    --caged-f: #ffa94d;
     --caged-d: #c77dff;
     --caged-ink: #141414;
 }
@@ -5413,7 +5415,7 @@ button.structure-close,
 
                 <div class="neck-control-row">
                     <span class="neck-control-label">Shape</span>
-                    <div id="neckShapes" class="neck-seg" role="group" aria-label="CAGED shape"></div>
+                    <div id="neckShapes" class="neck-seg" role="group" aria-label="Movable shape"></div>
                     <span class="neck-control-label neck-control-label-gap">Bass</span>
                     <select id="neckBass" class="neck-select neck-bass-select" aria-label="Bass note"></select>
                     <span class="neck-control-label neck-control-label-gap">Frets</span>
@@ -12338,11 +12340,13 @@ button.structure-close,
  * same root/quality/spelling as the shapes tab (js/explorer.js) and reads its
  * voicings from the shared ChordKit engine in chords.js.
  *
- * The CAGED layout is built from the five movable major shapes. For each
- * shape position the engine supplies the best voicing of the actual chord
- * quality, so a Cm7 region still shows a real Cm7 voicing rather than a
- * major triad. Regions repeat every octave, which is what makes the familiar
- * C–A–G–E–D run appear across the neck.
+ * The movable-shape layout is built from five major grips. Guitar uses the
+ * familiar CAGED forms; ukulele uses CAGFD, where the F grip replaces the E
+ * grip that is impractical on a re-entrant GCEA uke. For each shape position
+ * the engine supplies the best voicing of the actual chord quality, so a Cm7
+ * region still shows a real Cm7 voicing rather than a major triad. Regions
+ * repeat every octave, which is what makes the familiar run appear across the
+ * neck.
  */
 (function (SB) {
     'use strict';
@@ -12396,15 +12400,14 @@ button.structure-close,
 
     var LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
     var LETTER_PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-    var CAGED_LETTERS = ['C', 'A', 'G', 'E', 'D'];
     var QUICK_QUALITIES = ['maj', 'm', '7', 'maj7', 'm7'];
     var LABEL_MODES = ['notes', 'degrees', 'none'];
     var FRET_CHOICES = [12, 15, 24];
 
-    /* Semitone offsets from the shape's root string. These are the movable
-     * major forms: C and A put the root on the A string, G and E on the low E,
-     * and D on the D string. */
-    var CAGED_SHAPES = {
+    /* Semitone offsets from the shape's root string. On guitar these are the
+     * five movable major forms: C and A put the root on the A string, G and E
+     * on the low E, and D on the D string. */
+    var GUITAR_SHAPES = {
         C: { rootString: 1, offsets: { 1: 0, 2: -1, 3: -3, 4: -2, 5: -3 } },
         A: { rootString: 1, offsets: { 1: 0, 2: 2, 3: 2, 4: 2, 5: 0 } },
         G: { rootString: 0, offsets: { 0: 0, 1: -1, 2: -3, 3: -3, 4: -3, 5: 0 } },
@@ -12412,11 +12415,34 @@ button.structure-close,
         D: { rootString: 2, offsets: { 2: 0, 3: 2, 4: 3, 5: 2 } }
     };
 
+    /* Ukulele uses the same idea, but the E grip is impractical on a
+     * re-entrant GCEA uke, so the F shape takes its place: CAGFD. Each shape
+     * is the movable version of the familiar open chord, with the nut turned
+     * into a barre. */
+    var UKULELE_SHAPES = {
+        C: { rootString: 3, offsets: { 0: -3, 1: -3, 2: -3, 3: 0 } },
+        A: { rootString: 3, offsets: { 0: 2, 1: 1, 2: 0, 3: 0 } },
+        G: { rootString: 0, offsets: { 0: 0, 1: 2, 2: 3, 3: 2 } },
+        F: { rootString: 2, offsets: { 0: 1, 1: -1, 2: 0, 3: -1 } },
+        D: { rootString: 1, offsets: { 0: 0, 1: 0, 2: 0, 3: -2 } }
+    };
+
+    var SHAPE_LAYOUTS = {
+        guitar: { letters: ['C', 'A', 'G', 'E', 'D'], shapes: GUITAR_SHAPES, label: 'CAGED' },
+        ukulele: { letters: ['C', 'A', 'G', 'F', 'D'], shapes: UKULELE_SHAPES, label: 'CAGFD' }
+    };
+
+    /* Shape letters are shared between instruments in preferences, so accept
+     * the union here and let effectiveShapeMode() drop a letter that does not
+     * belong to the current instrument. */
+    var SHAPE_LETTERS = ['C', 'A', 'G', 'E', 'F', 'D'];
+
     var CAGED_COLORS = {
         C: 'var(--caged-c)',
         A: 'var(--caged-a)',
         G: 'var(--caged-g)',
         E: 'var(--caged-e)',
+        F: 'var(--caged-f)',
         D: 'var(--caged-d)'
     };
 
@@ -12427,7 +12453,6 @@ button.structure-close,
         scaleId: prefs.scaleId || null
     };
 
-    var highGuitarId = null;
     var voicingCache = {};
 
     /* ---------------- preferences ---------------- */
@@ -12441,7 +12466,7 @@ button.structure-close,
 
         var shapeMode = typeof raw.shapeMode === 'string' ? raw.shapeMode : 'caged';
         if (shapeMode !== 'caged' && shapeMode !== 'all' &&
-            CAGED_LETTERS.indexOf(shapeMode) < 0) {
+            SHAPE_LETTERS.indexOf(shapeMode) < 0) {
             shapeMode = 'caged';
         }
         var labelMode = LABEL_MODES.indexOf(raw.labelMode) >= 0 ? raw.labelMode : 'notes';
@@ -12477,7 +12502,6 @@ button.structure-close,
 
     function exp() { return SB.explorerState; }
     function inst() { return ChordKit.instrumentOf(SB.state.instrument); }
-    function isGuitar() { return inst().id === 'guitar'; }
     function type() { return ChordKit.typeOf(exp().quality); }
     function mod12(n) { return ((n % 12) + 12) % 12; }
     function isMinorQuality() { return !!MINOR_IDS[exp().quality]; }
@@ -12605,27 +12629,38 @@ button.structure-close,
 
     /* ---------------- CAGED shape positions ---------------- */
 
-    function highGuitar() {
-        if (highGuitarId) return highGuitarId;
-        var base = ChordKit.instrumentOf('guitar');
-        if (!ChordKit.INSTRUMENTS.guitar15) {
+    function shapeLayout() {
+        return SHAPE_LAYOUTS[inst().id] || SHAPE_LAYOUTS.ukulele;
+    }
+
+    var highIds = {};
+
+    /* The chord engine searches up to the instrument's own maxFret. Shape
+     * regions can sit higher than that on the 24-fret board, so ask for a
+     * slightly longer version of the same instrument. */
+    function highInstrument() {
+        var id = inst().id;
+        if (highIds[id]) return highIds[id];
+        var base = ChordKit.instrumentOf(id);
+        var cloneId = id + '15';
+        if (!ChordKit.INSTRUMENTS[cloneId]) {
             var clone = {};
             Object.keys(base).forEach(function (key) { clone[key] = base[key]; });
-            clone.id = 'guitar15';
+            clone.id = cloneId;
             clone.maxFret = 15;
-            ChordKit.INSTRUMENTS.guitar15 = clone;
+            ChordKit.INSTRUMENTS[cloneId] = clone;
         }
-        highGuitarId = 'guitar15';
-        return highGuitarId;
+        highIds[id] = cloneId;
+        return cloneId;
     }
 
     function qualityVoicings() {
-        if (!isGuitar()) return [];
         var name = shapeChordName();
-        if (!voicingCache[name]) {
-            voicingCache[name] = ChordKit.voicings(name, highGuitar());
+        var key = highInstrument() + ':' + name;
+        if (!voicingCache[key]) {
+            voicingCache[key] = ChordKit.voicings(name, highInstrument());
         }
-        return voicingCache[name];
+        return voicingCache[key];
     }
 
     function shiftFrets(frets, amount) {
@@ -12638,11 +12673,11 @@ button.structure-close,
         var rootPc = shapeRootPc();
         var tuning = inst().tuning;
         var num = tuning.length;
+        var layout = shapeLayout();
         var out = [];
-        if (!isGuitar()) return out;
 
-        CAGED_LETTERS.forEach(function (letter) {
-            var shape = CAGED_SHAPES[letter];
+        layout.letters.forEach(function (letter) {
+            var shape = layout.shapes[letter];
             var rootFret = mod12(rootPc - tuning[shape.rootString]);
             for (var octave = 0; octave <= 2; octave++) {
                 var anchor = rootFret + 12 * octave;
@@ -12675,13 +12710,13 @@ button.structure-close,
 
         out.sort(function (a, b) {
             if (a.minFret !== b.minFret) return a.minFret - b.minFret;
-            return CAGED_LETTERS.indexOf(a.letter) - CAGED_LETTERS.indexOf(b.letter);
+            return layout.letters.indexOf(a.letter) - layout.letters.indexOf(b.letter);
         });
         return out;
     }
 
     function cagedShapes() {
-        if (!isGuitar()) return [];
+        var layout = shapeLayout();
         var templates = cagedTemplates();
         var voicings = qualityVoicings();
         var wantedBass = selectedBassPc();
@@ -12690,6 +12725,7 @@ button.structure-close,
         templates.forEach(function (template) {
             var baseLo = template.minFret - 12 * template.octave;
             var baseHi = template.maxFret - 12 * template.octave;
+            var baseTemplate = shiftFrets(template.template, -12 * template.octave);
             var candidates = voicings.filter(function (frets) {
                 return frets.every(function (fret) {
                     return fret < 0 || (fret >= baseLo && fret <= baseHi);
@@ -12697,21 +12733,47 @@ button.structure-close,
             });
             if (!candidates.length) return;
 
+            function isGrip(frets) {
+                return frets.length === baseTemplate.length &&
+                    frets.every(function (fret, i) { return fret === baseTemplate[i]; });
+            }
+            function bassOf(frets) {
+                return bassPcOf(shiftFrets(frets, 12 * template.octave));
+            }
+            function bassFits(frets) {
+                return wantedBass == null || bassOf(frets) === wantedBass;
+            }
+
             var chosen = null;
-            var bassMatch = wantedBass == null;
-            if (wantedBass != null) {
-                for (var i = 0; i < candidates.length; i++) {
-                    var shifted = shiftFrets(candidates[i], 12 * template.octave);
-                    if (bassPcOf(shifted) === wantedBass) {
-                        chosen = candidates[i];
-                        bassMatch = true;
-                        break;
-                    }
+            var chosenFrets = null;
+            var grip = template.template;
+
+            // The movable major grip is the shape itself. Use it directly
+            // when it satisfies the bass filter; the voicing search below is
+            // for other qualities, where the grip is only a region.
+            if (inst().id === 'ukulele' && exp().quality === 'maj' &&
+                (wantedBass == null || bassPcOf(grip) === wantedBass)) {
+                chosenFrets = grip;
+            }
+
+            // The shape's own open grip is the clearest voicing for that
+            // region, so keep it when it is playable for this chord.
+            for (var i = 0; i < candidates.length && !chosen && !chosenFrets; i++) {
+                if (isGrip(candidates[i]) && bassFits(candidates[i])) chosen = candidates[i];
+            }
+            if (!chosen && !chosenFrets && wantedBass != null) {
+                for (var j = 0; j < candidates.length && !chosen; j++) {
+                    if (bassFits(candidates[j])) chosen = candidates[j];
                 }
             }
-            if (!chosen) chosen = candidates[0];
+            if (!chosen && !chosenFrets) {
+                for (var k = 0; k < candidates.length && !chosen; k++) {
+                    if (isGrip(candidates[k])) chosen = candidates[k];
+                }
+            }
+            if (!chosen && !chosenFrets) chosen = candidates[0];
 
-            var frets = shiftFrets(chosen, 12 * template.octave);
+            var frets = chosenFrets || shiftFrets(chosen, 12 * template.octave);
             var sounding = frets.filter(function (fret) { return fret >= 0; });
             if (!sounding.length) return;
 
@@ -12721,7 +12783,7 @@ button.structure-close,
                 minFret: Math.min.apply(null, sounding),
                 maxFret: Math.max.apply(null, sounding),
                 bassPc: bassPcOf(frets),
-                bassMatch: bassMatch
+                bassMatch: wantedBass == null || bassPcOf(frets) === wantedBass
             });
         });
 
@@ -12735,17 +12797,17 @@ button.structure-close,
 
         out.sort(function (a, b) {
             if (a.minFret !== b.minFret) return a.minFret - b.minFret;
-            return CAGED_LETTERS.indexOf(a.letter) - CAGED_LETTERS.indexOf(b.letter);
+            return layout.letters.indexOf(a.letter) - layout.letters.indexOf(b.letter);
         });
         return out;
     }
 
     function effectiveShapeMode() {
-        if (!isGuitar()) return 'all';
-        if (prefs.shapeMode === 'caged' || prefs.shapeMode === 'all' ||
-            CAGED_LETTERS.indexOf(prefs.shapeMode) >= 0) {
+        var layout = shapeLayout();
+        if (prefs.shapeMode === 'caged' || prefs.shapeMode === 'all') {
             return prefs.shapeMode;
         }
+        if (layout.letters.indexOf(prefs.shapeMode) >= 0) return prefs.shapeMode;
         return 'caged';
     }
 
@@ -12770,7 +12832,7 @@ button.structure-close,
             return active[0].frets;
         }
 
-        var id = isGuitar() ? highGuitar() : inst().id;
+        var id = highInstrument();
         var list = ChordKit.voicings(shapeChordName(), id);
         if (wantedBass != null) {
             for (var j = 0; j < list.length; j++) {
@@ -12866,21 +12928,19 @@ button.structure-close,
     }
 
     function renderShapes() {
-        var guitar = isGuitar();
+        var layout = shapeLayout();
         var mode = effectiveShapeMode();
         var options = [
-            { value: 'caged', label: 'CAGED' },
+            { value: 'caged', label: layout.label },
             { value: 'all', label: 'All' }
-        ].concat(CAGED_LETTERS.map(function (letter) {
+        ].concat(layout.letters.map(function (letter) {
             return { value: letter, label: letter };
         }));
 
+        SB.$('neckShapes').setAttribute('aria-label', layout.label + ' shape');
         SB.$('neckShapes').innerHTML = options.map(function (item) {
-            var disabled = !guitar && item.value !== 'all';
-            var title = disabled ? ' title="CAGED shapes are a guitar layout"' : '';
             return '<button type="button" data-shape-mode="' + item.value +
-                '" aria-pressed="' + (mode === item.value) + '"' +
-                (disabled ? ' disabled' : '') + title + '>' + item.label + '</button>';
+                '" aria-pressed="' + (mode === item.value) + '">' + item.label + '</button>';
         }).join('');
     }
 
@@ -13412,7 +13472,7 @@ button.structure-close,
 
         var desc = chordName() + ', ' + (QUALITY_LABELS[exp().quality] || 'Major').toLowerCase();
         if (prefs.capo) desc += ', capo ' + prefs.capo;
-        if (mode === 'caged') desc += ', CAGED shapes';
+        if (mode === 'caged') desc += ', ' + shapeLayout().label + ' shapes';
         else if (mode === 'all') desc += ', all chord tones';
         else desc += ', ' + mode + ' shape';
         desc += ', frets 1 to ' + prefs.frets;

@@ -288,10 +288,27 @@ def main():
            cdp.eval("document.querySelectorAll('#neckDiagram .neck-string').length"))
         cdp.eval("songbookTest.setInstrument('ukulele')")
         time.sleep(0.3)
-        ok('neck falls back to chord tones on ukulele',
+        cdp.eval("document.querySelector('#neckRoot [data-root-letter=\"C\"]').click()")
+        cdp.eval("document.querySelector('#neckQualities [data-quality=\"maj\"]').click()")
+        cdp.eval("(function(){var b=document.getElementById('neckBass');b.value='root';b.dispatchEvent(new Event('change',{bubbles:true}));})()")
+        time.sleep(0.1)
+        ok('neck groups ukulele shapes into CAGFD islands',
            cdp.eval("document.querySelectorAll('#neckDiagram .neck-string').length") == 4
-           and cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length") == 0,
-           cdp.eval("document.querySelectorAll('#neckDiagram .neck-string').length"))
+           and cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length") >= 5,
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length"))
+        ok('ukulele shape control offers CAGFD',
+           cdp.eval("Array.from(document.querySelectorAll('#neckShapes button')).map(b=>b.textContent).join(',')") == 'CAGFD,All,C,A,G,F,D'
+           and cdp.eval("document.querySelectorAll('#neckShapes button:disabled').length") == 0,
+           cdp.eval("Array.from(document.querySelectorAll('#neckShapes button')).map(b=>b.textContent).join(',')"))
+        ok('ukulele CAGFD uses its own F shape',
+           cdp.eval("SB.neckShapes().some(s=>s.letter==='F')"))
+        cdp.eval("document.querySelector('#neckShapes [data-shape-mode=\"F\"]').click()")
+        time.sleep(0.1)
+        ok('neck isolates the ukulele F shape',
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length") >= 1
+           and cdp.eval("Array.from(document.querySelectorAll('#neckDiagram .neck-region')).every(r=>r.getAttribute('fill')==='var(--caged-f)')"),
+           cdp.eval("document.querySelectorAll('#neckDiagram .neck-region').length"))
+        cdp.eval("document.querySelector('#neckShapes [data-shape-mode=\"caged\"]').click()")
         cdp.eval("location.hash = '#/chords'")
         cdp.wait_js("document.getElementById('explorerShapesPane').hidden === false", timeout=10)
         ok('shapes tab returns',
