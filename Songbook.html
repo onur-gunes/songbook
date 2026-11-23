@@ -1359,6 +1359,43 @@ main {
     text-transform: uppercase;
 }
 
+/* Where a tool's value came from: documented songbook data, the player's
+ * local edit, or the app fallback. The word is always visible — colour is a
+ * second signal, never the only one — and sits inside the group's label so it
+ * reads as part of "Tempo" / "Strum" rather than as another control. */
+.source-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+    text-transform: none;
+    vertical-align: 1px;
+    white-space: nowrap;
+}
+
+.source-badge[data-source="songbook"] {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
+.source-badge[data-source="manual"] {
+    color: var(--medium);
+    border-color: color-mix(in srgb, var(--medium) 40%, var(--line));
+    background: color-mix(in srgb, var(--medium) 10%, var(--surface));
+}
+
+.source-badge[data-source="default"] {
+    border-style: dashed;
+}
+
 /* The disclosure is a full-width footer row, not another control group. As a
  * flex child with auto margins it used to land at the far right of whichever
  * line it wrapped to, leaving a large gap beside the groups. Owning the whole
@@ -1462,11 +1499,17 @@ main {
 .step-btn:hover { background: var(--surface-2); }
 .step-btn:active { background: var(--chip); }
 
-.bpm-reset {
+.bpm-reset,
+.strum-reset {
     font-size: 0.95rem;
     color: var(--muted);
 }
-.bpm-reset:hover { color: var(--text); }
+.bpm-reset:hover,
+.strum-reset:hover { color: var(--text); }
+
+/* The strum reset is a small circle between the pattern select and the
+ * editor, so it must not inherit the select's flexible width. */
+.strum-reset { flex: none; }
 
 .step-value {
     min-width: 44px;
@@ -4585,6 +4628,11 @@ body.tuner-open { overflow: hidden; }
         min-height: 36px;
     }
     .song-tools .tool-label { font-size: 0.65rem; flex: none; }
+    .source-badge {
+        margin-left: 4px;
+        padding: 1px 4px;
+        font-size: 0.5rem;
+    }
     /* Right-aligned as a block so the steppers share an edge, but allowed to
      * shrink: the strum row is the widest and must not push the panel into a
      * horizontal scroll on a narrow phone. */
@@ -5166,7 +5214,7 @@ button.structure-close,
                     </div>
                 </div>
                 <div id="metronomeGroup" class="tool-group" role="group" aria-label="Metronome" hidden>
-                    <span class="tool-label">Tempo</span>
+                    <span class="tool-label">Tempo<span id="bpmSource" class="source-badge" hidden></span></span>
                     <div class="tool-controls">
                         <div class="stepper">
                             <button id="metronomeBtn" class="step-btn metronome-seg" type="button"
@@ -5194,13 +5242,16 @@ button.structure-close,
             </button>
             <div id="songToolsAdvanced" class="song-tools-advanced" hidden>
                 <div id="strumGroup" class="tool-group" role="group" aria-label="Strum pattern" hidden>
-                    <span class="tool-label">Strum</span>
+                    <span class="tool-label">Strum<span id="strumSource" class="source-badge" hidden></span></span>
                     <div class="tool-controls strum-controls">
                         <div class="strum-pattern-line">
                             <label class="strum-select-wrap">
                                 <span class="sr-only">Strum pattern</span>
                                 <select id="strumSelect" class="strum-select" aria-label="Strum pattern"></select>
                             </label>
+                            <button id="strumReset" class="step-btn strum-reset" type="button"
+                                    aria-label="Reset strum pattern to the song's default"
+                                    title="Reset to the song's strum pattern" hidden>↺</button>
                             <button id="strumEditBtn" class="step-btn strum-edit-btn" type="button"
                                     aria-haspopup="dialog" aria-label="Edit custom strum patterns"
                                     title="Custom strum patterns">✎</button>
@@ -7976,6 +8027,41 @@ button.structure-close,
         return n;
     }
     SB.compositeId = function (sbId, songId) { return sbId + SB.SEP + songId; }
+
+    /* Setting provenance: where the value a control is showing came from.
+     * "songbook" is documented song data, "manual" is the player's local
+     * override, and "default" is the app fallback used when the song carries
+     * no value at all. The badge is text, not colour alone, so the state is
+     * legible without seeing the tint; `detail` is a full sentence for the
+     * tooltip and assistive tech. */
+    var SOURCE_LABELS = {
+        songbook: 'Songbook',
+        manual: 'Edited',
+        default: 'Default'
+    };
+
+    SB.setSourceBadge = function (el, source, detail) {
+        if (!el) return;
+        var label = SOURCE_LABELS[source];
+        if (!label) {
+            el.hidden = true;
+            el.textContent = '';
+            el.removeAttribute('title');
+            el.removeAttribute('aria-label');
+            delete el.dataset.source;
+            return;
+        }
+        el.hidden = false;
+        el.textContent = label;
+        el.dataset.source = source;
+        if (detail) {
+            el.title = detail;
+            el.setAttribute('aria-label', detail);
+        } else {
+            el.removeAttribute('title');
+            el.removeAttribute('aria-label');
+        }
+    };
 
     /* Both the static chart ('grid') and the in-place animated view
      * ('animate') draw from the same beat grid, so every "is this a chart
@@ -16185,18 +16271,51 @@ button.structure-close,
         return v;
     }
 
-    /* The tempo the control should show: the user's per-song override, else
-     * the songbook's bpm, else the app default. The default keeps the
-     * metronome available on songs with no tempo data, and is not written to
-     * storage until the user actually steps the tempo. */
-    function tempoFor(song) {
-        if (!song) return null;
+    /* Where the tempo the control shows came from, and the values needed to
+     * explain it. Precedence: the user's per-song override, else the songbook's
+     * documented bpm, else the app default. The default keeps the metronome
+     * available on songs with no tempo data, and is not written to storage
+     * until the user actually steps the tempo. */
+    function tempoProvenance(song) {
+        if (!song) return { source: 'none', bpm: null, songBpm: null };
+        var fromSong = clampBpm(song.bpm);
         if (SB.state.active) {
             var saved = SB.loadBpmForSong(SB.state.active.id, song.id);
-            if (saved !== null) return saved;
+            if (saved !== null) {
+                return { source: 'manual', bpm: saved, songBpm: fromSong };
+            }
         }
-        var fromSong = clampBpm(song.bpm);
-        return fromSong !== null ? fromSong : SB.DEFAULT_BPM;
+        if (fromSong !== null) {
+            return { source: 'songbook', bpm: fromSong, songBpm: fromSong };
+        }
+        return { source: 'default', bpm: SB.DEFAULT_BPM, songBpm: null };
+    }
+
+    /* The tempo the control should show. Kept as a thin read of the
+     * provenance so the number and its label can never disagree. */
+    function tempoFor(song) {
+        return tempoProvenance(song).bpm;
+    }
+
+    SB.tempoProvenance = tempoProvenance;
+
+    /* The badge's tooltip/accessible description. The wording names the
+     * source first and gives the number in context: "Default" alone would not
+     * say which value the app invented, and "Edited" alone would not say what
+     * the songbook actually documented. */
+    function tempoSourceDetail(prov) {
+        if (!prov || prov.source === 'none') return '';
+        if (prov.source === 'songbook') {
+            return 'Tempo ' + prov.bpm + ' bpm comes from the songbook data.';
+        }
+        if (prov.source === 'default') {
+            return 'The songbook has no tempo. Showing the app default of ' +
+                prov.bpm + ' bpm.';
+        }
+        return 'Your tempo: ' + prov.bpm + ' bpm. ' +
+            (prov.songBpm !== null
+                ? 'The songbook says ' + prov.songBpm + ' bpm.'
+                : 'The songbook has no tempo.');
     }
 
     /* ---------------- audio ---------------- */
@@ -16421,11 +16540,17 @@ button.structure-close,
         group.hidden = !on;
         if (!on) return;
         SB.$('bpmValue').textContent = SB.state.metronome.bpm;
+        var song = SB.state.currentSong;
+        var prov = song ? tempoProvenance(song) : { source: 'none', bpm: null, songBpm: null };
+        SB.setSourceBadge(SB.$('bpmSource'), prov.source, tempoSourceDetail(prov));
         var reset = SB.$('bpmReset');
         if (reset) {
-            var overridden = !!(SB.state.active && SB.state.currentSong &&
-                SB.loadBpmForSong(SB.state.active.id, SB.state.currentSong.id) !== null);
-            reset.hidden = !overridden;
+            reset.hidden = prov.source !== 'manual';
+            var resetLabel = prov.songBpm !== null
+                ? 'Reset tempo to the songbook\'s ' + prov.songBpm + ' bpm'
+                : 'Reset tempo to the app default of ' + SB.DEFAULT_BPM + ' bpm';
+            reset.setAttribute('aria-label', resetLabel);
+            reset.title = resetLabel;
         }
         var btn = SB.$('metronomeBtn');
         btn.textContent = SB.state.metronome.playing ? '⏸' : '▶';
@@ -16710,22 +16835,66 @@ button.structure-close,
 
     /* The song-level pattern, ignoring section/bar/beat overrides. This is
      * what the collapsed row shows: per-section choices are a separate layer
-     * until the grid lane follows them during playback (Step 5). */
-    function mainPatternFor(song, plan) {
-        if (!song) return null;
+     * until the grid lane follows them during playback (Step 5).
+     *
+     * Returns the pattern and where it came from so the selector can say
+     * "Songbook" / "Edited" / "Default" instead of leaving the player to guess
+     * whether a pattern is documented or invented. `songPattern` is the
+     * songbook's own choice (if any), kept for the manual badge's explanation. */
+    function mainStrumProvenance(song, plan) {
+        var none = { source: 'none', pattern: null, songPattern: null };
+        if (!song) return none;
         if (plan === undefined) plan = currentPlanFor(song);
         plan = planWithSong(song, plan);
         var time = timeFor(song, plan);
+        var songPattern = findPattern(song.strum, time, plan);
         var pattern = findPattern(plan.songStrum, time, plan);
+        var source = pattern ? 'manual' : null;
         if (!pattern && SB.state.active) {
             pattern = findPattern(storedChoice(SB.state.active.id, song.id), time, plan);
+            source = pattern ? 'manual' : null;
         }
-        if (!pattern) pattern = findPattern(song.strum, time, plan);
+        if (!pattern) {
+            pattern = songPattern;
+            source = pattern ? 'songbook' : null;
+        }
         if (!pattern) {
             var list = SB.strumPatternsForSong(song, plan);
             pattern = list.length ? list[0] : null;
+            source = pattern ? 'default' : 'none';
         }
-        return pattern;
+        return {
+            source: source || 'none',
+            pattern: pattern,
+            songPattern: songPattern
+        };
+    }
+
+    function mainPatternFor(song, plan) {
+        return mainStrumProvenance(song, plan).pattern;
+    }
+
+    SB.strumProvenance = mainStrumProvenance;
+
+    /* The badge's tooltip/accessible description. Like the tempo one, it names
+     * the source and then gives the actual pattern, plus what the songbook
+     * documents when the player has overridden it. */
+    function strumSourceDetail(prov) {
+        if (!prov || !prov.pattern || prov.source === 'none') {
+            return 'No strum pattern is available for this song.';
+        }
+        var pattern = '"' + prov.pattern.name + '"';
+        if (prov.source === 'songbook') {
+            return 'Strum pattern ' + pattern + ' comes from the songbook data.';
+        }
+        if (prov.source === 'default') {
+            return 'The songbook has no strum pattern. Showing the default ' +
+                prov.pattern.time + ' pattern ' + pattern + '.';
+        }
+        return 'Your strum pattern: ' + pattern + '. ' +
+            (prov.songPattern
+                ? 'The songbook pattern is "' + prov.songPattern.name + '".'
+                : 'The songbook has no strum pattern.');
     }
 
     /* A section's effective pattern: its plan override when one fits the
@@ -17300,6 +17469,26 @@ button.structure-close,
 
     /* ---------------- wiring ---------------- */
 
+    /* The selector always shows the song-wide choice, so its source badge is
+     * derived from mainStrumProvenance and never from the transient row
+     * pattern: during playback the row previews the effective section pattern,
+     * and labelling that "Edited" would be a lie about the stored choice. */
+    function updateStrumSource() {
+        var song = SB.state.currentSong;
+        var prov = song ? mainStrumProvenance(song, currentPlanFor(song))
+            : { source: 'none', pattern: null, songPattern: null };
+        SB.setSourceBadge(SB.$('strumSource'), prov.source, strumSourceDetail(prov));
+        var reset = SB.$('strumReset');
+        if (reset) {
+            reset.hidden = prov.source !== 'manual';
+            var label = prov.songPattern
+                ? 'Reset strum pattern to the songbook\'s "' + prov.songPattern.name + '"'
+                : 'Reset strum pattern to the default for this song';
+            reset.setAttribute('aria-label', label);
+            reset.title = label;
+        }
+    }
+
     /* Shows or hides both halves of the feature together: the selector in the
      * toolbar and the subdivision row under the chord strip. Both start hidden
      * in the markup, so the row has to be unhidden here — without that the
@@ -17314,6 +17503,7 @@ button.structure-close,
         if (group) group.hidden = !on;
         if (row) row.hidden = !on;
         if (sections) sections.hidden = !on || !sectionsOpen;
+        updateStrumSource();
         SB.applyStrumSettings();
     }
 
@@ -17439,6 +17629,30 @@ button.structure-close,
         // new row; strumOnMetronomeStart is a no-op if the loop is already up.
         if (SB.state.metronome.playing) SB.strumOnMetronomeStart();
     }
+
+    /* Drops the manual song-level choice and returns the selector to the
+     * documented pattern (or the first pattern for the metre). Other local
+     * edits stay: this is the strum twin of resetBpmForSong, not a full plan
+     * reset, because section/bar/beat overrides and structure edits belong to
+     * different controls. The legacy pre-plan key has to go too, or it would
+     * seed the choice straight back on the next read. */
+    SB.resetStrumForSong = function () {
+        var song = SB.state.currentSong;
+        var active = SB.state.active;
+        if (!song || !active) return;
+        try { window.localStorage.removeItem(SB.strumKey(active.id, song.id)); }
+        catch (e) { /* ignore */ }
+        var plan = SB.loadPlan(active.id, song.id);
+        plan.songStrum = null;
+        if (SB.hasLocalEdits(plan)) {
+            SB.savePlan(active.id, song.id, plan);
+        } else {
+            try { window.localStorage.removeItem(SB.planKey(active.id, song.id)); }
+            catch (e) { /* ignore */ }
+        }
+        previewRole = null;
+        refreshCurrentStrum();
+    };
 
     /* ---------------- custom pattern editor ----------------
      *
@@ -18024,6 +18238,9 @@ button.structure-close,
         if (sel) sel.addEventListener('change', function () { SB.setStrum(sel.value); });
         var nbtn = SB.$('strumNotationBtn');
         if (nbtn) nbtn.addEventListener('click', SB.toggleStrumNotation);
+
+        var reset = SB.$('strumReset');
+        if (reset) reset.addEventListener('click', SB.resetStrumForSong);
 
         var edit = SB.$('strumEditBtn');
         if (edit) edit.addEventListener('click', openPatternEditor);
@@ -19585,6 +19802,7 @@ button.structure-close,
         metronome: SB.state.metronome,
         defaultBpm: SB.DEFAULT_BPM,
         defaultTime: SB.DEFAULT_TIME,
+        tempoProvenance: SB.tempoProvenance,
         metronomeBeatsPerBar: SB.metronomeBeatsPerBar,
         metronomeLog: function () { return SB.metronomeLog.slice(); },
         clearMetronomeLog: function () { SB.metronomeLog.length = 0; },
@@ -19598,6 +19816,8 @@ button.structure-close,
         strumPlanFor: SB.strumPlanFor,
         mainStrumFor: SB.mainStrumFor,
         sectionStrumFor: SB.sectionStrumFor,
+        strumProvenance: SB.strumProvenance,
+        resetStrum: SB.resetStrumForSong,
         songSectionRoles: SB.songSectionRoles,
         toggleStrumSections: SB.toggleStrumSections,
         validateCustomPattern: SB.validateCustomPattern,

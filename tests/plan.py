@@ -32,6 +32,7 @@ CORE_JS = os.path.join(ROOT, 'js', 'core.js')
 SECTIONS_JS = os.path.join(ROOT, 'js', 'sections.js')
 GRID_JS = os.path.join(ROOT, 'js', 'grid.js')
 SONGBOOKS_JS = os.path.join(ROOT, 'js', 'songbooks.js')
+METRONOME_JS = os.path.join(ROOT, 'js', 'metronome.js')
 STRUM_JS = os.path.join(ROOT, 'js', 'strum.js')
 
 SONG = {
@@ -83,6 +84,7 @@ def harness(extra='', local_storage=None):
         '  NS: \'songbook\',\n'
         '  SEP: \'\\u0000\',\n'
         '  DEFAULT_TIME: \'4/4\',\n'
+        '  DEFAULT_BPM: 100,\n'
         '  lsGet: function (k, f) {\n'
         '    try { var v = window.localStorage.getItem(k); return v === null ? f : JSON.parse(v); }\n'
         '    catch (e) { return f; }\n'
@@ -103,6 +105,7 @@ def harness(extra='', local_storage=None):
         + '\n' + read(SECTIONS_JS)
         + '\n' + read(GRID_JS)
         + '\n' + read(PLAN_JS)
+        + '\n' + read(METRONOME_JS)
         + '\n' + read(STRUM_JS)
         + '\n' + extra
     )
@@ -779,6 +782,97 @@ class SongbookImportTests(unittest.TestCase):
         self.assertEqual(got['sectionSlots'], 'DU')
         self.assertEqual(got['barSource'], 'bar')
         self.assertEqual(got['barSlots'], 'DU')
+
+
+class SettingSourceTests(unittest.TestCase):
+    """The provenance badges: songbook data vs the player's edit vs fallback.
+
+    These are the values behind the Songbook / Edited / Default labels in the
+    Tempo and Strum groups. The UI must never present an app fallback as if it
+    were documented data, so each branch is asserted directly.
+    """
+
+    def setUp(self):
+        if not shutil.which('node'):
+            self.skipTest('node not available')
+
+    def strum_source(self, song, plan=None, storage=None):
+        plan_js = json.dumps(plan if plan is not None else
+                             self.default_plan())
+        return run_js('''
+            var song = %s;
+            var prov = SB.strumProvenance(song, %s);
+            console.log(JSON.stringify({
+                source: prov.source,
+                id: prov.pattern && prov.pattern.id,
+                songId: prov.songPattern && prov.songPattern.id
+            }));
+        ''' % (json.dumps(song), plan_js), storage)
+
+    @staticmethod
+    def default_plan():
+        return {'version': 1, 'songStrum': None, 'sectionStrums': {},
+                'customPatterns': [], 'barStrums': {}, 'beatStrums': {},
+                'grid': None, 'time': None}
+
+    def test_strum_songbook_source(self):
+        got = self.strum_source(SONG)
+        self.assertEqual(got, {
+            'source': 'songbook', 'id': 'downs-4-4', 'songId': 'downs-4-4'})
+
+    def test_strum_manual_source_remembers_the_songbook_choice(self):
+        plan = self.default_plan()
+        plan['songStrum'] = 'dddudu-4-4'
+        got = self.strum_source(SONG, plan)
+        self.assertEqual(got, {
+            'source': 'manual', 'id': 'dddudu-4-4', 'songId': 'downs-4-4'})
+
+    def test_strum_default_source_when_song_has_no_pattern(self):
+        song = dict(SONG)
+        song.pop('strum')
+        got = self.strum_source(song)
+        self.assertEqual(got['source'], 'default')
+        self.assertEqual(got['id'], 'downs-4-4')
+        self.assertIsNone(got['songId'])
+
+    def test_strum_falls_back_when_a_stored_pattern_no_longer_fits(self):
+        # A 3/4 choice on a 4/4 song is not a manual choice: the resolver
+        # treats it as no choice, so the badge must say Songbook, not Edited.
+        plan = self.default_plan()
+        plan['songStrum'] = 'waltz-3-4'
+        got = self.strum_source(SONG, plan)
+        self.assertEqual(got['source'], 'songbook')
+        self.assertEqual(got['id'], 'downs-4-4')
+
+    def test_tempo_songbook_source(self):
+        got = run_js('''
+            var prov = SB.tempoProvenance({ id: 'song-1', bpm: 120 });
+            console.log(JSON.stringify(prov));
+        ''')
+        self.assertEqual(got, {'source': 'songbook', 'bpm': 120, 'songBpm': 120})
+
+    def test_tempo_default_source(self):
+        got = run_js('''
+            var prov = SB.tempoProvenance({ id: 'song-1' });
+            console.log(JSON.stringify(prov));
+        ''')
+        self.assertEqual(got, {'source': 'default', 'bpm': 100, 'songBpm': None})
+
+    def test_tempo_manual_source_and_what_the_songbook_says(self):
+        got = run_js('''
+            SB.state.active = { id: 'sb' };
+            var prov = SB.tempoProvenance({ id: 'song-1', bpm: 120 });
+            console.log(JSON.stringify(prov));
+        ''', {'songbook:bpm:sb\u0000song-1': '90'})
+        self.assertEqual(got, {'source': 'manual', 'bpm': 90, 'songBpm': 120})
+
+    def test_tempo_manual_source_with_no_songbook_tempo(self):
+        got = run_js('''
+            SB.state.active = { id: 'sb' };
+            var prov = SB.tempoProvenance({ id: 'song-1' });
+            console.log(JSON.stringify(prov));
+        ''', {'songbook:bpm:sb\u0000song-1': '90'})
+        self.assertEqual(got, {'source': 'manual', 'bpm': 90, 'songBpm': None})
 
 
 if __name__ == '__main__':

@@ -1346,6 +1346,43 @@ main {
     text-transform: uppercase;
 }
 
+/* Where a tool's value came from: documented songbook data, the player's
+ * local edit, or the app fallback. The word is always visible — colour is a
+ * second signal, never the only one — and sits inside the group's label so it
+ * reads as part of "Tempo" / "Strum" rather than as another control. */
+.source-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+    text-transform: none;
+    vertical-align: 1px;
+    white-space: nowrap;
+}
+
+.source-badge[data-source="songbook"] {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
+.source-badge[data-source="manual"] {
+    color: var(--medium);
+    border-color: color-mix(in srgb, var(--medium) 40%, var(--line));
+    background: color-mix(in srgb, var(--medium) 10%, var(--surface));
+}
+
+.source-badge[data-source="default"] {
+    border-style: dashed;
+}
+
 /* The disclosure is a full-width footer row, not another control group. As a
  * flex child with auto margins it used to land at the far right of whichever
  * line it wrapped to, leaving a large gap beside the groups. Owning the whole
@@ -1449,11 +1486,17 @@ main {
 .step-btn:hover { background: var(--surface-2); }
 .step-btn:active { background: var(--chip); }
 
-.bpm-reset {
+.bpm-reset,
+.strum-reset {
     font-size: 0.95rem;
     color: var(--muted);
 }
-.bpm-reset:hover { color: var(--text); }
+.bpm-reset:hover,
+.strum-reset:hover { color: var(--text); }
+
+/* The strum reset is a small circle between the pattern select and the
+ * editor, so it must not inherit the select's flexible width. */
+.strum-reset { flex: none; }
 
 .step-value {
     min-width: 44px;
@@ -4572,6 +4615,11 @@ body.tuner-open { overflow: hidden; }
         min-height: 36px;
     }
     .song-tools .tool-label { font-size: 0.65rem; flex: none; }
+    .source-badge {
+        margin-left: 4px;
+        padding: 1px 4px;
+        font-size: 0.5rem;
+    }
     /* Right-aligned as a block so the steppers share an edge, but allowed to
      * shrink: the strum row is the widest and must not push the panel into a
      * horizontal scroll on a narrow phone. */
