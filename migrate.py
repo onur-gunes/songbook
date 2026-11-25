@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Migrate the 198 legacy song HTML pages into a single songs-data.js dataset.
+"""Migrate a legacy song-page archive into a single songs-data.js dataset.
 
 Source: legacy/ folder (Riptide.html, etc. — archived original pages).
 Output: songs-data.js  (const SONGS = [...]), plus a printed validation report.
@@ -15,6 +15,16 @@ SONGBOOK_NAME = 'Krakow Ukulele Songbook'
 SONGBOOK_DESC = 'Personal offline songbook - Krakow Ukulele & Sing Tuesdays.'
 SONGBOOK_LOGO_LIGHT = 'images/ukulele-krakow-trans-light.png'
 SONGBOOK_LOGO_DARK = 'images/ukulele-krakow-trans-dark.png'
+
+# The live site marks seasonal songs with an emoji prefix in the title. The app
+# turns those markers into real tags so its list filters can be built from the
+# current song set instead of a hard-coded list: Christmas songs are only on the
+# site for part of the year, and a tag disappears with them.
+TITLE_TAGS = (
+    ('🎅', 'Christmas'),
+    ('🎄', 'Christmas'),
+    ('🎂', 'Birthday'),
+)
 
 # ---------- helpers ----------
 
@@ -277,6 +287,11 @@ def parse_page(fn):
 
     new = '🔥' in h3
 
+    tags = []
+    for marker, tag in TITLE_TAGS:
+        if marker in title and tag not in tags:
+            tags.append(tag)
+
     m = re.search(r'<div id="chordsContainer"[^>]*>(.*?)</div>', html, re.S)
     chords = []
     if m:
@@ -302,6 +317,7 @@ def parse_page(fn):
         'level': level,
         'new': new,
         'dur': dur,
+        'tags': tags,
         'chords': chords,
         'sheet': sheet,
         'fb': fallback,
@@ -350,6 +366,8 @@ def main():
             'chords': r['chords'],
             'sheet': r['sheet'],
         }
+        if r['tags']:
+            song['tags'] = r['tags']
         if sid in original_keys:
             meta = original_keys[sid]
             if meta.get('key'):
@@ -387,6 +405,11 @@ def main():
         lv[s['level']] = lv.get(s['level'], 0) + 1
     lines.append('levels: %s' % lv)
     lines.append('new songs: %d' % sum(1 for s in songs if s['new']))
+    tag_counts = {}
+    for s in songs:
+        for tag in s.get('tags', []):
+            tag_counts[tag] = tag_counts.get(tag, 0) + 1
+    lines.append('tags: %s' % (tag_counts or 'none'))
     keyed = [s['id'] for s in songs if s.get('key')]
     lines.append('original keys: %d/%d' % (len(keyed), len(songs)))
     missing_keys = [s['id'] for s in songs if not s.get('key')]

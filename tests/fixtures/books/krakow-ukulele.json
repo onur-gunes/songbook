@@ -11,6 +11,9 @@
    "artist": "Demo Artist",
    "level": "Easy",
    "new": true,
+   "tags": [
+    "Christmas"
+   ],
    "key": "C",
    "sheetKey": "C",
    "capo": 1,
@@ -297,6 +300,9 @@
    "artist": "Demo Artist",
    "level": "Medium",
    "new": false,
+   "tags": [
+    "Christmas"
+   ],
    "key": "G",
    "sheetKey": "G",
    "capo": 0,

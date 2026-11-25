@@ -226,6 +226,9 @@
             chords: (song.chords || []).slice(),
             sheet: copySheet(song.sheet)
         };
+        /* Tags are optional presentation metadata; keep the export compact
+         * for the overwhelming majority of songs that have none. */
+        if (song.tags && song.tags.length) out.tags = song.tags.slice();
         /* Authoring source travels with the effective song so an exported
          * book stays editable after re-import. It is not rendered content. */
         if (song.chordpro) out.chordpro = song.chordpro;

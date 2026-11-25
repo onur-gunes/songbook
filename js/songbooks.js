@@ -67,6 +67,27 @@
         return (typeof value === 'string' && value) ? value : null;
     }
 
+    /* Tags are free-form labels ("Christmas", "Birthday") used by the list
+     * filters. They are presentation metadata, so an invalid entry is dropped
+     * rather than made fatal; duplicates collapse case-insensitively while the
+     * first spelling wins. An empty array is omitted by normalizeSong so
+     * tag-less books do not grow a dead field. */
+    function normalizeTags(value) {
+        if (!Array.isArray(value)) return [];
+        var out = [];
+        var seen = Object.create(null);
+        value.forEach(function (raw) {
+            if (typeof raw !== 'string') return;
+            var tag = raw.trim().replace(/\s+/g, ' ');
+            if (!tag) return;
+            var key = tag.toLowerCase();
+            if (seen[key]) return;
+            seen[key] = true;
+            out.push(tag);
+        });
+        return out;
+    }
+
     /* The grid is a bar/beat chart parallel to the sheet (see chordpro.py).
      * This is the untrusted-import boundary, so the whole grid is dropped to
      * null the moment anything is off — bars that do not sum to the metre, a
@@ -270,6 +291,10 @@
             }).map(String) : [],
             sheet: normalizeSheet(s.sheet)
         };
+        /* Tags are optional, so an empty list is omitted like the fields
+         * below and the list filters can key straight off `song.tags`. */
+        var tags = normalizeTags(s.tags);
+        if (tags.length) song.tags = tags;
         /* Kept absent when there is nothing to carry, so downstream code can
          * test for the field's presence instead of special-casing null. */
         var sectionStrums = normalizeSectionStrums(s.sectionStrums);

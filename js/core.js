@@ -136,6 +136,7 @@
         state: {
             q: '',
             levels: new Set(),
+            tags: new Set(),
             isNew: false,
             favOnly: false,
             sort: 'title',

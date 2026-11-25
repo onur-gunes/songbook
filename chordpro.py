@@ -26,6 +26,7 @@ METADATA_DIRECTIVES = {
     'sheetkey': 'sheetKey',
     'capo': 'capo',
     'new': 'new',
+    'tags': 'tags', 'tag': 'tags',
     'number': 'n',
     'chords': 'chords',
 }
@@ -213,6 +214,29 @@ def _as_bool(value):
     if v in ('0', 'false', 'no', 'n', 'off', ''):
         return False
     return None
+
+
+def parse_tags(value):
+    """Split a comma-separated tag list into clean, unique labels.
+
+    Tags are free-form ("Christmas", "Birthday") and drive the list filters.
+    Empty entries and case-insensitive duplicates collapse; the first spelling
+    wins. The JavaScript parser mirrors this rule.
+    """
+    if value is None or isinstance(value, bool):
+        return []
+    out = []
+    seen = set()
+    for raw in str(value).split(','):
+        tag = re.sub(r'\s+', ' ', raw).strip()
+        if not tag:
+            continue
+        key = tag.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(tag)
+    return out
 
 
 def parse_bpm(value):
@@ -645,6 +669,10 @@ def parse_song(text, number=1, warnings=None, allow_trusted_notes=False):
         'new': new,
         'dur': dur,
     }
+
+    tags = parse_tags(meta.get('tags'))
+    if tags:
+        song['tags'] = tags
 
     key = meta.get('key', '').strip()
     sheet_key = meta.get('sheetKey', '').strip()

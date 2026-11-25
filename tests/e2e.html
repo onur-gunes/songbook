@@ -85,15 +85,27 @@ async function main() {
     click('All'); await wait(50);
     ok('All clears levels -> 15', rows().length === 15, rows().length);
 
+    // 3b. tag filters are derived from the book, not a fixed list
+    const tag = name => doc().querySelector('.filter-btn[data-tag="' + name + '"]');
+    ok('tag chip rendered', !!tag('Christmas'));
+    ok('no chip for a tag no song has', !tag('Birthday'));
+    tag('Christmas').click(); await wait(50);
+    ok('tag filter -> 2', rows().length === 2, rows().length);
+    ok('tag chip pressed', tag('Christmas').getAttribute('aria-pressed') === 'true');
+    click('All'); await wait(50);
+    ok('All clears tags -> 15', rows().length === 15, rows().length);
+
     click('New'); await wait(50);
     ok('toggle New -> 2', rows().length === 2, rows().length);
     click('New'); await wait(50);
     ok('untoggle New -> 15', rows().length === 15, rows().length);
 
-    // 4. favorites flow
+    // 4. favorites flow (the chip is dynamic too: no favorites, no chip)
+    ok('no Favorites chip before a favorite', !doc().querySelector('[data-level="Favorites"]'));
     const star = doc().querySelector('#songList .song-row .star-btn');
     star.click(); await wait(50);
     ok('star adds fav', star.classList.contains('on'));
+    ok('Favorites chip appears with a favorite', !!doc().querySelector('[data-level="Favorites"]'));
     click('Favorites'); await wait(50);
     ok('Favorites filter -> 1', rows().length === 1, rows().length);
     click('Favorites'); await wait(50);
@@ -102,9 +114,9 @@ async function main() {
     // 5. sort buttons (default: Title, alphabetical like the original site)
     ok('title sort active by default', doc().querySelector('[data-sort="title"]').getAttribute('aria-pressed') === 'true');
     const t = titles();
-    ok('title sort strips emoji', !t[0].startsWith('🔥') && !t[0].startsWith('🎂'), t[0]);
+    ok('title sort strips emoji', !t[0].startsWith('🔥') && !t[0].startsWith('🎂') && !t[0].startsWith('🎅'), t[0]);
     ok('title sort not starting with The', !/^the /i.test(t[0]), t[0]);
-    const stripped = t.map(x => x.replace(/^[🔥🎂\s]+/, '').replace(/^The\s+/i, ''));
+    const stripped = t.map(x => x.replace(/^[🔥🎂🎅🎄\s]+/, '').replace(/^The\s+/i, ''));
     const sortedCopy = stripped.slice().sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
     ok('title sort ordering', JSON.stringify(stripped) === JSON.stringify(sortedCopy), stripped.slice(0, 3).join(' / '));
     ok('500 Miles intact', t.some(x => x === '500 Miles'), t.filter(x => x.startsWith('5')).join(','));

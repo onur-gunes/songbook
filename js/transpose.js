@@ -96,7 +96,10 @@
     };
 
     SB.stripSortPrefix = function (t) {
-        return t.replace(/^[🔥🎂\s]+/, '').replace(/^#?\d+\s*[-–—]\s+/, '').replace(/^The\s+/i, '');
+        // Seasonal markers are decoration, not part of the title. The live
+        // Krakow site uses 🎅/🎄 for Christmas and 🎂 for birthdays; sort as if
+        // the song were titled "White Christmas", not as an emoji.
+        return t.replace(/^[🔥🎂🎅🎄\s]+/, '').replace(/^#?\d+\s*[-–—]\s+/, '').replace(/^The\s+/i, '');
     };
 
 })(window.SB = window.SB || {});
