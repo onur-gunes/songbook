@@ -23,7 +23,6 @@ SONGBOOK_LOGO_DARK = 'images/ukulele-krakow-trans-dark.png'
 TITLE_TAGS = (
     ('🎅', 'Christmas'),
     ('🎄', 'Christmas'),
-    ('🎂', 'Birthday'),
 )
 
 # ---------- helpers ----------
