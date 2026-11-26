@@ -407,9 +407,9 @@ local authoring input and is git-ignored.
 The retired Krakow archive can still be rebuilt locally with `migrate.py` if
 you keep your own copy of the old `legacy/` pages: it merges
 `songbooks/original-keys.json` and validates the result. The live site marks
-seasonal songs with a title emoji (🎅/🎄 Christmas, 🎂 Birthday); the migration
-turns those markers into `tags` so the app's filters follow the current song
-set. Neither the archive nor the migrated JSON ships with the repository.
+seasonal songs with a title emoji (🎅/🎄); the migration turns that marker into
+a `tags` entry so the app's filters follow the current song set. Neither the
+archive nor the migrated JSON ships with the repository.
 
 ## Author songs in the app
 

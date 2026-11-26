@@ -8686,10 +8686,12 @@ button.structure-close,
             }).map(String) : [],
             sheet: normalizeSheet(s.sheet)
         };
-        /* Kept absent when there is nothing to carry, so downstream code can
-         * test for the field's presence instead of special-casing null. */
+        /* Tags are optional, so an empty list is omitted like the fields
+         * below and the list filters can key straight off `song.tags`. */
         var tags = normalizeTags(s.tags);
         if (tags.length) song.tags = tags;
+        /* Kept absent when there is nothing to carry, so downstream code can
+         * test for the field's presence instead of special-casing null. */
         var sectionStrums = normalizeSectionStrums(s.sectionStrums);
         if (sectionStrums) song.sectionStrums = sectionStrums;
         var strumPatterns = normalizeStrumPatterns(s.strumPatterns);
