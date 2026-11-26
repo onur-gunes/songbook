@@ -60,7 +60,8 @@ class ParseSongTests(unittest.TestCase):
     def test_metadata_mapping(self):
         song = chordpro.parse_song(
             '{t: My Song}\n{st: Me}\n{level: hard}\n{duration: 4}\n'
-            '{key: Am}\n{sheetkey: G}\n{capo: 2}\n{new: yes}\n{number: 7}\n\n'
+            '{key: Am}\n{sheetkey: G}\n{capo: 2}\n{new: yes}\n'
+            '{tags: Christmas, Birthday, christmas}\n{number: 7}\n\n'
             '[C]Hello\n'
         )
         self.assertEqual(song['title'], 'My Song')
@@ -71,6 +72,7 @@ class ParseSongTests(unittest.TestCase):
         self.assertEqual(song['sheetKey'], 'G')
         self.assertEqual(song['capo'], 2)
         self.assertIs(song['new'], True)
+        self.assertEqual(song['tags'], ['Christmas', 'Birthday'])
         self.assertEqual(song['n'], 7)
         self.assertEqual(song['id'], 'my-song')
         self.assertEqual(song['chords'], ['C'])

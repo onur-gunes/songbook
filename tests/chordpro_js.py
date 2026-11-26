@@ -76,7 +76,8 @@ def cases():
         ('valid-metadata', '{title: T}\n{artist: A}\n{level: hard}\n'
                            '{duration: 2.5}\n{tempo: 92.5}\n{time: 6 / 8}\n'
                            '{strum: du-6-8}\n{key: Am}\n{sheetkey: G}\n'
-                           '{capo: 2}\n{number: 7}\n{new: yes}\n[C]x\n', {}),
+                           '{capo: 2}\n{number: 7}\n{new: yes}\n'
+                           '{tags: Christmas, Birthday, christmas}\n[C]x\n', {}),
         ('chords-override-mismatch', '{title: T}\n{artist: A}\n{level: Easy}\n'
                                      '{duration: 1}\n{chords: Am, F}\n[C]x\n', {}),
         ('trusted-note-disabled', '{title: T}\n{artist: A}\n{level: Easy}\n'

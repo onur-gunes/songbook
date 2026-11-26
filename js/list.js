@@ -35,6 +35,9 @@
         var sbId = SB.state.active ? SB.state.active.id : '';
         var out = SB.activeSongs().filter(function (s) {
             if (SB.state.state.levels.size && !SB.state.state.levels.has(s.level)) return false;
+            if (SB.state.state.tags.size && !(s.tags || []).some(function (tag) {
+                return SB.state.state.tags.has(tag);
+            })) return false;
             if (SB.state.state.isNew && !s.new) return false;
             if (SB.state.state.favOnly && !SB.isFav(sbId, s.id)) return false;
             if (q) {
@@ -58,6 +61,108 @@
         }
         return out;
     }
+
+    /* Filters are derived from the active book, not hard-coded: a book with no
+     * Hard songs never shows a Hard chip, and a Christmas-tagged book grows a
+     * Christmas chip only while those songs are in it. Tags are free-form, so
+     * the set comes straight from the songs. Favorites is local data rather
+     * than a song tag; it appears once the book has at least one favorite.
+     * `levels` and `tags` count occurrences so an option is shown only when it
+     * can match at least one song. */
+    function filterOptions() {
+        var opts = {
+            levels: { Easy: 0, Medium: 0, Hard: 0 },
+            tags: Object.create(null),
+            hasNew: false,
+            hasFav: false
+        };
+        var sbId = SB.state.active ? SB.state.active.id : '';
+        SB.activeSongs().forEach(function (s) {
+            if (Object.prototype.hasOwnProperty.call(opts.levels, s.level)) opts.levels[s.level] += 1;
+            (s.tags || []).forEach(function (tag) {
+                opts.tags[tag] = (opts.tags[tag] || 0) + 1;
+            });
+            if (s.new) opts.hasNew = true;
+            if (SB.isFav(sbId, s.id)) opts.hasFav = true;
+        });
+        return opts;
+    }
+
+    /* A selected chip for a song that is no longer in the book would hide every
+     * row after a book switch or removal. Drop those selections before the
+     * list filters itself, so "All" is the only possible empty result. */
+    function pruneFilters(opts) {
+        var st = SB.state.state;
+        st.levels.forEach(function (level) {
+            if (!Object.prototype.hasOwnProperty.call(opts.levels, level) || !opts.levels[level]) {
+                st.levels.delete(level);
+            }
+        });
+        st.tags.forEach(function (tag) {
+            if (!Object.prototype.hasOwnProperty.call(opts.tags, tag)) st.tags.delete(tag);
+        });
+        if (!opts.hasNew) st.isNew = false;
+        if (!opts.hasFav) st.favOnly = false;
+    }
+
+    function filterButton(attr, value, label) {
+        var b = SB.el('button', 'filter-btn', label);
+        b.type = 'button';
+        b.dataset[attr] = value;
+        return b;
+    }
+
+    function syncFilterButtons() {
+        Array.prototype.forEach.call(document.querySelectorAll('.filter-btn'), function (b) {
+            var lv = b.dataset.level;
+            var tag = b.dataset.tag;
+            var on = lv === 'New' ? SB.state.state.isNew
+                : lv === 'Favorites' ? SB.state.state.favOnly
+                : lv === 'All' ? (SB.state.state.levels.size === 0 && SB.state.state.tags.size === 0)
+                : tag ? SB.state.state.tags.has(tag)
+                : SB.state.state.levels.has(lv);
+            b.classList.toggle('active', on);
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+    }
+
+    /* Rebuild the chips from the active book. Called on every list paint so
+     * authoring (adding/removing songs), favorites and book switches all keep
+     * the rail in step without separate invalidation at every call site. The
+     * rebuild is skipped while the available options are unchanged, so
+     * clicking a chip updates aria-pressed without replacing the focused
+     * button under the user. */
+    var filterSignature = null;
+    SB.renderFilters = function () {
+        var box = SB.$('filters');
+        if (!box) return;
+        var opts = filterOptions();
+        pruneFilters(opts);
+        var tagNames = Object.keys(opts.tags).sort(function (a, b) {
+            return a.localeCompare(b, 'en', { sensitivity: 'base' });
+        });
+        var signature = [
+            opts.levels.Easy, opts.levels.Medium, opts.levels.Hard,
+            opts.hasNew ? 1 : 0, opts.hasFav ? 1 : 0, tagNames.join('\u0000')
+        ].join('|');
+        if (signature === filterSignature && box.children.length) {
+            syncFilterButtons();
+            return;
+        }
+        filterSignature = signature;
+        box.textContent = '';
+
+        box.appendChild(filterButton('level', 'All', 'All'));
+        ['Easy', 'Medium', 'Hard'].forEach(function (level) {
+            if (opts.levels[level]) box.appendChild(filterButton('level', level, level));
+        });
+        tagNames.forEach(function (tag) {
+            box.appendChild(filterButton('tag', tag, tag));
+        });
+        if (opts.hasNew) box.appendChild(filterButton('level', 'New', '🔥 New'));
+        if (opts.hasFav) box.appendChild(filterButton('level', 'Favorites', '★ Favorites'));
+        syncFilterButtons();
+    };
 
     /* The list view has two independent "nothing here" cases: no songbooks at
      * all (first run, or after removing the last import) and a search/filter
@@ -158,6 +263,7 @@
             SB.renderEmptyState();
             return;
         }
+        SB.renderFilters();
         var songs = SB.filteredSongs();
         var total = SB.activeSongs().length;
         /* A zero-song book is a real state (a freshly created book), not an
@@ -274,7 +380,13 @@
         SB.saveFavorites();
         if (!SB.$('listView').hidden && SB.state.active && SB.state.active.id === sbId) {
             if (SB.state.state.favOnly) SB.renderList();
-            else updateStarInPlace(songId);
+            else {
+                updateStarInPlace(songId);
+                /* Favorites is one of the dynamic chips, so the first star (or
+                 * the last un-star) must add or remove it without a full row
+                 * repaint. */
+                SB.renderFilters();
+            }
         }
         if (SB.state.currentSong && SB.state.active && SB.state.active.id === sbId && SB.state.currentSong.id === songId) SB.updateFavBtn();
     }
@@ -305,18 +417,6 @@
     function syncSortButtons() {
         Array.prototype.forEach.call(document.querySelectorAll('.sort-btn'), function (b) {
             var on = b.dataset.sort === SB.state.state.sort;
-            b.classList.toggle('active', on);
-            b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        });
-    }
-
-    function syncFilterButtons() {
-        Array.prototype.forEach.call(document.querySelectorAll('.filter-btn'), function (b) {
-            var lv = b.dataset.level;
-            var on = lv === 'New' ? SB.state.state.isNew
-                : lv === 'Favorites' ? SB.state.state.favOnly
-                : lv === 'All' ? SB.state.state.levels.size === 0
-                : SB.state.state.levels.has(lv);
             b.classList.toggle('active', on);
             b.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
@@ -353,17 +453,24 @@
             input.focus();
         });
 
-        document.querySelectorAll('.filter-btn').forEach(function (b) {
-            b.addEventListener('click', function () {
-                var lv = b.dataset.level;
-                if (lv === 'New') SB.state.state.isNew = !SB.state.state.isNew;
-                else if (lv === 'Favorites') SB.state.state.favOnly = !SB.state.state.favOnly;
-                else if (lv === 'All') SB.state.state.levels.clear();
-                else if (SB.state.state.levels.has(lv)) SB.state.state.levels.delete(lv);
-                else SB.state.state.levels.add(lv);
-                syncFilterButtons();
-                SB.renderList();
-            });
+        /* The chips are rebuilt on every list paint, so their handlers are
+         * delegated from the stable container instead of bound per button. */
+        SB.$('filters').addEventListener('click', function (e) {
+            var b = e.target.closest ? e.target.closest('.filter-btn') : null;
+            if (!b || !SB.$('filters').contains(b)) return;
+            var lv = b.dataset.level;
+            var tag = b.dataset.tag;
+            if (lv === 'New') SB.state.state.isNew = !SB.state.state.isNew;
+            else if (lv === 'Favorites') SB.state.state.favOnly = !SB.state.state.favOnly;
+            else if (lv === 'All') {
+                SB.state.state.levels.clear();
+                SB.state.state.tags.clear();
+            } else if (tag) {
+                if (SB.state.state.tags.has(tag)) SB.state.state.tags.delete(tag);
+                else SB.state.state.tags.add(tag);
+            } else if (SB.state.state.levels.has(lv)) SB.state.state.levels.delete(lv);
+            else SB.state.state.levels.add(lv);
+            SB.renderList();
         });
 
         document.querySelectorAll('.sort-btn').forEach(function (b) {

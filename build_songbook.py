@@ -272,6 +272,12 @@ def validate_songbook(book):
                       if s.get('level') not in chordpro.LEVELS]
     invalid_durations = [s.get('id') or '?' for s in songs
                          if isinstance(s.get('dur'), bool) or not isinstance(s.get('dur'), (int, float))]
+    # tags are optional presentation metadata; a present value must be a list
+    # of non-empty strings because the list filters key off them directly.
+    invalid_tags = ['%s (%r)' % (s.get('id') or '?', s.get('tags')) for s in songs
+                    if 'tags' in s and (not isinstance(s.get('tags'), list)
+                                        or any(not isinstance(t, str) or not t.strip()
+                                               for t in s.get('tags')))]
     # bpm/time are optional: absent is fine, present-but-wrong is a build
     # error. A bad tempo must never reach a published book, because the
     # metronome has no way to tell a typo from a deliberate 300bpm punk song.
@@ -432,6 +438,8 @@ def validate_songbook(book):
         errors.append('invalid levels: %s' % invalid_levels)
     if invalid_durations:
         errors.append('invalid durations: %s' % invalid_durations)
+    if invalid_tags:
+        errors.append('invalid tags: %s' % invalid_tags)
     if invalid_bpm:
         errors.append('invalid bpm (expected %d-%d): %s'
                       % (chordpro.BPM_MIN, chordpro.BPM_MAX, invalid_bpm))
@@ -464,6 +472,7 @@ def validate_songbook(book):
         'missing_artists': missing_artists,
         'invalid_levels': invalid_levels,
         'invalid_durations': invalid_durations,
+        'invalid_tags': invalid_tags,
         'invalid_bpm': invalid_bpm,
         'invalid_times': invalid_times,
         'invalid_strums': invalid_strums,
@@ -473,6 +482,7 @@ def validate_songbook(book):
         'with_strum_patterns': sum(1 for s in songs if s.get('strumPatterns')),
         'with_section_strums': sum(1 for s in songs if s.get('sectionStrums')),
         'with_grid': sum(1 for s in songs if s.get('grid')),
+        'with_tags': sum(1 for s in songs if s.get('tags')),
         'grid_problems': grid_problems,
         'invalid_strum_patterns': invalid_strum_patterns,
         'invalid_section_strums': invalid_section_strums,
@@ -799,6 +809,8 @@ def build_book(book_dir, out_dir=None, index_path=None, report_path=None,
         'missing artists: %s' % (facts['missing_artists'] or 'none'),
         'invalid levels: %s' % (facts['invalid_levels'] or 'none'),
         'invalid durations: %s' % (facts['invalid_durations'] or 'none'),
+        'tags: %d/%d songs tagged' % (facts['with_tags'], len(songs)),
+        'invalid tags: %s' % (facts['invalid_tags'] or 'none'),
         'tempo: %d/%d songs with bpm, %d with time signature, %d with strum'
         % (facts['with_bpm'], len(songs), facts['with_time'], facts['with_strum']),
         'invalid bpm: %s' % (facts['invalid_bpm'] or 'none'),
