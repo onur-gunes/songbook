@@ -129,9 +129,12 @@ attached to `SB`.
   Arpeggio buttons play the current voicing with Web Audio. Capo, octave
   labels and flats/sharps are adjustable there too, and everything follows
   the global instrument toggle.
-- Live search (title + artist), difficulty filters — multi-select, results OR'd
-  across Easy / Medium / Hard, 🔥 New, ⭐ Favorites (localStorage),
-  sort Title/Artist — list defaults to alphabetical by name,
+- Live search (title + artist), filters derived from the active book —
+  difficulty chips appear only for levels the book contains, each song `tag`
+  gets its own multi-select chip (so seasonal sets like Christmas come and go
+  with the songs), and 🔥 New / ⭐ Favorites appear only when they can match.
+  Levels and tags are OR'd within their group, then combined with AND; sort
+  Title/Artist — list defaults to alphabetical by name,
   🎲 Random from the current filter, recently-played list (with clear),
   ☰/▤ compact view toggle, persisted.
 - Song view in the same page (`#/<songbook>/<song-id>` — refresh- and back-safe),
@@ -337,6 +340,7 @@ Song fields:
 | `artist` | string | Optional |
 | `level` | `"Easy"` \| `"Medium"` \| `"Hard"` | Defaults to `Medium` |
 | `new` | boolean | Shows the 🔥 New filter |
+| `tags` | string[] | Optional free-form labels (for example `["Christmas"]`); each tag present in the book gets its own list filter |
 | `key` | string | Original recording key, shown in the song view |
 | `sheetKey` | string | Key the chords are written in; defaults to `key` |
 | `capo` | integer | Capo fret; `null`/absent means none |
@@ -409,8 +413,10 @@ local authoring input and is git-ignored.
 
 The retired Krakow archive can still be rebuilt locally with `migrate.py` if
 you keep your own copy of the old `legacy/` pages: it merges
-`songbooks/original-keys.json` and validates the result. Neither the archive nor
-the migrated JSON ships with the repository.
+`songbooks/original-keys.json` and validates the result. The live site marks
+seasonal songs with a title emoji (🎅/🎄); the migration turns that marker into
+a `tags` entry so the app's filters follow the current song set. Neither the
+archive nor the migrated JSON ships with the repository.
 
 ## Author songs in the app
 
@@ -485,7 +491,7 @@ Those local edits are included in exports but never rewrite the songbook.
 In-app input supports the same ChordPro subset as the build path below:
 `{title}`/`{t}`, `{artist}`/`{subtitle}`/`{st}`, `{level}`, `{duration}`,
 `{tempo}`/`{bpm}`, `{time}`/`{meter}`, `{strum}`, `{key}`, `{sheetkey}`,
-`{capo}`, `{new}`, `{number}`, `{chords}`, `{comment}`/`{c}`,
+`{capo}`, `{new}`, `{tags}`, `{number}`, `{chords}`, `{comment}`/`{c}`,
 `{start_of_chorus}`/`{end_of_chorus}`, `{start_of_tab}`/`{end_of_tab}` and
 `{start_of_grid}`/`{end_of_grid}`, plus inline `[Am]` chords and escapes. The
 full directive table, body syntax and warning behaviour are under
@@ -529,6 +535,7 @@ Song directives:
 | `{sheetkey: Am}` | `sheetKey` | defaults to `key` |
 | `{capo: 2}` | `capo` | defaults to `0` when a key is given |
 | `{new: true}` | `new` | default `false` |
+| `{tags: Christmas, Birthday}` | `tags` | optional comma-separated labels; trimmed, de-duplicated case-insensitively; each becomes a list filter |
 | `{number: 12}` | `n` | defaults to file order |
 | `{chords: Am, C, G}` | `chords` | optional curated order; mismatch with the sheet warns |
 | `{start_of_grid: Label}` / `{sog: ...}` … `{end_of_grid}` / `{eog}` | `grid` | optional bar/beat chart (see "Bar/beat grid"); requires `time` |

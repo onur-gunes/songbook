@@ -29,6 +29,7 @@
         'sheetkey': 'sheetKey',
         'capo': 'capo',
         'new': 'new',
+        'tags': 'tags', 'tag': 'tags',
         'number': 'n',
         'chords': 'chords',
     };
@@ -154,6 +155,22 @@
         if (v === '1' || v === 'true' || v === 'yes' || v === 'y' || v === 'on') return true;
         if (v === '0' || v === 'false' || v === 'no' || v === 'n' || v === 'off' || v === '') return false;
         return null;
+    }
+
+    /* Mirrors chordpro.py parse_tags: comma-separated, trimmed, unique by
+     * lower-case key, first spelling wins. */
+    function parseTags(value) {
+        if (value == null || typeof value === 'boolean') return [];
+        var out = [], seen = Object.create(null);
+        String(value).split(',').forEach(function (raw) {
+            var tag = raw.replace(/\s+/g, ' ').trim();
+            if (!tag) return;
+            var key = tag.toLowerCase();
+            if (seen[key]) return;
+            seen[key] = true;
+            out.push(tag);
+        });
+        return out;
     }
 
     /* Python float() for the values that can appear in a directive: strict,
@@ -479,6 +496,9 @@
             new: isNew,
             dur: dur,
         };
+
+        var tags = parseTags(get(meta, 'tags', ''));
+        if (tags.length) song.tags = tags;
 
         var keySig = String(get(meta, 'key', '')).trim();
         var sheetKey = String(get(meta, 'sheetKey', '')).trim();
