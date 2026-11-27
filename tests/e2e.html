@@ -1679,6 +1679,28 @@ async function main() {
     win().localStorage.removeItem('songbook:strum:polska-gurom\u0000arahja');
     win().localStorage.removeItem('songbook:bpm:polska-gurom\u0000arahja');
 
+    // 20c. On a phone the song-tools panel is raised above the floating
+    // auto-scroll pill, but it must stay under the pinned chrome. At the old
+    // z-index it painted over the pinned chord strip, strum row and top bar as
+    // it scrolled past — hiding the diagrams that were pinned to stay visible.
+    frame.style.width = '380px';
+    await wait(400);
+    const zIndex = sel => parseInt(win().getComputedStyle(doc().querySelector(sel)).zIndex, 10);
+    ok('phone: song-tools stays under the pinned chord strip',
+        zIndex('.song-tools') < zIndex('#chordStrip'),
+        zIndex('.song-tools') + ' vs ' + zIndex('#chordStrip'));
+    ok('phone: song-tools stays under the pinned strum row',
+        zIndex('.song-tools') < zIndex('#strumRow'),
+        zIndex('.song-tools') + ' vs ' + zIndex('#strumRow'));
+    ok('phone: song-tools stays under the top bar',
+        zIndex('.song-tools') < zIndex('.topbar'),
+        zIndex('.song-tools') + ' vs ' + zIndex('.topbar'));
+    ok('phone: song-tools still wins over the auto-scroll pill',
+        zIndex('.song-tools') > zIndex('#scrollControl'),
+        zIndex('.song-tools') + ' vs ' + zIndex('#scrollControl'));
+    frame.style.width = '1100px';
+    await wait(400);
+
     // 20c. the song-tools disclosure is the only switch for the optional
     // controls: strum editing, diagram size, scale degrees and structure
     // editing stay folded on load and open on demand. It is DOM state, so it
