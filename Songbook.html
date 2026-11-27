@@ -524,7 +524,11 @@ main {
     position: fixed;
     right: 20px;
     bottom: 20px;
-    z-index: 1100;
+    /* The floating transport sits above page content but below every piece of
+     * chrome. The song-tools panel is the one thing it must lose to (see the
+     * phone rule for .song-tools); the sticky top bar, chord strip and strum
+     * row are all above it so scrolling content never paints over them. */
+    z-index: 10;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -4592,9 +4596,17 @@ body.tuner-open { overflow: hidden; }
          * auto-scroll pill, so the two always meet at the top of a song. The
          * panel is the interactive surface and wins: covering Edit with a
          * floating button is worse than the pill appearing as soon as the
-         * panel scrolls away. */
+         * panel scrolls away.
+         *
+         * It must still lose to the sticky chrome. This is a positioned box,
+         * so a z-index here outranks the unpinned-looking siblings later in
+         * the document: at the old 1101 it painted over the pinned chord strip
+         * and strum row (and the top bar) as it scrolled past, hiding the very
+         * diagrams that were pinned to stay visible. 11 clears the transport
+         * (10) but stays under the strum row (49), strip (50) and top bar
+         * (100), so the card scrolls beneath them like every other element. */
         position: relative;
-        z-index: 1101;
+        z-index: 11;
     }
     /* A single column inside each layer: every group is one row, labels share
      * one left edge and controls one right edge. `align-items: stretch` keeps
